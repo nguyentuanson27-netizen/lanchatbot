@@ -1,0 +1,77 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ❯ src/single-agent-commerce-quote.test.ts (32 tests | 1 failed) 432ms
+   ✓ explicit quote operation > blocks an old verifier pass on changed policy or expired quote, firstContact=true 84ms
+   ✓ explicit quote operation > blocks an old verifier pass on changed policy or expired quote, firstContact=false 29ms
+   ✓ explicit quote operation > quotes quantity plus shipping before a cart and invalidates the total on a price change 29ms
+   ✓ explicit quote operation > opt-in completes price and selected media before exact final verification 40ms
+   ✓ explicit quote operation > rejects mixed quote+read_product before any sibling I/O 3ms
+   ✓ explicit quote operation > rejects mixed quote+select_product_media before any sibling I/O 2ms
+   ✓ explicit quote operation > rejects mixed quote+apply_customer_state before any sibling I/O 2ms
+   ✓ explicit quote operation > rejects mixed quote+add_to_cart before any sibling I/O 2ms
+   ✓ explicit quote operation > rejects mixed quote+request_handoff before any sibling I/O 2ms
+   ✓ explicit quote operation > rejects mixed quote+quote_product before any sibling I/O 2ms
+   ✓ explicit quote operation > legacy does not expose the operation 1ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 8ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 10ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 9ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 6ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 9ms
+   ✓ explicit quote operation > does not expose quote when prior contact is unknown 2ms
+   × explicit quote operation > returning customer can obtain a quantity total without colour, cart or another image 22ms
+     → expected { bindingVersion: 'binding-1', …(7) } to deeply equal { bindingVersion: 'binding-1', …(7) }
+   ✓ explicit quote operation > follow-up quantity quote reaches final verifier with current total and no mutation or image 22ms
+   ✓ explicit quote operation > returning quotes require explicit quantity and exactly one offer before reading: {"subjectRef":"SM613","offerTypes":["DIRECT"]} 5ms
+   ✓ explicit quote operation > returning quotes require explicit quantity and exactly one offer before reading: {"subjectRef":"SM613","offerTypes":["DIRECT"],"deliveryRegion":"MIEN-NAM"} 8ms
+   ✓ explicit quote operation > returning quotes require explicit quantity and exactly one offer before reading: {"subjectRef":"SM613","offerTypes":["DIRECT","AO"],"quantity":2} 7ms
+   ✓ explicit quote operation > hands off silently on required price failure and accounts partial execution 13ms
+   ✓ explicit quote operation > hands off silently on required media failure and accounts partial execution 12ms
+   ✓ explicit quote operation > preserves two exact requested offers without extra raw copies 12ms
+   ✓ explicit quote operation > does not execute quote twice 11ms
+   ✓ explicit quote operation > charges prepare and reserves two units with 3 previous primitive calls 31ms
+   ✓ explicit quote operation > charges prepare and reserves two units with 4 previous primitive calls 12ms
+   ✓ explicit quote operation > leaves an early FINAL untouched: first contact alone cannot select images 10ms
+   ✓ explicit quote operation > separates consumed units from admitted dispatch when not_a_capability is rejected 6ms
+   ✓ explicit quote operation > separates consumed units from admitted dispatch when read_product is rejected 9ms
+   ✓ explicit quote operation > separates consumed units from admitted dispatch when quote_product is rejected 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > explicit quote operation > returning customer can obtain a quantity total without colour, cart or another image
+AssertionError: expected { bindingVersion: 'binding-1', …(7) } to deeply equal { bindingVersion: 'binding-1', …(7) }
+
+- Expected
++ Received
+
+  {
+    "bindingVersion": "binding-1",
+    "conversationOwner": "BOT",
+    "currentProductId": null,
+-   "factSnapshotVersion": "4c151539a8fc87e94f2426d3f85ad33eb072e7e3c27ec7c7eefad065ed2469e9",
++   "factSnapshotVersion": "25205a9a1d3a105a31df3db7765bec6f5fb8af2d826ec1de0c2635949038521f",
+    "permission": true,
+    "privacyAllowed": true,
+    "recipient": "recipient-hash",
+    "revision": 1,
+  }
+
+ ❯ src/single-agent-commerce-quote.test.ts:74:36
+     72|   expect(r).toMatchObject({status:"OK",data:{preCartQuote:{quantity:2,…
+     73|   expect((r.data as Record<string,unknown>).media).toBeUndefined();exp…
+     74|   expect(s.tools.snapshot().state).toEqual(before.state);expect(s.tool…
+       |                                    ^
+     75|   expect(s.tools.quoteTaskWork!()).toEqual([{reservedUnits:2,readInvoc…
+     76|   expect((await s.tools.readback()).policyLiterals.some(p=>p.ref.start…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 31 passed (32)
+   Start at  22:18:32
+   Duration  3.48s (transform 1.42s, setup 0ms, collect 2.26s, tests 432ms, environment 0ms, prepare 258ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-quote.test.ts

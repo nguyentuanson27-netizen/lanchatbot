@@ -1,0 +1,11 @@
+{
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "version": "gpt-6.1-sol",
+  "cliVersion": "0.159.2",
+  "rubricHash": "7337fd2e3b5a6b2e52910ccfcc5c55db7c375aa0a6bf2380d80427fad8f38f00",
+  "schemaHash": "79b1d3bac15af9cf8355a8dd65320befddb775d5ef055a6cd3d34e5162139b29",
+  "retry": 0,
+  "maximumJudgeRequests": 10,
+  "packetBytesLimit": 262144
+}

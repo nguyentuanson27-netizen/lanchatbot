@@ -1,0 +1,133 @@
+{
+  "status": "NO_ADOPTION_EVIDENCE",
+  "registrationHash": "438cda0577d45a22ff9da17a8662199bbc5fa8bff612316fe304a39f4555a3de",
+  "primaryHash": "7d9ecf1943891efc25037765713b277c4831a036dd63f26616be7abe3b92610f",
+  "conditionalPlanned": 2,
+  "conditionalNotRun": 2,
+  "scoredAfterRunnerExit": true,
+  "runnerError": "CAMPAIGN_OFFLINE_ASSESSMENT_MISSING",
+  "assessmentHash": "47d1a15e830c2dfd7ccc5554be0727826bce2464c7c3219cba0828fc5e40bb81",
+  "providerRequestsAdded": 0,
+  "scored": [
+    {
+      "slotId": "f4efb3e9c4d90c799560014fdd340c8ffdb8fb0c91cb71c4b185df6c8c04cb84",
+      "id": "j1-total",
+      "arm": "A",
+      "repetition": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": true,
+      "outputHash": "e17db2b844fef6d396f69f324958da4e4060f67183cb1476b9f8ec0c4cb7a4a9",
+      "kind": "TOOLS"
+    },
+    {
+      "slotId": "af665f97426e67d2deb4af8ef0a4e5b9f7f053bdfc5fd64963a1b514dcd270ef",
+      "id": "j1-total",
+      "arm": "B",
+      "repetition": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": true,
+      "outputHash": "017673d7e7e07a0d139e88f44d5cda20d6b12a3a70657829484243c660f8aa8b",
+      "kind": "TOOLS"
+    },
+    {
+      "slotId": "5336375dd21126d274a6bf2dbc035aff2da29abccdb7b5c4a6d70c8c0e4077af",
+      "id": "j1-total",
+      "arm": "A",
+      "repetition": 2,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": true,
+      "outputHash": "3f205bd35e55aad2febabe12a085e5766ec32c9e74df8fa1b3d4b0e28eaa9e65",
+      "kind": "TOOLS"
+    },
+    {
+      "slotId": "76784136619109304bca479063a976489855fb5162ba179e1edbbfdb8a253c74",
+      "id": "j1-total",
+      "arm": "B",
+      "repetition": 2,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": false,
+      "outputHash": "0d3c181cc0281e07809b211711950812795e0b6ff5e5e2c36e3b41247f2cc1fc",
+      "kind": "FINAL"
+    },
+    {
+      "slotId": "d13a9d2e7c69b18ed17685b18430757c5ec843da80c67acc80fa73e14886d95d",
+      "id": "j1-total",
+      "arm": "A",
+      "repetition": 3,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": true,
+      "outputHash": "3324714819337bd1ab05c7aeee6e35f7d187abdd06b0e6bf92b26e12f87ad550",
+      "kind": "TOOLS"
+    },
+    {
+      "slotId": "71523e44c0c7367600d979aa95b80a0f7bcfa82c947726915d9bad0398cc8306",
+      "id": "j1-total",
+      "arm": "B",
+      "repetition": 3,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": true,
+      "outputHash": "54cceaa104bb075629f54c75807c88870637c7315fe1d15a1bf322d51b8ac41d",
+      "kind": "TOOLS"
+    },
+    {
+      "slotId": "9115c672f18fd83965acc73346a6257d362aaa94144a1c694cba22270ad7cd7f",
+      "id": "cart-control",
+      "arm": "B",
+      "repetition": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": true,
+      "outputHash": "51235876d8035280a0a9f05905e4823c2fe0c7990ce18f2e30474196ae35d4d6",
+      "kind": "FINAL"
+    },
+    {
+      "slotId": "c938eaa615377a9e1debfad98c759fd75571b07565643006077dd71b0b185f07",
+      "id": "cart-control",
+      "arm": "A",
+      "repetition": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": true,
+      "outputHash": "0f049ebf178786f7f29ebf3c8ee069905cb3f9072c59a9fd934199d4f6396c0c",
+      "kind": "FINAL"
+    },
+    {
+      "slotId": "c7fbccb42d2fa7ae60558663d82c14d41ae5c6877e17a63e661b9b3440e9645f",
+      "id": "ack-control",
+      "arm": "B",
+      "repetition": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": false,
+      "outputHash": "ea4bd8c2d3fb2b690d126a11c269f635063eae721e36dd72c596ea37f1ba38b9",
+      "kind": "TOOLS"
+    },
+    {
+      "slotId": "a8055344071d764eaff45ce994291b88a3937bf83e5e398dbf74f935e083b836",
+      "id": "ack-control",
+      "arm": "A",
+      "repetition": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "behaviorValid": true,
+      "pass": false,
+      "outputHash": "f973029fbd02bb46a3d50446f746662817b8c7bbf26b3e1d1071025baa98672e",
+      "kind": "TOOLS"
+    }
+  ]
+}

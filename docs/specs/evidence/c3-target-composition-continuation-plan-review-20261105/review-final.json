@@ -1,0 +1,49 @@
+{
+  "status": "APPROVED_FINAL_PLAN_DELIVERY_ONLY",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T10:04:34.225699+00:00",
+  "planningBaseSha": "21c497684040553fdd7faff395980a1ae61d1615",
+  "planPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\docs\\specs\\c3-phase-c-target-composition-continuation-repair-plan-20261105.md",
+  "finalPlanSha256": "a8cb152f336ca62d7f6e08be34db4d3d2f952e31dd7fb8a02abe35b3eee37cfa",
+  "approvedSemanticRevision2Sha256": "3039723fff7907542a22f48b18c64580b198a60fa1915c20e9922a18402824dc",
+  "exactPriorHashReconstruction": {
+    "matched": true,
+    "method": "Replace only final status line and final review-log paragraph with the reviewed revision2 text; LF+trailingnewline reconstructs exact approvedhash."
+  },
+  "checks": {
+    "semanticProposalUnchanged": true,
+    "review01And02CopiesSemanticEqual": true,
+    "tasksOnlyPrependPlanStatus": true,
+    "futureImplementationAndRunsStillNotAuthorizedByPlanApproval": true,
+    "historicalPrefixFailAnd21cases31turnsNotRunPreserved": true,
+    "noRuntimeSourceChanges": true
+  },
+  "files": [
+    {
+      "path": "docs\\specs\\c3-phase-c-target-composition-continuation-repair-plan-20261105.md",
+      "sha256": "a8cb152f336ca62d7f6e08be34db4d3d2f952e31dd7fb8a02abe35b3eee37cfa"
+    },
+    {
+      "path": "tasks\\plan.md",
+      "sha256": "0f92703a65befbfb5869f42ece38930980ee4fed309f982bd0f3e9695feb900d"
+    },
+    {
+      "path": "tasks\\todo.md",
+      "sha256": "ef9a75f8ca1da5eebdcf3a01bd1dfabe4d1561cdb44f673fca30f3e1cc1fe830"
+    },
+    {
+      "path": "docs\\specs\\evidence\\c3-target-composition-continuation-plan-review-20261105\\review-01.json",
+      "sha256": "a0cc28d756278668ca18ca1f515a8b76ca1e342044f9c9224e877f662e957cba"
+    },
+    {
+      "path": "docs\\specs\\evidence\\c3-target-composition-continuation-plan-review-20261105\\review-02.json",
+      "sha256": "d481e5100504c2eefbf196bd0c76eb9db22aee05f4e274337856b26524611a94"
+    }
+  ],
+  "unresolvedMaterialFindings": [],
+  "limits": [
+    "Plan/status/log/delivery review only. No implementation/tests/provider executions by this review.",
+    "Scope approvals remain planning only, not functional/model acceptance or Phase C GO.",
+    "review-final.json may be an exactsemantic copy of thisrecord; it is not self-included in its own manifest."
+  ]
+}

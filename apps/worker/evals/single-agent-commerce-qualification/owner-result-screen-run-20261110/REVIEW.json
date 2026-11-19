@@ -1,0 +1,151 @@
+{
+  "kind": "WHOLE_CONVERSATION_DEVELOPMENT_REVIEW_NOT_BLIND_QUALIFICATION",
+  "reviewer": "/root",
+  "runSourceSha": "205cd497eedad3bebe8a2a0fe4a98c7c49ced838",
+  "cases": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "status": "TASK_OK",
+      "reason": "Đúng combo ba món989.000đ, cả ship1.019.000đ theo quote, ảnhSD023 đúng; không tự đặt tên phần chưa có nhãn.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Preference be được commit, không tạo giỏ/đơn. ACK vẫn bị kéo thành báo giá và hỏi chọn thiết kế không cần thiết; không dùng quote_product nên chưa exercise writer→quote.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "status": "SOURCE_GAP_SEMANTIC_FALSE_PASS",
+      "reason": "Khách hỏi ảnh khách mặc; shop nhận gửi ảnh feedback, actual ảnh DETAIL/CLOSEUP với customerWearingEvidence=NOT_RECORDED, cùngURL gửi hai lần. Verifier PASS dù chưa có căn cứ đáp ứng ý khách. Đây là lỗi nghĩa được cho gửi, không phải control handoff đạt và không nằm trong12 ca bán hàng.",
+      "qualityDenominatorEligible": false,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "State sửa56→51kg, giữ162/88/70/94, commit RELAXED và dùng COMPONENT/TOP M từ engine. Hai lượt đầu có lời gọi MEASUREMENT_SOURCE_INVALID rồi sửa trong budget; không mất thông tin. Giọng đọc lại dữ liệu/lặp vẫn còn.",
+      "qualityDenominatorEligible": true,
+      "turns": 3
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "status": "MATERIAL_FAIL",
+      "reason": "Giỏ chưa có do thiếu màu; NOT_EVALUATED/UNKNOWN được trình bày rõ cho owner nhưng draft vẫn nói giá tốt nhất và mua cả bộ được giảm5%. Set chỉ tính một đơn vị cha, chưa đạt ngưỡng. Verifier chặn đúng; lượt sau NO_SEND do HUMAN. Chưa có câu trả lời thương lượng dùng được.",
+      "qualityDenominatorEligible": true,
+      "turns": 3
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "status": "TASK_OK",
+      "reason": "Đọc flat offerTypes đúng hai mã, trả đúng màu Trắng/Be từ nguồn; không lỗi schema.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "status": "TASK_OK",
+      "reason": "Trả gọn giặt tay ưu tiên/giặt máy với túi giặt ở chế độ nhẹ theo care policy. Lần này dùng read_policy, không chứng minh nhánh read details từng lỗi.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "status": "TASK_OK_CUSTOMER_INPUT",
+      "reason": "Lượt3 dùng quote_product quantity2 trước giỏ, báo998.000−49.900+30.000=978.100đ đúng nguồn. Không cộng thành3, không giả đã tạo giỏ; vẫn hỏi màu còn thiếu. Hai lượt trước add thất bại có hint route. Đây là tiến bộ quan sát được của tác vụ tổng tiền, chưa phải hoàn tất mua.",
+      "qualityDenominatorEligible": true,
+      "turns": 3
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "status": "TASK_OK_CUSTOMER_INPUT",
+      "reason": "Giữ set cũ khi REPLACE chưa commit vì thiếu màu áo; hỏi màu, không báo đã đổi xong. Chỉ đạt bước hỏi bổ sung, chưa hoàn tất đổi giỏ.",
+      "qualityDenominatorEligible": true,
+      "turns": 2
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "status": "TASK_OK",
+      "reason": "Hai scope COMPONENT TOP/PANTS đều engine M, không alternative; reply chọn M/M, không tự nâng quầnL như lần trước. Cách dẫn lại chiều cao/cân nặng còn máy móc.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "status": "MATERIAL_FAIL",
+      "reason": "Khách hỏi còn sizeM và trả lời câu phân biệt “Bộ quần nhé”; bot tự add_to_cart rồi báo đã thêm giỏ. Receipt CART_OPENED có thật, đúng SET_QUAN M, nhưng câu phân biệt mẫu chưa phải yêu cầu mua. Không thể chấm hoàn tất tác vụ chỉ vì có receipt.",
+      "qualityDenominatorEligible": true,
+      "turns": 2
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "status": "TASK_OK",
+      "reason": "Đúng setM829.000đ; intake riêng tư, preview trước xác nhận, receipt CONFIRM_PURCHASE và handoff PURCHASE_CONFIRMED. Không có tin chờ; năm code-owned SEND là kết quả đã gửi, không phải NO_SEND.",
+      "qualityDenominatorEligible": true,
+      "turns": 7
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Chọn DiệpAn theo dịp, báo preorder; Odette có sẵn là phương án thay có đánh đổi. Còn dài, nhiều tính từ và hỏi lại lựa chọn; không có sai ảnh. Native quote/photo comparison branch chưa được dùng.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    }
+  ],
+  "taskAdequateCases": 10,
+  "materialFailureCases": 2,
+  "salesCaseDenominator": 12,
+  "sourceGapControls": 1,
+  "sourceGapControlsPassed": 0,
+  "observedSendEligibleSemanticFalsePasses": 1,
+  "screenGate": "FAIL",
+  "recommendation": "STOP",
+  "gates": [
+    {
+      "item": "W1_FLAT_READ",
+      "status": "EXERCISED_PASS",
+      "evidence": "S04/P09 valid flat read; S09 care uses read_policy, old malformed details branch NOT_EXERCISED."
+    },
+    {
+      "item": "W2_WRITER_THEN_QUOTE",
+      "status": "NOT_EXERCISED",
+      "evidence": "No native same-turn successful writer then explicit quote_product. J1T3 uses pre-cart quote on a later customer turn; failed add before it is not a committed writer."
+    },
+    {
+      "item": "W3_QUOTE_PHOTO",
+      "status": "EXERCISED_PASS",
+      "evidence": "P06 COMPOSITE quote plusSD023 photo, work4. Multi-candidate/two-quote-target variants NOT_EXERCISED."
+    },
+    {
+      "item": "W4_COMPOSITION",
+      "status": "EXERCISED_PASS",
+      "evidence": "P06 three items989000, no invented component label."
+    },
+    {
+      "item": "W4_CUSTOMER_WEARING",
+      "status": "EXERCISED_FAIL",
+      "evidence": "S16 source-gap control SEND instead of silent handoff; unsupported request fulfillment passed verifier, duplicate URL attached twice."
+    },
+    {
+      "item": "W5_NATIVE_TRANSPORT_ERROR",
+      "status": "NOT_EXERCISED",
+      "evidence": "All66 generations OK; fault tests remain separate deterministic evidence."
+    },
+    {
+      "item": "CONTROLS",
+      "status": "EXERCISED_FAIL",
+      "evidence": "J1/P07 improved sample; J4 remains materially wrong; P09 infers purchase from disambiguation. J2/P08/checkout progress retained; comparison media branch NOT_EXERCISED."
+    }
+  ],
+  "limitations": [
+    "N1; known development cases",
+    "Task-adequate includes usable customer-input clarification, not ten completed sales",
+    "Fresh world differs from prior run; no causal or stability claim",
+    "One observed send-eligible false PASS; cannot claim zero",
+    "No full final-gate replay, formal blind qualification or C3 comparison",
+    "No automatic remainder or rerun"
+  ]
+}

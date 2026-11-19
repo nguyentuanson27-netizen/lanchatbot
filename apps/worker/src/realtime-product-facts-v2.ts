@@ -1,6 +1,5 @@
 import {
   FULFILLMENT_FRESH_FOR_SECONDS,
-  MEDIA_FRESH_FOR_SECONDS,
   ProductFactsV2Schema,
   type AdminArtifactContentV1,
   type ProductFactsV2,
@@ -196,7 +195,7 @@ export function buildRealtimeProductFactsV2(input: {
   const stableObservedAt = validDate(input.product.observedAt, input.now);
   const currentMediaProduct={...input.product,images:input.product.images.filter(image=>{
     const observed=mediaObservationTime(image,input.product.observedAt);
-    return Number.isFinite(observed)&&observed<=input.now.getTime()&&observed+MEDIA_FRESH_FOR_SECONDS*1000>input.now.getTime();
+    return Number.isFinite(observed)&&observed<=input.now.getTime();
   })};
   const mediaObservedAt=currentMediaProduct.images.length?new Date(Math.min(...currentMediaProduct.images.map(image=>
     mediaObservationTime(image,input.product.observedAt)))).toISOString():stableObservedAt;
@@ -298,13 +297,9 @@ export function buildRealtimeProductFactsV2(input: {
             authority: "QDRANT_STABLE",
             sourceVersion: input.product.catalogVersion,
             observedAt: mediaObservedAt,
-            expiresAt: plusSeconds(mediaObservedAt, MEDIA_FRESH_FOR_SECONDS),
-            freshForSeconds: MEDIA_FRESH_FOR_SECONDS,
-            freshnessState:
-              Date.parse(plusSeconds(mediaObservedAt, MEDIA_FRESH_FOR_SECONDS)) >
-                input.now.getTime()
-                ? "FRESH"
-                : "STALE",
+            expiresAt: null,
+            freshForSeconds: null,
+            freshnessState: "FRESH",
           },
         },
         ...(input.product.attributes ? { attributes: input.product.attributes } : {}),

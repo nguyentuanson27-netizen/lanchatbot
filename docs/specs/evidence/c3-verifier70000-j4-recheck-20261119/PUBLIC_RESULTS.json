@@ -1,0 +1,755 @@
+{
+  "source": "82c86a3c67d1f12f0f87f6956e0c44c68b265957",
+  "cases": [
+    {
+      "repetition": 1,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, áo lẻ giá 499k, phí vận chuyển về Cần Thơ 30k nhưng được shop hỗ trợ miễn phí vận chuyển nên tổng thanh toán vẫn là 499k chị nhé. Chị lấy áo màu trắng hay be ạ?",
+        "fallbackId": null
+      },
+      "finalDraft": "Dạ, áo lẻ giá 499k, phí vận chuyển về Cần Thơ 30k nhưng được shop hỗ trợ miễn phí vận chuyển nên tổng thanh toán vẫn là 499k chị nhé. Chị lấy áo màu trắng hay be ạ?",
+      "acceptedMessages": [
+        "Dạ, áo lẻ giá 499k, phí vận chuyển về Cần Thơ 30k nhưng được shop hỗ trợ miễn phí vận chuyển nên tổng thanh toán vẫn là 499k chị nhé. Chị lấy áo màu trắng hay be ạ?"
+      ],
+      "verdict": {
+        "verdict": "PASS",
+        "violations": []
+      },
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "recovery": null,
+      "tools": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "choiceOptions": {
+              "purpose": "CUSTOMER_CHOICE_LABELS_ONLY",
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "query": {
+                "quantity": 1,
+                "size": null,
+                "color": null
+              },
+              "colors": [
+                "TRẮNG",
+                "BE"
+              ],
+              "complete": true,
+              "purchaseStock": "NOT_CHECKED",
+              "evidenceHash": "c8c511203f1dab45fc73098ed8af4b55d9c53a8f9192c80df21aa8214b80ff51"
+            },
+            "preCartQuote": {
+              "kind": "PRE_CART_TOTAL_V1",
+              "calculationBasis": "PRE_CART_POLICY",
+              "appliesNegotiationReceipt": false,
+              "benefitAuthorization": {
+                "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                "status": "NOT_GRANTED",
+                "grantedBenefits": [],
+                "receiptRef": null
+              },
+              "negotiationAssessment": "QUOTED",
+              "supportEvaluation": {
+                "status": "QUOTED",
+                "pendingRef": "2942b6d19fd1a09af8a266487383ffdc9d0e8218d1200a9c0e969954d05542b7",
+                "sourceMessageId": "stateful-a8e5bad6-312f-4f47-a822-e233a81bb7c9:0",
+                "supportAvailability": "AVAILABLE",
+                "negotiationApplied": false,
+                "additionalDiscountVnd": 30000,
+                "grandTotalBeforeVnd": 529000,
+                "grandTotalAfterVnd": 499000
+              },
+              "quotedAdjustments": [
+                {
+                  "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+                  "kind": "FREE_SHIPPING",
+                  "amountVnd": 30000,
+                  "percentageBps": null
+                }
+              ],
+              "negotiatedPriceFloor": {
+                "status": "NOT_ESTABLISHED",
+                "amountVnd": null
+              },
+              "standardPromotion": {
+                "status": "NOT_APPLIED",
+                "parentProductUnits": 1,
+                "minimumParentProductUnits": 2,
+                "discountBps": 500,
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "setAndComboCountAsOne": true
+              },
+              "currentCartQuoteRef": null,
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "quantity": 1,
+              "deliveryRegion": "Cần Thơ",
+              "subtotalVnd": 499000,
+              "shippingFeeVnd": 30000,
+              "discountTotalVnd": 30000,
+              "grandTotalVnd": 499000,
+              "priceHash": "b041a55c90754c291d9b5f77c957741a1d8fd82b540e9d5ff86cb722c62095d5",
+              "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+              "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+              "bindingVersion": "commerce:3:23f0bdd660fd17b8c994b5cd5595d11d5f170c07f70b98b55fb07237fc8b5dbf",
+              "recipient": "23f0bdd660fd17b8c994b5cd5595d11d5f170c07f70b98b55fb07237fc8b5dbf"
+            }
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "quote_product",
+              "args": {
+                "quantity": 1,
+                "offerTypes": [
+                  "AO"
+                ],
+                "subjectRef": "SV2447",
+                "deliveryRegion": "Cần Thơ"
+              },
+              "id": "call_15828889376201168308"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ, áo lẻ giá 499k, phí vận chuyển về Cần Thơ 30k nhưng được shop hỗ trợ miễn phí vận chuyển nên tổng thanh toán vẫn là 499k chị nhé. Chị lấy áo màu trắng hay be ạ?"
+        }
+      ],
+      "pendingBefore": {
+        "id": "2942b6d19fd1a09af8a266487383ffdc9d0e8218d1200a9c0e969954d05542b7",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:41:49.847Z",
+        "cartId": null
+      },
+      "pendingAfter": {
+        "id": "2942b6d19fd1a09af8a266487383ffdc9d0e8218d1200a9c0e969954d05542b7",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:41:49.847Z",
+        "cartId": null
+      },
+      "cartAfter": null,
+      "committedEvents": [],
+      "verificationLatencyMs": 9105.003100000002
+    },
+    {
+      "repetition": 2,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, gửi về Cần Thơ tổng cộng là 499k (đã được shop hỗ trợ miễn phí vận chuyển 30k ạ). Chị lấy áo màu trắng có sẵn hay be đặt trước vậy ạ?",
+        "fallbackId": null
+      },
+      "finalDraft": "Dạ, gửi về Cần Thơ tổng cộng là 499k (đã được shop hỗ trợ miễn phí vận chuyển 30k ạ). Chị lấy áo màu trắng có sẵn hay be đặt trước vậy ạ?",
+      "acceptedMessages": [
+        "Dạ, gửi về Cần Thơ tổng cộng là 499k (đã được shop hỗ trợ miễn phí vận chuyển 30k ạ). Chị lấy áo màu trắng có sẵn hay be đặt trước vậy ạ?"
+      ],
+      "verdict": {
+        "verdict": "PASS",
+        "violations": []
+      },
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "recovery": null,
+      "tools": [
+        {
+          "name": "record_negotiation",
+          "status": "REJECTED",
+          "reason": "NEGOTIATION_SOURCE_OR_CART",
+          "data": {
+            "effectCommitted": false,
+            "pendingSupport": {
+              "pendingRef": "d154480e1dbc6c9f2dfc2f6f5d546e84edccdbf8c29ceedb762b6d7d39f6d0ef",
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "status": "NOT_EVALUATED",
+              "negotiatedPriceFloor": {
+                "status": "NOT_ESTABLISHED",
+                "amountVnd": null
+              },
+              "benefitAuthorization": {
+                "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                "status": "NOT_GRANTED",
+                "grantedBenefits": [],
+                "receiptRef": null
+              },
+              "canApply": false,
+              "evaluation": {
+                "by": "CODE",
+                "when": "MATCHING_CART_OPENS",
+                "waitingFor": [
+                  "COLOR"
+                ],
+                "waitingForStatus": "KNOWN",
+                "meaning": "Lời xin hỗ trợ giá cho món này đã lưu. Báo giá hỗ trợ bằng quote_product từ dữ kiện hiện hành, không cần có giỏ. Chỉ nêu mức đã được code tính trong quote; khi khách mua, code kiểm lại và ghi ưu đãi một lần khi món vào giỏ. Quote không phải biên nhận đã áp dụng. waitingFor là lựa chọn còn thiếu cho việc mua, không phải điều kiện để biết giá nếu giá đã xác định."
+              }
+            }
+          }
+        },
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "choiceOptions": {
+              "purpose": "CUSTOMER_CHOICE_LABELS_ONLY",
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "query": {
+                "quantity": 1,
+                "size": null,
+                "color": null
+              },
+              "colors": [
+                "TRẮNG",
+                "BE"
+              ],
+              "complete": true,
+              "purchaseStock": "NOT_CHECKED",
+              "evidenceHash": "c8c511203f1dab45fc73098ed8af4b55d9c53a8f9192c80df21aa8214b80ff51"
+            },
+            "preCartQuote": {
+              "kind": "PRE_CART_TOTAL_V1",
+              "calculationBasis": "PRE_CART_POLICY",
+              "appliesNegotiationReceipt": false,
+              "benefitAuthorization": {
+                "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                "status": "NOT_GRANTED",
+                "grantedBenefits": [],
+                "receiptRef": null
+              },
+              "negotiationAssessment": "QUOTED",
+              "supportEvaluation": {
+                "status": "QUOTED",
+                "pendingRef": "d154480e1dbc6c9f2dfc2f6f5d546e84edccdbf8c29ceedb762b6d7d39f6d0ef",
+                "sourceMessageId": "stateful-4e930b4c-fabd-46ed-8f7a-75b0babc1b78:0",
+                "supportAvailability": "AVAILABLE",
+                "negotiationApplied": false,
+                "additionalDiscountVnd": 30000,
+                "grandTotalBeforeVnd": 529000,
+                "grandTotalAfterVnd": 499000
+              },
+              "quotedAdjustments": [
+                {
+                  "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+                  "kind": "FREE_SHIPPING",
+                  "amountVnd": 30000,
+                  "percentageBps": null
+                }
+              ],
+              "negotiatedPriceFloor": {
+                "status": "NOT_ESTABLISHED",
+                "amountVnd": null
+              },
+              "standardPromotion": {
+                "status": "NOT_APPLIED",
+                "parentProductUnits": 1,
+                "minimumParentProductUnits": 2,
+                "discountBps": 500,
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "setAndComboCountAsOne": true
+              },
+              "currentCartQuoteRef": null,
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "quantity": 1,
+              "deliveryRegion": "Cần Thơ",
+              "subtotalVnd": 499000,
+              "shippingFeeVnd": 30000,
+              "discountTotalVnd": 30000,
+              "grandTotalVnd": 499000,
+              "priceHash": "b041a55c90754c291d9b5f77c957741a1d8fd82b540e9d5ff86cb722c62095d5",
+              "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+              "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+              "bindingVersion": "commerce:6:416f656202d6553140c59c773afd4e8e94d6111fa0e54cfdd14c7db29577f000",
+              "recipient": "416f656202d6553140c59c773afd4e8e94d6111fa0e54cfdd14c7db29577f000"
+            }
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "record_negotiation",
+              "args": {
+                "offerType": "AO",
+                "intent": "PRICE_OBJECTION",
+                "action": "RECORD",
+                "subjectRef": "SV2447",
+                "sourceQuote": "Shop hỗ trợ thêm cho chị được chút nào không?"
+              },
+              "id": "call_9876217677610830766"
+            },
+            {
+              "name": "quote_product",
+              "args": {
+                "subjectRef": "SV2447",
+                "quantity": 1,
+                "offerTypes": [
+                  "AO"
+                ],
+                "deliveryRegion": "Cần Thơ"
+              },
+              "id": "call_9876217677610829821"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ, gửi về Cần Thơ tổng cộng là 499k (đã được shop hỗ trợ miễn phí vận chuyển 30k ạ). Chị lấy áo màu trắng có sẵn hay be đặt trước vậy ạ?"
+        }
+      ],
+      "pendingBefore": {
+        "id": "d154480e1dbc6c9f2dfc2f6f5d546e84edccdbf8c29ceedb762b6d7d39f6d0ef",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:43:06.555Z",
+        "cartId": null
+      },
+      "pendingAfter": {
+        "id": "d154480e1dbc6c9f2dfc2f6f5d546e84edccdbf8c29ceedb762b6d7d39f6d0ef",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:43:06.555Z",
+        "cartId": null
+      },
+      "cartAfter": null,
+      "committedEvents": [],
+      "verificationLatencyMs": 10141.659899999999
+    },
+    {
+      "repetition": 3,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ một áo size M gửi về Cần Thơ giá 499.000đ, shop hỗ trợ miễn phí vận chuyển 30.000đ nên tổng thanh toán là 499.000đ chị nhé. Chị lấy áo màu Trắng hay Be ạ?",
+        "fallbackId": null
+      },
+      "finalDraft": "Dạ một áo size M gửi về Cần Thơ giá 499.000đ, shop hỗ trợ miễn phí vận chuyển 30.000đ nên tổng thanh toán là 499.000đ chị nhé. Chị lấy áo màu Trắng hay Be ạ?",
+      "acceptedMessages": [
+        "Dạ một áo size M gửi về Cần Thơ giá 499.000đ, shop hỗ trợ miễn phí vận chuyển 30.000đ nên tổng thanh toán là 499.000đ chị nhé. Chị lấy áo màu Trắng hay Be ạ?"
+      ],
+      "verdict": {
+        "verdict": "PASS",
+        "violations": []
+      },
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "recovery": null,
+      "tools": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "choiceOptions": {
+              "purpose": "CUSTOMER_CHOICE_LABELS_ONLY",
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "query": {
+                "quantity": 1,
+                "size": null,
+                "color": null
+              },
+              "colors": [
+                "TRẮNG",
+                "BE"
+              ],
+              "complete": true,
+              "purchaseStock": "NOT_CHECKED",
+              "evidenceHash": "c8c511203f1dab45fc73098ed8af4b55d9c53a8f9192c80df21aa8214b80ff51"
+            },
+            "preCartQuote": {
+              "kind": "PRE_CART_TOTAL_V1",
+              "calculationBasis": "PRE_CART_POLICY",
+              "appliesNegotiationReceipt": false,
+              "benefitAuthorization": {
+                "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                "status": "NOT_GRANTED",
+                "grantedBenefits": [],
+                "receiptRef": null
+              },
+              "negotiationAssessment": "QUOTED",
+              "supportEvaluation": {
+                "status": "QUOTED",
+                "pendingRef": "31c2c25a4680c8a0b91a48345f3f3a72a2a44c6c4f13b1f2ee12bae45766ef77",
+                "sourceMessageId": "stateful-35392037-d6e0-483d-a9db-050f044aafa5:0",
+                "supportAvailability": "AVAILABLE",
+                "negotiationApplied": false,
+                "additionalDiscountVnd": 30000,
+                "grandTotalBeforeVnd": 529000,
+                "grandTotalAfterVnd": 499000
+              },
+              "quotedAdjustments": [
+                {
+                  "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+                  "kind": "FREE_SHIPPING",
+                  "amountVnd": 30000,
+                  "percentageBps": null
+                }
+              ],
+              "negotiatedPriceFloor": {
+                "status": "NOT_ESTABLISHED",
+                "amountVnd": null
+              },
+              "standardPromotion": {
+                "status": "NOT_APPLIED",
+                "parentProductUnits": 1,
+                "minimumParentProductUnits": 2,
+                "discountBps": 500,
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "setAndComboCountAsOne": true
+              },
+              "currentCartQuoteRef": null,
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "quantity": 1,
+              "deliveryRegion": "Cần Thơ",
+              "subtotalVnd": 499000,
+              "shippingFeeVnd": 30000,
+              "discountTotalVnd": 30000,
+              "grandTotalVnd": 499000,
+              "priceHash": "b041a55c90754c291d9b5f77c957741a1d8fd82b540e9d5ff86cb722c62095d5",
+              "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+              "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+              "bindingVersion": "commerce:9:6d72410175f5f1ece231a54a2285b66e6908d49be0ef49e24c6509b598b885a6",
+              "recipient": "6d72410175f5f1ece231a54a2285b66e6908d49be0ef49e24c6509b598b885a6"
+            }
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "quote_product",
+              "args": {
+                "subjectRef": "SV2447",
+                "deliveryRegion": "Cần Thơ",
+                "quantity": 1,
+                "offerTypes": [
+                  "AO"
+                ]
+              },
+              "id": "call_1507528174205340637"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ một áo size M gửi về Cần Thơ giá 499.000đ, shop hỗ trợ miễn phí vận chuyển 30.000đ nên tổng thanh toán là 499.000đ chị nhé. Chị lấy áo màu Trắng hay Be ạ?"
+        }
+      ],
+      "pendingBefore": {
+        "id": "31c2c25a4680c8a0b91a48345f3f3a72a2a44c6c4f13b1f2ee12bae45766ef77",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:44:53.542Z",
+        "cartId": null
+      },
+      "pendingAfter": {
+        "id": "31c2c25a4680c8a0b91a48345f3f3a72a2a44c6c4f13b1f2ee12bae45766ef77",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:44:53.542Z",
+        "cartId": null
+      },
+      "cartAfter": null,
+      "committedEvents": [],
+      "verificationLatencyMs": 10299.728599999973
+    },
+    {
+      "repetition": 4,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ áo size M gửi về Cần Thơ tổng thanh toán là 499k chị nha (đã gồm 499k tiền áo và được hỗ trợ miễn phí vận chuyển 30k). Chị ưng màu trắng hay be ạ?",
+        "fallbackId": null
+      },
+      "finalDraft": "Dạ áo size M gửi về Cần Thơ tổng thanh toán là 499k chị nha (đã gồm 499k tiền áo và được hỗ trợ miễn phí vận chuyển 30k). Chị ưng màu trắng hay be ạ?",
+      "acceptedMessages": [
+        "Dạ áo size M gửi về Cần Thơ tổng thanh toán là 499k chị nha (đã gồm 499k tiền áo và được hỗ trợ miễn phí vận chuyển 30k). Chị ưng màu trắng hay be ạ?"
+      ],
+      "verdict": {
+        "verdict": "PASS",
+        "violations": []
+      },
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "recovery": null,
+      "tools": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "choiceOptions": {
+              "purpose": "CUSTOMER_CHOICE_LABELS_ONLY",
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "query": {
+                "quantity": 1,
+                "size": null,
+                "color": null
+              },
+              "colors": [
+                "TRẮNG",
+                "BE"
+              ],
+              "complete": true,
+              "purchaseStock": "NOT_CHECKED",
+              "evidenceHash": "c8c511203f1dab45fc73098ed8af4b55d9c53a8f9192c80df21aa8214b80ff51"
+            },
+            "preCartQuote": {
+              "kind": "PRE_CART_TOTAL_V1",
+              "calculationBasis": "PRE_CART_POLICY",
+              "appliesNegotiationReceipt": false,
+              "benefitAuthorization": {
+                "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                "status": "NOT_GRANTED",
+                "grantedBenefits": [],
+                "receiptRef": null
+              },
+              "negotiationAssessment": "QUOTED",
+              "supportEvaluation": {
+                "status": "QUOTED",
+                "pendingRef": "1330bb05a0cdc8d4e209eb755a14bd4524d5b8db5f8a8d4e377fc763c8487c8c",
+                "sourceMessageId": "stateful-2903a20e-3cdb-4fa0-b8fb-a041857f77bd:0",
+                "supportAvailability": "AVAILABLE",
+                "negotiationApplied": false,
+                "additionalDiscountVnd": 30000,
+                "grandTotalBeforeVnd": 529000,
+                "grandTotalAfterVnd": 499000
+              },
+              "quotedAdjustments": [
+                {
+                  "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+                  "kind": "FREE_SHIPPING",
+                  "amountVnd": 30000,
+                  "percentageBps": null
+                }
+              ],
+              "negotiatedPriceFloor": {
+                "status": "NOT_ESTABLISHED",
+                "amountVnd": null
+              },
+              "standardPromotion": {
+                "status": "NOT_APPLIED",
+                "parentProductUnits": 1,
+                "minimumParentProductUnits": 2,
+                "discountBps": 500,
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "setAndComboCountAsOne": true
+              },
+              "currentCartQuoteRef": null,
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "quantity": 1,
+              "deliveryRegion": "Cần Thơ",
+              "subtotalVnd": 499000,
+              "shippingFeeVnd": 30000,
+              "discountTotalVnd": 30000,
+              "grandTotalVnd": 499000,
+              "priceHash": "b041a55c90754c291d9b5f77c957741a1d8fd82b540e9d5ff86cb722c62095d5",
+              "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+              "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+              "bindingVersion": "commerce:12:fc2e5a176603d3d80152d8676eb90c48f9c089fac892c6665d0eb18ab8fd01cd",
+              "recipient": "fc2e5a176603d3d80152d8676eb90c48f9c089fac892c6665d0eb18ab8fd01cd"
+            }
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "quote_product",
+              "args": {
+                "subjectRef": "SV2447",
+                "offerTypes": [
+                  "AO"
+                ],
+                "quantity": 1,
+                "deliveryRegion": "Cần Thơ"
+              },
+              "id": "call_593258334306985168"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ áo size M gửi về Cần Thơ tổng thanh toán là 499k chị nha (đã gồm 499k tiền áo và được hỗ trợ miễn phí vận chuyển 30k). Chị ưng màu trắng hay be ạ?"
+        }
+      ],
+      "pendingBefore": {
+        "id": "1330bb05a0cdc8d4e209eb755a14bd4524d5b8db5f8a8d4e377fc763c8487c8c",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:46:16.027Z",
+        "cartId": null
+      },
+      "pendingAfter": {
+        "id": "1330bb05a0cdc8d4e209eb755a14bd4524d5b8db5f8a8d4e377fc763c8487c8c",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:46:16.027Z",
+        "cartId": null
+      },
+      "cartAfter": null,
+      "committedEvents": [],
+      "verificationLatencyMs": 7947.050300000003
+    },
+    {
+      "repetition": 5,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ gửi về Cần Thơ tổng thanh toán là 499.000đ ạ (áo 499.000đ, phí ship 30.000đ được shop hỗ trợ miễn phí). \n\nChị lấy màu trắng (có sẵn) hay be (đặt trước) để em lên đơn nhé ạ?",
+        "fallbackId": null
+      },
+      "finalDraft": "Dạ gửi về Cần Thơ tổng thanh toán là 499.000đ ạ (áo 499.000đ, phí ship 30.000đ được shop hỗ trợ miễn phí). \n\nChị lấy màu trắng (có sẵn) hay be (đặt trước) để em lên đơn nhé ạ?",
+      "acceptedMessages": [
+        "Dạ gửi về Cần Thơ tổng thanh toán là 499.000đ ạ (áo 499.000đ, phí ship 30.000đ được shop hỗ trợ miễn phí). \n\nChị lấy màu trắng (có sẵn) hay be (đặt trước) để em lên đơn nhé ạ?"
+      ],
+      "verdict": {
+        "verdict": "PASS",
+        "violations": []
+      },
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "recovery": null,
+      "tools": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "choiceOptions": {
+              "purpose": "CUSTOMER_CHOICE_LABELS_ONLY",
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "query": {
+                "quantity": 1,
+                "size": null,
+                "color": null
+              },
+              "colors": [
+                "TRẮNG",
+                "BE"
+              ],
+              "complete": true,
+              "purchaseStock": "NOT_CHECKED",
+              "evidenceHash": "c8c511203f1dab45fc73098ed8af4b55d9c53a8f9192c80df21aa8214b80ff51"
+            },
+            "preCartQuote": {
+              "kind": "PRE_CART_TOTAL_V1",
+              "calculationBasis": "PRE_CART_POLICY",
+              "appliesNegotiationReceipt": false,
+              "benefitAuthorization": {
+                "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                "status": "NOT_GRANTED",
+                "grantedBenefits": [],
+                "receiptRef": null
+              },
+              "negotiationAssessment": "QUOTED",
+              "supportEvaluation": {
+                "status": "QUOTED",
+                "pendingRef": "335ffcdf1bfb2c969b0025f97e3fbacd57a349dafe9f435c79aa47f735432280",
+                "sourceMessageId": "stateful-18fde1c2-2d4d-4577-aeb6-2d0935eee280:0",
+                "supportAvailability": "AVAILABLE",
+                "negotiationApplied": false,
+                "additionalDiscountVnd": 30000,
+                "grandTotalBeforeVnd": 529000,
+                "grandTotalAfterVnd": 499000
+              },
+              "quotedAdjustments": [
+                {
+                  "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+                  "kind": "FREE_SHIPPING",
+                  "amountVnd": 30000,
+                  "percentageBps": null
+                }
+              ],
+              "negotiatedPriceFloor": {
+                "status": "NOT_ESTABLISHED",
+                "amountVnd": null
+              },
+              "standardPromotion": {
+                "status": "NOT_APPLIED",
+                "parentProductUnits": 1,
+                "minimumParentProductUnits": 2,
+                "discountBps": 500,
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "setAndComboCountAsOne": true
+              },
+              "currentCartQuoteRef": null,
+              "subjectRef": "SV2447",
+              "offerType": "AO",
+              "quantity": 1,
+              "deliveryRegion": "Cần Thơ",
+              "subtotalVnd": 499000,
+              "shippingFeeVnd": 30000,
+              "discountTotalVnd": 30000,
+              "grandTotalVnd": 499000,
+              "priceHash": "b041a55c90754c291d9b5f77c957741a1d8fd82b540e9d5ff86cb722c62095d5",
+              "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+              "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+              "bindingVersion": "commerce:15:76b969ff202f1ffccddd611b4a6d8afc1054471abc1ba2d301547b19d97429eb",
+              "recipient": "76b969ff202f1ffccddd611b4a6d8afc1054471abc1ba2d301547b19d97429eb"
+            }
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "quote_product",
+              "args": {
+                "subjectRef": "SV2447",
+                "deliveryRegion": "Cần Thơ",
+                "offerTypes": [
+                  "AO"
+                ],
+                "quantity": 1
+              },
+              "id": "call_12357051634903518959"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ gửi về Cần Thơ tổng thanh toán là 499.000đ ạ (áo 499.000đ, phí ship 30.000đ được shop hỗ trợ miễn phí). \n\nChị lấy màu trắng (có sẵn) hay be (đặt trước) để em lên đơn nhé ạ?"
+        }
+      ],
+      "pendingBefore": {
+        "id": "335ffcdf1bfb2c969b0025f97e3fbacd57a349dafe9f435c79aa47f735432280",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:47:40.739Z",
+        "cartId": null
+      },
+      "pendingAfter": {
+        "id": "335ffcdf1bfb2c969b0025f97e3fbacd57a349dafe9f435c79aa47f735432280",
+        "status": "PENDING",
+        "sourceObservedAt": "2026-11-19T02:47:40.739Z",
+        "cartId": null
+      },
+      "cartAfter": null,
+      "committedEvents": [],
+      "verificationLatencyMs": 7820.169200000004
+    }
+  ]
+}

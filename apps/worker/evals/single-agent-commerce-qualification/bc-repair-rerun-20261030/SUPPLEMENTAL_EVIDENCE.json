@@ -1,0 +1,136 @@
+{
+  "kind": "MODEL_RUN_SUPPLEMENTAL_PROVENANCE",
+  "runSourceSha": "fe4b82932137df01fea85e974c4a562e00e7204f",
+  "runtimeChangedDuringRun": false,
+  "newGenerationAfterBatch": 0,
+  "postRunJudge": {
+    "task": "/root/blind_sales_judge",
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "fork": "none",
+    "packetHash": "f34111394f8d20fbe7d7560810d27145707c65947b75abaa52e27d8dad6a62bd",
+    "gradeByteHash": "5ff780fc433ea2ca9ebcb055f88e6450f393e9a7b4f66591b654d5002035f145",
+    "gradesLockedBeforeUnmask": true
+  },
+  "artifacts": [
+    {
+      "path": "../c3-bc-model-protocol-20261030-01.log",
+      "sha256": "3b98fa96aee9cf4238bafe82f184f3496add23852c92f1300d4c22f7c3c5c497",
+      "bytes": 8919
+    },
+    {
+      "path": "../c3-c-bcrepair-capture-20261030-01.log",
+      "sha256": "97424bee056cce9116821ffd282b980cc0e1c150a162b68b48c7adb06d2a87de",
+      "bytes": 138
+    },
+    {
+      "path": "../c3-c-bcrepair-world-prepare-20261030-01.log",
+      "sha256": "991fef83bdf131ae37f001a607f078db8f989b6e11adbce270523d32a756196d",
+      "bytes": 166
+    },
+    {
+      "path": "../c3-c-bcrepair-initial-20261030-01.log",
+      "sha256": "9836ebc8db3db372b1cec6eacaed6a16b02bc0972f3d4915c2be685f745e29da",
+      "bytes": 74
+    },
+    {
+      "path": "../c3-c-bcrepair-initial-20261030-01/INITIAL_STATE.json",
+      "sha256": "2d61b07059a5ad471914077dd2045da7a45c06993f2f5bfd7a87eb3b31850982",
+      "bytes": 700
+    },
+    {
+      "path": "../c3-c-bcrepair-register-20261030-01.log",
+      "sha256": "4e216d9de93da1a56cb965a0a1ee36035b0f716c24252349208527ed26705807",
+      "bytes": 875
+    },
+    {
+      "path": "../c3-c-bcrepair-register-20261030-02.log",
+      "sha256": "ea8bb1d5f922b03ee5507150eb8fac204d1792d918ae32661f730d7d56eff7ed",
+      "bytes": 1009
+    },
+    {
+      "path": "../c3-c-bcrepair-register-20261030-03.log",
+      "sha256": "aabdaf1cde9cf52fc35ee0029191fe1d74fd0f5c96b94abd44ba52ee77d86f0c",
+      "bytes": 1265
+    },
+    {
+      "path": "../c3-c-bcrepair-register-20261030-04.log",
+      "sha256": "118ff589aea13bf071c478342ff619e56ea3aba3adeb6584157996603287afb5",
+      "bytes": 1827
+    },
+    {
+      "path": "../c3-c-bcrepair-preflight-20261030-01.log",
+      "sha256": "4155a904476d0a9b747c64ddd0e45982b98bb79f8db8f4688fd55718587148ae",
+      "bytes": 786
+    },
+    {
+      "path": "../c3-c-bcrepair-sealed-20261030-01/INPUT_APPROVAL.json",
+      "sha256": "04d591f803686803c8aeb0c0e3d838fb28d62f29275e818e555a32661b8cfae9",
+      "bytes": 2949
+    },
+    {
+      "path": "../c3-c-bcrepair-sealed-20261030-01/DISPATCH_APPROVAL.json",
+      "sha256": "16f8967067338b0875131beb6a0b068a1b0f670facfd23632f6803e3f4611202",
+      "bytes": 3242
+    },
+    {
+      "path": "../c3-c-bcrepair-prepare-20261030.mjs",
+      "sha256": "1e5226fc5ec79d1fad9535e8bf4c89f406f486777ae2e987efa262f671f8d6c5",
+      "bytes": 9506
+    },
+    {
+      "path": "../c3-c-bcrepair-finalize-20261030.mjs",
+      "sha256": "90c2f6e01cb67844691fe28b93307804c883233aa6c5fd6230a3bf8d69898de6",
+      "bytes": 2169
+    },
+    {
+      "path": "../c3-c-bcrepair-launch-20261030.py",
+      "sha256": "9a3885e2f02e7153aa59d037468d0849e451675bd386c751d12ffdc689944622",
+      "bytes": 1957
+    },
+    {
+      "path": "../c3-c-bcrepair-command-20261030-01.json",
+      "sha256": "ccb2d05f188ffc59eb41727aa7a569c2f5756189ddfb8818af94cd7e2794fd5d",
+      "bytes": 1047
+    },
+    {
+      "path": "../c3-c-bcrepair-run-20261030-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "../c3-c-bcrepair-blind-20261030-01/PUBLIC_PACKET.json",
+      "sha256": "6be0e496e932c8d85e71bcc59944aa8edd3b498d40303adfdb7f00d571986fc4",
+      "bytes": 3575083
+    },
+    {
+      "path": "../c3-c-bcrepair-blind-20261030-01/GRADES.json",
+      "sha256": "5ff780fc433ea2ca9ebcb055f88e6450f393e9a7b4f66591b654d5002035f145",
+      "bytes": 15286
+    },
+    {
+      "path": "../c3-c-bcrepair-development-sources-20261030-01.json",
+      "sha256": "506fa05877d0374c4ebe91d3d16681f92a00332819f988bdf5ead9e73435ae2f",
+      "bytes": 1667350
+    },
+    {
+      "path": "../c3-c-bcrepair-development-inventory-20261030-01.json",
+      "sha256": "097692d7431019b47c228253bffeb07943379a1ba75b830d3735298f750849f7",
+      "bytes": 3069583
+    }
+  ],
+  "developmentInventory": {
+    "inventoryHash": "80373c471108dfa35ff3ec263245a1dd0926081b9990856510b2a4eddc5a69a2",
+    "artifacts": 6621,
+    "missing": 0,
+    "needsSourceMapping": 2382,
+    "reviewStatus": "PENDING"
+  },
+  "limits": [
+    "Development repeated population; not fresh holdout",
+    "No matched C3 comparison or fresh safety campaign",
+    "No causal or stability inference from N1/new source capture",
+    "No provider cost exposed",
+    "Native SQ2447 all-offer plus policy/chart byte bound remains"
+  ]
+}

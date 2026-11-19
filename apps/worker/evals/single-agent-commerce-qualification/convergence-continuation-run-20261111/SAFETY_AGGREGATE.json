@@ -1,0 +1,12 @@
+{
+  "kind": "CROSS_DOCUMENTATION_SAVEPOINT_CONTINUATION",
+  "priorSourceSha": "22fc581a3b32428dcf6c7d65cca3195bbf43b327",
+  "sourceSha": "93b3859180c8ec93eccbb251962ae300756ebd4f",
+  "identicalRuntimeHash": "20185069b27f53360b385996fa364059909e8705d8eece70a56a73c20a86471b",
+  "registered": 32,
+  "executed": 32,
+  "unsafeSendEligibleFalsePass": 1,
+  "providerRequests": 32,
+  "retry": 0,
+  "priorUnsafeFalsePassRetained": true
+}

@@ -1,0 +1,144 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import * as wire from './gemini-inference.mjs';
+import * as tables from './owner-product-tables.mjs';
+import {readCompactSections} from './owner-data-presentation.mjs';
+const hash=v=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
+export const allNames=()=>['readOnlyDeclarations','stateDeclarations','effectDeclarations','quoteDeclarations','mediaDeclarations','handoffDeclarations'].flatMap(k=>wire[k].map(d=>d.name));
+export const request=(returning=false,compact=true)=>({instructions:'Tư vấn theo nguồn.',ownerContextPresentation:compact?'VI_DATA_BLOCKS_COMPACT_V2':undefined,
+ toolWorkAccounting:'PRIMITIVE_WORK_V2',availableTools:allNames(),toolsAllowed:true,toolBudget:{roundsRemaining:2,callsRemaining:6},contents:[{role:'user',parts:[{text:'Chị lấy áo.'}]}],
+ context:{boundSubjects:[{ref:'P1',kind:'PRODUCT',label:'Mẫu một'},{ref:'L1',kind:'CART_LINE',label:'Dòng một',productId:'P1'}],protectedClaims:[],runtimeProducts:[],
+ policyLiterals:[{ref:'conversation-entry',text:JSON.stringify({firstContact:!returning})}],effectReceipts:[],state:{revision:1,currentProductId:'P1'}}});
+export const contract=r=>{const b=wire.buildGeminiCommerceRequest(r);return {schemas:b.tools[0].functionDeclarations.map(({description,...d})=>d),toolConfig:b.toolConfig};};
+const baseline=JSON.parse(readFileSync(new URL('./task-path-contract-baseline.json',import.meta.url)));
+test('observed p04 context/dialogue envelope fits full tools without altering signed content',()=>{
+ // Exact observed section sizes, synthetic contents. This is a portable stress control, not a historical body.
+ // Owner decision D2: the 11,024-byte provider signature observed on this path is bounded separately from text.
+ const r=request(true);r.instructions=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+ r.context.policyLiterals.push({ref:'synthetic-public-source',text:''});
+ const signed={role:'model',parts:[{functionCall:{id:'read',name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO'}},thoughtSignature:'s'.repeat(11024)}]};
+ const response={status:'OK',data:{subjectRef:'P1',content:''}};
+ r.contents.push(signed,{role:'user',parts:[{functionResponse:{name:'read_product',id:'read',response}}]});
+ let budget;wire.buildGeminiCommerceRequest(r,undefined,undefined,b=>budget=b);
+ r.context.policyLiterals.at(-1).text='x'.repeat(9393-budget.trustedFrameBytes);
+ response.data.content='x'.repeat(20338-budget.dialogueBytes);
+ const saved=structuredClone(signed),body=wire.buildGeminiCommerceRequest(r,undefined,undefined,b=>budget=b);
+ assert.equal(budget.trustedFrameBytes,9393);assert.equal(budget.dialogueBytes,20338);assert.equal(budget.signatureBytes,11024);
+ // textFrameBytes counts the raw frame, presentedTextFrameBytes the wire actually sent; neither includes the signature.
+ assert.equal(wire.ownerTextBytes(body),budget.presentedTextFrameBytes);assert.equal(wire.ownerSignatureBytes(body),11024);
+ const parts=budget.systemBytes+budget.toolSchemaBytes+budget.trustedFrameBytes+budget.dialogueBytes-11024;
+ assert(budget.textFrameBytes>=parts&&budget.textFrameBytes<parts+512,'TEXT_FRAME_IS_PARTS_WITHOUT_SIGNATURE');
+ assert(budget.toolResponseBytes>0&&budget.toolResponseBytes<budget.dialogueBytes);
+ // The continuation that used to overflow now keeps at least a tenth of the text bound free.
+ assert(budget.presentedTextFrameBytes<=wire.OWNER_REQUEST_MAX_BYTES*0.9,`headroom ${wire.OWNER_REQUEST_MAX_BYTES-budget.presentedTextFrameBytes}`);
+ assert.deepEqual(body.contents.at(-2),saved);assert.equal(body.tools[0].functionDeclarations.length,14);
+ const larger=structuredClone(r);larger.instructions+='x'.repeat(wire.OWNER_REQUEST_MAX_BYTES-budget.textFrameBytes+1);
+ assert.throws(()=>wire.buildGeminiCommerceRequest(larger),e=>e.message==='OWNER_REQUEST_BOUND'&&e.requestBytes===wire.OWNER_REQUEST_MAX_BYTES+1);
+ const fits=structuredClone(r);fits.instructions+='x'.repeat(wire.OWNER_REQUEST_MAX_BYTES-budget.presentedTextFrameBytes);
+ assert.doesNotThrow(()=>wire.buildGeminiCommerceRequest(fits));
+});
+test('provider signatures are returned unchanged and bounded on their own, never against the text frame',()=>{
+ const build=size=>{
+  const r=request(true);
+  r.contents.push({role:'model',parts:[{functionCall:{id:'read',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'s'.repeat(size)}]},
+   {role:'user',parts:[{functionResponse:{name:'read_product',id:'read',response:{status:'OK',data:{subjectRef:'P1'}}}}]});
+  let budget;const body=wire.buildGeminiCommerceRequest(r,undefined,undefined,b=>budget=b);return {body,budget};
+ };
+ const small=build(16),large=build(wire.OWNER_SIGNATURE_MAX_BYTES);
+ assert.equal(large.budget.signatureBytes,wire.OWNER_SIGNATURE_MAX_BYTES);assert.equal(large.budget.signatureLimitBytes,wire.OWNER_SIGNATURE_MAX_BYTES);
+ // Text accounting does not move with the signature; the signed part reaches the wire byte for byte.
+ assert.equal(large.budget.textFrameBytes,small.budget.textFrameBytes);assert.equal(large.budget.presentedTextFrameBytes,small.budget.presentedTextFrameBytes);
+ assert.equal(large.body.contents.at(-2).parts[0].thoughtSignature.length,wire.OWNER_SIGNATURE_MAX_BYTES);
+ assert.throws(()=>build(wire.OWNER_SIGNATURE_MAX_BYTES+1),/OWNER_REQUEST_BOUND/);
+ // A signature hidden in ordinary text is text.
+ const r=request(true);r.contents[0].parts[0].text='s'.repeat(wire.OWNER_REQUEST_MAX_BYTES);
+ assert.throws(()=>wire.buildGeminiCommerceRequest(r),/OWNER_REQUEST_BOUND/);
+});
+test('emitted schemas and call policy preserved; current owner prompt matches manifest',()=>{
+ for(const compact of [false,true])for(const returning of [false,true])assert.equal(hash(contract(request(returning,compact))),baseline.contracts[`${compact}:${returning}`]);
+ assert.equal(createHash('sha256').update(readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url))).digest('hex'),JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url))).promptHashes.owner);
+});
+test('full native tool instructions save at least 4KiB without dropping tools',()=>{
+ const b=wire.buildGeminiCommerceRequest(request());
+ assert.equal(b.tools[0].functionDeclarations.length,14);
+ assert(Buffer.byteLength(JSON.stringify(b.tools))<=baseline.toolBytes-4096);
+});
+const product=(id,role='TOP',ref='TOP-1',quantity=1)=>({subjectRef:id,purchaseOptions:[{offerType:'AO',priceRead:{subjectRef:id,offerType:'AO'},stockRead:{subjectRef:id,offerType:'AO'},
+ componentSource:{status:'AVAILABLE',completeness:'INSPECTED_ROWS',components:[{role,componentRef:ref,quantity}]}}]});
+test('shared single item lists both source targets, never selects or merges commercial data',()=>{
+ const ps=[product('P1'),product('P2')],saved=structuredClone(ps);
+ assert.deepEqual(tables.sharedSingleItemReads(ps),[{componentRef:'TOP-1',role:'TOP',readTargets:[{subjectRef:'P1',offerType:'AO'},{subjectRef:'P2',offerType:'AO'}]}]);
+ assert.deepEqual(ps,saved);
+ assert.deepEqual(tables.sharedSingleItemReads(tables.expandOwnerProducts(tables.compactOwnerProducts(ps))),tables.sharedSingleItemReads(ps));
+});
+test('emitted CompactV2 links retain both independent offers without altering source context',()=>{
+ const r=request(),ps=[product('P1'),product('P2')];
+ r.context.boundSubjects=ps.map(p=>({ref:p.subjectRef,kind:'PRODUCT',label:'Cùng tên chưa đủ để gộp'}));
+ for(const p of ps)r.context.policyLiterals.push({ref:`offers:${p.subjectRef}`,text:JSON.stringify({productId:p.subjectRef,availableOffers:['AO'],purchaseOptions:p.purchaseOptions})});
+ const before=structuredClone(r),body=wire.buildGeminiCommerceRequest(r);
+ const sections=readCompactSections(body.contents[0]);
+ const group=sections.find(s=>s.label==='Cùng một món bán lẻ, các mã set chỉ là đường tra nguồn').value[0];
+ assert.deepEqual(group.readTargets,tables.sharedSingleItemReads(ps)[0].readTargets);
+ const visible=sections.find(s=>s.label==='Sản phẩm').value;
+ assert.equal(visible.length,2);assert.deepEqual(r,before);
+});
+test('inspected catalog label metadata preserves the shared item and leaves both offers intact',()=>{
+ const r=request(),ps=[product('P1'),product('P2')];
+ for(const p of ps){
+  Object.assign(p.purchaseOptions[0].componentSource.components[0],{label:null,labelSource:null});
+  r.context.policyLiterals.push({ref:`offers:${p.subjectRef}`,text:JSON.stringify({productId:p.subjectRef,availableOffers:['AO'],purchaseOptions:p.purchaseOptions})});
+ }
+ r.context.boundSubjects=ps.map(p=>({ref:p.subjectRef,kind:'PRODUCT',label:p.subjectRef}));
+ const sections=readCompactSections(wire.buildGeminiCommerceRequest(r).contents[0]);
+ const shared=sections.find(s=>s.label==='Cùng một món bán lẻ, các mã set chỉ là đường tra nguồn');
+ assert.equal(shared?.value.length,1);
+ const [{componentRef,...item}]=shared.value;
+ assert.match(componentRef,/^component:[a-f0-9]{64}$/);
+ assert.deepEqual(item,{role:'TOP',readTargets:[{subjectRef:'P1',offerType:'AO'},{subjectRef:'P2',offerType:'AO'}]});
+ assert(sections.indexOf(shared)<sections.findIndex(s=>s.label==='Sản phẩm'));
+ const visible=sections.find(s=>s.label==='Sản phẩm').value;
+ assert.deepEqual(visible.map(p=>p.purchaseOptions[0].priceRead),item.readTargets);
+ assert.deepEqual(visible.map(p=>p.purchaseOptions[0].stockRead),item.readTargets);
+ assert.deepEqual(visible.map(p=>p.purchaseOptions[0].componentSource.components[0].componentRef),[componentRef,componentRef]);
+ assert(!JSON.stringify(sections).includes('TOP-1'));
+});
+test('unknown, conflicting, bundle and duplicate source identities do not suggest common purchase paths',()=>{
+ for(const modify of [p=>p[1].purchaseOptions[0].componentSource.status='UNKNOWN',p=>p[1].purchaseOptions[0].componentSource.completeness='UNKNOWN',
+ p=>p[1].purchaseOptions[0].componentSource.components[0].role='PANTS',p=>p[1].purchaseOptions[0].componentSource.components[0].quantity=2,
+ p=>p[1].purchaseOptions[0].componentSource.components.push({role:'SKIRT',componentRef:'SKIRT-1',quantity:1}),
+ p=>p.push(structuredClone(p[0])),p=>p[1].purchaseOptions.push(structuredClone(p[1].purchaseOptions[0])),
+ p=>p[1].purchaseOptions[0].priceRead.subjectRef='OTHER',p=>p[1].purchaseOptions[0].componentSource.components[0].componentRef='OTHER']){
+  const ps=[product('P1'),product('P2')];modify(ps);assert.deepEqual(tables.sharedSingleItemReads(ps),[]);
+ }
+});
+test('malformed native function calls retain failure, count one HTTP, expose no supplied values',async()=>{
+ let calls=0;const secret='private-raw-value';
+ const infer=wire.createGeminiCommerceInference({model:'gemini-3.5-flash-lite',projectId:'unit',location:'global',effort:'high'}, {getToken:async()=>'unit',fetchImpl:async()=>{calls++;return new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'MALFORMED_FUNCTION_CALL',content:{role:'model',parts:[{functionCall:{name:'apply_customer_state',args:{ops:[{sourceQuote:secret}], [secret]:secret}}},{functionCall:{name:secret,args:{secret}}}]}}]}),{status:200});}});
+ await assert.rejects(()=>infer({...request(),signal:new AbortController().signal}),e=>{
+  assert.equal(e.telemetry.failureCode,'OWNER_FINISH_REASON');assert.equal(e.telemetry.providerRequests,1);
+  const d=e.telemetry.malformedCallShape;assert(d);assert.equal(d.calls[0].tool,'apply_customer_state');assert.equal(d.calls[0].argsType,'OBJECT');
+  assert.equal(d.calls[1].tool,'UNKNOWN_TOOL');assert(!JSON.stringify(d).includes(secret));return true;
+ });assert.equal(calls,1);
+});
+test('no emitted call is recorded as absent; malformed shape inspection is bounded',()=>{
+ assert.deepEqual(wire.malformedCallShape({candidates:[{content:{parts:[{text:'private'}]}}]}),{inspectedParts:1,truncated:false,calls:[]});
+ const d=wire.malformedCallShape({candidates:[{content:{parts:Array(100).fill({functionCall:{name:'read_product',args:{subjectRef:'private'}}})}}]});
+ assert(d.inspectedParts<=16);assert.equal(d.calls.length,8);assert.equal(d.truncated,true);assert(!JSON.stringify(d).includes('private'));
+ const nine=wire.malformedCallShape({candidates:[{content:{parts:Array(9).fill({functionCall:{name:'read_product',args:{}}})}}]});
+ assert.equal(nine.calls.length,8);assert.equal(nine.truncated,true,'ninth call omitted even when it is the last part');
+});
+for(const [label,sourceBytes,signatureBytes,tool] of [['read-continuation',10500,13500,'read_product'],['state-continuation',6500,17500,'apply_customer_state']])test(`full native ${label} fits with existing tools, prompt and signed parts`,async()=>{
+ // Portable size regression, modeled on observed source/signature sizes; not a historical replay.
+ const r=request(true);r.instructions=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+ r.context.policyLiterals.push({ref:'synthetic-public-source',text:JSON.stringify({description:'x'.repeat(sourceBytes)})});
+ const args=tool==='read_product'?{subjectRef:'P1',selection:'SINGLE',offerType:'AO'}:{ops:[{op:'SET',field:'preferences.colors',value:['be'],sourceQuote:'Chị thích be'}]};
+ const signed={role:'model',parts:[{functionCall:{id:'captured-call',name:tool,args},thoughtSignature:'s'.repeat(signatureBytes)}]};
+ r.contents.push(signed,{role:'user',parts:[{functionResponse:{id:'captured-call',name:tool,response:{status:'OK',data:{revision:2,measurements:[]}}}}]});
+ r.toolBudget={roundsRemaining:1,callsRemaining:5};let calls=0;
+ await wire.createGeminiCommerceInference({model:'gemini-3.5-flash-lite',projectId:'unit',location:'global',effort:'high'},{getToken:async()=>'mock',fetchImpl:async(_url,init)=>{
+  calls++;const body=JSON.parse(init.body);assert.deepEqual(body.contents.at(-2),signed);assert.equal(body.tools[0].functionDeclarations.length,14);assert(Buffer.byteLength(init.body)<=65536);
+  return new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text:'Dạ chị.'}]}}]}));
+ }} )({...r,signal:new AbortController().signal});assert.equal(calls,1);
+});

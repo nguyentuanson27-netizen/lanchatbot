@@ -1,0 +1,60 @@
+[
+  {
+    "argv": [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "../c3-followup-model-world-20261105-01",
+      "../c3-media-context-model-codes-20261103-02.json"
+    ],
+    "exitCode": 0,
+    "result": "Fresh107publicproducts;0generation/sourcewrites"
+  },
+  {
+    "argv": [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "../c3-followup-model-initial-20261105-01",
+      "COD",
+      "--phase-c-initial-world",
+      "../c3-followup-model-world-20261105-01/WORLD.json"
+    ],
+    "exitCode": 0,
+    "result": "InitialPGPASS/clean48/droptrue/generation0"
+  },
+  {
+    "command": "node ../c3-followup-model-prepare-20261105-01.mjs",
+    "exitCode": 0,
+    "result": "4pendingregistrations,34cases55turns,0generation"
+  },
+  {
+    "command": "node ../c3-followup-model-finalize-20261105-01.mjs",
+    "exitCode": 0,
+    "result": "4preflightsPASS,0generation"
+  },
+  {
+    "command": "python ../c3-followup-model-launch-20261105-01.py r1",
+    "exitCode": 0,
+    "result": "Collected group; task gate separately recorded",
+    "actualCommandArtifact": "R1_RUN_COMMAND.json"
+  },
+  {
+    "command": "node ../c3-followup-model-accounting-20261105-01.mjs r1",
+    "exitCode": 0,
+    "result": "Actual captured outcomes/records/HTTP counts retained"
+  },
+  {
+    "command": "python ../c3-followup-model-launch-20261105-01.py r2",
+    "exitCode": 0,
+    "result": "Collected group; task gate separately recorded",
+    "actualCommandArtifact": "R2_RUN_COMMAND.json"
+  },
+  {
+    "command": "node ../c3-followup-model-accounting-20261105-01.mjs r2",
+    "exitCode": 0,
+    "result": "Actual captured outcomes/records/HTTP counts retained"
+  }
+]

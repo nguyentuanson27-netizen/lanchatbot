@@ -1,0 +1,18 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+················································································································································································································································································································································································································stdout | src/single-agent-commerce-discovery-feasibility.test.ts > discovery feasibility through composed reads and actual mocked owner wire > keeps representative two-candidate batch within existing bounds: complete
+DISCOVERY_FEASIBILITY complete {"fixtureBytes":5314,"requestedCandidates":2,"rawResults":[3959,10627],"chargedResults":[687,3378],"wire":[28719,36113,38833],"runtimeProducts":[4,4],"terminalHistoryBytes":17348,"nativeFunctionResponsesBytes":14199}
+
+·stdout | src/single-agent-commerce-discovery-feasibility.test.ts > discovery feasibility through composed reads and actual mocked owner wire > keeps representative two-candidate batch within existing bounds: partial
+DISCOVERY_FEASIBILITY partial {"fixtureBytes":5314,"requestedCandidates":2,"rawResults":[3959,7012],"chargedResults":[687,3664],"wire":[28719,36113,36542],"runtimeProducts":[4,4],"terminalHistoryBytes":15057,"nativeFunctionResponsesBytes":10768}
+
+stdout | src/single-agent-commerce-discovery-feasibility.test.ts > discovery feasibility through composed reads and actual mocked owner wire > keeps representative two-candidate batch within existing bounds: source-failure
+DISCOVERY_FEASIBILITY source-failure {"fixtureBytes":5314,"requestedCandidates":2,"rawResults":[3959,5088],"chargedResults":[687,1740],"wire":[28719,36113],"runtimeProducts":[4,4]}
+
+·········································································································································································································································································································································································································································································································································································································································································································································
+
+ Test Files  37 passed (37)
+      Tests  1114 passed (1114)
+   Start at  11:06:38
+   Duration  74.07s (transform 7.13s, setup 0ms, collect 25.04s, tests 31.25s, environment 8ms, prepare 7.41s)

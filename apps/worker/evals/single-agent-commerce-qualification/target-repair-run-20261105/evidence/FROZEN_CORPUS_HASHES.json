@@ -1,0 +1,33 @@
+{
+  "runSourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "corpusHash": "0fd50a8cf3e95d4e10d0a6c70cedb8118acf594993cf438a797e3d0e51dd9f3d",
+  "scopeHash": "cb9f7022a7a9df1d19738e24b4d4d8a18b6d3594af3c765a71b1d45cb42ab9d0",
+  "configHash": "ab755d3c8b06b83680499b1734609c1e19073b3a134b2076289908a73c679042",
+  "worldHash": "dd16e7c161f33f70e190b0510af85e685ff67a75d6ebeeea78db3fa1dd37ab79",
+  "initialStateArtifactHash": "5ac01672f11045e754b084cbe1ac7aad1275fccbb6eb486b5f9620eea6aba356",
+  "scopeCustomerScriptsHash": "165758f42ffcef3a2490e68be0d3e2df68cb7afc88c462b087f40061c9037100",
+  "cases": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "turns": 1
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "turns": 1
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "turns": 2
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "turns": 3
+    }
+  ],
+  "scopeName": "TARGET_REPAIR_R1_20261105",
+  "registrationHash": "2abaa2a14137da7391164857112cc14e0d62c462e15ab4bfd923bb949017ab85"
+}

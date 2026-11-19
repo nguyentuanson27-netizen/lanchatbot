@@ -1,0 +1,1256 @@
+{
+  "kind": "FROZEN_DEVELOPMENT_POPULATION",
+  "runSourceSha": "1427d2f17028e007df442c73a8d555990a3dc6ee",
+  "registrationHash": "70d87d6626c4fd6cf989db672e763b9118b0c05c40dd9bdd1def33fb4c4de93c",
+  "cases": 21,
+  "turns": 28,
+  "maximumGenerationRequests": 112,
+  "retry": 0,
+  "repetitions": 1,
+  "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+  "casesRegistered": [
+    {
+      "id": "c-po-20261031-p01",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Áo này bán riêng không em, bao nhiêu vậy?",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "AO"
+            },
+            {
+              "facet": "MEDIA",
+              "productId": "SV2447",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "AO"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "MEDIA",
+              "productId": "SV2447",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "bfb0547335f476067743aea5975ce31479cc33bb0f84e48f0341b2ead6783479"
+      }
+    },
+    {
+      "id": "c-po-20261031-p02",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Chị lấy mỗi quần thôi, quần bao nhiêu em?",
+          "history": [],
+          "initialProductCodes": [
+            "SQ2447"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SOURCE_UNAVAILABLE",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SQ2447",
+              "offerType": "QUAN"
+            },
+            {
+              "facet": "MEDIA",
+              "productId": "SQ2447",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SQ2447",
+              "offerType": "QUAN"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "MEDIA",
+              "productId": "SQ2447",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            },
+            "status": "FAILED",
+            "reason": "NO_VERIFIED_MATCHING_MEDIA"
+          }
+        ],
+        "contentHash": "cb62bfd82d252c890ed6a878804acd353105c4d8b78409a9e1bcac15722e7356"
+      }
+    },
+    {
+      "id": "c-po-20261031-p03",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Chân váy này size M còn không em?",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "STOCK",
+              "productId": "SV2447",
+              "offerType": "CV",
+              "size": "M"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "STOCK",
+              "productId": "SV2447",
+              "offerType": "CV",
+              "size": "M"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "4cdc590e697a9abcdc4f784f253f0c6495487b2488880a61bca9497a030a4eeb"
+      }
+    },
+    {
+      "id": "c-po-20261031-p04",
+      "mode": "JOURNEY",
+      "turns": [
+        {
+          "latest": "Chị cao 1m60, nặng 55kg, thích mặc rộng một chút. Em chọn size giúp chị nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        },
+        {
+          "latest": "Vậy cả bộ bao nhiêu em?",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        }
+      ],
+      "customerPolicy": {
+        "kind": "FROZEN_SCRIPTED_BRANCHES",
+        "branches": [],
+        "hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            {
+              "facet": "SIZE_SOURCE",
+              "productId": "SV2447"
+            },
+            {
+              "facet": "MEDIA",
+              "productId": "SV2447",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "SIZE_SOURCE",
+              "productId": "SV2447"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "MEDIA",
+              "productId": "SV2447",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "243282bad9cd4fbd45871bb2552250601104b98e5c69c7f007d5b51dbd85cc2b"
+      }
+    },
+    {
+      "id": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Em tính cả ba món cho chị bao nhiêu?",
+          "history": [],
+          "initialProductCodes": [
+            "SD023"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SOURCE_UNAVAILABLE",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SD023",
+              "offerType": "COMPOSITE"
+            },
+            {
+              "facet": "MEDIA",
+              "productId": "SD023",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SD023",
+              "offerType": "COMPOSITE"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "MEDIA",
+              "productId": "SD023",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            },
+            "status": "FAILED",
+            "reason": "NO_VERIFIED_MATCHING_MEDIA"
+          }
+        ],
+        "contentHash": "35e4791f60393d58147dbacb7176c2cf4dfff9a247de34d642b9d790c2e3d9bf"
+      }
+    },
+    {
+      "id": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Chị cao 1m60, nặng 55kg. Áo chị hay mặc M mà quần lại hay lấy L, em chọn size từng phần giúp chị nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SQ2447"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SOURCE_UNAVAILABLE",
+          "checks": [
+            {
+              "facet": "SIZE_SOURCE",
+              "productId": "SQ2447",
+              "componentRole": "TOP"
+            },
+            {
+              "facet": "SIZE_SOURCE",
+              "productId": "SQ2447",
+              "componentRole": "PANTS"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "SIZE_SOURCE",
+              "productId": "SQ2447",
+              "componentRole": "TOP"
+            },
+            "status": "FAILED",
+            "reason": "SIZE_SOURCE_UNAVAILABLE"
+          },
+          {
+            "requirement": {
+              "facet": "SIZE_SOURCE",
+              "productId": "SQ2447",
+              "componentRole": "PANTS"
+            },
+            "status": "FAILED",
+            "reason": "SIZE_SOURCE_UNAVAILABLE"
+          }
+        ],
+        "contentHash": "304fae94116ee35ddaee3d25d4bcdf3de906788d33c57db6c26b1b650daed0f2"
+      }
+    },
+    {
+      "id": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "turns": [
+        {
+          "latest": "Chị lấy cả bộ size M nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        },
+        {
+          "latest": "Thôi chị lấy mỗi áo thôi, em đổi lại nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        }
+      ],
+      "customerPolicy": {
+        "kind": "FROZEN_SCRIPTED_BRANCHES",
+        "branches": [],
+        "hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SOURCE_UNAVAILABLE",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            {
+              "facet": "SELECTION",
+              "productId": "SV2447",
+              "offerType": "AO",
+              "size": "M"
+            },
+            {
+              "facet": "MEDIA",
+              "productId": "SV2447",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "SELECTION",
+              "productId": "SV2447",
+              "offerType": "AO",
+              "size": "M"
+            },
+            "status": "FAILED",
+            "reason": "CART_COLOR_REQUIRED"
+          },
+          {
+            "requirement": {
+              "facet": "MEDIA",
+              "productId": "SV2447",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "f4efd80b1e2a76b4aaa07c3091b8301401b13f0312a9e755e4a4cf156fb89654"
+      }
+    },
+    {
+      "id": "c-po-20261031-p09",
+      "mode": "JOURNEY",
+      "turns": [
+        {
+          "latest": "Set Thạch Thảo còn size M không em?",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447",
+            "SQ2447"
+          ]
+        },
+        {
+          "latest": "Bộ quần nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447",
+            "SQ2447"
+          ]
+        }
+      ],
+      "customerPolicy": {
+        "kind": "FROZEN_SCRIPTED_BRANCHES",
+        "branches": [],
+        "hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "STOCK",
+              "productId": "SV2447",
+              "offerType": "SET_VAY",
+              "size": "M"
+            },
+            {
+              "facet": "STOCK",
+              "productId": "SQ2447",
+              "offerType": "SET_QUAN",
+              "size": "M"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "STOCK",
+              "productId": "SV2447",
+              "offerType": "SET_VAY",
+              "size": "M"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "STOCK",
+              "productId": "SQ2447",
+              "offerType": "SET_QUAN",
+              "size": "M"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "848112864c8a91c01019d2245db183427932fd7abde440ad2273b45614decba9"
+      }
+    },
+    {
+      "id": "c-po-20261031-p10",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Cái bộ hoa chị xem hôm trước còn không em?",
+          "history": [],
+          "initialProductCodes": []
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [],
+          "noProductFactsRequired": true
+        },
+        "results": [],
+        "contentHash": "d8f264c0d5bd0de7fc22780d7551a1be329574bd900c4ed14a6dc2ef33e5cbc9"
+      }
+    },
+    {
+      "id": "c-po-20261031-h01",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Chị lấy áo size L nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SOURCE_UNAVAILABLE",
+          "checks": [
+            {
+              "facet": "COLOR",
+              "productId": "SV2447",
+              "offerType": "AO",
+              "size": "L"
+            },
+            {
+              "facet": "SELECTION",
+              "productId": "SV2447",
+              "offerType": "AO",
+              "size": "L"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "COLOR",
+              "productId": "SV2447",
+              "offerType": "AO",
+              "size": "L"
+            },
+            "status": "FAILED",
+            "reason": "SHOP_COLOR_UNRECORDED_OR_UNAVAILABLE"
+          },
+          {
+            "requirement": {
+              "facet": "SELECTION",
+              "productId": "SV2447",
+              "offerType": "AO",
+              "size": "L"
+            },
+            "status": "FAILED",
+            "reason": "CART_COLOR_REQUIRED"
+          }
+        ],
+        "contentHash": "b90c596f70c21b595385b56d20e5af349b7c7cc505ccb7ce5b05be8b02735346"
+      }
+    },
+    {
+      "id": "c-po-20261031-h02",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Bộ Khánh Trang này bao nhiêu em?",
+          "history": [],
+          "initialProductCodes": [
+            "SV1561"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SOURCE_UNAVAILABLE",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SV1561",
+              "offerType": "SET_VAY"
+            },
+            {
+              "facet": "MEDIA",
+              "productId": "SV1561",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SV1561",
+              "offerType": "SET_VAY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "MEDIA",
+              "productId": "SV1561",
+              "intent": "GENERIC",
+              "allowedHostSuffixes": [
+                "content.pancake.vn",
+                "lanadesign.vn",
+                "fbcdn.net",
+                "fbsbx.com"
+              ]
+            },
+            "status": "FAILED",
+            "reason": "NO_VERIFIED_MATCHING_MEDIA"
+          }
+        ],
+        "contentHash": "84548b3403d94a0d36fc044e3ce159c0a6c2de002a09d85e8bd147fdd1aaadcf"
+      }
+    },
+    {
+      "id": "c-20261028-s05",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Chị cần bộ đồ mặc đi ăn với gia đình, thích đơn giản hơn một chút. Em chọn giúp chị nhé.",
+          "history": [],
+          "initialProductCodes": []
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SV1561",
+              "offerType": "SET_VAY"
+            },
+            {
+              "facet": "PRICE",
+              "productId": "V039",
+              "offerType": "DIRECT"
+            },
+            {
+              "facet": "PRICE",
+              "productId": "V168",
+              "offerType": "DIRECT"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SV1561",
+              "offerType": "SET_VAY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "V039",
+              "offerType": "DIRECT"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "V168",
+              "offerType": "DIRECT"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "ac5db123b1c29fbe2d76b3d69df7175518ba957f0bd3b463536343f1b0ad9a1f"
+      }
+    },
+    {
+      "id": "c-20261028-s06",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Áo Thạch Thảo phối với quần nâu sẫm chị đang có được không em?",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447",
+            "SQ2447"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            {
+              "facet": "PRICE",
+              "productId": "SQ2447",
+              "offerType": "SET_QUAN"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SQ2447",
+              "offerType": "SET_QUAN"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "a08e623e30de7666149bddc35561a987529b1728b5d12b98d082cfffa01af6c8"
+      }
+    },
+    {
+      "id": "c-20261028-s08",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Váy Odette với Diệp An, em chọn giúp chị một mẫu mặc đi lễ nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "V039",
+            "V168"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "V039",
+              "offerType": "DIRECT"
+            },
+            {
+              "facet": "PRICE",
+              "productId": "V168",
+              "offerType": "DIRECT"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "V039",
+              "offerType": "DIRECT"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "V168",
+              "offerType": "DIRECT"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "aed572ba4794072794b1c8000409856ad4caafd858209b79cf95e8204c83b04c"
+      }
+    },
+    {
+      "id": "c-20261028-s09",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Áo Thạch Thảo này có cần giặt tay không hay cho máy được em?",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447",
+            "SQ2447"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            {
+              "facet": "PRICE",
+              "productId": "SQ2447",
+              "offerType": "SET_QUAN"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SQ2447",
+              "offerType": "SET_QUAN"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "a08e623e30de7666149bddc35561a987529b1728b5d12b98d082cfffa01af6c8"
+      }
+    },
+    {
+      "id": "c-20261028-s10",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Áo chị đặt hôm trước chưa nhận, giờ chị muốn đổi màu thì làm thế nào em?",
+          "history": [],
+          "initialProductCodes": []
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "POLICY"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "POLICY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "f2eaae985542bddfa475c1388953d9c4030df98df476f8061db24897cc7c44d2"
+      }
+    },
+    {
+      "id": "c-20261028-s12",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Chị mới mở hộp, khóa váy bị kẹt. Giờ chị muốn đổi thì làm thế nào em?",
+          "history": [],
+          "initialProductCodes": []
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "POLICY"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "POLICY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "f2eaae985542bddfa475c1388953d9c4030df98df476f8061db24897cc7c44d2"
+      }
+    },
+    {
+      "id": "c-20261028-s14",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Em để chị xem thêm đã, khi nào lấy chị nhắn nhé.",
+          "history": [],
+          "initialProductCodes": []
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "POLICY"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "POLICY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "f2eaae985542bddfa475c1388953d9c4030df98df476f8061db24897cc7c44d2"
+      }
+    },
+    {
+      "id": "c-20261028-s15",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Chị thích áo Thạch Thảo màu be, cảm ơn em nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447",
+            "SQ2447"
+          ]
+        }
+      ],
+      "customerPolicy": null,
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "POLICY"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "POLICY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "f2eaae985542bddfa475c1388953d9c4030df98df476f8061db24897cc7c44d2"
+      }
+    },
+    {
+      "id": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "turns": [
+        {
+          "latest": "Chị muốn chọn size áo của bộ váy Thạch Thảo, cao 1m62 nặng 56kg.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        },
+        {
+          "latest": "Chị nhắn nhầm cân nặng, 51kg thôi em nhé. Ngực 88, eo 70, mông 94.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        },
+        {
+          "latest": "Chị thích mặc thoải mái một chút, em chọn size giúp chị nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        }
+      ],
+      "customerPolicy": {
+        "kind": "FROZEN_SCRIPTED_BRANCHES",
+        "selector": "HUMAN_RECORDED_FROM_ACTUAL_REPLY",
+        "branches": [
+          {
+            "turnIndex": 1,
+            "when": "shop asks a missing measurement",
+            "latest": "Chị nhắn nhầm cân nặng, 51kg thôi em nhé. Ngực 88, eo 70, mông 94."
+          }
+        ],
+        "hash": "6c482bbd327b9c389418568075209c709d5501476e3c4e1cbdebec62eefba232"
+      },
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            {
+              "facet": "SIZE_SOURCE",
+              "productId": "SV2447"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "SIZE_SOURCE",
+              "productId": "SV2447"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "da7e6db21482ebef581d7a650663c72db2727d4531ad88fbab7395d62588de79"
+      }
+    },
+    {
+      "id": "c-20261028-j6",
+      "mode": "JOURNEY",
+      "turns": [
+        {
+          "latest": "Chị lấy set váy Thạch Thảo size M nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        },
+        {
+          "latest": "Em lên đơn cho chị đi.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        },
+        {
+          "latest": "Chị muốn trả khi nhận hàng.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        }
+      ],
+      "customerPolicy": {
+        "kind": "FROZEN_SCRIPTED_BRANCHES",
+        "selector": "HUMAN_RECORDED_FROM_ACTUAL_REPLY",
+        "branches": [
+          {
+            "turnIndex": 2,
+            "when": "shop asks recipient details",
+            "latest": "Chị trả khi nhận hàng nhé. Thông tin người nhận chị gửi riêng cho shop."
+          }
+        ],
+        "hash": "379dc2db102972b941a7747c7db2e67e024e5f438b77c9af1c00d0aea8bf434c"
+      },
+      "sourceReadiness": {
+        "kind": "C_SOURCE_READINESS_V1",
+        "worldHash": "0b77222d5fe039e6892d5ca75d6525beef8f42ee02b94950f86f6fbc27e18692",
+        "checkedAt": "2026-11-01T07:47:21.293Z",
+        "spec": {
+          "cohort": "SALES_READY",
+          "checks": [
+            {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            {
+              "facet": "SELECTION",
+              "productId": "SV2447",
+              "offerType": "SET_VAY",
+              "size": "M"
+            }
+          ]
+        },
+        "results": [
+          {
+            "requirement": {
+              "facet": "PRICE",
+              "productId": "SV2447",
+              "offerType": "SET_VAY"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          },
+          {
+            "requirement": {
+              "facet": "SELECTION",
+              "productId": "SV2447",
+              "offerType": "SET_VAY",
+              "size": "M"
+            },
+            "status": "AVAILABLE",
+            "reason": null
+          }
+        ],
+        "contentHash": "a1ba716e0b07f654f34773bbfa96f4fe9a0f4b373aba07a58b826e1f330d7d98"
+      }
+    }
+  ]
+}

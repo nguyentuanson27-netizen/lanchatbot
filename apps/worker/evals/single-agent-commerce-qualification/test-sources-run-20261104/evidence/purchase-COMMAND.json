@@ -1,0 +1,24 @@
+{
+  "kind": "TEST_SOURCES_DEVELOPMENT_N1_NOT_QUALIFICATION",
+  "command": [
+    "python",
+    "../c3-media-context-model-source-wrapper-20261103-02.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "..\\c3-test-sources-model-purchase-run-20261104-01",
+    "COD",
+    "--phase-c-diagnostic-registration",
+    "..\\c3-test-sources-model-purchase-sealed-20261104-01\\REGISTRATION.json",
+    "--phase-c-world",
+    "../c3-test-sources-model-world-20261104-01/WORLD.json",
+    "--phase-c-seed",
+    "..\\c3-test-sources-model-purchase-sealed-20261104-01\\PRIVATE_BLIND_SEED.json"
+  ],
+  "sourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "registrationHash": "075142db8d413cd89e618a6769a05e208b2854d3d452cae80d0af0e38e5a38d4",
+  "retry": 0,
+  "sendEnabled": false,
+  "startedAt": "2026-11-04T08:26:18.504279+00:00",
+  "exitCode": 0,
+  "completedAt": "2026-11-04T08:45:29.587998+00:00"
+}

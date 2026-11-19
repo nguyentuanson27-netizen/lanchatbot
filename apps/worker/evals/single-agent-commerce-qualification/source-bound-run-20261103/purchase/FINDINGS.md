@@ -1,0 +1,10 @@
+# Primary whole-turn findings — purchase
+
+1. **Có tiến triển ở đường giỏ/ảnh đã sửa.** p08 thêm cả bộ rồi đổi sang áo lẻ đều được gửi; cart receipt và tổng829k→529k khớp capture. j6 thêm giỏ kèm ảnh rồi đi tiếp đến hai câu hỏi tên người nhận do code dựng. Đây là clarification, chưa phải preview hoặc hoàn tất đơn. Reviewer đã kiểm bằng chứng native/code-owned; không suy rộng thành mọi checkout đều hoạt động.
+2. **So với batch21 trước:** trước5 lượt eligible,17 handoff,6 human no-send; lượt này8 eligible,2 code-owned send,15 handoff,3 human no-send. Chỉ là so sánh outcome trên known development cases. Fresh world/readiness và owner outputs khác; N1 không chứng minh nguyên nhân cải thiện chỉ do code hay tính ổn định.
+3. **Handoff vẫn nhiều.**15 handoff và3 no-send, tương ứng18/28 lượt không có reply. p07/j2 báo SIZE_RULE_UNAVAILABLE; hậu mãi/defect s10/s12 đi handoff; nhiều trường hợp khác bị DEPENDENCY_FAILURE khi thiếu nguồn/ảnh hoặc lựa chọn. Tên reason rộng không đủ để kết luận mọi ca cùng một root cause. Xem từng tool/non-success diagnostic trong PRIMARY_DIAGNOSTICS.json.
+4. **Không có lỗi generation trong batch này.**47records/47HTTP đềuOK;8 verifier verdict đềuPASS. Không biến điều này thành tuyên bố an toàn trên population chưa chấm độc lập.
+5. **Trải nghiệm bán hàng chưa được chứng minh tốt hơn.** p08 đã nhận yêu cầu mua nhưng vẫn kết bằng “Chị sẵn sàng chốt đơn thì báo em”; bước tiếp theo còn chung chung. p01 là câu hỏi giá nên form báo giá vẫn được áp dụng, nhưng reply vẫn dài về chất liệu/size. p04 đọc lại chiều cao/cân nặng. Đây là primary whole-turn observations, không phải keyword scores hay locked qualityFAIL.
+6. **j6 hỏi tên hai lần có nguyên nhân hội thoại:** sau lần hỏi tên đầu tiên khách chỉ đổi thông tin phương thức thanh toán, chưa đưa tên. Lặp câu hỏi còn thiếu không chứng minh code quên lịch sử hoặc đã lên đơn sai; đồng thời chưa kiểm chứng full preview trong model run này.
+
+Không sửa runtime/prompt hoặc chạy lại sau khi xem outcome trong lượt này. Không chấm mù quality hoặc claim PhaseC GO.

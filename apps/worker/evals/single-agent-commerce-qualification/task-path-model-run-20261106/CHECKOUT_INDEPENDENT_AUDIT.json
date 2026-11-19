@@ -1,0 +1,173 @@
+{
+  "status": "AUDITED_INTEGRITY_PASS_FUNCTIONAL_GATE_PASS_SCOPED_CHECKOUT",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-06T09:15:52.307111+00:00",
+  "sourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "registrationHash": "24f3e5da645785dec9830b36c8fff30fb475a56847ae7133e7c493ac94574296",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-checkout-run-20261106-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "2f32e96b70d9cffd5590a1228e892a1a9843045adef0009085ad27b14d95e884",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-checkout-run-20261106-02\\integration.json",
+  "integrationSha256": "ab070fa1476ebae830d8d027d7097b208d6de40394e045dba24532c9629b472f",
+  "accountingSha256": "f3dfdd2046462fd3ec560f2072545c70014cba86bcd9bf243f306b3e02cd1375",
+  "casesRegistered": 1,
+  "casesExecuted": 1,
+  "capturedTurns": 7,
+  "generationRecords": 5,
+  "generationHttpRequests": 5,
+  "roles": {
+    "OWNER": 4,
+    "VERIFIER": 1
+  },
+  "generationStatus": {
+    "OK": 5
+  },
+  "automaticGenerationRetries": 0,
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 1,
+    "CODE_OWNED_SEND": 5,
+    "HANDOFF": 1
+  },
+  "capturedTexts": 6,
+  "capturedImages": 1,
+  "acceptedOutbox": 7,
+  "testDatabaseDropped": true,
+  "sourceDirty": false,
+  "liveSend": false,
+  "materialTaskFailures": 0,
+  "materialFailures": [],
+  "frames": [
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng giỏ hàng của mình hiện tại là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển). Chị có cần em hỗ trợ thêm gì không ạ?"
+      ],
+      "imageCount": 1,
+      "nativeArtifact": "native-10b4b18ba1de5dd4ff98ff3f135fea5373ec0a62ffef4dac7d6b3a7d7dc26476-turn-0.json",
+      "nativeRawSha256": "5c17cd669ddd52115d531484996db8130e00fb0031fd8005a918acdce2869baa"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "turnIndex": 1,
+      "actualDisposition": "CODE_OWNED_SEND",
+      "messages": [
+        "Chị cho em tên người nhận nhé."
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-10b4b18ba1de5dd4ff98ff3f135fea5373ec0a62ffef4dac7d6b3a7d7dc26476-turn-1.json",
+      "nativeRawSha256": "ad4314c165bdcd2293bf3942436f1b448db73fa07c7845953847f1884cf8b547"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "turnIndex": 2,
+      "actualDisposition": "CODE_OWNED_SEND",
+      "messages": [
+        "Chị cho em số điện thoại nhé."
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-10b4b18ba1de5dd4ff98ff3f135fea5373ec0a62ffef4dac7d6b3a7d7dc26476-turn-2.json",
+      "nativeRawSha256": "e87349ac126d276c8bab5a298c1cc4e952409d4ea101583a13b3e4846222f32c"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "turnIndex": 3,
+      "actualDisposition": "CODE_OWNED_SEND",
+      "messages": [
+        "Chị cho em địa chỉ nhé."
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-10b4b18ba1de5dd4ff98ff3f135fea5373ec0a62ffef4dac7d6b3a7d7dc26476-turn-3.json",
+      "nativeRawSha256": "4afd19a67b3f2a5cb4e89a8fa18d85fe7929c7e5f7c71caa91622c192a88f649"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "turnIndex": 4,
+      "actualDisposition": "CODE_OWNED_SEND",
+      "messages": [
+        "Chị cho em COD hoặc chuyển khoản nhé."
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-10b4b18ba1de5dd4ff98ff3f135fea5373ec0a62ffef4dac7d6b3a7d7dc26476-turn-4.json",
+      "nativeRawSha256": "d9cce0d76cccd25ff3ed9404022326290ca64f598bb70047e5dc7da13c4e4468"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "turnIndex": 5,
+      "actualDisposition": "CODE_OWNED_SEND",
+      "messages": [
+        "[Đã ẩn preview chứa thông tin nhận hàng thử nghiệm]"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-10b4b18ba1de5dd4ff98ff3f135fea5373ec0a62ffef4dac7d6b3a7d7dc26476-turn-5.json",
+      "nativeRawSha256": "6ac42b3fa1becc6590a02e14dfca7a3a5c5b251202332d1f39c4ae33811d4ceb"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "turnIndex": 6,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "nativeArtifact": "native-10b4b18ba1de5dd4ff98ff3f135fea5373ec0a62ffef4dac7d6b3a7d7dc26476-turn-6.json",
+      "nativeRawSha256": "89b40e901818a00913a145b41700fae75e38ffd2cf8d454c9a67c1741a8b25eb"
+    }
+  ],
+  "integrityChecks": [
+    "All registered attempts EXECUTED; all native canonical artifact digests/requestBody hashes match; evaluator firewall passes; unique generation IDs and1HTTP/generation; all statusOK.",
+    "Exact verifier draft and snapshot input hashes match; final native witness expected/current bindings match where present. Captured text count/hashes equal accepted Outbox. Silent handoff and human-owned no-send contain zero text/images/Outbox.",
+    "Native PostgreSQL DB dropped, source clean and exact9b2cfff, no recorded hardstop or safetyFindings. Original source timestamps preserved; group execution before09:29:08.912Z POS stock expiry. No model calls/source edits by reviewer."
+  ],
+  "limits": [
+    "Owner authorization continued development diagnostics after failed gates; R1 and R2FAIL remain immutable. This audit does not retrospectively approve original staged progression.",
+    "No Phase C qualification, paired C3 comparison, stable improvement or promotionGO.",
+    "Synthetic feedback is owner-approved test provenance, not real verified customer feedback."
+  ],
+  "checkout": {
+    "outcome": "SCOPED_PASS_CONFIRMED_THEN_SILENT_HANDOFF",
+    "codeOwnedReplies": 5,
+    "modelReplies": 1,
+    "finalCustomerReply": null,
+    "finalDisposition": "HANDOFF/PURCHASE_CONFIRMED",
+    "confirmationOperationId": "522dc27090ba2722f6234beb86fa13d2106befcb6cce3831ffd2502ad8902846",
+    "confirmationReceipt": {
+      "operation_id": "522dc27090ba2722f6234beb86fa13d2106befcb6cce3831ffd2502ad8902846",
+      "kind": "COMMITTED_SALES_EVENT",
+      "commandKind": "CONFIRM_PURCHASE",
+      "stateRevisionAfter": 18,
+      "occurredAt": "2026-11-06T09:11:52.040Z"
+    },
+    "confirmationEvent": {
+      "command_id_hash": "859a7da6b6c15550180a2d55aad8c21018d70449e17455536c757f9032a40030",
+      "command_kind": "CONFIRM_PURCHASE",
+      "outcome": "APPLIED",
+      "state_revision_after": "18"
+    },
+    "preview": {
+      "id": "3619e6e9-f22e-5bb7-a509-f8fe1cb1a0f3",
+      "hash": "sha256:a4c2a2eb717497a677e7395b1a06e70716f8ae5d10643f6804d2642eb8bf8def",
+      "cartId": "83e5131b-780b-5f6d-844a-d1ffb3fbd8f8",
+      "cartVersion": 2
+    },
+    "cart": {
+      "id": "83e5131b-780b-5f6d-844a-d1ffb3fbd8f8",
+      "version": 2
+    },
+    "conversationRevision": 8,
+    "salesRevision": 18,
+    "totalVnd": 829000,
+    "paymentMethod": "COD",
+    "recipientHash": "b557d7aa3c79322568020b1cb0398e8a0de328f328b48046c53ab6ef51e036ac",
+    "proof": "Final progress operation equals unique committed CONFIRM_PURCHASE receipt and APPLIED DB event. Previous captured code preview has samecartVersion2 and matching proof before customer confirmation; final authority HUMAN. No new Outbox at final turn; fulljourney exactly7accepted units (6text1image),18unique receipts/events.",
+    "notClaimed": "No external POSorder/live customer delivery/payment completed. Final silence is configured handoff, not missing generation fallback."
+  },
+  "privacy": {
+    "status": "PASS_MODEL_BOUNDARY",
+    "testedValues": [
+      "Synthetic recipient name",
+      "Synthetic phone",
+      "Synthetic street/address"
+    ],
+    "checks": "Reviewer scanned all5parsed model request bodies; synthetic private name/phone/street/ward absent. Private customer turns have zero owner/verifier generation; PII is confined to native code intake and customer preview, not owner or verifier."
+  },
+  "publicationNote": "Redacted copy: synthetic recipient details removed from preview. Original local independent audit sha256 3960eae4ef3753286f0ddf0be13fd3942cb5fc867bb966713276a3807745deaa"
+}

@@ -1,0 +1,309 @@
+{
+  "kind": "TWO_PHASE_DEVELOPMENT_EVIDENCE_NOT_QUALIFICATION",
+  "worldHash": "4acd541db45ee9ee2e7f7b5f384b5927da14f1669e370802c6e0a5ff82ec347f",
+  "worldFile": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-world-20261108-01\\WORLD.json",
+  "j2RunSourceSha": "d9b8190703bee3f6838d73ac43992fa8e8c8af74",
+  "j1RunSourceSha": "4516f06c4cf8ef0372b77315381c3eb2909ec046",
+  "exactSameSourceClaim": false,
+  "planSha256": "2c617c4d6b467a92797a706279d37ee43bdc9ac38f47bdb8767b3539e71d0393",
+  "providerRequests": 19,
+  "attemptDenominator": 19,
+  "primarySlots": 10,
+  "j2CustomerTurns": 3,
+  "conditionalNativeArmsNotRun": 2,
+  "runnerErrorRetained": "CAMPAIGN_OFFLINE_ASSESSMENT_MISSING",
+  "rawArtifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-01\\CAMPAIGN.jsonl",
+      "sha256": "803f3d75c6d94e64e2b9c2aef93807d9f5ddf54dfc60cd16a6552026f22eabfe",
+      "bytes": 726471
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-01\\CAMPAIGN_DISPATCH.json",
+      "sha256": "8c31e5f43b415311dacd2c9e0e608832d5f8edef01c4bb56c3d9c0050f7c68a3",
+      "bytes": 500
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-01\\integration.json",
+      "sha256": "5195761c30787a467f952f92dee45c18fb089034d3254df5377b43487327516e",
+      "bytes": 125863
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-01\\J2_TURN_0.json",
+      "sha256": "ad8f3a6e0eb214a855357e59ea2d43462597cff4cd1f68dcc937ffe345b3caa8",
+      "bytes": 76565
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-01\\J2_TURN_1.json",
+      "sha256": "39ec689331d1c31a2f22475b8d04cfa3bb0dab55789233aee98fb0e74a902420",
+      "bytes": 76465
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-01\\J2_TURN_2.json",
+      "sha256": "3f64223e5b9c5d2f631fd51c801d9fa476dfd57c9eb1124c2ff51c33a8b9d036",
+      "bytes": 81965
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-01\\RESULT.json",
+      "sha256": "eb7558fb03d18b5a88c6f82c92ffb206680bf076054cfdccf273af6460f0d4bb",
+      "bytes": 117408
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\ASSESSMENT_NEEDED.json",
+      "sha256": "5ace0baff89606e71c6dfef266bbe0435fcbffcdf20b3a0e310bb9a914ab5dfa",
+      "bytes": 320
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\ASSESSMENTS.json",
+      "sha256": "6b4e19654d547c95df54e642e671284f21b104bb56a0eace2912d069db659722",
+      "bytes": 1119
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\CAMPAIGN_DISPATCH.json",
+      "sha256": "11a09899478bffe537a5e96c447129fcd6a4d35554c12bd9847dc65bf9a86d4b",
+      "bytes": 500
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\integration.json",
+      "sha256": "6e41c045206d38bb99d597b348d3bf9c87a6e2f4203311200cdc3b35955f36ee",
+      "bytes": 7454
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\J1_GATE_OFFLINE.json",
+      "sha256": "be6b5522ea11d46113f4ad5f5637d81b3c4bab3b26f5281570345116c8f431ff",
+      "bytes": 154450
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\5336375dd21126d274a6bf2dbc035aff2da29abccdb7b5c4a6d70c8c0e4077af.claim.json",
+      "sha256": "fcd690b2a89a63d06c6f0664b5a008b53ade9542d4d19359b5ff9fa940505cad",
+      "bytes": 218
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\5336375dd21126d274a6bf2dbc035aff2da29abccdb7b5c4a6d70c8c0e4077af.result.json",
+      "sha256": "ee1399b270b0aac93f939c9af19075fecbc39b5bf5d4cf03aa99ba20eed58f10",
+      "bytes": 15820
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\71523e44c0c7367600d979aa95b80a0f7bcfa82c947726915d9bad0398cc8306.claim.json",
+      "sha256": "1c05e103ac039208c00703d424998e77b8691c34c8a332043b144c6863a49552",
+      "bytes": 218
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\71523e44c0c7367600d979aa95b80a0f7bcfa82c947726915d9bad0398cc8306.result.json",
+      "sha256": "a7bfee46b7d64733157bf658d37c74a368221c18feba17cfc63b1f488cc2fcd6",
+      "bytes": 17943
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\76784136619109304bca479063a976489855fb5162ba179e1edbbfdb8a253c74.claim.json",
+      "sha256": "534c1f3f36625c423bc6702a45faf1696deeae5e259ca7e6eaf4b9ab0a56bbf2",
+      "bytes": 218
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\76784136619109304bca479063a976489855fb5162ba179e1edbbfdb8a253c74.result.json",
+      "sha256": "417b460a402a5c5081902de6aaceba6dd5d1e8c91e390b33523fd9e31ba3e045",
+      "bytes": 12841
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\9115c672f18fd83965acc73346a6257d362aaa94144a1c694cba22270ad7cd7f.claim.json",
+      "sha256": "af72f481eafc15bf0bd3712fc8375c9a2378e6795fd23ed4b3070d45cb22189a",
+      "bytes": 222
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\9115c672f18fd83965acc73346a6257d362aaa94144a1c694cba22270ad7cd7f.result.json",
+      "sha256": "2bc41c295210b3451621224b7e851e582585b379fd6a979031fd5162aab5844e",
+      "bytes": 8011
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\a8055344071d764eaff45ce994291b88a3937bf83e5e398dbf74f935e083b836.claim.json",
+      "sha256": "6410906a84006d23bf1021327ff4f65057366516dffcf49541e7024e41d01250",
+      "bytes": 221
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\a8055344071d764eaff45ce994291b88a3937bf83e5e398dbf74f935e083b836.result.json",
+      "sha256": "421f675f8c2036ea85cc113a857893fc58ae5665eb13446050e1ac1307503668",
+      "bytes": 17518
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\af665f97426e67d2deb4af8ef0a4e5b9f7f053bdfc5fd64963a1b514dcd270ef.claim.json",
+      "sha256": "1d7d1a9187ab525425ea72a3389126182d765476fbf0bfefb21c5a48462bb1ec",
+      "bytes": 218
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\af665f97426e67d2deb4af8ef0a4e5b9f7f053bdfc5fd64963a1b514dcd270ef.result.json",
+      "sha256": "0758894236728ca5544deab59818cd8a8debd24776bceae854f59f8cc9e1be20",
+      "bytes": 15015
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\c7fbccb42d2fa7ae60558663d82c14d41ae5c6877e17a63e661b9b3440e9645f.claim.json",
+      "sha256": "3c446a4f6be2c59f4023518d70dfa49e4f2efeb591678ba791428f3397cee8b9",
+      "bytes": 221
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\c7fbccb42d2fa7ae60558663d82c14d41ae5c6877e17a63e661b9b3440e9645f.result.json",
+      "sha256": "3435155c1bfa407ccf539130d777789e741869f3e0a560ea80226b4af1482c2f",
+      "bytes": 26206
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\c938eaa615377a9e1debfad98c759fd75571b07565643006077dd71b0b185f07.claim.json",
+      "sha256": "5e247c4139e054a41bbfd65b9e64ca22e03dd157265ef916a23a50072e15b6ad",
+      "bytes": 222
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\c938eaa615377a9e1debfad98c759fd75571b07565643006077dd71b0b185f07.result.json",
+      "sha256": "7dbc16d1d0e0943a3317387a200d08515e857f7680b4b672a2eb2d32baa09b75",
+      "bytes": 4834
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\d13a9d2e7c69b18ed17685b18430757c5ec843da80c67acc80fa73e14886d95d.claim.json",
+      "sha256": "3b5edf33d5c46a37c15be5619596e52c1ab5c71e2a1f1ffd88a4ad43befdf241",
+      "bytes": 218
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\d13a9d2e7c69b18ed17685b18430757c5ec843da80c67acc80fa73e14886d95d.result.json",
+      "sha256": "080f228bbcb77f507fa39247a6b46d5a3350e7f07a92775153b224a75447a5c9",
+      "bytes": 15535
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\DISPATCH.json",
+      "sha256": "0fba922177396ea60f735b4769b7f1fe73bd682caa11ed11779af0d714ac983e",
+      "bytes": 159
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\f4efb3e9c4d90c799560014fdd340c8ffdb8fb0c91cb71c4b185df6c8c04cb84.claim.json",
+      "sha256": "7c129cc2c4f27d93c9acc785dd6b2d50e48e927fae0af9ed7b8f448a25c2b135",
+      "bytes": 218
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\f4efb3e9c4d90c799560014fdd340c8ffdb8fb0c91cb71c4b185df6c8c04cb84.result.json",
+      "sha256": "bc017ec388adeb57d5ddcdcadcc120d64baa1747c6a44dfd750ecd5735178005",
+      "bytes": 15124
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\PRIMARY.json",
+      "sha256": "fcd9be69f5d9df7748fce028eaca28b6e82ce24f347037f8583afaf0ce97b337",
+      "bytes": 153777
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02\\primary\\REQUESTS.jsonl",
+      "sha256": "729aa6d9c832ca32c4efc6af5bdbb440b2783390c1abd6fcb05cbf378b211b29",
+      "bytes": 434085
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-preparation-20261108-07\\CAPTURE_4e6306f1ea69.json",
+      "sha256": "d0796325262cdb15ebb4db90f926e1769f69d8f21dd41453380ad7c2ebc5bef0",
+      "bytes": 26118
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-preparation-20261108-07\\CAPTURE_641ed2898f84.json",
+      "sha256": "80d7575c912432a72625edff08dc73eeef229c2e487aa0aecb6bde085a63d56d",
+      "bytes": 25791
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-preparation-20261108-07\\CAPTURE_907a1dd54b3f.json",
+      "sha256": "b7c45f017fe6ed9c3ab3d280caebfd3e653e5f78b4c60e5c7c96da0b7fbcf6c4",
+      "bytes": 31387
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-preparation-20261108-07\\CART_SEED.json",
+      "sha256": "b3d0aba75cb7503e3a738cc6cf771c65306418cb2dcd9aafc63d412038d906ef",
+      "bytes": 13448
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-preparation-20261108-07\\integration.json",
+      "sha256": "1b26200d9fe3557edcaf9b8f3730b4503a70e447c3f259e0b7ace578394c8b3e",
+      "bytes": 7521
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-preparation-20261108-07\\J1_PRIMARY_438cda0577d45a22ff9da17a8662199bbc5fa8bff612316fe304a39f4555a3de.claim.json",
+      "sha256": "bd69bf83e5e7de8db4c566c71d9797df07669ebe67243e004fbbf1eeb606fada",
+      "bytes": 348
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-preparation-20261108-07\\J1_REGISTRATION.json",
+      "sha256": "18f8f4d0ec04e341265a664b384373a5856215ec108477d433ec96814f80d518",
+      "bytes": 395168
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-preparation-20261108-07\\PREPARATION.json",
+      "sha256": "eb8d538635d76951d34a1f52215a3cc7012be78bd0c0c70c128e30c83b983fa3",
+      "bytes": 4742
+    }
+  ],
+  "commandsActuallyRun": [
+    "npm install --prefix ../c3-j2-j1-toolchain-20261108-01/npm --ignore-scripts --no-audit --no-fund @openai/codex@0.159.2",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs ../c3-j2-j1-world-20261108-01 ../c3-media-context-model-codes-20261103-02.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-j1-preparation-20261108-01 COD --j2-j1-campaign ../c3-j2-j1-preparation-input-20261108-01.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-j1-preparation-20261108-02 COD --j2-j1-campaign ../c3-j2-j1-preparation-input-20261108-02.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-j1-preparation-20261108-03 COD --j2-j1-campaign ../c3-j2-j1-preparation-input-20261108-03.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-j1-preparation-20261108-04 COD --j2-j1-campaign ../c3-j2-j1-preparation-input-20261108-04.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-j1-preparation-20261108-05 COD --j2-j1-campaign ../c3-j2-j1-preparation-input-20261108-05.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-j1-preparation-20261108-06 COD --j2-j1-campaign ../c3-j2-j1-preparation-input-20261108-06.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-j1-preparation-20261108-07 COD --j2-j1-campaign ../c3-j2-j1-preparation-input-20261108-07.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-j1-model-20261108-01 COD --j2-j1-campaign ../c3-j2-j1-run-input-20261108-01.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-j1-model-20261108-02 COD --j2-j1-campaign ../c3-j2-j1-run-input-20261108-02.json",
+    "node --test apps/worker/evals/single-agent-commerce-qualification/j1-operation-control.test.mjs apps/worker/evals/single-agent-commerce-read-only/attempt-evidence.test.mjs",
+    "node --check apps/worker/evals/single-agent-commerce-qualification/j2-j1-campaign.mjs",
+    "node --check apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "git diff --check"
+  ],
+  "commandResults": {
+    "worldCapture": "PASS/0generation",
+    "pinnedCLI": "0.159.2 login verified, isolated install; global0.164 unchanged",
+    "preparation": "five failed +two complete, all0generation/DBdropped",
+    "modelPhase1": "3J2turns/9HTTP, originalJ1preflightNOT_RUN preserved, DBdropped",
+    "modelPhase2": "10primary/10HTTP, runner FAIL awaiting offline scoring; DBdropped, offline gate NO_ADOPTION_EVIDENCE, no native calls",
+    "focusedNode": "21PASS before later eval-only fixture corrections",
+    "syntax": "PASS",
+    "newFullWorkerBuildTypecheckLint": "NOT_RUN this execution turn; runtime/packages unchanged from prior tested implementation"
+  },
+  "noNewRuntimeChange": true,
+  "noPromptChange": true,
+  "liveSend": 0,
+  "liveShopSourceWrites": 0,
+  "allNineTestDatabasesDropped": true,
+  "publicationRules": [
+    "Raw signed/native requests remain outside repo; published conversation view omits opaque signatures/function IDs only, not final text.",
+    "All actual J2 final text equals accepted capture; primary outputs not sent or executed.",
+    "Runner failure is not erased by offline scoring; no provider retry/replacement or model-loop fix.",
+    "One independent whole-packet review after all19generations. No independent per-sample review."
+  ],
+  "publishedArtifacts": {
+    "AUTOMATED_INTEGRITY.json": "312feca846e402c0fd501b59ae91b7b249ecbf6a657f5c576bebbed35e724379",
+    "CONVERSATIONS.md": "dfa0ca2a99e8a3970e2d830e8efeaf2b3902e9b60336552a1ee0041a1b9b3015",
+    "INDEPENDENT_REVIEW.json": "aaaaa2e904c51f33d55d12bd48551b246d07e350309788ff44a362c7e3e414a8",
+    "INDEPENDENT_REVIEW.md": "d91a3ffd06f2b0983adeb226ee40b8ecbed9fa64ce133de86be2a7abeaef902c",
+    "J1_GATE.json": "055949abfee92d924669785f1dbdd2aef9f44f6457395b1d9174969f148a534e",
+    "METRICS.json": "fdc9f97fd9020f84d8d23fbb090592996d99b21fffa894ec2c2c2a61c1ae6777",
+    "REPORT.md": "4070e738f8e24cbed5b17b15e36a77018a540256b847bbb3148df1c0fda7d947"
+  },
+  "independentReview": {
+    "invocations": 1,
+    "verdict": "LIMITED_J2_ACCEPTANCE_J1_NO_ADOPTION_RUNNER_FAIL_NO_PHASE_C_GO",
+    "records": [
+      {
+        "source": "c3-j2-j1-model-independent-review-20261108.md",
+        "rawSha256": "c5659f86b552a0f7313f5da56aac76fef1ff3a5f2d5032dad6866c3f5c1babbd",
+        "publication": "INDEPENDENT_REVIEW.md",
+        "publicationSha256": "d91a3ffd06f2b0983adeb226ee40b8ecbed9fa64ce133de86be2a7abeaef902c",
+        "normalization": "LF_SINGLE_FINAL_NEWLINE"
+      },
+      {
+        "source": "c3-j2-j1-model-independent-review-20261108.json",
+        "rawSha256": "abee4ce237e9fa3b93a59c303aca5026c0a64a7076e995dbd579b6429de1043e",
+        "publication": "INDEPENDENT_REVIEW.json",
+        "publicationSha256": "aaaaa2e904c51f33d55d12bd48551b246d07e350309788ff44a362c7e3e414a8",
+        "normalization": "LF_SINGLE_FINAL_NEWLINE"
+      }
+    ]
+  },
+  "publicationChecks": {
+    "json": "PASS",
+    "localLinks": "PASS",
+    "LF": "PASS",
+    "credentialPatterns": "PASS",
+    "runtimeModelCallsAddedByPublication": 0,
+    "syntax": "PASS",
+    "diffCheck": "PASS",
+    "reviewInvocations": 1
+  }
+}

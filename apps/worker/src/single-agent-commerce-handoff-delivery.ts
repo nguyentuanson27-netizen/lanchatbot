@@ -67,8 +67,11 @@ export function createCommerceHandoffPreSendGate(input: {
             catch{return blocked(`C3_HANDOFF_SOURCE_${source.kind}_UNAVAILABLE`);}
           }
         }
-        if (commerceHash(await input.readAuthority(b)) !== commerceHash(authority) || await policyHash() !== b.policyHash) return blocked();
-        return input.base.authorize(claim);
+        const isCurrent = async () => commerceHash(await input.readAuthority(b)) === commerceHash(authority) &&
+          await policyHash() === b.policyHash;
+        if (!await isCurrent()) return blocked();
+        const result = await input.base.authorize(claim);
+        return result.status === "ALLOWED" && !await isCurrent() ? blocked() : result;
       } catch { return blocked(); }
     } };
 }

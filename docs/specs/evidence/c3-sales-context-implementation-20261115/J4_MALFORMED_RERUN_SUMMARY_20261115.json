@@ -1,0 +1,893 @@
+{
+  "runSourceSha": "d14594a0aa8af732d6ea5f2a85559530e82b3352",
+  "previousRunSourceSha": "978fc83dcae93fbb21fd2f72485d50429589d788",
+  "worldHash": "83facf100a289302c2a34911c699856895c5ac446a78562671305162480a033c",
+  "sameExecutableConfig": {
+    "status": "PASS",
+    "previousSource": "978fc83dcae93fbb21fd2f72485d50429589d788",
+    "rerunSource": "d14594a0aa8af732d6ea5f2a85559530e82b3352",
+    "runtimeHash": "104ccc105a5c4b2842fd09d29efdf6e7af2da871f213882fcf2ef8389443fe2d",
+    "ownerPromptHash": "a29e54165dc0bd4809060e7bae28a51f4e024366b55257484dee2bd9a5f131cd",
+    "verifierPromptHash": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3",
+    "modelConfigUnchanged": true,
+    "executableConfigUnchanged": true,
+    "providerRequests": 0
+  },
+  "attempts": 2,
+  "turns": 6,
+  "nativeGenerationRequests": 18,
+  "judgeGenerationRequests": 2,
+  "dispositions": {
+    "SEND_ELIGIBLE": 6
+  },
+  "statusCounts": {
+    "OK": 18
+  },
+  "roleCounts": {
+    "OWNER": 12,
+    "VERIFIER": 6
+  },
+  "qualificationEligible": false,
+  "cases": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "judge": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Hỏi màu đúng phần còn thiếu, phân biệt Trắng có sẵn và Be đặt trước theo kết quả tool; có ảnh mở đầu hợp lệ. Yêu cầu hỗ trợ mới được ghi nhận, chưa được cấp ưu đãi nên không tự giảm hay freeship. Báo đúng một áo AO 499.000đ + ship Cần Thơ 30.000đ = 529.000đ theo quote thực, không nhận đã chốt đơn hay thanh toán. Giọng lịch sự, rõ ràng; việc nhắc lại chọn màu vẫn phù hợp vì khách chưa chọn."
+          }
+        ]
+      },
+      "turns": [
+        {
+          "turn": 0,
+          "terminal": "SEND_ELIGIBLE",
+          "recoveryReason": null,
+          "artifactHash": "51b0948e125f9d61ed51b84fb44b9794cdca64e2cb79b402619da466b3d413c0",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "draft": "Dạ, áo thêu Thạch Thảo size M có 2 màu: màu Trắng (hàng có sẵn) và màu Be (hàng đặt trước ạ). Chị lấy màu nào ạ?",
+          "pendingSupport": null,
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {}
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "terminal": "SEND_ELIGIBLE",
+          "recoveryReason": null,
+          "artifactHash": "36827d89ca545ca6a9862e16428c32e829cb043a29a858736ad1570ae6f599be",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "draft": "Áo lẻ Thạch Thảo size M hiện có giá 499.000đ ạ. Em đã ghi nhận yêu cầu hỗ trợ của chị rồi ạ. \n\nChị lấy áo màu Trắng (hàng có sẵn) hay màu Be (hàng đặt trước) để em hỗ trợ tiếp cho chị nhé ạ?",
+          "pendingSupport": {
+            "benefitAuthorization": {
+              "grantedBenefits": [],
+              "receiptRef": null,
+              "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+              "status": "NOT_GRANTED"
+            },
+            "blockedReason": "CART_REQUIRED",
+            "canApply": false,
+            "offerType": "AO",
+            "pendingRef": "4c975a184b801ca7fa56cc9983e836bf690ec7c95d5c10fa862c78e403b71548",
+            "status": "NOT_EVALUATED",
+            "subjectRef": "SV2447"
+          },
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "837ebeca2e62ea4b4200518d668cd13271b7ac0c1d858a7124b34eac0c66c34a",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "4c975a184b801ca7fa56cc9983e836bf690ec7c95d5c10fa862c78e403b71548",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "4c975a184b801ca7fa56cc9983e836bf690ec7c95d5c10fa862c78e403b71548",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "blockedReason": "CART_REQUIRED"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "terminal": "SEND_ELIGIBLE",
+          "recoveryReason": null,
+          "artifactHash": "a3c1b90f63770fd40ddb1a166387024fe79f6067bb0e2a2c804f7f652cd419e9",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "draft": "Dạ, áo lẻ Thạch Thảo size M giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé ạ. \n\nChị lấy áo màu Trắng (hàng có sẵn) hay màu Be (hàng đặt trước) ạ?",
+          "pendingSupport": {
+            "benefitAuthorization": {
+              "grantedBenefits": [],
+              "receiptRef": null,
+              "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+              "status": "NOT_GRANTED"
+            },
+            "blockedReason": "CART_REQUIRED",
+            "canApply": false,
+            "offerType": "AO",
+            "pendingRef": "4c975a184b801ca7fa56cc9983e836bf690ec7c95d5c10fa862c78e403b71548",
+            "status": "NOT_EVALUATED",
+            "subjectRef": "SV2447"
+          },
+          "tools": [
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "benefitAuthorization": {
+                  "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                  "status": "NOT_GRANTED",
+                  "grantedBenefits": [],
+                  "receiptRef": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": "Cần Thơ",
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "9eeb0c578fa3bdf4f353dd391a31253e9fcfb4b2c355a08595aa968ead195360",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:3:0c9db9b5650669aeed5503c970e87893691aa3583237f5f4a4198fa52be89b6d",
+                  "recipient": "0c9db9b5650669aeed5503c970e87893691aa3583237f5f4a4198fa52be89b6d"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "judge": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": true,
+            "factsPass": false,
+            "materialIssue": true,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": false
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Giọng tự nhiên, hỏi màu đúng phần còn thiếu; offer AO và trạng thái Trắng có sẵn/Be đặt trước đều có nguồn. Tuy nhiên, lượt 2 khẳng định đây là giá tốt nhất khi yêu cầu hỗ trợ mới chỉ được ghi nhận, còn NOT_EVALUATED và bị chặn do chưa có giỏ: kết luận này có thể khiến khách bỏ quyền được xét hỗ trợ. Lượt 3 báo đúng tổng một áo gửi Cần Thơ: 499.000đ + 30.000đ = 529.000đ theo quote thực, không tự giảm giá, freeship hay giả đã thanh toán."
+          }
+        ]
+      },
+      "turns": [
+        {
+          "turn": 0,
+          "terminal": "SEND_ELIGIBLE",
+          "recoveryReason": null,
+          "artifactHash": "3b9a7ac498d9796a3ee0d4a90aed5e3b8003f32908458bf2590a89822ccd748f",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "draft": "Dạ, áo lẻ Set váy Thạch Thảo size M có 2 màu: màu Trắng (có sẵn) và màu Be (hàng đặt trước). Chị lấy màu nào ạ?",
+          "pendingSupport": null,
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {}
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "terminal": "SEND_ELIGIBLE",
+          "recoveryReason": null,
+          "artifactHash": "057e7f50ea4879ce732e95e83cbeee9d9fa6ff86f1246311998cf063e8bae701",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "draft": "Dạ, áo lẻ Set váy Thạch Thảo có giá 499.000đ (phí vận chuyển 30.000đ ạ). Đây là mức giá niêm yết tốt nhất của shop rồi chị nha. \n\nChị lấy áo màu Trắng (có sẵn) hay màu Be (đặt trước) để em hỗ trợ mình lên đơn ạ?",
+          "pendingSupport": {
+            "benefitAuthorization": {
+              "grantedBenefits": [],
+              "receiptRef": null,
+              "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+              "status": "NOT_GRANTED"
+            },
+            "blockedReason": "CART_REQUIRED",
+            "canApply": false,
+            "offerType": "AO",
+            "pendingRef": "782e37915c61292f8c932cba5fbb0025b5ab1ed5346071a9f9d4584098eca623",
+            "status": "NOT_EVALUATED",
+            "subjectRef": "SV2447"
+          },
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "0671fbf94aff6a6ca997e6a6c8b89c321fbc494e6b0cbd811cce8b8b0dd808f7",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "782e37915c61292f8c932cba5fbb0025b5ab1ed5346071a9f9d4584098eca623",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "782e37915c61292f8c932cba5fbb0025b5ab1ed5346071a9f9d4584098eca623",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "blockedReason": "CART_REQUIRED"
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "benefitAuthorization": {
+                  "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                  "status": "NOT_GRANTED",
+                  "grantedBenefits": [],
+                  "receiptRef": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "9eeb0c578fa3bdf4f353dd391a31253e9fcfb4b2c355a08595aa968ead195360",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:5:7ab37a320a404f87ab885b6e73f258e1f7f907d949e5ec178bcd2e29a087643f",
+                  "recipient": "7ab37a320a404f87ab885b6e73f258e1f7f907d949e5ec178bcd2e29a087643f"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "terminal": "SEND_ELIGIBLE",
+          "recoveryReason": null,
+          "artifactHash": "34080f0432006455fea1e46fde6150b9de744d0b247c264c4ef1878dc9f8afd9",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "draft": "Dạ, áo lẻ Set váy Thạch Thảo size M giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nha. \n\nChị lấy màu Trắng (có sẵn) hay màu Be (đặt trước) ạ?",
+          "pendingSupport": {
+            "benefitAuthorization": {
+              "grantedBenefits": [],
+              "receiptRef": null,
+              "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+              "status": "NOT_GRANTED"
+            },
+            "blockedReason": "CART_REQUIRED",
+            "canApply": false,
+            "offerType": "AO",
+            "pendingRef": "782e37915c61292f8c932cba5fbb0025b5ab1ed5346071a9f9d4584098eca623",
+            "status": "NOT_EVALUATED",
+            "subjectRef": "SV2447"
+          },
+          "tools": [
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "benefitAuthorization": {
+                  "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                  "status": "NOT_GRANTED",
+                  "grantedBenefits": [],
+                  "receiptRef": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": "Cần Thơ",
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "9eeb0c578fa3bdf4f353dd391a31253e9fcfb4b2c355a08595aa968ead195360",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:6:7ab37a320a404f87ab885b6e73f258e1f7f907d949e5ec178bcd2e29a087643f",
+                  "recipient": "7ab37a320a404f87ab885b6e73f258e1f7f907d949e5ec178bcd2e29a087643f"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "originalFailuresRetained": true,
+  "providerGenerations": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "87db5849d92285bc38e7ed4fd2fc0f7ef8706b48aa94ae9c12f2bdf5b3ff6b25",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5308.172499999997,
+        "inputTokens": 10835,
+        "outputTokens": 1136,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "8f0cb6a79b16a1aaa07c047cf951a306d4c12ea31f78a0c5fae55781c61e574d",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3157.801799999994,
+        "inputTokens": 13468,
+        "outputTokens": 383,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "80a7402d7315f7ad1954170f4dbc60a6484e950aa729860338a262c502704438",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7485.736399999994,
+        "inputTokens": 9597,
+        "outputTokens": 76,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "c33c8974aa88707ad666b9f0d136c78f37e3f6b2861109d5560876156362911c",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4186.965799999998,
+        "inputTokens": 11335,
+        "outputTokens": 852,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "2c9db8c5ccccfbdc27800b77c9ccec86920a1e7e36696f5b788004ae448639df",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3652.588899999988,
+        "inputTokens": 13485,
+        "outputTokens": 601,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "f1914cbf13304318af1f45a885f9d07b762d24f5222c09ac95a3abb6fb1bb954",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 8398.840800000005,
+        "inputTokens": 9450,
+        "outputTokens": 79,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "367ea47d6473d6398cc0ccae6197d281b202e3a08a653916093f6af79eebfe8b",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5071.4614,
+        "inputTokens": 11594,
+        "outputTokens": 1086,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "67e3ea064a511b699ffc9f5d1ad73fbdc905ef8a8443439765970017a4299f09",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 2967.057700000005,
+        "inputTokens": 16041,
+        "outputTokens": 350,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "65cf0e8b289ef97e6b7191e8b49541fb39848c5645a06bdc8191d1ab21ef6ff5",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7113.207500000004,
+        "inputTokens": 10954,
+        "outputTokens": 54,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "457f7341863d5d60c42a72502cc37f0d6adb836db2fcc936d671556db16562de",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4193.589099999983,
+        "inputTokens": 10837,
+        "outputTokens": 906,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "f5068113e8e38ae1a16985f7c765bfe92e25b7f82d0578cff193ecb2b9cd5055",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 2967.0548000000126,
+        "inputTokens": 13240,
+        "outputTokens": 351,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "6719132655531af41e85946a1e746a572a4badd5b1de991989a676db0c45a870",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 5898.8440999999875,
+        "inputTokens": 9612,
+        "outputTokens": 69,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "569f547ee53b6845a4eb81016bf01f8c7213b19db81b4d00a066b8a6812f2581",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6166.480700000015,
+        "inputTokens": 11335,
+        "outputTokens": 1776,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "9d9cf72e9574cc0fc06a6e7ce3e2df209159bdc8141c0c79374aec7dcff39039",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4180.051399999997,
+        "inputTokens": 17772,
+        "outputTokens": 699,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "117ba311f3c1e93b678a07b1c8a64fcc54a7963fa5d4d8f37e82a2497cb803ec",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 15952.91710000002,
+        "inputTokens": 11638,
+        "outputTokens": 312,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "cdd8f427d365a27999519d5369148360a550124a6bad83bbd65acaf7215b8a10",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5115.031500000012,
+        "inputTokens": 11607,
+        "outputTokens": 1216,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "566f2d9ffd95f703722adeca88c95a637d1952e8c72fd2eeb67a23d6bbb25261",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3477.2695999999996,
+        "inputTokens": 16190,
+        "outputTokens": 618,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "requestHash": "c7f3c74258a10de12a4e97db5b40c81157affdade3bbbefc78a56f1003d5ac25",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 6176.236399999994,
+        "inputTokens": 10994,
+        "outputTokens": 54,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "usage": null
+    }
+  ],
+  "corpusHash": "5af81521333a221d17049f647dbb27134f22c2baeee874ed6e3296d7d0a19ca0",
+  "candidate": {
+    "sourceSha": "d14594a0aa8af732d6ea5f2a85559530e82b3352",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "a29e54165dc0bd4809060e7bae28a51f4e024366b55257484dee2bd9a5f131cd",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "ac8ed513e98debd19bbe3b904543df1ae49684cfeafe894b7c8c25ad194f1693",
+    "toolContractHash": "0291b405444a7a8127a7aef7ef53f3e3a652ca53a63b3101a2835112baac71c3",
+    "assemblyHash": "2851ed1430f3f9048d5ce414fe79df9d718a29fdc4a4004b79179afb3cbd8f2c",
+    "runtimeHash": "104ccc105a5c4b2842fd09d29efdf6e7af2da871f213882fcf2ef8389443fe2d",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "be6d02ed3d0106cb995626769e47d37b417b6655d43c8bfb2b2f4b80f3f8e6d7",
+      "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+      "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+    }
+  },
+  "metrics": {
+    "OWNER": {
+      "inputTokens": 157739,
+      "outputTokens": 9974,
+      "latencyP50Ms": 4180.051399999997,
+      "latencyP95Ms": 6166.480700000015,
+      "costUSD": null,
+      "costUnavailableReason": "PROVIDER_NOT_EXPOSED"
+    },
+    "VERIFIER": {
+      "inputTokens": 62245,
+      "outputTokens": 644,
+      "latencyP50Ms": 7113.207500000004,
+      "latencyP95Ms": 15952.91710000002,
+      "costUSD": null,
+      "costUnavailableReason": "PROVIDER_NOT_EXPOSED"
+    }
+  }
+}

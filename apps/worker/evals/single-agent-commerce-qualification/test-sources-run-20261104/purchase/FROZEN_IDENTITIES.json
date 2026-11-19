@@ -1,0 +1,276 @@
+{
+  "runSourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "config": {
+    "version": 1,
+    "qualificationStage": "ABSOLUTE",
+    "nativeCodecs": {
+      "OWNER": "NATIVE_B_OWNER_V1",
+      "VERIFIER": "NATIVE_B_VERIFIER_V1",
+      "STRATEGIST": "MAIN_C3_V1",
+      "RESPONDER": "MAIN_C3_V1"
+    },
+    "sendEnabled": false,
+    "retry": 0,
+    "repetitions": 1,
+    "implementationBaseSha": "f160dfa4f7e0c8b3e29232570710d99d4f5ed012",
+    "candidate": {
+      "sourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+      "model": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "promptHash": "fdb071bf6079af059819c1a984be80ca386ab2d92fb5988418271d08e450db2b",
+      "openingMediaRule": {
+        "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+      },
+      "contextPolicyHash": "1ddf18e864f093d7ef247a5ed3d3b293cd429bcf9fc8a16d124799bd37302ae1",
+      "toolContractHash": "fca446c9ee0e569f378750e79cde33424ceefed9dc087c073a943d132a577160",
+      "assemblyHash": "070ab41506b3089e8ad6b0260152d74c542405ce1d2b668a278a3c363ae7c6b3",
+      "runtimeHash": "56339ec2817b65c3a8c0c62ae0a379408ff778b5327959c9aa867b69b6da0d44",
+      "verifier": {
+        "model": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        },
+        "promptHash": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944",
+        "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+        "serializationHash": "93bd246918f3c61426fc61a67b5a29109ec348bb7569da927f16b065c1232f70",
+        "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+        "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+      }
+    },
+    "measurementPolicy": {
+      "latency": "MONOTONIC_MS_EVERY_GENERATION",
+      "percentiles": "NEAREST_RANK",
+      "tokens": "PROVIDER_OR_EXPLICIT_UNAVAILABLE",
+      "cost": "PROVIDER_OR_EXPLICIT_UNAVAILABLE",
+      "toolCalls": "EVERY_ATTEMPT",
+      "terminalReasons": "EVERY_NON_SEND",
+      "embedding": {
+        "kind": "NATIVE_VERTEX_EMBED_TEXT_V1",
+        "maximumPredictHttpPerInvocation": 2,
+        "retry": "ONE_REFRESH_AND_RETRY_ONLY_AFTER_FIRST_PREDICT_401",
+        "oauth": "NATIVE_TOKEN_CACHE_SINGLE_REFRESH_NO_OAUTH_RETRY",
+        "generationRequests": 0,
+        "requestEvidence": "PREDICT_BODY_HASH_ONLY_OAUTH_BODY_NEVER_RETAINED",
+        "usage": "NOT_EXPOSED_BY_NATIVE_EMBED_PORT"
+      }
+    },
+    "onlineRoles": [
+      "OWNER",
+      "VERIFIER"
+    ],
+    "maximumOwnerGenerations": 3,
+    "maximumVerifierGenerations": 1,
+    "ownerDecision": {
+      "status": "APPROVED",
+      "evidenceRef": "owner-reply:call_c242e38f43fc43008382efd4abff8c46:2026-10-28",
+      "decisionHash": "87d2a2535bfb174c4ffe731b8072c89211c8d50a121807348a735d67021d7eeb"
+    },
+    "thresholds": {
+      "singleQuality": 0.9,
+      "journeyQuality": 0.9,
+      "safeUsability": 0.9,
+      "singleNetWin": 0.1,
+      "journeyNetWin": 0.1
+    },
+    "judge": {
+      "kind": "OFFLINE_MODEL",
+      "identity": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "approvalRef": "owner-reply:call_bd286ceab8db4f4780bc1a76537484da:2026-10-28",
+      "promptHash": "80843a39c70548e8709a5cbd42628927b0c34515cd3d2d55e7667212355d6bff",
+      "rubricHash": "a652669b2ea5d788eaba897bfd24f0bbf8fe3fbe3a6ab6e64ecdc4cb51984fad",
+      "blind": true,
+      "disagreement": "REQUIRE_ADJUDICATION"
+    },
+    "baseline": {
+      "sourceSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+      "capabilityPath": "apps/worker/src/track-c-c3-two-pass-candidate.ts",
+      "model": null,
+      "capabilityStatus": "UNVERIFIED_MATCHED_MODEL_AND_STATEFUL_PARITY"
+    },
+    "blinding": {
+      "scheme": "HMAC_SHA256_ORDER_V1",
+      "seedCommitment": "4aeeb74ab8b0829921a796e185304f6e27b84d2fb8e731c81f9bf65128899618"
+    }
+  },
+  "corpusHash": "d7c3808a6d519f816add12ba0b68b85b1be8dcb8abeded85355f321a0bfcceba",
+  "scopeHash": "dbde6402f9e69bb3d7096761b6bf05640f05b1ca4e95c1957fa7f7b3ef715d57",
+  "worldHash": "524aeac4caaa99c1042b4347f4f945a317ae3351cd1b304cdd11e5838b78f1d3",
+  "initialStateArtifactHash": "a2f67c01ce2a2466eae0f9b8d966fe5dd4daff89b33742cd43c9ed6fdd40489d",
+  "review": {
+    "status": "APPROVED",
+    "reviewer": "/root/sales_completion_implementation_review",
+    "evidenceRef": "../c3-test-sources-model-purchase-sealed-20261104-01/INPUT_APPROVAL.json",
+    "newProviderResultsObserved": 0,
+    "corpusHash": "d7c3808a6d519f816add12ba0b68b85b1be8dcb8abeded85355f321a0bfcceba",
+    "worldHash": "524aeac4caaa99c1042b4347f4f945a317ae3351cd1b304cdd11e5838b78f1d3",
+    "sourceChecksHash": "2d90d83c48920eafae0fa72b74313fa2435deb9ad9b076eaaf57661a1df46c10"
+  },
+  "provenance": {
+    "developmentOnly": true,
+    "diagnosticScope": "PURCHASE_OPTIONS_21_20261031",
+    "sourceBindingsPending": false,
+    "candidatePromptUnchanged": true,
+    "verifierPromptUnchanged": true,
+    "repairPlan": "c3-test-feedback-handoff-sources-20261104.md",
+    "authoredFrom": "Owner-approved purchase-options plan revision3 plus retained historical development cases",
+    "developmentExposure": "Known development population; not fresh holdout",
+    "historicalEvidenceRef": "variant-stock-search-rerun-20261030/REPORT.md",
+    "noNewProviderResultsBeforeSeal": true,
+    "knownDevelopmentExposure": true,
+    "sourceBoundReadinessVersion": 3,
+    "previousRegistrationHash": "68259c6e41d1b1822387a6c60fde9a29b378136e2c42534a542e3fb2e8cc359c",
+    "ownerAmendment": "c3-test-white-shirt-source-20261104.md",
+    "promptComparison": {
+      "basis": "EXACT_PREVIOUS_REGISTRATION",
+      "previousRegistrationHash": "68259c6e41d1b1822387a6c60fde9a29b378136e2c42534a542e3fb2e8cc359c",
+      "previousOwnerPromptHash": "fdb071bf6079af059819c1a984be80ca386ab2d92fb5988418271d08e450db2b",
+      "currentOwnerPromptHash": "fdb071bf6079af059819c1a984be80ca386ab2d92fb5988418271d08e450db2b",
+      "previousVerifierPromptHash": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944",
+      "currentVerifierPromptHash": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944"
+    },
+    "testSourceAssumptions": {
+      "colour": {
+        "kind": "OWNER_APPROVED_ISOLATED_COLOR_V1",
+        "configurationHash": "379b0b825749e59132e63388a254357375d62fd11add4c15aa258925942422ef",
+        "publicSourceWorldHash": "c21b5e4763ad95c5678343967eb24e2696d6fc6854d6d4632ce624ea5c2d9020",
+        "approvalRefs": [
+          "owner-white-shirt-test-assumption-20261104"
+        ],
+        "changedRows": [
+          {
+            "productId": "SV2447",
+            "componentSku": "SV2447-AO",
+            "size": "S",
+            "from": "__NO_COLOR__",
+            "to": "TRẮNG"
+          },
+          {
+            "productId": "SV2447",
+            "componentSku": "SV2447-AO",
+            "size": "M",
+            "from": "__NO_COLOR__",
+            "to": "TRẮNG"
+          },
+          {
+            "productId": "SV2447",
+            "componentSku": "SV2447-AO",
+            "size": "L",
+            "from": "__NO_COLOR__",
+            "to": "TRẮNG"
+          },
+          {
+            "productId": "SV2447",
+            "componentSku": "SV2447-AO",
+            "size": "XL",
+            "from": "__NO_COLOR__",
+            "to": "TRẮNG"
+          },
+          {
+            "productId": "SQ2447",
+            "componentSku": "SV2447-AO",
+            "size": "S",
+            "from": "__NO_COLOR__",
+            "to": "TRẮNG"
+          },
+          {
+            "productId": "SQ2447",
+            "componentSku": "SV2447-AO",
+            "size": "M",
+            "from": "__NO_COLOR__",
+            "to": "TRẮNG"
+          },
+          {
+            "productId": "SQ2447",
+            "componentSku": "SV2447-AO",
+            "size": "L",
+            "from": "__NO_COLOR__",
+            "to": "TRẮNG"
+          },
+          {
+            "productId": "SQ2447",
+            "componentSku": "SV2447-AO",
+            "size": "XL",
+            "from": "__NO_COLOR__",
+            "to": "TRẮNG"
+          }
+        ],
+        "meaning": "Owner-approved test assumption; not verified physical stock colour or source publication."
+      },
+      "support": {
+        "kind": "OWNER_APPROVED_TEST_FEEDBACK_HANDOFF_V1",
+        "configurationHash": "d4eee9dc3bd07ad198b3a28cb0416bba03c70f5e8b8d997c81e4f31fdd09fedf",
+        "approvalRef": "owner-feedback-handoff-test-supplement-20261104",
+        "baseWorldHash": "02ec65ed639eda619069d9f1f58bdb5e8ed02d63ac08c6220a4f9a1ae33e68ff",
+        "handoffContentHash": "sha256:5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+        "handoffVersionId": "ee92f932-91ea-5490-a2a9-8e6338ae26f2",
+        "meaning": "Owner-approved isolated test feedback; not verified customer provenance. Handoff policy is active only in the test clone."
+      }
+    },
+    "taskPurposeAmendment": {
+      "reason": "New source-complete sales tasks no longer retain an inherited SHOP_GAP evaluator purpose.",
+      "cases": [
+        "c-po-20261031-p02",
+        "c-po-20261031-p07",
+        "c-po-20261031-p09",
+        "c-po-20261031-p10",
+        "c-po-20261031-h02",
+        "c-20261028-s05",
+        "c-20261028-s06",
+        "c-20261028-s08",
+        "c-20261028-s09",
+        "c-20261028-s15",
+        "c-20261028-j2"
+      ],
+      "providerResultsObserved": 0
+    }
+  }
+}

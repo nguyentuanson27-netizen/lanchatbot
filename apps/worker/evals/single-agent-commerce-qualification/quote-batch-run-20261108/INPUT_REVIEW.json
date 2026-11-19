@@ -1,0 +1,52 @@
+{
+  "status": "APPROVED_INPUTS_CONDITIONAL_STAGED_DISPATCH",
+  "reviewer": "/root/quote_pg_run_review",
+  "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+  "helperInventoryHash": "ca58084340b41ef3457b250de2d6b483f98011687705f451a7c4fb983d039cc8",
+  "evaluationPolicyHash": "313a05b8efef425e36ef02513cbadcf845ad1d62a8fb30df2e576cd27e9f278e",
+  "providerRequests": 0,
+  "results": [
+    {
+      "dir": "../c3-quote-batch-model-r1-sealed-20261108-01",
+      "cases": 4,
+      "turns": 7,
+      "maximumGenerationRequests": 28,
+      "cohorts": {
+        "SALES_READY": 4
+      },
+      "pendingRegistrationHash": "8eef91a55b0721cba937c328eabf4a1c3231ab28c171ff18c97fda570e347f85"
+    },
+    {
+      "dir": "../c3-quote-batch-model-r2-sealed-20261108-01",
+      "cases": 9,
+      "turns": 17,
+      "maximumGenerationRequests": 68,
+      "cohorts": {
+        "SALES_READY": 9
+      },
+      "pendingRegistrationHash": "8f01ccfb0eba50abeccc0116f5f26784ecfb3a87e5c03287314dddfbfd01b327"
+    },
+    {
+      "dir": "../c3-quote-batch-model-remainder-sealed-20261108-01",
+      "cases": 20,
+      "turns": 24,
+      "maximumGenerationRequests": 96,
+      "cohorts": {
+        "SALES_READY": 19,
+        "SOURCE_UNAVAILABLE": 1
+      },
+      "pendingRegistrationHash": "f5b1f103c35eee25bf4582c48793bb55599ae418689608f73c48f281dadfb383"
+    },
+    {
+      "dir": "../c3-quote-batch-model-checkout-sealed-20261108-01",
+      "cases": 1,
+      "turns": 7,
+      "maximumGenerationRequests": 28,
+      "cohorts": {
+        "SALES_READY": 1
+      },
+      "pendingRegistrationHash": "b17762c7d2b68ea452bec41b1a05c29d7ad09d1d54f15976f37c9a2b75d08b29"
+    }
+  ]
+}

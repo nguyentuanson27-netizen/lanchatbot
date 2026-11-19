@@ -1,0 +1,164 @@
+{
+  "kind": "REPOSITORY_EVIDENCE_PACKET_HASHES_V1",
+  "runSourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "excludes": [
+    "PACKET_HASHES.json"
+  ],
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "5a935362cd657e16b66b276cf24ee12e66b68d2b3f275df708ea708e9fa99cb9",
+      "bytes": 229
+    },
+    {
+      "path": "ARTIFACTS.json",
+      "sha256": "fdf1a812aa23e2e4b69ccee1644fbc6d31e02ab12834066fc02d842062d75d3a",
+      "bytes": 26968
+    },
+    {
+      "path": "evidence/FINAL_REPORT_REVIEW.json",
+      "sha256": "1e75c528e0ea93dd893b40ae971ead98d1d4708f4ac1112bc6969d951b3f9526",
+      "bytes": 4400
+    },
+    {
+      "path": "evidence/HELPER_INVENTORY.json",
+      "sha256": "fb64bec87ed9e5a8a175ce11253d8c196f5f4e1d18f060ed9d2ea78bff493666",
+      "bytes": 3218
+    },
+    {
+      "path": "evidence/purchase-COMMAND.json",
+      "sha256": "adde79e8c74e62eee311921f35ff3ca97dbdad5510fa7dc011527c59da4c2206",
+      "bytes": 966
+    },
+    {
+      "path": "evidence/purchase-DIAGNOSTIC_DISPATCH.json",
+      "sha256": "0d08fd0e59cd59a6189ecc435242c4844abc0882f07213802b265d1c013f34b1",
+      "bytes": 162
+    },
+    {
+      "path": "evidence/purchase-INPUT_APPROVAL.json",
+      "sha256": "6da59b725181b6bad12364b30da0850ec746620252dc730fe4ef21076bcad1ca",
+      "bytes": 2782
+    },
+    {
+      "path": "evidence/purchase-POST_RUN_AUDIT.json",
+      "sha256": "f56ea06adbdef049aeb2871f1c6ffe149516b50611f0345518efe533f75f7df6",
+      "bytes": 6844
+    },
+    {
+      "path": "evidence/purchase-PREFLIGHT.json",
+      "sha256": "34a9a48694d46f2ac8f01b47d34539c0b5ab4e3db7757fe2f5b49ec196ffd1b0",
+      "bytes": 868
+    },
+    {
+      "path": "evidence/remainder-COMMAND.json",
+      "sha256": "c7d5591c528bf6eed94fc55c0e8d21cb1cf5db5a99448a0103bb139e197311a7",
+      "bytes": 969
+    },
+    {
+      "path": "evidence/remainder-DIAGNOSTIC_DISPATCH.json",
+      "sha256": "c628035e61c5e7bae5f491894c0fd2f847770ef3b74075fb98d09b1824423e0c",
+      "bytes": 162
+    },
+    {
+      "path": "evidence/remainder-INPUT_APPROVAL.json",
+      "sha256": "4b359d780e47fe123082f07f89dc2d8866e1df4b3347c4d0182a0558288b6919",
+      "bytes": 2781
+    },
+    {
+      "path": "evidence/remainder-POST_RUN_AUDIT.json",
+      "sha256": "0df259fc2749aefb19c9a1b7c5f8037821d3bd43175b560850388fb52f9d2d2f",
+      "bytes": 6020
+    },
+    {
+      "path": "evidence/remainder-PREFLIGHT.json",
+      "sha256": "0d7b72509bc7aaf6f4ffe04fe4d92fc99e3f06869204557383b85814a1864889",
+      "bytes": 867
+    },
+    {
+      "path": "evidence/TASK_PURPOSE_AMENDMENT.json",
+      "sha256": "b74480c103802aecd0bfeb9da690d8b4cea6bff35e950be919c1bf63714b5711",
+      "bytes": 6986
+    },
+    {
+      "path": "purchase/ACCOUNTING.json",
+      "sha256": "4bc32e796300fe58aac229300a9448b4565389d1aebf1a77eb300c54b797154b",
+      "bytes": 156389
+    },
+    {
+      "path": "purchase/CONVERSATIONS.md",
+      "sha256": "0f006747f46fb7530465c1265ae8f80f5fd87cbce33a2e02ad7b17aa82b4efd2",
+      "bytes": 13923
+    },
+    {
+      "path": "purchase/DRAFTS.md",
+      "sha256": "02c81d2b994056091a48e61d612eba255a326533605a91426cffedf6b778f4cc",
+      "bytes": 5912
+    },
+    {
+      "path": "purchase/FROZEN_IDENTITIES.json",
+      "sha256": "6196430f3b29b260448fbdfd2feb6cf742793377d60b054b65a5e110d684e23c",
+      "bytes": 11422
+    },
+    {
+      "path": "purchase/FROZEN_POPULATION.json",
+      "sha256": "858ea93110567a2a0f8cf3d9ca449744aa0618419a8942c52210aad64597838c",
+      "bytes": 29803
+    },
+    {
+      "path": "purchase/OPERATIONAL.json",
+      "sha256": "31bf43478722621bbc6ec8db25630cc38d3628e6e4f807ff5fb192e07344f152",
+      "bytes": 2652
+    },
+    {
+      "path": "purchase/PRIMARY_DIAGNOSTICS.json",
+      "sha256": "42928aacb69b5040c9f5bb64698c945b5bed00af0f769d1696829bc676b7a321",
+      "bytes": 82928
+    },
+    {
+      "path": "remainder/ACCOUNTING.json",
+      "sha256": "0bb8e149992036ab922d5dcbe01a2bd4e47f37a1399f16d06fdb375d2ae551e2",
+      "bytes": 86779
+    },
+    {
+      "path": "remainder/CONVERSATIONS.md",
+      "sha256": "6c87d4f16e6c519fc44f55427d7a2ce963f3dde1d37e683f5885efb62a32f154",
+      "bytes": 8561
+    },
+    {
+      "path": "remainder/DRAFTS.md",
+      "sha256": "26fce824666b5e8b1926b0ec00c90d91d067a1ac1b70d078aede6f764323f168",
+      "bytes": 3157
+    },
+    {
+      "path": "remainder/FROZEN_IDENTITIES.json",
+      "sha256": "6697307c3f861339efd50158a902ce0f932e242d8209890c440ddba325d214f8",
+      "bytes": 11318
+    },
+    {
+      "path": "remainder/FROZEN_POPULATION.json",
+      "sha256": "1fa1e19821f5edc69a9a495432d0b6562da4e72c0af4023dcbb70c83d0ac6e06",
+      "bytes": 21082
+    },
+    {
+      "path": "remainder/OPERATIONAL.json",
+      "sha256": "6a1ed536b1fa86d06b8ab9c92dddb29a67568dc9f42c259719a49bf7e955849e",
+      "bytes": 1397
+    },
+    {
+      "path": "remainder/PRIMARY_DIAGNOSTICS.json",
+      "sha256": "c075e813107baa051005a00ec1abb7783b230add669c1b5c7aa84b581e250de0",
+      "bytes": 47463
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "7f7f7540b673b4e5b6ec1aec31aa6e9f9e4955e7c9a6cd06f94e586e2eb041e8",
+      "bytes": 13301
+    },
+    {
+      "path": "SUMMARY.json",
+      "sha256": "42b39158e795ef12899b4dde8db6715c957afbede708658a9d9319744448898f",
+      "bytes": 5234
+    }
+  ]
+}

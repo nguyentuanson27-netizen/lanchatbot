@@ -1,0 +1,42 @@
+{
+  "name": "TARGET_REPAIR_R1_20261105",
+  "purpose": "DEVELOPMENT_ONLY_NOT_QUALIFICATION",
+  "repetitions": 1,
+  "maximumCases": 4,
+  "maximumNativeCustomerTurns": 7,
+  "maximumVerifierOnlyProbes": 0,
+  "maximumGenerationRequests": 28,
+  "maximumOwnerGenerationsPerNativeTurn": 3,
+  "maximumVerifierGenerationsPerTurn": 1,
+  "generationRetry": 0,
+  "customerScriptsHash": "165758f42ffcef3a2490e68be0d3e2df68cb7afc88c462b087f40061c9037100",
+  "cases": [
+    {
+      "sourceCase": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "turns": 2,
+      "maximumGenerationRequests": 8
+    },
+    {
+      "sourceCase": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    }
+  ],
+  "parentScope": "B_PRESERVING_PREFIX_20261104",
+  "stage": "R1",
+  "parentScopeHash": "bf5134158e10c6f48a8cd09e70354817ebfd477be4812303556973a958d18ab2"
+}

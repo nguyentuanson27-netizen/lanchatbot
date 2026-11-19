@@ -1,0 +1,56 @@
+{
+  "kind": "DOCUMENTATION_ONLY_DELIVERY_FINALIZATION",
+  "runSourceSha": "2628987aae6c62958db4484ba5f152907f833d83",
+  "reviewedReportSha256": "4662ee3a1eae7cc558a04542b4bbf9d1fd92bf438d43c10352d15c09ddfb13f2",
+  "allowedDelta": "Pending audit status and audit links only; reviewed findings unchanged. Original approved files retained outside source.",
+  "deliveredFiles": [
+    {
+      "path": "ACCOUNTING.json",
+      "sha256": "ad54a4424db9b5ccf3e85619dd77a1397dd7a9f740232bef7a803c86be3d03a5"
+    },
+    {
+      "path": "ARTIFACTS.json",
+      "sha256": "5c13abad9b53a18705816bcf4c59081b3f0739b875502382197d560ed5fae87b"
+    },
+    {
+      "path": "COMMAND.json",
+      "sha256": "6ef2cafa18328de2bac00d969bbe7525af37416a2961c0bfe50a7897b0588570"
+    },
+    {
+      "path": "CONVERSATIONS.md",
+      "sha256": "6c95b8eea81fd79ead990f9ff20de3b95827e3c7c0c0989daa77ead0e84e30d6"
+    },
+    {
+      "path": "FROZEN_POPULATION.json",
+      "sha256": "5749088076385336d3e6fd834a87b1dc80f18ebd104e3fd7ce42c1dd23c21aa7"
+    },
+    {
+      "path": "INPUT_APPROVAL.json",
+      "sha256": "25dc2c8215723faf59fb4d0f4cfee6531ea48402975c12c8a1263810db97032d"
+    },
+    {
+      "path": "OPERATIONAL.json",
+      "sha256": "a70ad0272de8bcc9be5e32ab7f68fc39dd6971c1c585c2ce5ce1a2fbac601a92"
+    },
+    {
+      "path": "POST_RUN_AUDIT.json",
+      "sha256": "af28191a90dd5076436df94c91f626a93fab1a5bc56b367448b518fa8630d5f2"
+    },
+    {
+      "path": "PREFLIGHT.json",
+      "sha256": "78c5eefe82554f23516a988b522f183985416e8bef20b67afcc29781ef61aa06"
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "48bd3c134cf6fd8226f2007a41bcbb2505717c9e97b3ec12acc7f099e9baee92"
+    },
+    {
+      "path": "REPORT_ACCURACY_REVIEW.json",
+      "sha256": "604a2303e792cd13a40401dfc4183007f741753dbd9d293fbbdcdd46c37aab96"
+    },
+    {
+      "path": "REVIEW_STATUS.json",
+      "sha256": "8a5d8b7d5c9dc3c37712f2fa7d39d34bc4962ab7953c85c78f449e7c13038569"
+    }
+  ]
+}

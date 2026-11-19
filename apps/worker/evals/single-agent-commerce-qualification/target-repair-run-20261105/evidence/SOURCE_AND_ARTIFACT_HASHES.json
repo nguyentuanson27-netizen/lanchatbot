@@ -1,0 +1,129 @@
+{
+  "runSourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "runtimeApprovedSha": "639aff103898ad9e6cad5119d27c08f4809f9896",
+  "admissionOnlyCommit": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "worldLocalArtifact": {
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-world-20261105-02\\WORLD.json",
+    "sha256": "cb1e644d1f86a6351ccccafc8746c80f033379a8bbf77d1a5866e922269097de"
+  },
+  "completeLocalEvidence": {
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\CANDIDATE_EVIDENCE.partial.json",
+    "sha256": "6a9381c48970f4a226487771053d43de358bb847af601d6d5d30ae161ffe5004"
+  },
+  "nativeRawArtifacts": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\native-c2907db70389a97999da437fa76dbfde89e2bf0eb99dd37a36ce1c3578bd7192-turn-0.json",
+      "sha256": "58a4c0b19b053764843c3dd025ab3ff7abd5e668fd1bcfcf6d235e0ab08ffbd7",
+      "bytes": 370035
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\native-8e208d301b45c37e2780aeab502d3c9ef31539cc1130c60f926ca60b3c57f791-turn-0.json",
+      "sha256": "3c3e88fd48241a586597800d90e4924ca51ea5337ee57b5a2f25f5032e76a31d",
+      "bytes": 455779
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\native-f659418a320771765fc56f2f7f987ea52c71bc94fd89635fa92696af96aff1ad-turn-0.json",
+      "sha256": "0bac39d6f98eb7254583b9513fb4559416fdc17dd494fd193dc90210d140b138",
+      "bytes": 463696
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\native-f659418a320771765fc56f2f7f987ea52c71bc94fd89635fa92696af96aff1ad-turn-1.json",
+      "sha256": "d0e7c2f25a7bffad71cbe9d82f582acaa2ec89ca3840c212155ceb7c69df8957",
+      "bytes": 498316
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\native-1e79b5021340bccb6d9f8c1be38b30212aed45de840e61ee7654f4f45d243333-turn-0.json",
+      "sha256": "52f1536f7d175b4dda7c7c4a2dd9f716049d47ab4239e2ba74ec14d944743cd1",
+      "bytes": 448908
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\native-1e79b5021340bccb6d9f8c1be38b30212aed45de840e61ee7654f4f45d243333-turn-1.json",
+      "sha256": "b47a010bab643469c895c0ecee30101bcf67a544b568009b340bd5433aa20407",
+      "bytes": 412094
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\native-1e79b5021340bccb6d9f8c1be38b30212aed45de840e61ee7654f4f45d243333-turn-2.json",
+      "sha256": "b012b06ea30cfb2c04b7d6015de8363d78c924e787b67072b33cf40530216446",
+      "bytes": 402733
+    }
+  ],
+  "logs": [
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-stages-red-20261105.log",
+      "sha256": "3469056ecb9dca46ec3e8602d2028b337ad8d732cc312be8f22dfb60afb8e396",
+      "bytes": 3020
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-stages-green-20261105.log",
+      "sha256": "403b3afd9e75bb4e66723456ee6d42ac56a0375226c81496d35676ec3706fe10",
+      "bytes": 1555
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-capture-20261105-01.log",
+      "sha256": "f13925e1a041fa5988e2f5890b7fb32f3975e3cb85e687cd563477f63ac36bff",
+      "bytes": 1644
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-capture-20261105-02.log",
+      "sha256": "0187bf65b6937dc90aa4f85dfaa06aa8b32c064290dae1374ccf6c9298363f07",
+      "bytes": 138
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-initial-20261105-01.log",
+      "sha256": "9836ebc8db3db372b1cec6eacaed6a16b02bc0972f3d4915c2be685f745e29da",
+      "bytes": 74
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-prepare-20261105-01.log",
+      "sha256": "e41598d126c63c8111e7819734b1e26880ef7e3baea7453aa7703e80f4e05fda",
+      "bytes": 1342
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-finalize-20261105-01.log",
+      "sha256": "a8991253bc8960c1d65caa8f655fcfc816ece526756a62606ff0d593ef0526a6",
+      "bytes": 3179
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-stages-final-20261105.log",
+      "sha256": "2594b3605ad35305c7fb213cb052ca46f59ad68385b8ef2853a58cf05e69f5b0",
+      "bytes": 1552
+    }
+  ],
+  "scopesAndSource": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/diagnostic.mjs",
+      "gitBlobSha256": "f82ab713e26e60e3f6945c5d5246d05ccf21a22e18ba86440514e3b4b88e5361"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/TARGET_REPAIR_R1_SCOPE_20261105.json",
+      "gitBlobSha256": "608b0cf2a49a11583cbd6a65cb2cfd2b1bb5caadecfe3b41e3effb0b006e93b2"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/TARGET_REPAIR_R2_SCOPE_20261105.json",
+      "gitBlobSha256": "df43ac6aeedae3e3e0d3d9b23ad98b96f0796417ed1981a8e1740c916fecf8d5"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-stages.test.mjs",
+      "gitBlobSha256": "98ac68f3cfe881a3af3ec971476814903c3ea2aa09563fe724b9a13b03dd4760"
+    }
+  ]
+}

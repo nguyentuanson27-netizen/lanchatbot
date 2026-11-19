@@ -1,0 +1,10 @@
+{
+  "inputReview": "APPROVED",
+  "postRunAudit": "APPROVED_ACCOUNTING_FIREWALL_NATIVE_CAPTURE",
+  "quality": "NOT_GRADED",
+  "qualification": "BLOCKED",
+  "C3": "NOT_RUN",
+  "liveSend": false,
+  "primaryWholeTurnReview": "COMPLETED_UNSCORED",
+  "reportAccuracy": "APPROVED"
+}

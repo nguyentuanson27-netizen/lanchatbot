@@ -1,0 +1,253 @@
+{
+  "implementationBaseSha": "de6579ec5f3be29ed12271e19bafacd1f7eba0c2",
+  "implementationApprovedSha": "86acecc40b16486eca686422500cf3d6f30995ed",
+  "runSourceSha": "205cd497eedad3bebe8a2a0fe4a98c7c49ced838",
+  "runSourceClean": true,
+  "planHashes": {
+    "docs/specs/c3-phase-c-owner-result-meaning-repair-20261110.md": "4729fb560fb0f8eddca7f9d7d0fd61c0ac1e11543ccb554dbd18657c17567a3e",
+    "docs/specs/c3-phase-c-owner-result-meaning-review-amendment-20261110.md": "23e336ae515413389f08c743e6f0f6683b4913bff23d0a41a4012484c009bd4a"
+  },
+  "worldHash": "8e03669f4f4af02021f98b1f87bd39140cfbde5cbf3d6bcfba24963c704506ca",
+  "registrationHash": "b26ac937097751b78af3b7e342f28132248bb7751f65c47e63adbf70788b861f",
+  "corpusHash": "113b2a850abf27d461f28a0952788a1a3a1b6dc0940e8ed7fdd51c3ce0d23d01",
+  "previousRunSourceSha": "8b4e190c8c6e048b4412c45c254de1c75872cf1b",
+  "config": {
+    "candidate": {
+      "sourceSha": "205cd497eedad3bebe8a2a0fe4a98c7c49ced838",
+      "model": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "promptHash": "0d8eaa82d7f0b03a5e409c8a33c977e008ee891f2ddfbbaa2c477870a3439f37",
+      "openingMediaRule": {
+        "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+      },
+      "contextPolicyHash": "e9c9940dfddeee1550d1bc7ff50076655f04ac92440993e9b42d1a7a1a73fd74",
+      "toolContractHash": "73a7055052b9655256e226b31ed498685e66061e0c56670cdc2169e3f05c1485",
+      "assemblyHash": "0eca650c770e837f12af2c06663959bf0416cb3f45235a1dd20d84837e796dbc",
+      "runtimeHash": "3a8d01422b008b934627d1fbbf4df4d16382a064a8ac10062b113508a8918514",
+      "verifier": {
+        "model": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        },
+        "promptHash": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944",
+        "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+        "serializationHash": "c2fc8f74412e03ea7401c3d771f2231e92875752ca89c85b26076e11ba7fe1d3",
+        "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+        "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+      }
+    },
+    "judge": {
+      "kind": "OFFLINE_MODEL",
+      "identity": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "approvalRef": "owner-reply:call_bd286ceab8db4f4780bc1a76537484da:2026-10-28",
+      "promptHash": "80843a39c70548e8709a5cbd42628927b0c34515cd3d2d55e7667212355d6bff",
+      "rubricHash": "a652669b2ea5d788eaba897bfd24f0bbf8fe3fbe3a6ab6e64ecdc4cb51984fad",
+      "blind": true,
+      "disagreement": "REQUIRE_ADJUDICATION"
+    },
+    "repetitions": 1,
+    "retry": 0
+  },
+  "commands": [
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "../c3-owner-result-screen-world-20261110-01",
+      "../c3-media-context-model-codes-20261103-02.json"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "../c3-owner-result-screen-initial-20261110-01",
+      "COD",
+      "--phase-c-initial-world",
+      "../c3-owner-result-screen-world-20261110-01/WORLD.json"
+    ],
+    [
+      "node",
+      "../c3-owner-result-screen-prepare-20261110-01.mjs"
+    ],
+    [
+      "node",
+      "../c3-owner-result-screen-seal-20261110-01.mjs"
+    ],
+    [
+      "python",
+      "../c3-owner-result-screen-launch-20261110-01.py"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "..\\c3-owner-result-screen-run-20261110-01",
+      "COD",
+      "--phase-c-diagnostic-registration",
+      "..\\c3-owner-result-screen-sealed-20261110-01\\REGISTRATION.json",
+      "--phase-c-world",
+      "../c3-owner-result-screen-world-20261110-01/WORLD.json",
+      "--phase-c-seed",
+      "..\\c3-owner-result-screen-sealed-20261110-01\\PRIVATE_BLIND_SEED.json"
+    ],
+    [
+      "node",
+      "../c3-owner-result-screen-accounting-20261110-01.mjs"
+    ],
+    [
+      "node",
+      "../c3-owner-result-screen-public-view-20261110-01.mjs"
+    ],
+    [
+      "node",
+      "../c3-owner-result-screen-audit-20261110-01.mjs"
+    ],
+    [
+      "python",
+      "../c3-owner-result-screen-trace-20261110-01.py"
+    ]
+  ],
+  "commandResults": "All listed commands exit0; model terminal quality FAIL is preserved separately",
+  "execution": {
+    "sourceSha": "205cd497eedad3bebe8a2a0fe4a98c7c49ced838",
+    "worldHash": "8e03669f4f4af02021f98b1f87bd39140cfbde5cbf3d6bcfba24963c704506ca",
+    "cases": 13,
+    "turns": 27,
+    "command": [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "..\\c3-owner-result-screen-run-20261110-01",
+      "COD",
+      "--phase-c-diagnostic-registration",
+      "..\\c3-owner-result-screen-sealed-20261110-01\\REGISTRATION.json",
+      "--phase-c-world",
+      "../c3-owner-result-screen-world-20261110-01/WORLD.json",
+      "--phase-c-seed",
+      "..\\c3-owner-result-screen-sealed-20261110-01\\PRIVATE_BLIND_SEED.json"
+    ],
+    "retry": 0,
+    "startedAt": "2026-11-10T05:37:43.633278+00:00",
+    "helpers": [
+      {
+        "path": "..\\c3-owner-result-screen-prepare-20261110-01.mjs",
+        "sha256": "aa060eb7c271e45c1ff6a1d81cfdca27eef4c4ef600ffe73e18c2d50c7271558"
+      },
+      {
+        "path": "..\\c3-owner-result-screen-seal-20261110-01.mjs",
+        "sha256": "da620d1c69a8bc44a274e0520b7f9015202d63165517410fac64be3a13687655"
+      },
+      {
+        "path": "..\\c3-owner-result-screen-launch-20261110-01.py",
+        "sha256": "6c3afb205b3f58c8ae06eb2650e81414f3cfea738631f6128e8b58faf1bcaf19"
+      }
+    ],
+    "exitCode": 0,
+    "completedAt": "2026-11-10T05:55:08.453359+00:00"
+  },
+  "rawEvidence": {
+    "../c3-owner-result-screen-run-20261110-01/CANDIDATE_EVIDENCE.partial.json": "03ee2cc57b4ad818a45d007e5b9c77f8ba20d8cb890a7f98a3d4c85a43701ca9",
+    "../c3-owner-result-screen-run-20261110-01/integration.json": "f1255775a1d398a641154d332e1439da9a6595dc2a721636d82625bef718cbff",
+    "../c3-owner-result-screen-run-20261110-01/NATIVE_REQUESTS.jsonl": "ba4b5d38b0813545a80651acb11921d4e66a2fab29ad9d0df0cc39cad70c01fd",
+    "../c3-owner-result-screen-world-20261110-01/WORLD.json": "386c5142c5cada6fe6954d880cc80c4202ff64b6e59700e37bc8c180b9d3c0e5",
+    "../c3-owner-result-screen-initial-20261110-01/INITIAL_STATE.json": "c80efa0ae0f4315a0da15eabb73ec485d411e2954ac01f06c605d7eaa4f40cb8",
+    "../c3-owner-result-screen-sealed-20261110-01/REGISTRATION.json": "2e17e54266871b4245c60012fc91269920739e8e0ef053fc651cb97292aac33a"
+  },
+  "analysisHelpers": {
+    "../c3-owner-result-screen-trace-20261110-01.py": "90ddaac8c756a377ba6d250640a3d21c896774b0f5f8b00e4dd9d131ffc1947a",
+    "../c3-owner-result-screen-publish-20261110-01.py": "dc89c36618358e503ce1389045eabf4cb82e1db5455a4832fd9ea83c949c8e3d"
+  },
+  "privateSeed": "RETAINED_OUTSIDE_REPO_NOT_PUBLISHED",
+  "sourceShopWrites": 0,
+  "liveSends": 0,
+  "noNewModelGenerationAfterRun": true,
+  "postPublicationChecks": [
+    {
+      "command": [
+        "pnpm",
+        "check:dataset-boundary"
+      ],
+      "result": "PASS",
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "result": "PASS",
+      "exitCode": 0
+    },
+    {
+      "check": "publication known synthetic private literals/fragments, JSON parse, independent counts, normalized local Markdown links",
+      "result": "PASS",
+      "initialAuthoringCheck": "Unnormalized Windows long relative path returned false; resolved-path recheck PASS, no content/code/run changed"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "initialResult": "FAIL: four terminal text display lines retained provider trailing spaces",
+      "correction": "Trim Markdown display line endings only; exact JSON/raw terminal strings unchanged; annotate normalization",
+      "finalResult": "PASS",
+      "finalExitCode": 0
+    }
+  ]
+}

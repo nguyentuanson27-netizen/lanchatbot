@@ -1,0 +1,152 @@
+{
+  "runSourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "auditStatus": "APPROVED",
+  "quality": "NOT_GRADED",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "be2fed42d2c896079f60785629e8676bd18dc9d802eac128d8c296b26bf95b9a"
+    },
+    {
+      "path": "COVERAGE.json",
+      "sha256": "3a60e6ac5f0223bb8dfa94d50c3899a27d90f74ba15427cd95bc3eb2d8bd4bb6"
+    },
+    {
+      "path": "evidence/COMMANDS.md",
+      "sha256": "89420f824c0355321c66e0631f6e131b2c58aa784a7c4f8043a0b87b8c2f4d76"
+    },
+    {
+      "path": "evidence/HELPER_INVENTORY.json",
+      "sha256": "08bc061ae8e45e86f1b3cc36d4fac429e1d78b1fc014205a64b4ec0f2bc9f0ee"
+    },
+    {
+      "path": "evidence/OLD_DATABASE_CLEANUP.json",
+      "sha256": "86afd4d16fe47878aba5c523c43a856b21c275280ef7e0aa46bd60d9efdeb62a"
+    },
+    {
+      "path": "evidence/purchase-COMMAND.json",
+      "sha256": "c0068a594f1e9b415a58c34cd0e877d5c22f085dbab0928bde9d4d1f9ff1aa34"
+    },
+    {
+      "path": "evidence/purchase-DIAGNOSTIC_DISPATCH.json",
+      "sha256": "ac0c86c6233828560f2ec9a48eed449e28854476f5b781fde3e608f9794bdc3d"
+    },
+    {
+      "path": "evidence/purchase-INPUT_APPROVAL.json",
+      "sha256": "8d4bc8c7173ff0fb5cc5516735b70a3ac8e09fb03424dcee188925f89e4be073"
+    },
+    {
+      "path": "evidence/purchase-PREFLIGHT.json",
+      "sha256": "82fd0e8fc6e30df385fd427485fff570d2603e629089731a3dc15487cdaad10c"
+    },
+    {
+      "path": "evidence/remainder-COMMAND.json",
+      "sha256": "8f989220f9528812cba2c877dbedf3ad8463e6f448ab57032dcfa01fdf233abe"
+    },
+    {
+      "path": "evidence/remainder-DIAGNOSTIC_DISPATCH.json",
+      "sha256": "87724f26ab9d14104ace9dd50a3685e23348731ec7d11c67706aa582f8691962"
+    },
+    {
+      "path": "evidence/remainder-INPUT_APPROVAL.json",
+      "sha256": "de2c031d5f77e56945954dd086ab6f4583906345f37a000e469754f03746a341"
+    },
+    {
+      "path": "evidence/remainder-PREFLIGHT.json",
+      "sha256": "d6620452d3977dd876c2158a0174488cc34e248e887e928f0517bd560e7348ac"
+    },
+    {
+      "path": "POST_RUN_AUDITS.json",
+      "sha256": "7646f463398ac814a65518e3f2eca2513e1e6132b377fa2dd456fa2622ffc365"
+    },
+    {
+      "path": "purchase/ACCOUNTING.json",
+      "sha256": "d7556f2b375bcfdd40301b402b012285ede8703a90b8c02a2db9ad999bcfeb6c"
+    },
+    {
+      "path": "purchase/ARTIFACTS.json",
+      "sha256": "73cb316493be260a753d7ea57c2bdf12352d29ce6d5a7ef06242e6f4ac0994e7"
+    },
+    {
+      "path": "purchase/CONVERSATIONS.md",
+      "sha256": "99f48aad7d81198d29917a415980dc2f1525c6001f96c676ebcde6cc09d092d0"
+    },
+    {
+      "path": "purchase/DRAFTS.md",
+      "sha256": "6e430f76e3a80dc53346a4e34a47c21202e521ffbb113c08b2830bd5812949ed"
+    },
+    {
+      "path": "purchase/FROZEN_POPULATION.json",
+      "sha256": "76cb0c97d9015ecfa75db54ea59dae07188a6cf97bbb969f5640fec375f42d6c"
+    },
+    {
+      "path": "purchase/OPERATIONAL.json",
+      "sha256": "77c0bec7d5ef9c3990e67e200b4cf44026d51af7c4ed67dfab8acc237da44c29"
+    },
+    {
+      "path": "purchase/POST_RUN_AUDIT.json",
+      "sha256": "bf1db55fdccfa6a85c8b576d83bdee4e32d046269d34ca35b1907909562770dc"
+    },
+    {
+      "path": "purchase/PRIMARY_DIAGNOSTICS.json",
+      "sha256": "5dda7012158434c5283292625c37968d44cc750b7b1e38b1f53d0eb7ead330cd"
+    },
+    {
+      "path": "purchase/REPORT.md",
+      "sha256": "2b6057c018ad00f5316e5ffd86830245963e892453c86c8b4242f6a0a546919e"
+    },
+    {
+      "path": "purchase/REVIEW_STATUS.json",
+      "sha256": "e162f2e77572206f4dfdbf53841ba5264ad878f53de3f2a0d5205a5c1ca04a21"
+    },
+    {
+      "path": "remainder/ACCOUNTING.json",
+      "sha256": "ba67599617adacda05446416dbd2fbeef763d750b95703f1ec67f7f8d8cc3e42"
+    },
+    {
+      "path": "remainder/ARTIFACTS.json",
+      "sha256": "0561d3d7cab94b7ee604940e7f45c899339b0c7f5e58dddb535c9c6ed3f9cb5e"
+    },
+    {
+      "path": "remainder/CONVERSATIONS.md",
+      "sha256": "0f94ee811c8fce13c96b1e1f2f9df0b8aa0e0c74c3c8d017343e3f7faedd0e25"
+    },
+    {
+      "path": "remainder/DRAFTS.md",
+      "sha256": "0d7e6895303904c43ee4046523910f3960c123fadce32f2ddff43f2e76dedf75"
+    },
+    {
+      "path": "remainder/FROZEN_POPULATION.json",
+      "sha256": "318e9615ab08e0df180e936d2e5e416ea3c487ccef8d97084afeabd4120f0599"
+    },
+    {
+      "path": "remainder/OPERATIONAL.json",
+      "sha256": "45f7b643c6b646e5da43a82490e44f880082c06676008862e4e549aef8d5a3a0"
+    },
+    {
+      "path": "remainder/POST_RUN_AUDIT.json",
+      "sha256": "2db0862e94a845fab8b0241b74e12ffbca991bd5bb69d3612e495d14ba789068"
+    },
+    {
+      "path": "remainder/PRIMARY_DIAGNOSTICS.json",
+      "sha256": "255990be9099dfd6f52315a4b89c55311542dba2733a12b2196c60140da08008"
+    },
+    {
+      "path": "remainder/REPORT.md",
+      "sha256": "ecb8bffeb5ecd7b8a521458ee4154e1d3241cdc9c881211f2239200a72200e08"
+    },
+    {
+      "path": "remainder/REVIEW_STATUS.json",
+      "sha256": "e162f2e77572206f4dfdbf53841ba5264ad878f53de3f2a0d5205a5c1ca04a21"
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "43424cb9b33b4da9c4d407f99d6366496b97aa1fe8fcc344977721715fb3f193"
+    },
+    {
+      "path": "RETAINED_CONVERSATIONS.md",
+      "sha256": "d9c209deb10df33a013534e44ea05e3d7bc4c2bf08a180e8b454051ebe257e28"
+    }
+  ],
+  "bytePreservation": "Local .gitattributes disables Git newline conversion. Quoted model trailing whitespace is intentionally retained; unscoped git diff --check flags it. Source/docs checks are run separately."
+}

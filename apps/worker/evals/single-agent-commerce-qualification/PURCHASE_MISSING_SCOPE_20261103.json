@@ -1,0 +1,78 @@
+{
+  "name": "PURCHASE_MISSING_7_20261103",
+  "purpose": "DEVELOPMENT_ONLY_NOT_QUALIFICATION",
+  "repetitions": 1,
+  "maximumCases": 7,
+  "maximumNativeCustomerTurns": 11,
+  "maximumVerifierOnlyProbes": 0,
+  "maximumGenerationRequests": 44,
+  "maximumOwnerGenerationsPerNativeTurn": 3,
+  "maximumVerifierGenerationsPerTurn": 1,
+  "generationRetry": 0,
+  "customerScriptsHash": "609b9fd9e0889cf1bd0fc5438fb48177b20b8d6227dbca9359b3513a1ca43d15",
+  "parentScopeHash": "dbde6402f9e69bb3d7096761b6bf05640f05b1ca4e95c1957fa7f7b3ef715d57",
+  "interruptedRunSourceSha": "4e87350c94a034bc2913a96d3a804047f36c4c28",
+  "interruptedRegistrationHash": "478d85a57004fcb642639352ffa3bbe7390a540fe82c5f139c22b5d0fb480dfe",
+  "interruptedEvidenceSha256": "330f1803d8879a5ca74fd6abf52fe335bef0a9b5e00ed1938e6787972b120625",
+  "cases": [
+    {
+      "sourceCase": "c-20261028-s09",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s10",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s12",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s14",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s15",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-20261028-j6",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    }
+  ],
+  "excludedCompletedCaseIds": [
+    "c-po-20261031-p01",
+    "c-po-20261031-p02",
+    "c-po-20261031-p03",
+    "c-po-20261031-p04",
+    "c-po-20261031-p06",
+    "c-po-20261031-p07",
+    "c-po-20261031-p08",
+    "c-po-20261031-p09",
+    "c-po-20261031-p10",
+    "c-po-20261031-h01",
+    "c-po-20261031-h02",
+    "c-20261028-s05",
+    "c-20261028-s06",
+    "c-20261028-s08"
+  ],
+  "provenance": "17 completed native turns retained; s09 dispatched provider work without terminal capture is retained as interrupted, not erased or counted as an unseen attempt. New identity for s09; no generation retry."
+}

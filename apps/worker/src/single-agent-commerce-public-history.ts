@@ -2,6 +2,18 @@ import {CommercePublicCartEventV1Schema,type CommercePublicCartEventV1} from "@l
 import {createHash} from "node:crypto";
 export interface CommerceHistoryMetadata {completeHistory:false;publicCartEvents:CommercePublicCartEventV1[]}
 const bytes=(v:unknown)=>Buffer.byteLength(JSON.stringify(v));
+/** State provenance only. Never raw intake text/PII or proof of customer delivery. */
+export function publicCheckoutState(state:{checkoutDraft?:{paymentMethod?:string|null}|null;
+  clarification?:{reasonCode:string;missingFields:readonly string[];attemptCount:number;askedQuestionFingerprints:readonly string[]}|null}) {
+  const q=state.clarification;
+  const paymentMethod=!q?.missingFields.includes("PAYMENT_METHOD")&&["COD","BANK_TRANSFER"].includes(state.checkoutDraft?.paymentMethod??"")?state.checkoutDraft!.paymentMethod:null;
+  const questionFingerprint=q?.askedQuestionFingerprints.at(-1)??"";
+  const lastQuestion=q?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&q.missingFields.length>0&&q.missingFields.length<=4&&
+    q.missingFields.every(f=>["FULL_NAME","PHONE","ADDRESS","PAYMENT_METHOD"].includes(f))&&Number.isSafeInteger(q.attemptCount)&&
+    q.attemptCount>0&&q.attemptCount<=16&&/^[a-f0-9]{64}$/.test(questionFingerprint)
+    ?{missingFields:[...q.missingFields],attemptCount:q.attemptCount,questionFingerprint,delivery:"UNKNOWN" as const}:null;
+  return paymentMethod||lastQuestion?{provenance:"CODE_PERSISTED_CHECKOUT_STATE" as const,paymentMethod,lastQuestion}:null;
+}
 /** Communication history, deliberately outside the trusted world and current receipt gate. */
 export function projectCommerceHistoryMetadata(history:readonly {role:string;text:string}[],events:readonly unknown[]){
   // Media remains in the existing bounded history projection. Its serialized summary

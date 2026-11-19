@@ -1,0 +1,419 @@
+{
+  "kind": "OFFLINE_CODE_COMPONENT_REPLAY_NOT_END_TO_END",
+  "arm": "C",
+  "sourceSha": "c7b485b097c1b84098b3ba86b1170a9d0614cb93",
+  "sourceDirty": false,
+  "inputHash": "5702bcdd3bcea7563eb020869b33437485e37d6c5dc250f66160950abf7ca924",
+  "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+  "providerRequests": 0,
+  "effects": 0,
+  "sendEnabled": false,
+  "freshness": [
+    {
+      "productId": "SV1561",
+      "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+      "at": "2026-10-28T04:31:05.724Z",
+      "query": {
+        "subjectRef": "SV1561",
+        "intent": "GENERIC"
+      },
+      "selected": 2,
+      "alternatives": []
+    },
+    {
+      "productId": "SV1561",
+      "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+      "at": "2026-10-28T04:31:05.724Z",
+      "query": {
+        "subjectRef": "SV1561",
+        "intent": "DETAIL"
+      },
+      "selected": 1,
+      "alternatives": []
+    },
+    {
+      "productId": "SV1561",
+      "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+      "at": "2026-10-28T04:31:05.724Z",
+      "query": {
+        "subjectRef": "SV1561",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "selected": 1,
+      "alternatives": []
+    },
+    {
+      "productId": "SV1561",
+      "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+      "at": "2026-10-28T04:31:05.726Z",
+      "query": {
+        "subjectRef": "SV1561",
+        "intent": "GENERIC"
+      },
+      "selected": 2,
+      "alternatives": []
+    },
+    {
+      "productId": "SV1561",
+      "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+      "at": "2026-10-28T04:31:05.726Z",
+      "query": {
+        "subjectRef": "SV1561",
+        "intent": "DETAIL"
+      },
+      "selected": 1,
+      "alternatives": []
+    },
+    {
+      "productId": "SV1561",
+      "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+      "at": "2026-10-28T04:31:05.726Z",
+      "query": {
+        "subjectRef": "SV1561",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "selected": 1,
+      "alternatives": []
+    },
+    {
+      "productId": "SV1561",
+      "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+      "at": "2026-10-29T19:20:19.998Z",
+      "query": {
+        "subjectRef": "SV1561",
+        "intent": "GENERIC"
+      },
+      "selected": 2,
+      "alternatives": []
+    },
+    {
+      "productId": "SV1561",
+      "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+      "at": "2026-10-29T19:20:19.998Z",
+      "query": {
+        "subjectRef": "SV1561",
+        "intent": "DETAIL"
+      },
+      "selected": 1,
+      "alternatives": []
+    },
+    {
+      "productId": "SV1561",
+      "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+      "at": "2026-10-29T19:20:19.998Z",
+      "query": {
+        "subjectRef": "SV1561",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "selected": 1,
+      "alternatives": []
+    },
+    {
+      "productId": "V406",
+      "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+      "at": "2026-10-05T10:07:31.040Z",
+      "query": {
+        "subjectRef": "V406",
+        "intent": "GENERIC"
+      },
+      "selected": 2,
+      "alternatives": []
+    },
+    {
+      "productId": "V406",
+      "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+      "at": "2026-10-05T10:07:31.040Z",
+      "query": {
+        "subjectRef": "V406",
+        "intent": "DETAIL"
+      },
+      "selected": 1,
+      "alternatives": []
+    },
+    {
+      "productId": "V406",
+      "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+      "at": "2026-10-05T10:07:31.040Z",
+      "query": {
+        "subjectRef": "V406",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "selected": 0,
+      "alternatives": []
+    },
+    {
+      "productId": "V406",
+      "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+      "at": "2026-10-05T10:07:31.042Z",
+      "query": {
+        "subjectRef": "V406",
+        "intent": "GENERIC"
+      },
+      "selected": 2,
+      "alternatives": []
+    },
+    {
+      "productId": "V406",
+      "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+      "at": "2026-10-05T10:07:31.042Z",
+      "query": {
+        "subjectRef": "V406",
+        "intent": "DETAIL"
+      },
+      "selected": 1,
+      "alternatives": []
+    },
+    {
+      "productId": "V406",
+      "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+      "at": "2026-10-05T10:07:31.042Z",
+      "query": {
+        "subjectRef": "V406",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "selected": 0,
+      "alternatives": []
+    },
+    {
+      "productId": "V406",
+      "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+      "at": "2026-10-29T19:20:19.998Z",
+      "query": {
+        "subjectRef": "V406",
+        "intent": "GENERIC"
+      },
+      "selected": 2,
+      "alternatives": []
+    },
+    {
+      "productId": "V406",
+      "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+      "at": "2026-10-29T19:20:19.998Z",
+      "query": {
+        "subjectRef": "V406",
+        "intent": "DETAIL"
+      },
+      "selected": 1,
+      "alternatives": []
+    },
+    {
+      "productId": "V406",
+      "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+      "at": "2026-10-29T19:20:19.998Z",
+      "query": {
+        "subjectRef": "V406",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "selected": 0,
+      "alternatives": []
+    },
+    {
+      "productId": "SV2447",
+      "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+      "at": "2026-10-28T04:31:05.724Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "GENERIC"
+      },
+      "selected": 0,
+      "alternatives": []
+    },
+    {
+      "productId": "SV2447",
+      "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+      "at": "2026-10-28T04:31:05.724Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "DETAIL"
+      },
+      "selected": 0,
+      "alternatives": []
+    },
+    {
+      "productId": "SV2447",
+      "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+      "at": "2026-10-28T04:31:05.724Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "selected": 0,
+      "alternatives": []
+    },
+    {
+      "productId": "SV2447",
+      "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+      "at": "2026-10-28T04:31:05.726Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "GENERIC"
+      },
+      "selected": 0,
+      "alternatives": []
+    },
+    {
+      "productId": "SV2447",
+      "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+      "at": "2026-10-28T04:31:05.726Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "DETAIL"
+      },
+      "selected": 0,
+      "alternatives": []
+    },
+    {
+      "productId": "SV2447",
+      "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+      "at": "2026-10-28T04:31:05.726Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "selected": 0,
+      "alternatives": []
+    },
+    {
+      "productId": "SV2447",
+      "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+      "at": "2026-10-29T19:20:19.998Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "GENERIC"
+      },
+      "selected": 2,
+      "alternatives": []
+    },
+    {
+      "productId": "SV2447",
+      "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+      "at": "2026-10-29T19:20:19.998Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "DETAIL"
+      },
+      "selected": 2,
+      "alternatives": []
+    },
+    {
+      "productId": "SV2447",
+      "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+      "at": "2026-10-29T19:20:19.998Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "selected": 1,
+      "alternatives": []
+    }
+  ],
+  "limitations": [
+    "Scripted read-only ports and size evaluation, not real PostgreSQL/native ingress replay",
+    "Historical hard gate checks cannot measure model semantics or replace verifier",
+    "Freshness counterfactual applies only to media component, not current authorization",
+    "Search algorithm parity is not established"
+  ],
+  "historical": [
+    {
+      "caseId": "b1-price",
+      "at": "2026-10-26T20:29:20.102Z",
+      "inputHash": "d24ec892f75606247f234024989de419e46756b0966d96032e1c4a1004a2e152",
+      "atTurnStart": null,
+      "startReasons": []
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "at": "2026-10-26T20:32:11.620Z",
+      "inputHash": "ef479a858ccb1b981a9f729e2bbb8bd29f594df9a621c7a21c8583fd6a871f2d",
+      "atTurnStart": null,
+      "startReasons": []
+    },
+    {
+      "caseId": "b1-current-policy",
+      "at": "2026-10-26T20:29:06.860Z",
+      "inputHash": "d13779fe20e666928a40a1ba0f2385780a7ab9a6197a0d9cee3cdd7755ad1975",
+      "atTurnStart": null,
+      "startReasons": []
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "at": "2026-10-26T20:37:05.416Z",
+      "inputHash": "23326b4715de802b4dc956fa8a28e343a7e4ca9ab1be1ee73c8165f64a09f039",
+      "atTurnStart": "STALE",
+      "startReasons": [
+        "PROTECTED_CLAIM_FUTURE"
+      ]
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "at": "2026-10-26T20:24:23.110Z",
+      "inputHash": "6345d7ae1d0067e1412534fa77b840e3cfa6f3bd90b8a0c3fddba583e1484134",
+      "atTurnStart": "STALE",
+      "startReasons": [
+        "PROTECTED_CLAIM_FUTURE"
+      ]
+    },
+    {
+      "caseId": "stateful-quote",
+      "at": "2026-10-26T20:40:31.442Z",
+      "inputHash": "3cf89d46ad10a92270994ecf1ad10d252456e6d6f399b5a4961c0e95ec08e457",
+      "atTurnStart": null,
+      "startReasons": []
+    }
+  ],
+  "readProbes": [
+    {
+      "query": {
+        "subjectRef": "SV2447"
+      },
+      "status": "OK",
+      "reason": null
+    },
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "offerType": "AO"
+      },
+      "status": "OK",
+      "reason": null
+    },
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "offerType": "SET_VAY"
+      },
+      "status": "OK",
+      "reason": null
+    },
+    {
+      "query": {
+        "subjectRef": "SV1561"
+      },
+      "status": "OK",
+      "reason": null
+    },
+    {
+      "query": {
+        "subjectRef": "SV1561",
+        "offerType": "SET_VAY"
+      },
+      "status": "OK",
+      "reason": null
+    }
+  ],
+  "sizeStatus": "RECOMMENDED",
+  "fullLocalArtifact": {
+    "name": "c3-target-repair-bc-clean-20261105.json",
+    "sha256": "0300cf9c812802402dc43bd178b72faf7202b9a894f2bb20982c555178501aae",
+    "bytes": 142045
+  }
+}

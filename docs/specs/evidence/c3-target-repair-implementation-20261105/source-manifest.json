@@ -1,0 +1,84 @@
+{
+  "kind": "TARGET_REPAIR_SOURCE_MANIFEST",
+  "implementationBaseSha": "1c2ef10e0a3a83eb80074585b92802ebdd3d142d",
+  "sourceSha": "639aff103898ad9e6cad5119d27c08f4809f9896",
+  "sourceDirty": false,
+  "files": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "worktreeSha256": "3d22ea551064d177d5dc64e455a27845825e86cb0f8acf35a6f026f87c06ab30",
+      "gitBlobSha256": "3d22ea551064d177d5dc64e455a27845825e86cb0f8acf35a6f026f87c06ab30"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+      "worktreeSha256": "33e669fa7dcedd2071ef7a4269d8f3e3f3c59d600a359b4eb6485781ad8912d4",
+      "gitBlobSha256": "33e669fa7dcedd2071ef7a4269d8f3e3f3c59d600a359b4eb6485781ad8912d4"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "worktreeSha256": "42aa8dba630696d249394720bab8b8c23b16c45002c5e8ca6bfe127b8af62b8b",
+      "gitBlobSha256": "42aa8dba630696d249394720bab8b8c23b16c45002c5e8ca6bfe127b8af62b8b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/owner-product-tables.mjs",
+      "worktreeSha256": "af40acc862484012975e5fef63c5a426327a3b52509a04600e5005e53cffa63f",
+      "gitBlobSha256": "af40acc862484012975e5fef63c5a426327a3b52509a04600e5005e53cffa63f"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs",
+      "worktreeSha256": "af77e6a96da6cc39a9c492fbaa3108acaffd8a16446080a2ed5492c304921d80",
+      "gitBlobSha256": "af77e6a96da6cc39a9c492fbaa3108acaffd8a16446080a2ed5492c304921d80"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/selection-result-wire.test.mjs",
+      "worktreeSha256": "d2cb98beff8023fe12c40b3d8755630fe5dc8e50d18f03aec80290b0c27c0409",
+      "gitBlobSha256": "d2cb98beff8023fe12c40b3d8755630fe5dc8e50d18f03aec80290b0c27c0409"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/tool-output-diagnostic.test.mjs",
+      "worktreeSha256": "72b64c4197340f149c1affff31d584a4e70e872cd93911199fdb702c50a54c87",
+      "gitBlobSha256": "72b64c4197340f149c1affff31d584a4e70e872cd93911199fdb702c50a54c87"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.test.ts",
+      "worktreeSha256": "3ac3afd48d5771396666f422b031dac219edf07677a522c6f4ae9d826e36a53f",
+      "gitBlobSha256": "3ac3afd48d5771396666f422b031dac219edf07677a522c6f4ae9d826e36a53f"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.ts",
+      "worktreeSha256": "bc936319cf472b3b5a8c46d85760d14918564007c0c3bbf7ace700657c069b94",
+      "gitBlobSha256": "bc936319cf472b3b5a8c46d85760d14918564007c0c3bbf7ace700657c069b94"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-media.test.ts",
+      "worktreeSha256": "982a1942387ca0b34506cb8878d6a81972fb78d4d2e39d6ca4e6658c8030f325",
+      "gitBlobSha256": "982a1942387ca0b34506cb8878d6a81972fb78d4d2e39d6ca4e6658c8030f325"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-preparation.test.ts",
+      "worktreeSha256": "4b9a79f9cf3b4947d58eb576f8f3ec172237409fc0617c79a992959c14528ac1",
+      "gitBlobSha256": "4b9a79f9cf3b4947d58eb576f8f3ec172237409fc0617c79a992959c14528ac1"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only-tools.test.ts",
+      "worktreeSha256": "06f9432fdcd7133aa5ada4e6946159a995eb2c17d3a9300e249e00eaf3f0e10f",
+      "gitBlobSha256": "06f9432fdcd7133aa5ada4e6946159a995eb2c17d3a9300e249e00eaf3f0e10f"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only-tools.ts",
+      "worktreeSha256": "5be06b44e7ea7f1d993d3563b27281e0a644d783e775e050d56c6204ca4212c9",
+      "gitBlobSha256": "5be06b44e7ea7f1d993d3563b27281e0a644d783e775e050d56c6204ca4212c9"
+    },
+    {
+      "path": "packages/contracts/src/v2/canonical-evidence-readiness.test.ts",
+      "worktreeSha256": "1e5b4fd38f85df1702bedf4ac5f706a202d2c65b29c9b1587b6d01c448de2849",
+      "gitBlobSha256": "1e5b4fd38f85df1702bedf4ac5f706a202d2c65b29c9b1587b6d01c448de2849"
+    },
+    {
+      "path": "packages/contracts/src/v2/canonical-evidence-readiness.ts",
+      "worktreeSha256": "853bbd3e4cf4a28861e5d8924b24b84a3619688794f69a0eb70206c8d9d60dd1",
+      "gitBlobSha256": "853bbd3e4cf4a28861e5d8924b24b84a3619688794f69a0eb70206c8d9d60dd1"
+    }
+  ],
+  "hashConvention": "Raw worktree bytes and git blob bytes separately; runtime/eval files must match reviewed values."
+}

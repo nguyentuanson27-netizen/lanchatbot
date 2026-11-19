@@ -1,0 +1,562 @@
+{
+  "kind": "PHASE_C_OPENING_CHECKOUT_MEDIA_VERIFICATION",
+  "implementationBaseSha": "84b3989e1977972ef0a30ab55fa7a5872662bd46",
+  "sourceSha": "dd88d38396c15c82ef315e8352c4494a29d7ba9b",
+  "implementationSha": "603c391b7e348b3b9b61d631c4ac15f0ec34bcda",
+  "runtimeParity": true,
+  "sourceFiles": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/native-population.mjs",
+      "sha256": "2cf282c6b0212e14556b96c25554b92254e6c914b8efeff71468d0efd4d344b9",
+      "gitBlob": "0fb6df78743494d1eb10135e4e1e8bef30be86f2"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/native-snapshot.mjs",
+      "sha256": "fb54d2b25a8ebe9a3279355b80488fa6440d6f72cd95f28998d4d05bb3174e85",
+      "gitBlob": "67db6e5e6ac39418d4dd5c8d1c184efebd86510c"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/native-terminal.mjs",
+      "sha256": "2cc4c2f4def28371fc5b08836a64372a3ae49998a3ee42105d9abfc2aba704dd",
+      "gitBlob": "65347ef678ed81bd727ea5b1b688d393178af58c"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/native-terminal.test.mjs",
+      "sha256": "eb50ca2c68f0da98743b009c1fedef65bea9cf01ee5396a21692b69c286c7664",
+      "gitBlob": "0761a2634642eb97992ee6e80a9413b2a1d36129"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/owner-decisions.json",
+      "sha256": "7e13c31bc12a5599f3c224b7df62bdb06911c8f3f28f944ba6e54a5db8305f2c",
+      "gitBlob": "d154259ec6ae73b00e5d782418906ce61ad1c7d8"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/qualification.mjs",
+      "sha256": "3a5e4266f55f22413828da1cefc4c72fc6d6e6c9d238c46609be5a92fac5a728",
+      "gitBlob": "f6d8a23ffa8ab25349cbf3030417c3118c524040"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "2587c92ae186065213164e68c4a7ab88c9b704fd53e6e2286f29d3ea83064599",
+      "gitBlob": "856d73b9b7a23e8a65da44a7d625ee60165401ec"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-checkout-media.ts",
+      "sha256": "8dc85e32e0bac3cfd8f4de50e697ab6ec25bd42237336c7d16a06111a8180e25",
+      "gitBlob": "93b6a8cb35cf73e1cb971fff74c60a61bad2b670"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.test.ts",
+      "sha256": "76622b807c44c9ae4be9dfa7de61d25fa77b3b6d14d4834214e07d66a7e0fe65",
+      "gitBlob": "e39e217d8180631bcc9cba76b21a490b5f9b8490"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.ts",
+      "sha256": "5489d1c054cf286e1e984ca023f8b4e0b0342e020fca51aa6b50bd2bbce9603d",
+      "gitBlob": "cd1245cacc0c5496c5f2cedf6f8b33fb551ac3f7"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-opening-media.ts",
+      "sha256": "62c30209ffd3d963d36dcc3610b4fc4623630112174e4c05977e3081cc4ef941",
+      "gitBlob": "73b65713b48f5b4a3c530f604c6259fb1a11e229"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only.ts",
+      "sha256": "5eb2e54b648b7c0882ed6303e42b462415b64bfb22614a1f1b70ae299d33b099",
+      "gitBlob": "9e996a748eec58fdced3275c4b50d6f51d0b3d78"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-session.ts",
+      "sha256": "ce6df8c1fa34804844af8d9dfabd089ffcc4456af864c5a0adc6cde33d89e78a",
+      "gitBlob": "2606af95cd8126f9675e3794a6afa8cfe79799f9"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce.ts",
+      "sha256": "bad9b154b3194750bd2aade0788809e630903b8cfbf8a25b06669a694ca83251",
+      "gitBlob": "cac0e83cfd24c1a2e6af227a02ecb4f8bb5d985a"
+    },
+    {
+      "path": "docs/specs/c3-phase-c-opening-checkout-media-plan-20261102.md",
+      "sha256": "f96da80b0d63898c5cc1824d97ab541c594ed2530c9b2c6265e28e00475156ac",
+      "gitBlob": "0e3890c816083c1a67581e8d8481f7d606607302"
+    }
+  ],
+  "independentReview": {
+    "status": "APPROVE_IMPLEMENTATION",
+    "reviewer": "/root/phase_c_task_completion_implementation_review",
+    "closedFindings": [
+      "R1_VARIANT_SOURCE_BINDING",
+      "R2_PRE_DISPATCH_FAILURE_BOUNDARY",
+      "R3_DURABLE_CAPTURE_IDENTITY"
+    ],
+    "accountingFinding": "RETRACTED_BY_REVIEWER_ALREADY_PRESENT",
+    "approvedExecutableSha": "dd88d38396c15c82ef315e8352c4494a29d7ba9b",
+    "blockingFindings": [],
+    "addConfirmEvidence": "Existing retained C opening add-confirm case at isolated-integration.mjs:689-692 independently rechecked PASS in fullPG05; initial evidence query withdrawn."
+  },
+  "checks": [
+    {
+      "id": "worker-broad",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts",
+      "log": "../c3-opening-checkout-worker-broad-final-20261102.log",
+      "result": {
+        "pass": 893,
+        "fail": 0
+      }
+    },
+    {
+      "id": "node-full",
+      "command": "pnpm --filter @lana/worker test:evals",
+      "log": "../c3-opening-checkout-node-full-final-20261102.log",
+      "result": {
+        "pass": 819,
+        "fail": 0,
+        "skip": 2
+      }
+    },
+    {
+      "id": "protected-assembly",
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "log": "../c3-opening-checkout-protected-20261102.log",
+      "result": {
+        "pass": 21,
+        "fail": 0
+      }
+    },
+    {
+      "id": "worker-build",
+      "command": "pnpm --filter @lana/worker build",
+      "log": "../c3-opening-checkout-build-final-20261102.log",
+      "result": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "worker-typecheck",
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit",
+      "log": "../c3-opening-checkout-typecheck-final-20261102.log",
+      "result": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "worker-lint",
+      "command": "pnpm --filter @lana/worker lint",
+      "log": "../c3-opening-checkout-lint-final-20261102.log",
+      "result": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "accounting",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts -t \"opening checkout preparation|unknown prior-output\"",
+      "log": "../c3-opening-checkout-accounting-20261102.log",
+      "result": {
+        "pass": 5,
+        "fail": 0
+      }
+    },
+    {
+      "id": "postgres-prefix",
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-opening-checkout-pg-20261102-04 COD --check-prefix \"C checkout\"",
+      "log": "../c3-opening-checkout-pg04-20261102.log",
+      "result": {
+        "pass": 8,
+        "fail": 0
+      }
+    },
+    {
+      "id": "postgres-full",
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-opening-checkout-pg-full-20261102-05 COD",
+      "log": "../c3-opening-checkout-pg-full05-20261102.log",
+      "result": {
+        "pass": 118,
+        "fail": 0
+      }
+    },
+    {
+      "id": "postgres-invariants",
+      "command": "node ../c3-task-completion-validate-20261102.mjs ../c3-opening-checkout-pg-full-20261102-05",
+      "log": "../c3-opening-checkout-pg-validate-20261102.log",
+      "result": {
+        "pass": 7,
+        "fail": 0
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../c3-opening-checkout-accounting-20261102.log",
+      "bytes": 411,
+      "sha256": "01400c5db5057eed67b0b5be57aadf2abd11721fee7c2ca36e97a91e2a59725c"
+    },
+    {
+      "path": "../c3-opening-checkout-build-final-20261102.log",
+      "bytes": 5249,
+      "sha256": "8f2eee77e2dcea0b02cd73b3e8a6c6c46b7e0af760229d32cca90acef6cb2a68"
+    },
+    {
+      "path": "../c3-opening-checkout-build01-20261102.log",
+      "bytes": 5249,
+      "sha256": "3d300cac05203342b1344bb72edf949befc7eab4c9ae2492cda3dda78e1c28f3"
+    },
+    {
+      "path": "../c3-opening-checkout-capture-green01-20261102.log",
+      "bytes": 594,
+      "sha256": "b67a5a6d3d4ed989af24f386e8c60c701ed441e512db8407bba743f023364fc3"
+    },
+    {
+      "path": "../c3-opening-checkout-capture-red-20261102.log",
+      "bytes": 1727,
+      "sha256": "69f7cd814d1c07332c169308f2af96f91a11c63bb524ab8a852a625cbd773eaa"
+    },
+    {
+      "path": "../c3-opening-checkout-command-exits-20261102.json",
+      "bytes": 114,
+      "sha256": "f917bdc2794775df897007869f23d23d9f1ccc26c869c6b2cc4552bdb8437d6a"
+    },
+    {
+      "path": "../c3-opening-checkout-emit-final01-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-checkout-eval-focused01-20261102.log",
+      "bytes": 3838,
+      "sha256": "20ed289a65eabe8bbd4f4739611bd61b704913fda2c2f535bea06650a63ecaf6"
+    },
+    {
+      "path": "../c3-opening-checkout-eval-focused02-20261102.log",
+      "bytes": 3838,
+      "sha256": "583c4ac09463a75a28597798c8158a3b64a5ab0e154c99a1b78cd967521615e8"
+    },
+    {
+      "path": "../c3-opening-checkout-eval-focused03-20261102.log",
+      "bytes": 3959,
+      "sha256": "7864464976b8dda628b16574aefd56f03434bb1853093ad76a2dd6ead95bca04"
+    },
+    {
+      "path": "../c3-opening-checkout-focused01-20261102.log",
+      "bytes": 719,
+      "sha256": "e8e6f2bdd50005bd77ff1998e0f68645d0f781080e7c832ec7693b34a0154e76"
+    },
+    {
+      "path": "../c3-opening-checkout-focused02-20261102.log",
+      "bytes": 13553,
+      "sha256": "97e31062faa915cca5949e439cad1be32ce758ea1e27cc2f01630baabe2461bd"
+    },
+    {
+      "path": "../c3-opening-checkout-focused03-20261102.log",
+      "bytes": 411,
+      "sha256": "501ea227315c409b25a463f437d2c15fa0ccad11c5146ce9f8a388a945747409"
+    },
+    {
+      "path": "../c3-opening-checkout-focused04-20261102.log",
+      "bytes": 15674,
+      "sha256": "2226b9de3b8981947755f1ab2472e579ef5fd2c440ea61778fd7f84667742ae4"
+    },
+    {
+      "path": "../c3-opening-checkout-focused05-20261102.log",
+      "bytes": 15122,
+      "sha256": "d449c21ee1c943d01843f2f075cb403f24eb37701322a5bcfaf387874769b698"
+    },
+    {
+      "path": "../c3-opening-checkout-focused06-20261102.log",
+      "bytes": 531,
+      "sha256": "b3ec8ca91107d2d2f86fad6179acbd0a3b8a81eb2c8ca41b59daf17c67bfdffc"
+    },
+    {
+      "path": "../c3-opening-checkout-green01-20261102.log",
+      "bytes": 1381,
+      "sha256": "b03a227c4bb485835e0db953ea46135a7365c61a85866104290a69252d5b311a"
+    },
+    {
+      "path": "../c3-opening-checkout-lint-20261102.log",
+      "bytes": 171,
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    },
+    {
+      "path": "../c3-opening-checkout-lint-final-20261102.log",
+      "bytes": 171,
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    },
+    {
+      "path": "../c3-opening-checkout-node-full-final-20261102.log",
+      "bytes": 90074,
+      "sha256": "4bb397439ffdece9f46cb9136c3dca47a3714680d5d7f65aa3a721c17f477b51"
+    },
+    {
+      "path": "../c3-opening-checkout-node-full01-20261102.log",
+      "bytes": 90089,
+      "sha256": "2ce13dd933bd878d28bdf0e696d0a01d9e928e6b333dfec4449c9d79a90aaf92"
+    },
+    {
+      "path": "../c3-opening-checkout-pg-20261102-01/integration.json",
+      "bytes": 6461,
+      "sha256": "399d6d4db66669ddcb9b3739f53723a3da07e31ba54ff329e28f245f9a617785"
+    },
+    {
+      "path": "../c3-opening-checkout-pg-20261102-02/integration.json",
+      "bytes": 11206,
+      "sha256": "8305846c7fd20f3420c83fba3c4b7d32d326a575e1ecc918b7c1b862df57f48b"
+    },
+    {
+      "path": "../c3-opening-checkout-pg-20261102-03/integration.json",
+      "bytes": 6966,
+      "sha256": "f78514b9c95dbf078ef3f434cbafe8d3cbb238f504b87f7515bbdf06c2c5e00a"
+    },
+    {
+      "path": "../c3-opening-checkout-pg-20261102-04/integration.json",
+      "bytes": 7317,
+      "sha256": "749a7106781dd467fd499bf9282272d32fefcc721b7370013640dba717e97695"
+    },
+    {
+      "path": "../c3-opening-checkout-pg-full-20261102-05/integration.json",
+      "bytes": 40800,
+      "sha256": "282dd33fe60a85f83333fec0377e55b8045d73a02270c77d439bffef2af359e0"
+    },
+    {
+      "path": "../c3-opening-checkout-pg-full-20261102-05/VALIDATED_INVARIANTS.json",
+      "bytes": 1993,
+      "sha256": "baf4c84bb2357067d91588c03b0f04afb09c36a4601cf1c222070ddff71528d2"
+    },
+    {
+      "path": "../c3-opening-checkout-pg-full05-20261102.log",
+      "bytes": 9541,
+      "sha256": "d93693a210a7f935b5406e2c841838caa46c717dbe7f90a9af077fd25bfba8d4"
+    },
+    {
+      "path": "../c3-opening-checkout-pg-validate-20261102.log",
+      "bytes": 163,
+      "sha256": "0f50d11017f1e4a009d9453b67a09e6154393147ac6013114c7e4f8730e52fa0"
+    },
+    {
+      "path": "../c3-opening-checkout-pg01-20261102.log",
+      "bytes": 1024,
+      "sha256": "8a51502e449454ddf7eee28a6fcd3f872449d6932225ee553c1c7d2b0bece436"
+    },
+    {
+      "path": "../c3-opening-checkout-pg02-20261102.log",
+      "bytes": 1024,
+      "sha256": "e27dfcbcd754ca74a9f7e54c7be0813a890e6719a702b0861b43b4cf1b3a0af9"
+    },
+    {
+      "path": "../c3-opening-checkout-pg03-20261102.log",
+      "bytes": 1311,
+      "sha256": "50f82987615e991902dbae0d7ab51c466a11cfce5dbc74117630e31a0ec3fbb0"
+    },
+    {
+      "path": "../c3-opening-checkout-pg04-20261102.log",
+      "bytes": 702,
+      "sha256": "8fb8aa6d6b6b3ba52cdcd5e3276117020579eea6e0107b028c968a829e2c22ae"
+    },
+    {
+      "path": "../c3-opening-checkout-protected-20261102.log",
+      "bytes": 429,
+      "sha256": "5f4abc41a47d9a10597805b7904e72cdab567fe90a589313f0f79c42d57a1371"
+    },
+    {
+      "path": "../c3-opening-checkout-red-20261102.log",
+      "bytes": 14751,
+      "sha256": "1aa15c3036ae9427a5dfbc4f4984ea4c0dcd3d3979d4f36bd7070cc6e6b359b8"
+    },
+    {
+      "path": "../c3-opening-checkout-source-inventory-20261102.json",
+      "bytes": 3883,
+      "sha256": "f374d14f6f3eb4ca738706f91c77790e1a89611aaaad6e568164c98027154cfe"
+    },
+    {
+      "path": "../c3-opening-checkout-tsc01-20261102.log",
+      "bytes": 2519,
+      "sha256": "63613a883c5ce4c159cf93ae0bff464fca18199d82d26acb15d7ec84b24734ea"
+    },
+    {
+      "path": "../c3-opening-checkout-tsc02-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-checkout-tsc03-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-checkout-tsc04-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-checkout-tsc05-20261102.log",
+      "bytes": 426,
+      "sha256": "07ca27aa94f77b2f90e78bd523dabbcb52296e56a23a8522837b43743d414489"
+    },
+    {
+      "path": "../c3-opening-checkout-tsc06-20261102.log",
+      "bytes": 426,
+      "sha256": "07ca27aa94f77b2f90e78bd523dabbcb52296e56a23a8522837b43743d414489"
+    },
+    {
+      "path": "../c3-opening-checkout-tsc07-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-checkout-tsc08-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-checkout-typecheck-final-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-checkout-worker-broad-final-20261102.log",
+      "bytes": 6692,
+      "sha256": "da9e77be0dc5092de651ea00d2e52302e1f191f3bad6a93e3f2d05668fd429c5"
+    },
+    {
+      "path": "../c3-opening-checkout-worker-broad01-20261102.log",
+      "bytes": 5815,
+      "sha256": "a0c2a1b33a8f9d384c284b81b84307287ebb41e48ce00bc6b750807cd3e88491"
+    }
+  ],
+  "postgres": {
+    "pass": 118,
+    "fail": 0,
+    "legacyPlusOpeningPhotoCases": 110,
+    "newCheckoutCases": 8,
+    "invariants": 7,
+    "sourceDirty": false,
+    "databaseDropped": true,
+    "providerGenerations": 0,
+    "sendEnabled": false
+  },
+  "failedPostgres": [
+    {
+      "run": "01",
+      "pass": 0,
+      "fail": 1,
+      "reason": "Strict capture rejected setup pending ACK contaminating measured payload group.",
+      "sourceSha": "603c391b7e348b3b9b61d631c4ac15f0ec34bcda",
+      "sourceDirty": false,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false
+    },
+    {
+      "run": "02",
+      "pass": 0,
+      "fail": 1,
+      "reason": "Same mismatch retained with bounded diagnostics; old ACK cancelled through scoped audited fixture operator afterwards.",
+      "sourceSha": "1a74ea3c3e444ecb7b12f9fbf885110dcf3163c7",
+      "sourceDirty": false,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false
+    },
+    {
+      "run": "03",
+      "pass": 2,
+      "fail": 1,
+      "reason": "Native preview/proof passed; overbroad assertion included raw diagnostic trace. Corrected to actual model history projection.",
+      "sourceSha": "b1270ed95229c4da32a03fc3bf8b3c244895a002",
+      "sourceDirty": false,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false
+    }
+  ],
+  "modelQuality": "NOT_RUN",
+  "qualification": "BLOCKED",
+  "replacementParity": "INFORMATION_PARITY_NOT_ESTABLISHED",
+  "providerRequests": 0,
+  "liveSends": 0,
+  "shopSourceWrites": 0,
+  "structuralDelta": {
+    "codeOwnedCheckoutMediaHelpers": 1,
+    "optionalSessionCallbacks": 1,
+    "newOnlineSemanticRoles": 0,
+    "newParsers": 0,
+    "promptProviderSchemaChanges": 0
+  },
+  "limitations": [
+    "Multiple/conflicting component colours remain deferred with existing fail-closed behavior.",
+    "Unknown history, missing shop/media source, budget or authority failures remain silent handoff/NO_SEND.",
+    "Private data without a valid cart does not create an implicit cart.",
+    "Unscoped standalone compositions retain old confirm fence unless persisted media capability is supplied.",
+    "No new model quality/stability/fresh qualification/GO or matched C3 information parity."
+  ],
+  "notes": [
+    "Counts overlap, not model attempts.",
+    "All model/provider/effort/verifierSchema/prompt/request bounds unchanged.",
+    "No shared package source/migration or production entrypoint changed.",
+    "Worker/runtime bytes unchanged603→final test fixture commits; shared packages unchanged.",
+    "PostgreSQL ephemeral fixture cancellation preserves old ACK row and audit, asserts never accepted before measured opening turn.",
+    "Provider0 synthetic captured delivery is not live customer send."
+  ],
+  "unchangedContract": {
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "promptHashes": {
+      "owner": "2a17c6b9fcc36a1dcea771631f0c8f3e7ff77d2f47f857550e9b906f801346ce",
+      "verifier": "d9d999d0b6f08dd111081cfbf1324e26aaf29904d3c03c8519eb7614b0216c73"
+    },
+    "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+    "requestBounds": {
+      "ownerWireBytes": 65536,
+      "verifierWireBytes": 65536
+    },
+    "toolCalls": 6,
+    "toolRounds": 2
+  }
+}

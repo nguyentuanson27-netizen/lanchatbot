@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { cartSelectionsHaveIndependentStockV2 } from "./realtime-sales-catalog.js";
+import {paymentChoice} from "./checkout-payment-choice.js";
 import {
   buildProtectedCartPolicyClaimsV1,
   buildProtectedClaimsFromCartSelectionsV1,
@@ -10,6 +12,8 @@ import {
 import {
   CheckoutRevalidationV1Schema,
   canonicalJsonV1,
+  PendingNegotiationTransitionV1Schema,
+  canonicalCartVariantScopeV2,
   canonicalCartStateHashPreimageV1,
   canonicalCartStateV1,
   canonicalBuyingIntentAuthorizesCartMutationV1,
@@ -101,6 +105,8 @@ export interface RealtimeSalesCycleInput {
   readonly nativeNegotiation?: Extract<SalesCycleCommand,{kind:"NEGOTIATION_EVENT"}>;
   /** Exact message resolved by the native adapter, independent of the batch's commit source. */
   readonly nativeNegotiationInbound?: VerifiedInboundMessageV1 | null;
+  readonly nativePendingNegotiation?:Extract<SalesCycleCommand,{kind:"PENDING_NEGOTIATION_RECORDED"|"PENDING_NEGOTIATION_INVALIDATED"}>;
+  readonly nativeCartCreationReceipt?:ReturnType<NonNullable<SalesCycleTrustedPortsV1["resolveCartCreationReceipt"]>>;
   readonly paymentReceiptInbound?: VerifiedInboundMessageV1;
   readonly pageId: string;
   readonly conversationId: string;
@@ -193,6 +199,7 @@ export interface RealtimeSalesCycleOutput {
   readonly transferToHuman: boolean;
   readonly desiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
   readonly reasonCode: string | null;
+  readonly failureStage?: import("./single-agent-commerce-effect-failure.js").CommerceEffectFailureStage;
   readonly readinessAttempt?: DeterministicEffectReadinessV1;
   readonly protectedOutbound?: Readonly<{
     claims: readonly ProtectedClaimV1[];
@@ -543,10 +550,12 @@ export function checkoutDetails(
   text: string,
   salesSignals: AgentSalesSignalsV1 | null | undefined,
   pendingField?: CheckoutFieldKey,
+  collection?: "SINGLE_FIELD",
 ): CheckoutDetails {
   const bare = text.normalize("NFC").trim();
   // Field syntax only, not a general-language intent/name extractor. Ambiguous replies stay private.
-  const bareName = pendingField === "FULL_NAME" && bare.length >= 2 && bare.length <= 160 &&
+  const choice=collection==="SINGLE_FIELD"?paymentChoice(text):null;
+  const bareName = (!choice||choice.kind==="NO_SIGNAL") && pendingField === "FULL_NAME" && bare.length >= 2 && bare.length <= 160 &&
     /^\p{Lu}[\p{L}\p{M}'’-]*(?:\s+\p{Lu}[\p{L}\p{M}'’-]*){0,5}$/u.test(bare) ? bare : undefined;
   const bareAddress = pendingField === "ADDRESS" && bare.length >= 8 && bare.length <= 1000 &&
     /^\d[\p{L}\p{M}\p{N}\s,./’-]+$/u.test(bare) ? bare : undefined;
@@ -554,7 +563,7 @@ export function checkoutDetails(
   const phone = labeledValue(text, ["sđt", "sdt", "điện thoại", "dien thoai", "phone"]) ??
     text.match(/(?:^|[^\d])((?:\+?84|0)\d{8,10})(?:[^\d]|$)/u)?.[1] ??
     modelCheckoutValue(text, extracted?.phone, "PHONE");
-  const paymentMethod = /(chuyển khoản|chuyen khoan|\bck\b|bank)/iu.test(text)
+  const paymentMethod = choice?(choice.kind==="RESOLVED"?choice.method:undefined):/(chuyển khoản|chuyen khoan|\bck\b|bank)/iu.test(text)
     ? "BANK_TRANSFER" as const
     : /(?:^|\s)(?:cod|tiền mặt|tien mat|nhận hàng trả|nhan hang tra)(?:\s|$)/iu.test(text)
       ? "COD" as const
@@ -651,13 +660,14 @@ export function formatCartLineSelection(line: CartV1["lines"][number], product?:
   const label = product && normalizeCatalogToken(product.productId) === line.parentProductId && product.title.trim()
     ? `(mẫu “${product.title}”)` : line.parentProductId;
   const roles = { TOP: "áo", SKIRT: "chân váy", PANTS: "quần", DRESS: "váy", JACKET: "áo khoác", ACCESSORY: "phụ kiện", OTHER: "sản phẩm" };
+  const color = (value: string | null) => value && value !== "__NO_COLOR__" ? ` màu ${value.toLocaleLowerCase("vi-VN")}` : "";
   const component = (c: typeof line.components[number]) => (c.quantity > 1 ? `${c.quantity} ` : "") + roles[c.componentRole] +
-    (c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : "") + (c.size ? `, size ${c.size}` : "");
+    color(c.color) + (c.size ? `, size ${c.size}` : "");
   if (line.offerKind === "SET" || line.offerKind === "COMBO_3") {
     return `${line.quantity} ${line.offerKind === "SET" ? "bộ" : "combo"} ${label} (${line.components.map(component).join("; ")})`;
   }
   const c = line.components[0]!, role = roles[c.componentRole];
-  return `${line.quantity} ${role} ${label}${c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : ""}${c.size ? `, size ${c.size}` : ""}`;
+  return `${line.quantity} ${role} ${label}${color(c.color)}${c.size ? `, size ${c.size}` : ""}`;
 }
 
 function cartSummary(cart: CartV1, includeSelections = false, productNames: RealtimeSalesCycleInput["productNames"] = []): string {
@@ -928,6 +938,7 @@ export async function evaluateRealtimeSalesCycle(
       (references.get(canonicalJson(reference)) as ResolvedCartMutationV1 | undefined) ?? null,
     resolveShopPolicy: (reference) =>
       (references.get(canonicalJson(reference)) as ReturnType<SalesCycleTrustedPortsV1["resolveShopPolicy"]> | undefined) ?? null,
+    resolveCartCreationReceipt:commandId=>input.nativeCartCreationReceipt?.commandId===commandId?input.nativeCartCreationReceipt:null,
     resolveInboundMessage: (sourceMessageId) => input.nativeNegotiation?.sourceMessageId === sourceMessageId &&
       input.nativeNegotiationInbound?.messageId === sourceMessageId ? input.nativeNegotiationInbound
       : input.paymentReceiptInbound?.messageId === sourceMessageId ? input.paymentReceiptInbound : sourceMessageId === input.messageId ? inbound : null,
@@ -945,6 +956,7 @@ export async function evaluateRealtimeSalesCycle(
         resolvedMutation?.mutation.kind === "REMOVE_LINE" ||
         resolvedMutation?.mutation.kind === "SET_QUANTITY"
         || resolvedMutation?.mutation.kind === "SET_COMPONENT_VARIANT"
+        || resolvedMutation?.mutation.kind === "REPLACE_LINE"
       ? resolvedMutation.mutation.kind
       : null;
     const result = applySalesCycleCommand({
@@ -1065,6 +1077,11 @@ export async function evaluateRealtimeSalesCycle(
           ? null
           : computeBusinessContentHash(resolvedMutation).replace(/^sha256:/u, ""),
         ...(negotiationTransitionEvidence === null ? {} : { negotiationTransitionEvidence }),
+        ...((command.kind==="PENDING_NEGOTIATION_RECORDED"||command.kind==="PENDING_NEGOTIATION_INVALIDATED"||
+          (command.kind==="NEGOTIATION_EVENT"&&command.pendingId))?{pendingNegotiationTransition:PendingNegotiationTransitionV1Schema.parse({
+            schemaVersion:1,action:command.kind==="PENDING_NEGOTIATION_RECORDED"?"RECORDED":command.kind==="PENDING_NEGOTIATION_INVALIDATED"?"INVALIDATED":"ACTIVATED",
+            sourceMessageIdHash:input.canonicalBuyingIntent.sourceMessageIdHash,commandIdHash:createHash("sha256").update(command.commandId).digest("hex"),
+            before:before.pendingNegotiation??null,after:state.pendingNegotiation,appliedAt:input.now.toISOString()})}:{}),
         ...(checkoutDetailsTransitionEvidence === null
           ? {}
           : { checkoutDetailsTransitionEvidence }),
@@ -1109,9 +1126,9 @@ export async function evaluateRealtimeSalesCycle(
     payloadHash: string | null = null,
     mutationQuantity: number | null = null,
   ): DeterministicEffectReadinessV1 => {
-    const claims = buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
+    const claims = buildProtectedClaimsFromCartSelectionsV1((cartSelectionsHaveIndependentStockV2(selections) ? selections : []).map((selection) => ({
       productId: selection.line.parentProductId,
-      variantId: selection.line.offerId,
+      variantId: input.commandIdentity ? canonicalCartVariantScopeV2(selection.line, text => createHash("sha256").update(text, "utf8").digest("hex")) : selection.line.offerId,
       priceVnd: selection.line.posUnitPriceVnd!,
       priceVersion: selection.versions.price,
       inventoryVersion: selection.versions.inventory,
@@ -1132,7 +1149,7 @@ export async function evaluateRealtimeSalesCycle(
       sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
       conversationRevision: input.conversationRevision,
       salesCycleRevision: initial.revision,
-      productIds: selections.map(({ line }) => line.parentProductId),
+      productIds: [...new Set(selections.map(({ line }) => line.parentProductId))].sort(),
       cartId: cart?.cartId ?? null,
       cartVersion: cart?.revision ?? null,
       cartStateHash: cart === null
@@ -1176,8 +1193,8 @@ export async function evaluateRealtimeSalesCycle(
     if (!state.cart) {
       return freshReadiness("CART_MUTATION", selections, null, null, null, checkedAt);
     }
-    const authorityLine = action === "ADD_LINE"
-      ? mutation.kind === "ADD_LINE" ? mutation.line : null
+    const authorityLine = action === "ADD_LINE" || action === "REPLACE_LINE"
+      ? mutation.kind === "ADD_LINE" || mutation.kind === "REPLACE_LINE" ? mutation.line : null
       : mutation.kind === "ADD_LINE"
         ? null
         : beforeCart.lines.find(({ lineId }) => lineId === mutation.lineId) ?? null;
@@ -1193,6 +1210,12 @@ export async function evaluateRealtimeSalesCycle(
       offerId: authorityLine.offerId,
       authorityKind,
       authorityEvidenceHash,
+      ...(mutation.kind === "REPLACE_LINE" ? {replacedLine:(() => {
+        const old = beforeCart.lines.find(l => l.lineId === mutation.lineId);
+        if (!old) throw new Error("NATIVE_REPLACEMENT_OLD_LINE");
+        return {lineId:old.lineId,productId:old.parentProductId,offerId:old.offerId,
+          beforeLineHash:createHash("sha256").update(canonicalJson(old),"utf8").digest("hex")};
+      })()} : {}),
       bindingHash: "0".repeat(64),
     };
     const authority = CartMutationAuthorityBindingV1Schema.parse({
@@ -1210,6 +1233,7 @@ export async function evaluateRealtimeSalesCycle(
       mutationPayloadHash,
       mutationReasonCode: action === "ADD_LINE"
         ? "LINE_ADDED" as const
+        : action === "REPLACE_LINE" ? "LINE_REPLACED" as const
         : action === "REMOVE_LINE"
           ? "LINE_REMOVED" as const
           : action === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" as const : "QUANTITY_CHANGED" as const,
@@ -1239,7 +1263,7 @@ export async function evaluateRealtimeSalesCycle(
       action,
       null,
       null,
-      mutation.kind === "ADD_LINE"
+      mutation.kind === "ADD_LINE" || mutation.kind === "REPLACE_LINE"
         ? mutation.line.quantity
         : mutation.kind === "SET_QUANTITY"
           ? mutation.quantity
@@ -1251,7 +1275,7 @@ export async function evaluateRealtimeSalesCycle(
   const plan = (): RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null => {
     if (events.length === 0) return null;
     const cartExpiry = state.cart ? new Date(state.cart.expiresAt) : null;
-    const expiresAt = cartExpiry ?? new Date(input.now.getTime() + CART_TTL_MS_V1);
+    const expiresAt = cartExpiry ?? (state.pendingNegotiation?new Date(state.pendingNegotiation.expiresAt):new Date(input.now.getTime() + CART_TTL_MS_V1));
     const batchWithPlaceholder = cartMutationReceipts.length === 0
       ? null
       : {
@@ -1315,6 +1339,7 @@ export async function evaluateRealtimeSalesCycle(
       return failedOutput("PROTECTED_OUTBOUND_CART_SNAPSHOT_CHANGED");
     }
     const checkedAt = effectNow();
+    if (!cartSelectionsHaveIndependentStockV2(options.selections)) return failedOutput("CART_INVENTORY_SOURCE_UNRESOLVED");
     const cartClaimExpiry = new Date(Math.min(
       Date.parse(state.cart.expiresAt),
       bundle.policy.effectiveUntil === null
@@ -1330,7 +1355,7 @@ export async function evaluateRealtimeSalesCycle(
     const allClaims = [
       ...buildProtectedClaimsFromCartSelectionsV1(options.selections.map((selection) => ({
         productId: selection.line.parentProductId,
-        variantId: selection.line.offerId,
+        variantId: input.commandIdentity ? canonicalCartVariantScopeV2(selection.line, text => createHash("sha256").update(text, "utf8").digest("hex")) : selection.line.offerId,
         priceVnd: selection.line.posUnitPriceVnd!,
         priceVersion: selection.versions.price,
         inventoryVersion: selection.versions.inventory,
@@ -1382,7 +1407,7 @@ export async function evaluateRealtimeSalesCycle(
       sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
       conversationRevision: input.conversationRevision,
       salesCycleRevision: initial.revision,
-      productIds: state.cart.value.lines.map(({ parentProductId }) => parentProductId),
+      productIds: [...new Set(state.cart.value.lines.map(({ parentProductId }) => parentProductId))].sort(),
       cartId: state.cart.value.cartId,
       cartVersion: state.cart.value.revision,
       cartStateHash: cartHash(state.cart.value),
@@ -1412,6 +1437,11 @@ export async function evaluateRealtimeSalesCycle(
     };
   };
 
+  if(input.nativePendingNegotiation){
+    const result=apply(input.nativePendingNegotiation);
+    if(result.status!=="APPLIED")return failedOutput(result.status==="REJECTED"?result.reasonCode:"NATIVE_PENDING_NEGOTIATION_REJECTED");
+    return {handled:true,messages:[],plan:plan(),transferToHuman:false,desiredTag:null,reasonCode:null};
+  }
   if(input.nativeNegotiation){
     const command=input.nativeNegotiation;
     if(!ports.resolveInboundMessage(command.sourceMessageId)||!state.cart||!state.negotiation)return failedOutput("NATIVE_NEGOTIATION_SOURCE");
@@ -1432,10 +1462,15 @@ export async function evaluateRealtimeSalesCycle(
     const beforeCart = state.cart.value, customerState = state.negotiation.customerState;
     references.set(canonicalJson(command.mutationRef), { mutation });
     const result = apply(command);
-    if (result.status !== "APPLIED" || !state.cart) return failedOutput("NATIVE_MUTATION_REJECTED");
+    if (result.status !== "APPLIED" || !state.cart) {
+      const safeReasons = new Set(["CART_EMPTY","CART_VERSION_CONFLICT","CART_TERMINAL","CART_MUTATION_INVALID","POLICY_BLOCKED","PRICE_FACT_INVALID",
+        "SALES_STAGE_TRANSITION_INVALID","CART_EXPIRED_OR_MISSING","SHOP_POLICY_UNTRUSTED","CART_MUTATION_UNTRUSTED","NEGOTIATION_REPRICE_BLOCKED"]);
+      return {...failedOutput((result.status === "REJECTED" || result.status === "CONFLICT") && safeReasons.has(result.reasonCode) ? result.reasonCode : "NATIVE_MUTATION_REJECTED"),
+        failureStage:result.status==="CONFLICT"?"CAS":"DOMAIN"};
+    }
     const selections = await currentSelections(input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow());
     const ready = selections.filter((s): s is ReadyCartSelection => s.status === "READY");
-    if (!selectionsMatchCartLines(state.cart.value.lines, ready)) return failedOutput("NATIVE_MUTATION_SNAPSHOT_CHANGED");
+    if (!selectionsMatchCartLines(state.cart.value.lines, ready)) return {...failedOutput("NATIVE_MUTATION_SNAPSHOT_CHANGED"),failureStage:"SOURCE"};
     const readiness = acceptCartMutationReadiness(mutation.kind, command.commandId, beforeCart, ready, effectNow(), mutation,
       computeBusinessContentHash({ mutation }).replace(/^sha256:/u, ""), "NATIVE_TOOL_PERMISSION", hashCanonicalBuyingIntentV1(input.canonicalBuyingIntent), customerState);
     if (readiness.outcome !== "READY") return failedOutput(readiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
@@ -1447,13 +1482,25 @@ export async function evaluateRealtimeSalesCycle(
     capturedFields: readonly CheckoutFieldKey[] = [],
     nativeCommandId?: string,
   ): RealtimeSalesCycleOutput => {
+    const progress=input.checkoutCollection==="SINGLE_FIELD"&&capturedFields.some(field=>{
+      const key=({FULL_NAME:"fullName",PHONE:"phone",ADDRESS:"address",PAYMENT_METHOD:"paymentMethod"} as const)[field];
+      return !initial.checkoutDraft?.[key]&&!!state.checkoutDraft?.[key];
+    });
+    if(progress&&state.clarification&&!state.clarification.missingFields.includes("PAYMENT_METHOD")){
+      const reset=apply({kind:"CLARIFICATION_RESOLVED",commandId:commandId("clarification-progress")});
+      if(reset.status!=="APPLIED")return failedOutput("CLARIFICATION_RESOLVE_REJECTED",plan());
+    }
     const asked = input.checkoutCollection === "SINGLE_FIELD" ? missing.slice(0, 1) : missing;
     const productId = input.productId ?? state.cart?.value.lines.at(-1)?.parentProductId ?? null;
     const previous = state.clarification ?? null;
     const sameRequest = previous?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
       previous.productId === productId &&
       sameMissingFields(previous.missingFields, asked);
-    const attemptCount = sameRequest ? previous.attemptCount + 1 : 1;
+    const paymentQuestion = (fields: readonly string[]) => fields.length === 1 &&
+      (fields[0] === "PAYMENT_METHOD" || fields[0] === "ORDER_PREVIEW");
+    const sameBudget = sameRequest || previous?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
+      (paymentQuestion(previous.missingFields) || paymentQuestion(asked));
+    const attemptCount = sameBudget ? previous!.attemptCount + 1 : 1;
     if (attemptCount > MAX_CHECKOUT_CLARIFICATION_ATTEMPTS) {
       return {
         ...failedOutput("CLARIFICATION_RETRY_EXHAUSTED", plan()),
@@ -1469,8 +1516,11 @@ export async function evaluateRealtimeSalesCycle(
         },
       };
     }
+    const paymentMethods=bundle.artifacts.shopPolicy.allowedPaymentMethods;
+    if(input.checkoutCollection==="SINGLE_FIELD"&&asked[0]==="PAYMENT_METHOD"&&(!paymentMethods?.length))return failedOutput("PAYMENT_POLICY_UNAVAILABLE",plan());
+    const fieldLabel=asked[0]==="PAYMENT_METHOD"?paymentMethods.map(m=>m==="COD"?"COD":"chuyển khoản").join(" hoặc "):CHECKOUT_FIELD_LABELS[asked[0]!];
     const message = input.checkoutCollection === "SINGLE_FIELD"
-      ? `${attemptCount === 1 ? "Chị cho em" : attemptCount === 2 ? "Chị gửi riêng" : "Em còn cần"} ${CHECKOUT_FIELD_LABELS[asked[0]!]} nhé.`
+      ? `${attemptCount === 1 ? "Chị cho em" : attemptCount === 2 ? "Chị gửi riêng" : "Em còn cần"} ${fieldLabel} nhé.`
       : clarificationMessage(missing, attemptCount);
     const requested = apply({
       kind: "CLARIFICATION_REQUESTED",
@@ -1505,6 +1555,16 @@ export async function evaluateRealtimeSalesCycle(
       },
     };
   };
+
+  const candidatePayment=input.checkoutCollection==="SINGLE_FIELD"?paymentChoice(input.text):null;
+  const paymentPending=()=>state.clarification?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&state.clarification.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD";
+  const paymentAllowed=candidatePayment?.kind==="RESOLVED"&&bundle.artifacts.shopPolicy.allowedPaymentMethods?.includes(candidatePayment.method);
+  if(candidatePayment&&["CART_OPEN","ORDER_PREVIEW"].includes(state.stage)&&
+    (["AMBIGUOUS","UNSUPPORTED"].includes(candidatePayment.kind)||candidatePayment.kind==="RESOLVED"&&!paymentAllowed)){
+    const {paymentMethod:_ignored,...fields}=checkoutDetails(input.text,undefined,undefined,"SINGLE_FIELD");
+    if(Object.keys(fields).length){const c=apply({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:commandId("checkout-details"),details:fields});if(c.status!=="APPLIED")return failedOutput("CHECKOUT_DETAILS_REJECTED",plan());}
+    return requestCheckoutClarification(["PAYMENT_METHOD"], checkoutCapturedFields(fields));
+  }
 
   if (input.checkoutCollection === "SINGLE_FIELD" && state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
       ["CART_OPEN", "ORDER_PREVIEW"].includes(state.stage) && classifyConfirmationContract(input.text, null).decision === "REJECT") {
@@ -1784,7 +1844,7 @@ export async function evaluateRealtimeSalesCycle(
       sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
       conversationRevision: input.conversationRevision,
       salesCycleRevision: input.stateRevision,
-      productIds: state.cart?.value.lines.map(({ parentProductId }) => parentProductId) ?? [],
+      productIds: [...new Set(state.cart?.value.lines.map(({ parentProductId }) => parentProductId) ?? [])].sort(),
       cartId: state.cart?.value.cartId ?? null,
       cartVersion: state.cart?.value.revision ?? null,
       cartStateHash: state.cart ? cartHash(state.cart.value) : null,
@@ -1968,7 +2028,7 @@ export async function evaluateRealtimeSalesCycle(
 
     const pending = input.checkoutCollection === "SINGLE_FIELD" && state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
       state.clarification.missingFields.length === 1 ? state.clarification.missingFields[0] as CheckoutFieldKey : undefined;
-    const details = checkoutDetails(input.text, input.salesSignals, pending);
+    const details = checkoutDetails(input.text, input.salesSignals, pending,input.checkoutCollection);
     const hasDetails = Object.keys(details).length > 0;
     if (hasDetails) {
       const prospectiveCheckoutDraft = { ...state.checkoutDraft, ...details };
@@ -1977,7 +2037,7 @@ export async function evaluateRealtimeSalesCycle(
         ...(prospectiveCheckoutDraft.fullName ? [] : ["FULL_NAME" as const]),
         ...(prospectiveCheckoutDraft.phone ? [] : ["PHONE" as const]),
         ...(prospectiveCheckoutDraft.address ? [] : ["ADDRESS" as const]),
-        ...(prospectiveCheckoutDraft.paymentMethod ? [] : ["PAYMENT_METHOD" as const]),
+        ...(prospectiveCheckoutDraft.paymentMethod&&(!paymentPending()||details.paymentMethod) ? [] : ["PAYMENT_METHOD" as const]),
       ];
       if (prospectiveMissing.length > 0) {
         const captured = apply({
@@ -1988,7 +2048,7 @@ export async function evaluateRealtimeSalesCycle(
         if (captured.status !== "APPLIED") {
           return failedOutput("CHECKOUT_DETAILS_REJECTED", plan());
         }
-        return requestCheckoutClarification(prospectiveMissing, capturedFields);
+        return requestCheckoutClarification(paymentPending()?["PAYMENT_METHOD"]:prospectiveMissing, capturedFields);
       }
       if (prospectiveCheckoutDraft.paymentMethod === "BANK_TRANSFER" && !bank) {
         return failedOutput("BANK_TRANSFER_POLICY_UNAVAILABLE");
@@ -2028,7 +2088,7 @@ export async function evaluateRealtimeSalesCycle(
         details,
       });
       if (captured.status !== "APPLIED") return failedOutput("CHECKOUT_DETAILS_REJECTED");
-      if (state.clarification) {
+      if (state.clarification && !(state.clarification.missingFields.length === 1 && state.clarification.missingFields[0] === "ORDER_PREVIEW")) {
         const resolved = apply({
           kind: "CLARIFICATION_RESOLVED",
           commandId: commandId("clarification-resolved"),
@@ -2303,6 +2363,7 @@ export async function evaluateRealtimeSalesCycle(
     }
 
     if (state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING") {
+      if(input.checkoutCollection==="SINGLE_FIELD"&&paymentPending())return requestCheckoutClarification(["PAYMENT_METHOD"]);
       const missing = missingCheckout(state);
       if (missing.length === 0) {
         const resolved = apply({

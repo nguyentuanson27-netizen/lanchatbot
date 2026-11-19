@@ -1,0 +1,449 @@
+{
+  "kind": "TARGET_COMPOSITION_CONTINUATION_IMPLEMENTATION_VERIFICATION",
+  "implementationBaseSha": "1c2ef10e0a3a83eb80074585b92802ebdd3d142d",
+  "reviewedExecutableSha": "639aff103898ad9e6cad5119d27c08f4809f9896",
+  "sourceDirtyAtFinalNodeAndPg": false,
+  "planSha256": "a8cb152f336ca62d7f6e08be34db4d3d2f952e31dd7fb8a02abe35b3eee37cfa",
+  "sourceManifest": "source-manifest.json",
+  "independentReview": "independent-implementation-review.json",
+  "engineeringVerdict": "APPROVE_SCOPED_IMPLEMENTATION",
+  "modelCampaign": "NOT_RUN",
+  "providerGenerations": 0,
+  "liveSend": false,
+  "commands": [
+    {
+      "command": "pnpm --filter @lana/contracts exec vitest run src/v2/canonical-evidence-readiness.test.ts src/v2/customer-size-cart.test.ts",
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-s1-green-20261105.log",
+      "pass": 75
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts",
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-business-focused-20261105.log",
+      "pass": 42
+    },
+    {
+      "command": "pnpm --filter @lana/database exec vitest run src/realtime-runtime.test.ts",
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-database-focused-20261105.log",
+      "pass": 56
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-product-groups.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-media.test.ts src/single-agent-commerce-media-delivery.test.ts src/single-agent-semantic-verifier-boundary.test.ts",
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-worker-focused-20261105.log",
+      "pass": 594,
+      "scope": "Before 3 additional malformed-container controls; overlapped by full suite"
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/selection-compact-wire.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-product-tables.test.mjs apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs",
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-plan-node-final-20261105.log",
+      "scope": "Exact planned five-file adapter command, run after engineering review; only report/evidence worktree changes, executable bytes match approved639.",
+      "pass": 103
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src --maxWorkers=2",
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-worker-full-20261105-02.log",
+      "pass": 2659,
+      "files": 154,
+      "sourceScope": "c7b485b0 TS source; unchanged in final639"
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-evals-final-20261105.log",
+      "pass": 856,
+      "skip": 2,
+      "fail": 0,
+      "sourceSha": "639aff103898ad9e6cad5119d27c08f4809f9896"
+    },
+    {
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "build"
+      ],
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-final-build-20261105.log",
+      "sourceScope": "Current shared/runtime TS unchanged in final eval-only dictionary follow-up"
+    },
+    {
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-final-typecheck-20261105.log",
+      "sourceScope": "Current shared/runtime TS unchanged in final eval-only dictionary follow-up"
+    },
+    {
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "lint"
+      ],
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-final-lint-20261105.log",
+      "sourceScope": "Current shared/runtime TS unchanged in final eval-only dictionary follow-up"
+    },
+    {
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@lana/contracts",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-final-contracts-20261105.log",
+      "sourceScope": "Current shared/runtime TS unchanged in final eval-only dictionary follow-up"
+    },
+    {
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@lana/business-tools",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-final-business-20261105.log",
+      "sourceScope": "Current shared/runtime TS unchanged in final eval-only dictionary follow-up"
+    },
+    {
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-final-database-20261105.log",
+      "sourceScope": "Current shared/runtime TS unchanged in final eval-only dictionary follow-up"
+    },
+    {
+      "command": "pnpm --filter @lana/worker benchmark:c2:validate",
+      "exitCode": 0,
+      "log": "logs/c3-target-repair-benchmark-20261105.log"
+    },
+    {
+      "argv": [
+        "python",
+        "../c3-media-context-model-source-wrapper-20261103-02.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-target-repair-pg-final-20261105-01",
+        "COD",
+        "--check-prefix",
+        "C target repair"
+      ],
+      "exitCode": 0,
+      "result": "pg-final.json",
+      "providerGenerations": 0,
+      "testDatabaseDropped": true
+    },
+    {
+      "argv": [
+        "python",
+        "../c3-media-context-model-source-wrapper-20261103-02.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-target-repair-pg-b-preserving-20261105-01",
+        "COD",
+        "--check-prefix",
+        "C B-preserving"
+      ],
+      "exitCode": 0,
+      "result": "pg-b-preserving.json",
+      "providerGenerations": 0,
+      "testDatabaseDropped": true
+    },
+    {
+      "command": "node ../c3-target-repair-j1-replay-20261105.mjs",
+      "exitCode": 0,
+      "result": "j1-wire-reconstruction.json",
+      "scope": "Offline reconstructed capture, no provider; historical body unavailable"
+    },
+    {
+      "command": "node ../c3-target-repair-composition-replay-20261105.mjs",
+      "exitCode": 0,
+      "result": "composition-replay.json",
+      "scope": "Offline historical source clock, not current authorization"
+    },
+    {
+      "command": "node ../c3-b-preserve-bc-replay-20261105.mjs ../c3-bc-controlled-20261030-01/INPUTS.json C ../c3-target-repair-bc-clean-20261105.json",
+      "exitCode": 0,
+      "result": "bc-replay-summary.json",
+      "scope": "Pinned offline component controls; no full end-to-end model parity"
+    }
+  ],
+  "logInventory": [
+    {
+      "artifact": "logs/c3-target-repair-bc-clean-20261105.log",
+      "sha256": "064b2fec3a439d0bd0721beea281397aa6f92ab07d5501114ba706a45ad7dd1b",
+      "bytes": 481
+    },
+    {
+      "artifact": "logs/c3-target-repair-benchmark-20261105.log",
+      "sha256": "cd0720d3e6ea05e3770bb2c1355ecf6e53912dacbdb087b56e25ea74cf5a1e53",
+      "bytes": 2151
+    },
+    {
+      "artifact": "logs/c3-target-repair-bom-container-green-20261105.log",
+      "sha256": "224d7c3515cf567162646fb298d0e8ecf635ef8991a3888a52721f22b549ba57",
+      "bytes": 463
+    },
+    {
+      "artifact": "logs/c3-target-repair-bom-container-red-20261105.log",
+      "sha256": "0ed5e4d48985f85ed31b3280fbaf1895439270469c4cd7672d171723a2eb3744",
+      "bytes": 13278
+    },
+    {
+      "artifact": "logs/c3-target-repair-build-20261105.log",
+      "sha256": "8015c21aa78574db2b9709e77b1a08f5487452d067d8e6967f475c4fad2d851a",
+      "bytes": 5673
+    },
+    {
+      "artifact": "logs/c3-target-repair-business-focused-20261105.log",
+      "sha256": "6d5ea4701719f45abe739b91f22f17ac7f8aed65eb8104db212087e76bfd8019",
+      "bytes": 475
+    },
+    {
+      "artifact": "logs/c3-target-repair-choice-green-20261105.log",
+      "sha256": "518ffa287fd90e8a8d0ed12c869c9ea08ae8e41d07f1f2c2383088bb2aa99529",
+      "bytes": 521
+    },
+    {
+      "artifact": "logs/c3-target-repair-choice-red-20261105.log",
+      "sha256": "16011f3e5a4fc3f9c17a768468d3a4980ddabdbf44da9433364c9df07b25f61e",
+      "bytes": 19872
+    },
+    {
+      "artifact": "logs/c3-target-repair-composition-replay-20261105.log",
+      "sha256": "99787fecfed18a338fbe278b115d048a374ec236bda8490d2ee7fdc59e772c8a",
+      "bytes": 490
+    },
+    {
+      "artifact": "logs/c3-target-repair-dangling-green-20261105-02.log",
+      "sha256": "3eed77b74efea92a5865ebb50c991c27aafda424f44465a5c424636ac1a660ba",
+      "bytes": 8286
+    },
+    {
+      "artifact": "logs/c3-target-repair-dangling-green-20261105.log",
+      "sha256": "be469a2bbb33cbc4d193dedaaf8b38271853760b96aaf4934c885bf2dfa95cb8",
+      "bytes": 9616
+    },
+    {
+      "artifact": "logs/c3-target-repair-dangling-red-20261105.log",
+      "sha256": "4795eaf17b700f94266200f543e03f4332745b6bb557ab5e501b9c652bf569bc",
+      "bytes": 9880
+    },
+    {
+      "artifact": "logs/c3-target-repair-database-focused-20261105.log",
+      "sha256": "fa7893a343c94a6a02ebc447840300c37dd9dacfa091c0d80ef9cd89cf34aa71",
+      "bytes": 375
+    },
+    {
+      "artifact": "logs/c3-target-repair-diagnostic-compat-20261105.log",
+      "sha256": "06ea0e1bc9a03f23760d47daff5b2ec1978a7289c4ee151ef30258aa5aa08cd7",
+      "bytes": 351
+    },
+    {
+      "artifact": "logs/c3-target-repair-diagnostics-focused-20261105.log",
+      "sha256": "5d069ac055d8f669293ed749b2ea3e3f27398300f17a4eeec519d2a06ec4c1e6",
+      "bytes": 8375
+    },
+    {
+      "artifact": "logs/c3-target-repair-dictionary-green-20261105.log",
+      "sha256": "b9647a25e271ae2c8dc8081dff617ba8a878f8acc49684d78e60e8879e0da123",
+      "bytes": 9009
+    },
+    {
+      "artifact": "logs/c3-target-repair-dictionary-red-20261105.log",
+      "sha256": "744d95ae4f6b6ccd077173c83c6653618f7347832a25cd846a80d8677acdf37b",
+      "bytes": 1611
+    },
+    {
+      "artifact": "logs/c3-target-repair-evals-final-20261105.log",
+      "sha256": "af2cfdca2949f417c8138ea3efafe87390250329c60dc848613558edc7719bc3",
+      "bytes": 94242
+    },
+    {
+      "artifact": "logs/c3-target-repair-evals-full-20261105-02.log",
+      "sha256": "3e54898a0aa43f33f889e99ef0a15ac6b67c31970fb8f4b52b814b9061e2e361",
+      "bytes": 94151
+    },
+    {
+      "artifact": "logs/c3-target-repair-evals-full-20261105.log",
+      "sha256": "76fa6a1ae1d0455260d0c02b35437e0dd0f298d8502567aec70d4bfb6c070964",
+      "bytes": 96830
+    },
+    {
+      "artifact": "logs/c3-target-repair-final-build-20261105.log",
+      "sha256": "2e2a7477d537b26a68ab3128a8c2a948c8fcc9c1201ee5f47cd9f59183f458a7",
+      "bytes": 5249
+    },
+    {
+      "artifact": "logs/c3-target-repair-final-business-20261105.log",
+      "sha256": "3333868def9afe9b4c5ecc6803cd7da86599de45e5774ed721cb470e8e77ad5d",
+      "bytes": 804
+    },
+    {
+      "artifact": "logs/c3-target-repair-final-contracts-20261105.log",
+      "sha256": "1b7113c9a1e3ca485b1878418e0237fc26beddeea42b4f5d0205fe6510e7d7e8",
+      "bytes": 186
+    },
+    {
+      "artifact": "logs/c3-target-repair-final-database-20261105.log",
+      "sha256": "fb22438eff46a7796dc43c7bb69c6b11a0bae5be99ce4c1ab983f268a38e560d",
+      "bytes": 780
+    },
+    {
+      "artifact": "logs/c3-target-repair-final-lint-20261105.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "artifact": "logs/c3-target-repair-final-typecheck-20261105.log",
+      "sha256": "660b288930cd706bd031439efe7920e08301cf041e8dd18afcaba58c083306b5",
+      "bytes": 5266
+    },
+    {
+      "artifact": "logs/c3-target-repair-j1-replay-20261105-final.log",
+      "sha256": "2118df0a8ea9b04155df29fb36cb0bda21b453b0c7330543909497c12683f445",
+      "bytes": 664
+    },
+    {
+      "artifact": "logs/c3-target-repair-j1-replay-20261105.log",
+      "sha256": "2118df0a8ea9b04155df29fb36cb0bda21b453b0c7330543909497c12683f445",
+      "bytes": 664
+    },
+    {
+      "artifact": "logs/c3-target-repair-node-focused-20261105.log",
+      "sha256": "4e12641c270de4a8af21ce7093959683b7e091cf99ec96c3fdffdf08c255a347",
+      "bytes": 9500
+    },
+    {
+      "artifact": "logs/c3-target-repair-pg-20261105-01.log",
+      "sha256": "2a65a9c8da3958d588466c84c3d9cc18e8e712ac3265932e048c1a826d175f6b",
+      "bytes": 875
+    },
+    {
+      "artifact": "logs/c3-target-repair-pg-20261105-02.log",
+      "sha256": "480f80c442adcb5df764f81034a042be8d96a554730c676a22e5afebf8574982",
+      "bytes": 820
+    },
+    {
+      "artifact": "logs/c3-target-repair-pg-20261105-03.log",
+      "sha256": "198f3735285c779747bd96773a123887e98ea669ea29ecfed1778d6de515229b",
+      "bytes": 193
+    },
+    {
+      "artifact": "logs/c3-target-repair-pg-b-preserving-20261105-01.log",
+      "sha256": "42633d203fa2b1589468696bfb85d9b8daa56fb1016d0179e68a30409e7954fe",
+      "bytes": 202
+    },
+    {
+      "artifact": "logs/c3-target-repair-pg-clean-20261105-01.log",
+      "sha256": "4b58531fc1deda42ac9669249c7cbb0e9125380e00693d17ef523464291adb83",
+      "bytes": 280
+    },
+    {
+      "artifact": "logs/c3-target-repair-pg-final-20261105-01.log",
+      "sha256": "4b58531fc1deda42ac9669249c7cbb0e9125380e00693d17ef523464291adb83",
+      "bytes": 280
+    },
+    {
+      "artifact": "logs/c3-target-repair-photo-focused-20261105.log",
+      "sha256": "3fdc989504a98aaf6c0a12ce363334825927a637a97593db356276fb2295b8e1",
+      "bytes": 6714
+    },
+    {
+      "artifact": "logs/c3-target-repair-s1-green-20261105.log",
+      "sha256": "a06b4f88c6d8c611f75b5652fd4cb10fb006e175574efd01bd03b62912ce552b",
+      "bytes": 445
+    },
+    {
+      "artifact": "logs/c3-target-repair-s1-red-20261105.log",
+      "sha256": "176e57e348b23178d3129457d55d3b085babacceb23a0d839118edd9eca3aab1",
+      "bytes": 9284
+    },
+    {
+      "artifact": "logs/c3-target-repair-s2-green-20261105.log",
+      "sha256": "63b9c4e1f4caf39c08b57dfd53ee38d97ca8e8929e6e353177a3a1d87dce2a90",
+      "bytes": 390
+    },
+    {
+      "artifact": "logs/c3-target-repair-s2-red-20261105.log",
+      "sha256": "b8a8294d87d8192d0d53b5352f96e20a158ac0f9c94adcf01c9b85ce38a84d82",
+      "bytes": 15067
+    },
+    {
+      "artifact": "logs/c3-target-repair-s3-green-20261105.log",
+      "sha256": "2d0681a4db1fc537f36fcec432292605bdf6aa49fa96f1abf05e1b5e30f91072",
+      "bytes": 963
+    },
+    {
+      "artifact": "logs/c3-target-repair-s3-red-20261105.log",
+      "sha256": "2fffd5fc1cd1df3c85ec0bf69270bc713b29b77cf041a3417b2c5d9990a55618",
+      "bytes": 1246
+    },
+    {
+      "artifact": "logs/c3-target-repair-tsc-20261105-02.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "artifact": "logs/c3-target-repair-tsc-20261105.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "artifact": "logs/c3-target-repair-worker-focused-20261105.log",
+      "sha256": "472fe6a15b822268b7485edb8c01fad1a6985487433a0ed467c3df8fa89ab302",
+      "bytes": 1271
+    },
+    {
+      "artifact": "logs/c3-target-repair-worker-full-20261105-02.log",
+      "sha256": "51019cd9c0045eacaa473ce0cb6b2cf9db91d778ef95e53cb2a689ac2545317d",
+      "bytes": 12906
+    },
+    {
+      "artifact": "logs/c3-target-repair-worker-full-20261105.log",
+      "sha256": "1b37817376a3469e4f018d097e2166ece0e0cb37f6e1d36fb7224f8afad1af48",
+      "bytes": 15999
+    },
+    {
+      "artifact": "logs/c3-target-repair-plan-node-final-20261105.log",
+      "sha256": "4d61aae1ae97d5b4f9b538f5b687e96caea0ffc822df1e532f5adcc69bdf16ba",
+      "bytes": 11148
+    }
+  ],
+  "failuresRetained": [
+    "S1 RED 1 fail",
+    "S2 RED 7 fail",
+    "S3 missing export RED",
+    "choice missing effectCommitted marker RED",
+    "dangling reference actual-adapter RED",
+    "malformed BOM container RED 3 fail",
+    "conflicting same-body dictionary RED",
+    "First build TS unknown[] error",
+    "First worker full: obsolete expected projection lacked quantity",
+    "First Node full: obsolete diagnostic envelope lacked argumentShape",
+    "PG01 media fixture missing explicit call",
+    "PG02 fieldEvidence map wrongly treated as array"
+  ],
+  "limits": [
+    "Scripted providers and in-memory delivery capture are not model or live-send results",
+    "Node intermediate run855/2 was not a final exact-source seal; final856/2 is authoritative",
+    "Worker2659 and B-preservingPG ran before final eval-only dictionary guard; their tested shared/runtime TS source bytes remain unchanged",
+    "Historical capture replays do not authorize current freshness or establish model/search parity",
+    "s03 owner evidence use, s13/j4 malformed completions, s15 unknown-field origin require subsequent measured provider campaign",
+    "Prior prefix functional FAIL and21cases31turns NOT_RUN remain; no qualification GO/C3 comparison"
+  ]
+}

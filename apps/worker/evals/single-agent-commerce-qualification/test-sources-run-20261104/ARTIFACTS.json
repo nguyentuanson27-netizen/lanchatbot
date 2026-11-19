@@ -1,0 +1,465 @@
+{
+  "sourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-finalize-inputs-20261104-01.mjs",
+      "sha256": "fe383e3bd6416038e3f28fe0c6ae7df8ac222df641e89db8d05da5851e4b68fd",
+      "bytes": 2178
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-helper-inventory-20261104-01.json",
+      "sha256": "fb64bec87ed9e5a8a175ce11253d8c196f5f4e1d18f060ed9d2ea78bff493666",
+      "bytes": 3218
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-initial-20261104-01\\INITIAL_STATE.json",
+      "sha256": "472145dd0d8d4981d94d11f7f0358269b93c3905a78afe6251029d0a902fa3d6",
+      "bytes": 700
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-initial-20261104-01\\integration.json",
+      "sha256": "1b0a3fbd039223a7b21295e2f4c0183d40e1f69099e1b059b46f719db5ecead1",
+      "bytes": 8221
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-input-index-20261104-01.json",
+      "sha256": "5b5433057d9e3a6921c4c80d7867417e8ee3526377a89e1814c4ae031a5ff68d",
+      "bytes": 910
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-launch-20261104-01.py",
+      "sha256": "43e35ad1bd5dc48e2ccab8265548873fdea7c688876a772c94ede7bc4c14d3f6",
+      "bytes": 3117
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-make-helpers-20261104-01.py",
+      "sha256": "4435bc032eed5813fc2f3f5a8dd417256708d662264c56811c41d21403af6bb4",
+      "bytes": 4639
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-prepare-20261104-01.mjs",
+      "sha256": "c791bc052e1db2b249177b799e270a8af5a7165a012676c42b613890f240b2d9",
+      "bytes": 9994
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-accounting-20261104-01.json",
+      "sha256": "7d6b8593de5f58c67c6239081fdce55dba006f5255354c1d9fb883d8cc87daa2",
+      "bytes": 152314
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-accounting-20261104-01.mjs",
+      "sha256": "fa5160f2fd5f47c9aca9dae7c34986d3013e18672a394fd13c16984932f9632a",
+      "bytes": 4327
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-command-20261104-01.json",
+      "sha256": "adde79e8c74e62eee311921f35ff3ca97dbdad5510fa7dc011527c59da4c2206",
+      "bytes": 966
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-command-started-20261104-01.json",
+      "sha256": "246450328602314f12ec7e99abb0a04dc7f6ec3365fc852971d2dfa99d0dd818",
+      "bytes": 894
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-post-run-audit-20261104-01.json",
+      "sha256": "f56ea06adbdef049aeb2871f1c6ffe149516b50611f0345518efe533f75f7df6",
+      "bytes": 6844
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "7bfdec79a21a4f2076ba79e09678d54a135bd73e7102798f8a62a9f02931dd1b",
+      "bytes": 10780645
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\integration.json",
+      "sha256": "dd244801ffd7226b62c8f9895cd3c4cefa368334d1bf83905fbc2498b1c63ef0",
+      "bytes": 8930
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-00664935fa5348dbab0222554c8bbfaba5ab6389b35939c5b4ff87ac232a838d-turn-0.json",
+      "sha256": "2aee618be2a46d28a34f4fe492252fc36fbc6445b9f0d2e7019ca7e00ea4ed1f",
+      "bytes": 58932
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-0ba97d9d0282aa26990bd9ad3d4c81e1ca490c85c195e2925c7f79e7c2bfd65d-turn-0.json",
+      "sha256": "c90094d53d9fb7faf4ffc521e9f884baff0ab8a646629406efc51eac8d408fe9",
+      "bytes": 150349
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-0d868280a7251c5537a65cdfb63afdbe3ed42572a8a7baafe20b7e43e2665dcb-turn-0.json",
+      "sha256": "75ee3c5409234640647e2c2b02f54f46196da0da8bca7f7f855fba6eb15dc05d",
+      "bytes": 431884
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-100d6ef8ebf64989149db9f79fbe45c6ddbbf77999461d2aa84d7681f356810e-turn-0.json",
+      "sha256": "62ae30297f51a38401fa9e94b2695f3cadb6aa8c73e5c4fb85ab51560785c409",
+      "bytes": 458209
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-100d6ef8ebf64989149db9f79fbe45c6ddbbf77999461d2aa84d7681f356810e-turn-1.json",
+      "sha256": "ca77eec20345e56f1a763e5ed4cb14f17c3ae3ae7ff71f232690a0a39ad04ed2",
+      "bytes": 156687
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-100d6ef8ebf64989149db9f79fbe45c6ddbbf77999461d2aa84d7681f356810e-turn-2.json",
+      "sha256": "dc68600de0780e296bb668e047e8d0d3e2da0195f2c1bbcd0c17485889a252d7",
+      "bytes": 31290
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-2773afd627bfd01d30d57c94b028a4e719f6e7133b793d6ec67f334045f151de-turn-0.json",
+      "sha256": "9349cea7143b53602cf0f010ca59cc2b0044b44bf68c8d3e9a9da13d150efed0",
+      "bytes": 303851
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-3b00638d9608340b2f392dd42de175f66f253d7984a2b5eda55dbddc6d74e5fe-turn-0.json",
+      "sha256": "963f9cfdde15139d804967c3e051f584e8c7e25d2a92e984dfdd1b8986874066",
+      "bytes": 338156
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-45636206380229faf706cfa6680639ca718adfff10d1dcd359951855c73c8713-turn-0.json",
+      "sha256": "ac4aaf14b14bd5b9b8c8618f4f4000093ef5c3b82ff4a629066c1c5d0d5d9e50",
+      "bytes": 371008
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-49bc29d40aceaa916ff4d686ad79d22b597b519c069d047de63d9c6ff886cd1a-turn-0.json",
+      "sha256": "1146e3cbf2a0c730c59a1ab172f49f985d7ecb193a1a09d785dc1afaabb83f00",
+      "bytes": 152801
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-55c13fee71a483c22411b080dddec605a6974b89e84dba3977eebf3cad526f10-turn-0.json",
+      "sha256": "07ddac71ccaf1ee314ffa959958bb8558af65a3490f93d501db4a3b7943652fe",
+      "bytes": 440714
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-55c13fee71a483c22411b080dddec605a6974b89e84dba3977eebf3cad526f10-turn-1.json",
+      "sha256": "5f1ef917643acad3351e8ced77127387de5ebe3c91bdfe06a47232e4e34ac684",
+      "bytes": 281333
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-63677e5445320a402cd197731597085fc211838cacab2dfb82865b911f214448-turn-0.json",
+      "sha256": "f373e0e0af14f926769ae529b9530ad15e470e9ebc7c9e3b86d903b58d5266a4",
+      "bytes": 462995
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-63677e5445320a402cd197731597085fc211838cacab2dfb82865b911f214448-turn-1.json",
+      "sha256": "2f2825a21b757daa59f44b71b299dd03b7ffd9e3510a9bbd8009b84286835f5e",
+      "bytes": 468770
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-6c4e1a7b7be39c6473a2a265cae56eb52cb80110d936a8a51a0693aba0d95633-turn-0.json",
+      "sha256": "5b5dc1b127a19e47e74a51adfdf53493b5b78c3270d671be075c547f9c9a3aad",
+      "bytes": 230092
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-7afc78f9e3acddf18d4bd5f06279f47f03462d8c1007f1323d45bf2ba3fb1e05-turn-0.json",
+      "sha256": "a7adf6caddc2eaa8ac254f6948c723e42773b60d5eaac892543709b442648776",
+      "bytes": 151682
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-83879c08d4409dc8688f7f26636ad40a1861d4501ff79022b608c189fec2187e-turn-0.json",
+      "sha256": "4b1bf58fc8682c1c28535aafa630ebf78fa1cc3ed748eedfebfedb2b2ec48ecb",
+      "bytes": 517730
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-88ab9305e0aac48a3fc7e5bf16d6d4bf7d608564819aee9ff9f559a85d7fcd84-turn-0.json",
+      "sha256": "dc3569b0d59e069ce210ec105030d6c4167b191fdb44c423499400ba7ee2cfbc",
+      "bytes": 479575
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-88ab9305e0aac48a3fc7e5bf16d6d4bf7d608564819aee9ff9f559a85d7fcd84-turn-1.json",
+      "sha256": "3044d852220193cf80ddb5a5344383587fded3a643128b7f114dac29f631b0db",
+      "bytes": 223796
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-88ab9305e0aac48a3fc7e5bf16d6d4bf7d608564819aee9ff9f559a85d7fcd84-turn-2.json",
+      "sha256": "b776439762ca51f86acdd7f9e7a3ac679116d72e36dd1adc7ff4c36e2557ded1",
+      "bytes": 17561
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-91533dfd8568c017e47912348a2dde5c2101584f020e24e6f30baeb3edbb7ae3-turn-0.json",
+      "sha256": "68c4daa909fec72c8b8bf2902bb06a0c9a40a9cd5fe966bbe6b70d09418d50ed",
+      "bytes": 430398
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-9984430d5d47339f405b3052f12e1902f936e1f2739e042555a8f7e9656a4106-turn-0.json",
+      "sha256": "c43a770ceb1ac04055a36c15d6f97863753b5ceaed8c741b81422c60a98e1b4d",
+      "bytes": 460196
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-9984430d5d47339f405b3052f12e1902f936e1f2739e042555a8f7e9656a4106-turn-1.json",
+      "sha256": "76a8dded40a1aa646b0d9c43df4ed84b8a78412dea8e50756ea048f39732d906",
+      "bytes": 468914
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-9b9ef173f46a94849ab7db812dd4549be8943c28991558c8ef3e453abce1cdf6-turn-0.json",
+      "sha256": "3cffde65a3ba29cf389c4e120572ca365314c0f8db1f9e1af3a519490be43a8d",
+      "bytes": 406514
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-9be2014b6eb74ecac9ca33769aead193bff2b0f4882c2c08c7fa8d7bb32418ff-turn-0.json",
+      "sha256": "48ec0994e3b63b172fcb49fc018e72e94b76a14c96f9b92c0d94265f12b3c906",
+      "bytes": 448452
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-abc0f5085faa0af287a9333a253c5cb9eb122db37d36838470527df1171bccd5-turn-0.json",
+      "sha256": "7ea4136b3dab68bde2790aa0e5b5839457ba2222ca8a5cee136673887696b7dd",
+      "bytes": 435404
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-c48d9ccf9616ba035493c0a592a73712f6e15cbfb38bbd100c3b18465bb761f2-turn-0.json",
+      "sha256": "1971faa13162a09c769dfe831ce72e9bb9d41c257b2d9c471a21c5e3d06be730",
+      "bytes": 477854
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\native-fc3f833574c8c41bf3734d6702ce81e8ffd6f4808bf6722908fb510fd4a37a47-turn-0.json",
+      "sha256": "7196c06e58510995aae04287aa6f5441237d3ec555b8491cf439bdeea3c58fd7",
+      "bytes": 525412
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-run-20261104-01\\NATIVE_REQUESTS.jsonl",
+      "sha256": "69b2e38bdb4b78ee8606d48810ab476c02903298c7a589fd50fb7b9f9a006ed2",
+      "bytes": 10350348
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-sealed-20261104-01\\DIAGNOSTIC_DISPATCH.json",
+      "sha256": "0d08fd0e59cd59a6189ecc435242c4844abc0882f07213802b265d1c013f34b1",
+      "bytes": 162
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-sealed-20261104-01\\INPUT_APPROVAL.json",
+      "sha256": "6da59b725181b6bad12364b30da0850ec746620252dc730fe4ef21076bcad1ca",
+      "bytes": 2782
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-sealed-20261104-01\\PREFLIGHT.json",
+      "sha256": "34a9a48694d46f2ac8f01b47d34539c0b5ab4e3db7757fe2f5b49ec196ffd1b0",
+      "bytes": 868
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-sealed-20261104-01\\REGISTRATION.before-purpose-review.json",
+      "sha256": "c36bde5a45f1f8088978b5cfc0d37b0386421752df372e41cac0fc7d4c1f2c8e",
+      "bytes": 1724389
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-sealed-20261104-01\\REGISTRATION.json",
+      "sha256": "14a3c5aa507fd025f22e9adbd542c340a85535de9d6c3a1b48d9b5ff75068244",
+      "bytes": 1725308
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-sealed-20261104-01\\REGISTRATION.pending.json",
+      "sha256": "60faba7b81dd153db791c889100f3c1ffed2c770767a818cc9eadfa71c014025",
+      "bytes": 1724885
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purchase-sealed-20261104-01\\SOURCE_READINESS_REVIEW.json",
+      "sha256": "ecb62aa04782e02f3f4316fb5337c4da6ef06368ba0decbdd1ced69c328a97f9",
+      "bytes": 28582
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purpose-amendment-20261104-01.json",
+      "sha256": "b74480c103802aecd0bfeb9da690d8b4cea6bff35e950be919c1bf63714b5711",
+      "bytes": 6986
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-purpose-amendment-20261104-01.mjs",
+      "sha256": "d4b8cb35e2c226b2db9a13c93a4f461b8dfece2637a49af99cbeee66f45933be",
+      "bytes": 3773
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-accounting-20261104-01.json",
+      "sha256": "830882071049c069f56e19762bd481e00bce2f4e9752c9c1f0506e1897d4ec94",
+      "bytes": 84514
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-accounting-20261104-01.mjs",
+      "sha256": "03fc306fbde686a660f80a586a015136482574f7fdd777c38f4f6173e629b530",
+      "bytes": 4329
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-command-20261104-01.json",
+      "sha256": "c7d5591c528bf6eed94fc55c0e8d21cb1cf5db5a99448a0103bb139e197311a7",
+      "bytes": 969
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-command-started-20261104-01.json",
+      "sha256": "dc9f1545fa84c6623b3ec5038dc0754e371ad55a2da87303b191f549a60c9ad5",
+      "bytes": 897
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "d5f54cdeb994e6420d6fe17fc7bac3b23251af174df34074ac74bdfa9c372ef0",
+      "bytes": 5639244
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\integration.json",
+      "sha256": "0fce7ac5293d1d8ade2f93fd40ffeecea9bed5a6fbf922e3b0232d224b6b61ea",
+      "bytes": 7615
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-1185526c4c80d26db0c6277003f65065c0a1c4714431710ab3b1421c042c252b-turn-0.json",
+      "sha256": "4145f5e30415e30a75d3d09f653a0340a96ec7cecebf348b3c324a1a7d39e467",
+      "bytes": 410622
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-3f3e117ae00300cabe5e9c6481a22d457a04992b3df836b0b91e4b7f4a50cb42-turn-0.json",
+      "sha256": "9248f67471120c45e4e8abae1e92bdc019d0956fc3a415f1621afe37f41946e0",
+      "bytes": 225782
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-6e5b71e4b5caa6000c11692b0c5bbe2b6717a2fa1fccfc2ab2feed6470ddfe9d-turn-0.json",
+      "sha256": "9bbd0fa84988719e4a2868bdaedc0368e2ae3c6fb1cb862016cc27b4c5f0c646",
+      "bytes": 452542
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-782b83e848d539e96755a0a17a43f716c0a41fdc3a9fc8f072477975c6298651-turn-0.json",
+      "sha256": "42f5fdddc64c6efea268b00c2fac1f382a7ce41fc050ea6e5bfd9debbb49e32c",
+      "bytes": 183484
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-782b83e848d539e96755a0a17a43f716c0a41fdc3a9fc8f072477975c6298651-turn-1.json",
+      "sha256": "fad9edac0e6b0cb0c47448ec53fc1264701c718284cf449aa3fb36e4bfadb40b",
+      "bytes": 6671
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-782b83e848d539e96755a0a17a43f716c0a41fdc3a9fc8f072477975c6298651-turn-2.json",
+      "sha256": "fc5181ce57d933841513c2e100d4b8c6cb26777f485e88592e0cffec448b1c27",
+      "bytes": 7821
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-7cd8458d244c91a96115d9806c512c3e70233ecae876fe8a9ee3f83f110033cf-turn-0.json",
+      "sha256": "3f262b196ed97704346c00fc79e6069fe00c810fdd207ff1beaad2d4067505cd",
+      "bytes": 72820
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-7cd8458d244c91a96115d9806c512c3e70233ecae876fe8a9ee3f83f110033cf-turn-1.json",
+      "sha256": "74d5ffec8fb9939238b743a02032ec21f0a979776746bfe46478e95e8d627add",
+      "bytes": 6695
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-7cd8458d244c91a96115d9806c512c3e70233ecae876fe8a9ee3f83f110033cf-turn-2.json",
+      "sha256": "aaa58c1ee3bd2e861bdb6f5f913411d643587fdd0b7cccc015ecc8aa01b82d05",
+      "bytes": 7797
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-8487b51a63a3c873f30ec9294da927e0826842a82f16a62d6a79371c4f4af4c6-turn-0.json",
+      "sha256": "401cd759ba593169c9eaec55428cc430354738b3a99bf4573bf25e497ca4f4f6",
+      "bytes": 119691
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-898d1b8fe10f89098a1124b8a07608481fce8a6f4d889345a827a1ef2ff064b8-turn-0.json",
+      "sha256": "045fd8079a3c8da4ed9166bde6b9770ff02928b4685bfc8e9590d253c26d0b66",
+      "bytes": 530830
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-906c024b7f3caab1f4c6d5a5d14af320c18f8d18689ec9b4c6f1c8dae00b25ea-turn-0.json",
+      "sha256": "0629df4a824c85625fff9e6dd97861bfab12f699e9af27fe9444ea063b4b52ff",
+      "bytes": 437271
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-906c024b7f3caab1f4c6d5a5d14af320c18f8d18689ec9b4c6f1c8dae00b25ea-turn-1.json",
+      "sha256": "7ae280713a7d1cff906b15dc382ce868f5c7a1291e859b9984778dab469b6b00",
+      "bytes": 293208
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-906c024b7f3caab1f4c6d5a5d14af320c18f8d18689ec9b4c6f1c8dae00b25ea-turn-2.json",
+      "sha256": "cb27d67e79ec086655a7c3c11e236b1a2faed393fbc45827ced2841d62154a73",
+      "bytes": 299776
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-91efaa65b3edaf1c6ab64ceb11dbb2ec627eda9a4a3788fb33fe05fd53479781-turn-0.json",
+      "sha256": "afa44332262199f25f7a6fd828ce50b90b88b7052e3fd759aa090fb12867031b",
+      "bytes": 523360
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-ba6e4de1f2ef04f83b51f94898e38de3cd697bf69a8f99676b41b54930262db9-turn-0.json",
+      "sha256": "c2046145a2ce70636867e2a5fe14a4168ea0eabf3af2ddf1750a4f086249315a",
+      "bytes": 494273
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-bb91906e22647ac43a2e81f1d2f4c62aa5f7936a7e06b6f851bc3f9875471799-turn-0.json",
+      "sha256": "717c2bddc19143fbb9e7399c21713b75a4ef68d3442a8824cd24c932a27f6bf5",
+      "bytes": 183453
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-bb91906e22647ac43a2e81f1d2f4c62aa5f7936a7e06b6f851bc3f9875471799-turn-1.json",
+      "sha256": "a4cfe67fa4b8a33849ff928f0e388221c1266a21f13df9628de51ba3ba814074",
+      "bytes": 6707
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-bb91906e22647ac43a2e81f1d2f4c62aa5f7936a7e06b6f851bc3f9875471799-turn-2.json",
+      "sha256": "22d89536bac68ae13914ea0b0a7f975b23c3e4c2721fe141ebc1bd3c357e4974",
+      "bytes": 7937
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\native-dff3645c2829f65915909c9ddce466df5eb46732e76b480281ff691b077afb70-turn-0.json",
+      "sha256": "c192d84ec732b90a5542d39d8b8b295c84e927da9c772e5371c664b0213b37ab",
+      "bytes": 432223
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-run-20261104-01\\NATIVE_REQUESTS.jsonl",
+      "sha256": "b9033bb2bb24b1be8cdd18c51e3d0275e35d12c4880011e864832b6bcbab4262",
+      "bytes": 4903445
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-sealed-20261104-01\\DIAGNOSTIC_DISPATCH.json",
+      "sha256": "c628035e61c5e7bae5f491894c0fd2f847770ef3b74075fb98d09b1824423e0c",
+      "bytes": 162
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-sealed-20261104-01\\INPUT_APPROVAL.json",
+      "sha256": "4b359d780e47fe123082f07f89dc2d8866e1df4b3347c4d0182a0558288b6919",
+      "bytes": 2781
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-sealed-20261104-01\\PREFLIGHT.json",
+      "sha256": "0d7b72509bc7aaf6f4ffe04fe4d92fc99e3f06869204557383b85814a1864889",
+      "bytes": 867
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-sealed-20261104-01\\REGISTRATION.before-purpose-review.json",
+      "sha256": "c2e0afdc81352bdcaf1c832fd5c35afc04dbc6cbf8f8ba3461238b33614c79d0",
+      "bytes": 1242712
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-sealed-20261104-01\\REGISTRATION.json",
+      "sha256": "81128422afdcd9a4a83f33f3de4be76b6fddfda8f96b19c298d48faf8583cb59",
+      "bytes": 1243522
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-sealed-20261104-01\\REGISTRATION.pending.json",
+      "sha256": "b3125d0849b590d053a5e88e82ce700aa1bce7f81a000c03a6e4d00ee2eb1c3b",
+      "bytes": 1243098
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-remainder-sealed-20261104-01\\SOURCE_READINESS_REVIEW.json",
+      "sha256": "7e9fb444839c5091164873fe5e5b2e5ff89c2d995ada59cf6086afdbe46afbcb",
+      "bytes": 20227
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-report-20261104-01.py",
+      "sha256": "3b4487f8472f4ed547fa12d707a75a246b5dcbd88f32f90fbf1306ff97122c28",
+      "bytes": 8613
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-status-20261104-01.py",
+      "sha256": "3179c8f607d57dd8a5b60574301564037a10c6c6bdd182ad26a823927e3b4d57",
+      "bytes": 1280
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-world-20261104-01\\PUBLIC_SOURCE_WORLD.json",
+      "sha256": "a13452ffde9bf96652e0e54002203cef2df2bb8a42dba35a0739a0972c8706b4",
+      "bytes": 42772349
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-world-20261104-01\\SUMMARY.json",
+      "sha256": "9f9c30fb220aab06aeaecf3d58d72091ea183f2ffefd7ad1480951377bc68d8b",
+      "bytes": 2015
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-test-sources-model-world-20261104-01\\WORLD.json",
+      "sha256": "aafd156f5a92c7b69807a175344f4c70f89af0d5b38e21322c9aa1a464efef98",
+      "bytes": 42782804
+    }
+  ]
+}

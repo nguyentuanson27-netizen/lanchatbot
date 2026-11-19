@@ -1,0 +1,24 @@
+{
+  "kind": "CHECKOUT_RELAXATION_DEVELOPMENT_N1_NOT_QUALIFICATION",
+  "command": [
+    "python",
+    "../c3-media-context-model-source-wrapper-20261103-02.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "..\\c3-checkout-relax-model-remainder-run-20261103-01",
+    "COD",
+    "--phase-c-diagnostic-registration",
+    "..\\c3-checkout-relax-model-remainder-sealed-20261103-01\\REGISTRATION.json",
+    "--phase-c-world",
+    "../c3-checkout-relax-model-world-resolved-20261103-01.json",
+    "--phase-c-seed",
+    "..\\c3-checkout-relax-model-remainder-sealed-20261103-01\\PRIVATE_BLIND_SEED.json"
+  ],
+  "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "registrationHash": "b5180ceae6ff87dabe30398b2b052aa135b178d31461f20a6a2d1c0a9c1ab01b",
+  "retry": 0,
+  "sendEnabled": false,
+  "startedAt": "2026-11-03T17:20:52.437665+00:00",
+  "exitCode": 0,
+  "completedAt": "2026-11-03T17:27:05.376032+00:00"
+}

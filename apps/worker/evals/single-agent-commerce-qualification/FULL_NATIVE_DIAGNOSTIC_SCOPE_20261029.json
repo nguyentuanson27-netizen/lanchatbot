@@ -1,0 +1,128 @@
+{
+  "name": "FULL_NATIVE_22_20261029",
+  "purpose": "DEVELOPMENT_ONLY_NOT_QUALIFICATION",
+  "repetitions": 1,
+  "maximumCases": 22,
+  "maximumNativeCustomerTurns": 34,
+  "maximumVerifierOnlyProbes": 0,
+  "maximumGenerationRequests": 136,
+  "maximumOwnerGenerationsPerNativeTurn": 3,
+  "maximumVerifierGenerationsPerTurn": 1,
+  "generationRetry": 0,
+  "sourceCorpusHash": "efa318a4a081c4c1194c5414dcfedc4122f22a41059c41983f440a72a39fff83",
+  "customerScriptsHash": "af6e434ed61309592ef36e41758eed956059c50de8b26af9063ca8e45165c6f8",
+  "cases": [
+    {
+      "sourceCase": "c-20261028-s01",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s02",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s03",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s04",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s05",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s06",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s07",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s08",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s09",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s10",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s11",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s12",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s13",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s14",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s15",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s16",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-j1",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-20261028-j2",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-20261028-j3",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-20261028-j4",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-20261028-j5",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-20261028-j6",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    }
+  ],
+  "registrationRequiredBeforeDispatch": true,
+  "qualifiedReplacement": false
+}

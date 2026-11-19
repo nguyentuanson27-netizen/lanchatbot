@@ -1,0 +1,1338 @@
+{
+  "source": "5dfde94b11a2b55ca7a52846b241bb440ee68994",
+  "worldHash": "b96fd7c76ce2d66cf7d6e4648022fed6fdc99118c073bde7613329a758339c27",
+  "registrationSha256": "005575f84f110d99c7ffb3d1983c8307125a5fafa5e385a531ef6fe57fbc04c8",
+  "owner": {
+    "provider": "VERTEX_AI",
+    "model": "gemini-3.5-flash-lite",
+    "version": "gemini-3.5-flash-lite",
+    "effort": "high",
+    "location": "global",
+    "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+    "generationConfig": {
+      "candidateCount": 1,
+      "responseMimeType": "text/plain",
+      "maxOutputTokens": 8192,
+      "thinkingConfig": {
+        "thinkingLevel": "HIGH",
+        "includeThoughts": false
+      },
+      "temperature": "OMITTED_PROVIDER_DEFAULT",
+      "topP": "OMITTED_PROVIDER_DEFAULT",
+      "retry": 0,
+      "timeoutMs": 90000
+    }
+  },
+  "verifier": {
+    "model": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    },
+    "promptHash": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3",
+    "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+    "serializationHash": "be6d02ed3d0106cb995626769e47d37b417b6655d43c8bfb2b2f4b80f3f8e6d7",
+    "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+    "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+  },
+  "total": {
+    "attempts": 25,
+    "turns": 45,
+    "requests": 126,
+    "owner": 87,
+    "verifier": 39,
+    "liveSends": 0,
+    "dispositions": {
+      "SEND_ELIGIBLE": 38,
+      "HANDOFF": 6,
+      "NO_SEND": 1
+    }
+  },
+  "reports": [
+    {
+      "id": "c-20261028-j2",
+      "repetitions": [
+        {
+          "repetition": 1,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với chiều cao 1m62 và nặng 56kg, áo trong set váy Thạch Thảo chị mặc size M là phù hợp nhất ạ."
+              ],
+              "draft": "Dạ, với chiều cao 1m62 và nặng 56kg, áo trong set váy Thạch Thảo chị mặc size M là phù hợp nhất ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với số đo mới của chị (ngực 88, eo 70, mông 94, nặng 51kg), áo trong set váy Thạch Thảo chị vẫn mặc size M là vừa đẹp ạ."
+              ],
+              "draft": "Dạ, với số đo mới của chị (ngực 88, eo 70, mông 94, nặng 51kg), áo trong set váy Thạch Thảo chị vẫn mặc size M là vừa đẹp ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với số đo và sở thích muốn mặc thoải mái, áo trong set váy Thạch Thảo chị vẫn mặc size M là vừa vặn và thoải mái nhất ạ."
+              ],
+              "draft": "Dạ, với số đo và sở thích muốn mặc thoải mái, áo trong set váy Thạch Thảo chị vẫn mặc size M là vừa vặn và thoải mái nhất ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình mặc áo set Thạch Thảo size M nhé ạ."
+              ],
+              "draft": "Dạ, với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình mặc áo set Thạch Thảo size M nhé ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với số đo của mình, em tư vấn chị mặc áo set Thạch Thảo size M nhé ạ."
+              ],
+              "draft": "Dạ, với số đo của mình, em tư vấn chị mặc áo set Thạch Thảo size M nhé ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với số đo và sở thích của mình, em tư vấn chị mặc áo set Thạch Thảo size M nhé ạ."
+              ],
+              "draft": "Dạ, với số đo và sở thích của mình, em tư vấn chị mặc áo set Thạch Thảo size M nhé ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ với chiều cao 1m62 và nặng 56kg, áo trong set váy Thạch Thảo chị mặc size M vừa vặn ạ."
+              ],
+              "draft": "Dạ với chiều cao 1m62 và nặng 56kg, áo trong set váy Thạch Thảo chị mặc size M vừa vặn ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ với số đo của chị (ngực 88, eo 70, mông 94, nặng 51kg), áo trong set váy Thạch Thảo chị vẫn mặc size M vừa vặn ạ."
+              ],
+              "draft": "Dạ với số đo của chị (ngực 88, eo 70, mông 94, nặng 51kg), áo trong set váy Thạch Thảo chị vẫn mặc size M vừa vặn ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ với sở thích muốn mặc thoải mái hơn, áo trong set váy Thạch Thảo chị vẫn mặc size M rất vừa vặn và thoải mái ạ."
+              ],
+              "draft": "Dạ với sở thích muốn mặc thoải mái hơn, áo trong set váy Thạch Thảo chị vẫn mặc size M rất vừa vặn và thoải mái ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình mặc áo size M của set váy Thạch Thảo chị nhé ạ."
+              ],
+              "draft": "Với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình mặc áo size M của set váy Thạch Thảo chị nhé ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với số đo ngực 88, eo 70, mông 94 và cân nặng 51kg, áo của set váy Thạch Thảo vẫn phù hợp nhất với size M chị nhé ạ."
+              ],
+              "draft": "Dạ, với số đo ngực 88, eo 70, mông 94 và cân nặng 51kg, áo của set váy Thạch Thảo vẫn phù hợp nhất với size M chị nhé ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "REJECTED",
+                  "reason": "TOOL_ARGUMENTS",
+                  "handoffReason": null
+                },
+                {
+                  "name": "recommend_size",
+                  "status": "REJECTED",
+                  "reason": "TOOL_ARGUMENTS",
+                  "handoffReason": null
+                },
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với sở thích mặc thoải mái, áo set váy Thạch Thảo size M vẫn là lựa chọn phù hợp nhất với số đo của chị ạ."
+              ],
+              "draft": "Dạ, với sở thích mặc thoải mái, áo set váy Thạch Thảo size M vẫn là lựa chọn phù hợp nhất với số đo của chị ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với chiều cao 1m62 và cân nặng 56kg, áo của set váy Thạch Thảo vừa vặn với size M ạ."
+              ],
+              "draft": "Dạ, với chiều cao 1m62 và cân nặng 56kg, áo của set váy Thạch Thảo vừa vặn với size M ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với số đo của chị, áo của set váy Thạch Thảo vẫn phù hợp với size M chị nhé."
+              ],
+              "draft": "Dạ, với số đo của chị, áo của set váy Thạch Thảo vẫn phù hợp với size M chị nhé.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "recommend_size",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, với sở thích mặc thoải mái, size M vẫn là lựa chọn phù hợp nhất cho chị ạ."
+              ],
+              "draft": "Dạ, với sở thích mặc thoải mái, size M vẫn là lựa chọn phù hợp nhất cho chị ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-j4",
+      "repetitions": [
+        {
+          "repetition": 1,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "add_to_cart",
+                  "status": "UNAVAILABLE",
+                  "reason": "SELECTION_UNAVAILABLE",
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo thêu Thạch Thảo size M hiện có 2 màu: Trắng (sẵn hàng) và Be (đặt trước). Chị lấy màu nào ạ?"
+              ],
+              "draft": "Dạ, áo thêu Thạch Thảo size M hiện có 2 màu: Trắng (sẵn hàng) và Be (đặt trước). Chị lấy màu nào ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "record_negotiation",
+                  "status": "REJECTED",
+                  "reason": "NEGOTIATION_CONTEXT_REQUIRED",
+                  "handoffReason": null
+                },
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Áo lẻ Thạch Thảo giá 499.000đ chị ạ. Khi mua từ 2 sản phẩm trở lên, shop có chương trình ưu đãi giảm 5%. \n\nChị lấy màu Trắng (sẵn hàng) hay Be (đặt trước) để em hỗ trợ tiếp cho mình nhé ạ?"
+              ],
+              "draft": "Áo lẻ Thạch Thảo giá 499.000đ chị ạ. Khi mua từ 2 sản phẩm trở lên, shop có chương trình ưu đãi giảm 5%. \n\nChị lấy màu Trắng (sẵn hàng) hay Be (đặt trước) để em hỗ trợ tiếp cho mình nhé ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo lẻ Thạch Thảo size M giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé. \n\nChị lấy áo màu Trắng (sẵn hàng) hay Be (đặt trước) ạ?"
+              ],
+              "draft": "Dạ, áo lẻ Thạch Thảo size M giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé. \n\nChị lấy áo màu Trắng (sẵn hàng) hay Be (đặt trước) ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "add_to_cart",
+                  "status": "UNAVAILABLE",
+                  "reason": "SELECTION_UNAVAILABLE",
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Áo Thạch Thảo size M nhà em có màu trắng (có sẵn) và màu be (đặt trước). Chị lấy màu nào ạ?"
+              ],
+              "draft": "Áo Thạch Thảo size M nhà em có màu trắng (có sẵn) và màu be (đặt trước). Chị lấy màu nào ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo lẻ Thạch Thảo size M có giá 499.000đ chị nha. Khi mua từ 2 sản phẩm trở lên, shop có chương trình ưu đãi giảm 5%. \n\nChị lấy áo màu trắng (có sẵn) hay màu be (đặt trước) để em hỗ trợ mình lên đơn nhé ạ?"
+              ],
+              "draft": "Dạ, áo lẻ Thạch Thảo size M có giá 499.000đ chị nha. Khi mua từ 2 sản phẩm trở lên, shop có chương trình ưu đãi giảm 5%. \n\nChị lấy áo màu trắng (có sẵn) hay màu be (đặt trước) để em hỗ trợ mình lên đơn nhé ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo lẻ Thạch Thảo size M giá 499.000đ, phí ship về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé. \n\nChị lấy áo màu trắng (có sẵn) hay be (đặt trước) để em lên đơn cho mình ạ?"
+              ],
+              "draft": "Dạ, áo lẻ Thạch Thảo size M giá 499.000đ, phí ship về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé. \n\nChị lấy áo màu trắng (có sẵn) hay be (đặt trước) để em lên đơn cho mình ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "add_to_cart",
+                  "status": "UNAVAILABLE",
+                  "reason": "SELECTION_UNAVAILABLE",
+                  "handoffReason": null
+                },
+                {
+                  "name": "add_to_cart",
+                  "status": "UNAVAILABLE",
+                  "reason": "SELECTION_UNAVAILABLE",
+                  "handoffReason": null
+                },
+                {
+                  "name": "add_to_cart",
+                  "status": "UNAVAILABLE",
+                  "reason": "SELECTION_UNAVAILABLE",
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ áo này size M bên em có màu Trắng (hàng sẵn) và màu Be (đặt trước), chị lấy màu nào ạ?"
+              ],
+              "draft": "Dạ áo này size M bên em có màu Trắng (hàng sẵn) và màu Be (đặt trước), chị lấy màu nào ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "record_negotiation",
+                  "status": "REJECTED",
+                  "reason": "NEGOTIATION_CONTEXT_REQUIRED",
+                  "handoffReason": null
+                },
+                {
+                  "name": "record_negotiation",
+                  "status": "REJECTED",
+                  "reason": "NEGOTIATION_CONTEXT_REQUIRED",
+                  "handoffReason": null
+                },
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ áo có giá 499.000đ chị ạ. Nếu chị lấy từ 2 sản phẩm trở lên bên em có ưu đãi giảm 5%. \n\nChị lấy màu Trắng (hàng sẵn) hay màu Be (đặt trước) để em hỗ trợ mình tiếp nhé ạ?"
+              ],
+              "draft": "Dạ áo có giá 499.000đ chị ạ. Nếu chị lấy từ 2 sản phẩm trở lên bên em có ưu đãi giảm 5%. \n\nChị lấy màu Trắng (hàng sẵn) hay màu Be (đặt trước) để em hỗ trợ mình tiếp nhé ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ áo có giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nha. \n\nChị lấy áo màu Trắng (hàng sẵn) hay màu Be (đặt trước) ạ?"
+              ],
+              "draft": "Dạ áo có giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nha. \n\nChị lấy áo màu Trắng (hàng sẵn) hay màu Be (đặt trước) ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "add_to_cart",
+                  "status": "UNAVAILABLE",
+                  "reason": "SELECTION_UNAVAILABLE",
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo thêu Thạch Thảo size M có hai màu: màu Trắng (có sẵn) và màu Be (hàng đặt trước ạ). Chị lấy màu nào ạ?"
+              ],
+              "draft": "Dạ, áo thêu Thạch Thảo size M có hai màu: màu Trắng (có sẵn) và màu Be (hàng đặt trước ạ). Chị lấy màu nào ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo lẻ Thạch Thảo có giá 499.000đ ạ. Khi chị mua từ 2 sản phẩm trở lên, shop có chính sách ưu đãi giảm 5%. \n\nChị chọn áo màu Trắng (có sẵn) hay Be (hàng đặt trước) để em hỗ trợ tiếp cho mình nhé ạ?"
+              ],
+              "draft": "Dạ, áo lẻ Thạch Thảo có giá 499.000đ ạ. Khi chị mua từ 2 sản phẩm trở lên, shop có chính sách ưu đãi giảm 5%. \n\nChị chọn áo màu Trắng (có sẵn) hay Be (hàng đặt trước) để em hỗ trợ tiếp cho mình nhé ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo lẻ Thạch Thảo size M có giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé ạ. \n\nChị lấy áo màu Trắng (có sẵn) hay Be (hàng đặt trước) để em lên đơn cho mình nha ạ?"
+              ],
+              "draft": "Dạ, áo lẻ Thạch Thảo size M có giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé ạ. \n\nChị lấy áo màu Trắng (có sẵn) hay Be (hàng đặt trước) để em lên đơn cho mình nha ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "add_to_cart",
+                  "status": "UNAVAILABLE",
+                  "reason": "SELECTION_UNAVAILABLE",
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, mẫu áo thêu Thạch Thảo size M hiện có 2 màu:\n- Màu trắng (có sẵn)\n- Màu be (đặt trước)\n\nChị lấy màu nào ạ?"
+              ],
+              "draft": "Dạ, mẫu áo thêu Thạch Thảo size M hiện có 2 màu:\n- Màu trắng (có sẵn)\n- Màu be (đặt trước)\n\nChị lấy màu nào ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            },
+            {
+              "turn": 2,
+              "disposition": "HANDOFF",
+              "reason": "RESPONSE_UNAVAILABLE",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "record_negotiation",
+                  "status": "REJECTED",
+                  "reason": "NEGOTIATION_CONTEXT_REQUIRED",
+                  "handoffReason": null
+                },
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [],
+              "draft": "Dạ, mẫu áo lẻ Thạch Thảo có giá 499.000đ ạ. Shop có chương trình ưu đãi giảm 5% khi mua từ 2 sản phẩm trở lên, chị có thể lấy thêm sản phẩm hoặc lấy cả bộ để được áp dụng ưu đãi này nhé ạ.\n\nChị lấy áo màu trắng (có sẵn) hay màu be (đặt trước) size M để em hỗ trợ tiếp cho mình ạ?",
+              "verifierVerdict": {
+                "verdict": "FAIL",
+                "violations": [
+                  {
+                    "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+                    "protectedRef": "pre-cart-quote:36ebcc36194f61205a409edcb41db60a5ea2f69bca369c0c346bd8b2c6e3f349",
+                    "excerpt": "chị có thể lấy thêm sản phẩm hoặc lấy cả bộ để được áp dụng ưu đãi này",
+                    "basis": "Ưu đãi 5% yêu cầu từ 2 đơn vị sản phẩm cha; cả set chỉ được tính là 1 đơn vị. Chuyển từ mua áo lẻ sang mua cả bộ không tự đủ điều kiện hưởng ưu đãi như lời đáp nêu."
+                  }
+                ]
+              },
+              "errors": []
+            },
+            {
+              "turn": 3,
+              "disposition": "NO_SEND",
+              "reason": "HUMAN_OWNS_CONVERSATION",
+              "images": 0,
+              "tools": [],
+              "messages": [],
+              "draft": null,
+              "verifierVerdict": null,
+              "errors": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s08",
+      "repetitions": [
+        {
+          "repetition": 1,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 2,
+              "tools": [
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Chị chọn mẫu Váy Diệp An (699.000đ, hàng đặt trước) nhé ạ. Mẫu này có thiết kế 2 lớp kín đáo, nhã nhặn và thanh lịch, rất phù hợp để mình mặc đi lễ."
+              ],
+              "draft": "Chị chọn mẫu Váy Diệp An (699.000đ, hàng đặt trước) nhé ạ. Mẫu này có thiết kế 2 lớp kín đáo, nhã nhặn và thanh lịch, rất phù hợp để mình mặc đi lễ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 4,
+              "tools": [
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "select_product_media",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "select_product_media",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Chị đi lễ thì em gợi ý mẫu Váy Diệp An (V168) nhé ạ. Mẫu này có thiết kế 2 lớp kín đáo, form suông nhẹ nhàng và thanh lịch, mặc rất nhã nhặn, trang trọng và thoải mái. Váy hiện có giá 699.000đ chị nha."
+              ],
+              "draft": "Chị đi lễ thì em gợi ý mẫu Váy Diệp An (V168) nhé ạ. Mẫu này có thiết kế 2 lớp kín đáo, form suông nhẹ nhàng và thanh lịch, mặc rất nhã nhặn, trang trọng và thoải mái. Váy hiện có giá 699.000đ chị nha.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 2,
+              "tools": [
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Em gợi ý chị chọn **Váy Diệp An** (699.000đ). Mẫu này có thiết kế cổ tròn cùng form suông nhẹ 2 lớp kín đáo, lịch sự, kết hợp họa tiết tơ hoa thêu tinh tế và đuôi cá nhã nhặn, rất phù hợp và trang trọng khi mặc đi lễ. \n\n(Nếu chị thích kiểu dáng bay bổng, mềm mại hơn thì tham khảo **Váy Odette** 799.000đ với chất ren phối tơ Hàn sang trọng, hiện mẫu này đang có sẵn size S). \n\nChị ưng mẫu Diệp An hơn hay muốn em chuẩn bị Odette cho chị nhé ạ?"
+              ],
+              "draft": "Em gợi ý chị chọn **Váy Diệp An** (699.000đ). Mẫu này có thiết kế cổ tròn cùng form suông nhẹ 2 lớp kín đáo, lịch sự, kết hợp họa tiết tơ hoa thêu tinh tế và đuôi cá nhã nhặn, rất phù hợp và trang trọng khi mặc đi lễ. \n\n(Nếu chị thích kiểu dáng bay bổng, mềm mại hơn thì tham khảo **Váy Odette** 799.000đ với chất ren phối tơ Hàn sang trọng, hiện mẫu này đang có sẵn size S). \n\nChị ưng mẫu Diệp An hơn hay muốn em chuẩn bị Odette cho chị nhé ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 2,
+              "tools": [
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Đi lễ thì Váy Diệp An (699.000đ) rất hợp với thiết kế cổ tròn kín đáo, form suông nhẹ cùng 2 lớp lịch sự, mang nét thanh nhã và trang trọng. Mẫu này hiện là hàng đặt trước chị nhé.\n\nNếu chị cần mặc ngay thì Váy Odette (799.000đ) chất liệu ren phối tơ Hàn dịu dàng, sang trọng cũng rất thanh lịch và hiện có sẵn size S ạ. Chị ưng mẫu nào hơn ạ?"
+              ],
+              "draft": "Đi lễ thì Váy Diệp An (699.000đ) rất hợp với thiết kế cổ tròn kín đáo, form suông nhẹ cùng 2 lớp lịch sự, mang nét thanh nhã và trang trọng. Mẫu này hiện là hàng đặt trước chị nhé.\n\nNếu chị cần mặc ngay thì Váy Odette (799.000đ) chất liệu ren phối tơ Hàn dịu dàng, sang trọng cũng rất thanh lịch và hiện có sẵn size S ạ. Chị ưng mẫu nào hơn ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 3,
+              "tools": [
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "select_product_media",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Chị chọn mẫu Váy Diệp An (V168) giá 699.000đ nhé ạ. Thiết kế cổ tròn đơn giản, phom suông nhẹ cùng cấu trúc hai lớp kín đáo và lịch sự rất phù hợp để mặc đi lễ, mang lại cảm giác trang nhã và thoải mái khi di chuyển."
+              ],
+              "draft": "Chị chọn mẫu Váy Diệp An (V168) giá 699.000đ nhé ạ. Thiết kế cổ tròn đơn giản, phom suông nhẹ cùng cấu trúc hai lớp kín đáo và lịch sự rất phù hợp để mặc đi lễ, mang lại cảm giác trang nhã và thoải mái khi di chuyển.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s15",
+      "repetitions": [
+        {
+          "repetition": 1,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "select_product_media",
+                  "status": "UNAVAILABLE",
+                  "reason": "MEDIA_COLOR_BINDING_UNVERIFIED",
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo lẻ Thạch Thảo màu be có giá 499.000đ ạ. Mẫu áo này làm từ chất liệu tơ Hàn thêu cao cấp với họa tiết thêu nổi tinh tế, form áo nhẹ nhàng, mang lại cảm giác mềm mại, bay bổng và rất thanh lịch khi mặc. \n\nSản phẩm hiện ở trạng thái đặt trước (pre-order). Chị cần em hỗ trợ thêm thông tin chi tiết hay chọn size nào không ạ?"
+              ],
+              "draft": "Dạ, áo lẻ Thạch Thảo màu be có giá 499.000đ ạ. Mẫu áo này làm từ chất liệu tơ Hàn thêu cao cấp với họa tiết thêu nổi tinh tế, form áo nhẹ nhàng, mang lại cảm giác mềm mại, bay bổng và rất thanh lịch khi mặc. \n\nSản phẩm hiện ở trạng thái đặt trước (pre-order). Chị cần em hỗ trợ thêm thông tin chi tiết hay chọn size nào không ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 1,
+              "tools": [
+                {
+                  "name": "apply_customer_state",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "quote_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, mẫu áo Thạch Thảo màu be (chất liệu tơ Hàn thêu cao cấp, form nhẹ nhàng, mềm mại và bay bổng) có giá 499.000đ và hiện là hàng đặt trước chị nhé. Áo có các size S, M, L, XL. Chị có muốn em tư vấn size phù hợp hay cần thêm thông tin gì không ạ?"
+              ],
+              "draft": "Dạ, mẫu áo Thạch Thảo màu be (chất liệu tơ Hàn thêu cao cấp, form nhẹ nhàng, mềm mại và bay bổng) có giá 499.000đ và hiện là hàng đặt trước chị nhé. Áo có các size S, M, L, XL. Chị có muốn em tư vấn size phù hợp hay cần thêm thông tin gì không ạ?",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "select_product_media",
+                  "status": "UNAVAILABLE",
+                  "reason": "MEDIA_COLOR_BINDING_UNVERIFIED",
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo lẻ Thạch Thảo màu be có giá 499.000đ và hiện là hàng đặt trước ạ. Mẫu này làm từ chất liệu tơ Hàn thêu cao cấp, mặc lên rất mềm mại, bay bổng và thanh lịch. \n\nChị cho em xin chiều cao cân nặng hoặc size quen mặc để em tư vấn size chuẩn cho chị nhé ạ!"
+              ],
+              "draft": "Dạ, áo lẻ Thạch Thảo màu be có giá 499.000đ và hiện là hàng đặt trước ạ. Mẫu này làm từ chất liệu tơ Hàn thêu cao cấp, mặc lên rất mềm mại, bay bổng và thanh lịch. \n\nChị cho em xin chiều cao cân nặng hoặc size quen mặc để em tư vấn size chuẩn cho chị nhé ạ!",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "select_product_media",
+                  "status": "UNAVAILABLE",
+                  "reason": "MEDIA_COLOR_BINDING_UNVERIFIED",
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo lẻ Thạch Thảo màu be có giá 499.000đ, hiện ở trạng thái đặt trước chị nhé. Áo làm từ chất liệu tơ Hàn thêu cao cấp, mềm mại và bay bổng, có các size S, M, L, XL ạ."
+              ],
+              "draft": "Dạ, áo lẻ Thạch Thảo màu be có giá 499.000đ, hiện ở trạng thái đặt trước chị nhé. Áo làm từ chất liệu tơ Hàn thêu cao cấp, mềm mại và bay bổng, có các size S, M, L, XL ạ.",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "SEND_ELIGIBLE",
+              "reason": "PASS",
+              "images": 0,
+              "tools": [
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "read_product",
+                  "status": "OK",
+                  "reason": null,
+                  "handoffReason": null
+                },
+                {
+                  "name": "quote_product",
+                  "status": "REJECTED",
+                  "reason": "QUOTE_BATCH_INVALID",
+                  "handoffReason": null
+                },
+                {
+                  "name": "select_product_media",
+                  "status": "REJECTED",
+                  "reason": "QUOTE_BATCH_INVALID",
+                  "handoffReason": null
+                }
+              ],
+              "messages": [
+                "Dạ, áo lẻ Thạch Thảo màu be có giá 499.000đ (hàng đặt trước ạ). Chị cần em hỗ trợ thêm thông tin gì cứ nhắn em nhé!"
+              ],
+              "draft": "Dạ, áo lẻ Thạch Thảo màu be có giá 499.000đ (hàng đặt trước ạ). Chị cần em hỗ trợ thêm thông tin gì cứ nhắn em nhé!",
+              "verifierVerdict": {
+                "verdict": "PASS",
+                "violations": []
+              },
+              "errors": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s16",
+      "repetitions": [
+        {
+          "repetition": 1,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "HANDOFF",
+              "reason": "RESPONSE_UNAVAILABLE",
+              "images": 0,
+              "tools": [],
+              "messages": [],
+              "draft": null,
+              "verifierVerdict": null,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "HANDOFF",
+              "reason": "DEPENDENCY_FAILURE",
+              "images": 0,
+              "tools": [],
+              "messages": [],
+              "draft": null,
+              "verifierVerdict": null,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "HANDOFF",
+              "reason": "RESPONSE_UNAVAILABLE",
+              "images": 0,
+              "tools": [],
+              "messages": [],
+              "draft": null,
+              "verifierVerdict": null,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "HANDOFF",
+              "reason": "DEPENDENCY_FAILURE",
+              "images": 0,
+              "tools": [],
+              "messages": [],
+              "draft": null,
+              "verifierVerdict": null,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "turns": [
+            {
+              "turn": 1,
+              "disposition": "HANDOFF",
+              "reason": "RESPONSE_UNAVAILABLE",
+              "images": 0,
+              "tools": [],
+              "messages": [],
+              "draft": null,
+              "verifierVerdict": null,
+              "errors": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

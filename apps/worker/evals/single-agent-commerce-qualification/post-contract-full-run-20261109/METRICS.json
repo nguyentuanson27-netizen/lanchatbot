@@ -1,0 +1,50 @@
+{
+  "sourceSha": "312858f5f782d1372339e2dd03bfd3a480ce1578",
+  "worldHash": "2b8cf58c3ce6496ffbd0f87050133e2d627b2e38e4c6234aa9de4dbfc6066a9d",
+  "cases": 34,
+  "turns": 55,
+  "generationAttempts": 121,
+  "generationHttp": 121,
+  "roles": {
+    "OWNER": 85,
+    "VERIFIER": 36
+  },
+  "generationStatuses": {
+    "OK": 118,
+    "PROVIDER_ERROR": 1,
+    "MALFORMED": 2
+  },
+  "verifierProviderLatencyMs": {
+    "n": 36,
+    "p50": 5808,
+    "p95": 13050
+  },
+  "verifierAdapterWindowMs": {
+    "n": 36,
+    "p50": 6675.399199999985,
+    "p95": 13893.612599999993
+  },
+  "tokenUsage": {
+    "inputObserved": 1153598,
+    "outputObserved": 91314,
+    "usageRows": 120,
+    "totalRows": 121,
+    "cost": "NOT_EXPOSED"
+  },
+  "ownerOAuthHttp": 4,
+  "actualTerminalCounts": {
+    "HANDOFF": 13,
+    "SEND_ELIGIBLE": 32,
+    "NO_SEND": 3,
+    "CODE_OWNED_SEND": 7
+  },
+  "modelSendRate": 0.5818181818181818,
+  "codeSendRate": 0.12727272727272726,
+  "silentHandoffRate": 0.23636363636363636,
+  "noSendRate": 0.05454545454545454,
+  "providerTransportErrorRate": 0.008264462809917356,
+  "malformedCompletionRate": 0.01652892561983471,
+  "verifierTimeoutErrorRate": 0.0,
+  "privacy": "ONLY_KNOWN_SYNTHETIC_PRIVATE_VALUES_CHECKED_NOT_EXHAUSTIVE",
+  "offlineBlindJudge": "NOT_RUN"
+}

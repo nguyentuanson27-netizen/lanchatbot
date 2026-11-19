@@ -1,0 +1,39 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+··························································x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > keeps pre-cart offer-price source separate when cart overlay supersedes generic claims
+AssertionError: expected { status: 'UNAVAILABLE', …(1) } to match object { status: 'OK', data: { …(1) } }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "data": {
+-     "preCartQuote": {
+-       "calculationBasis": "PRE_CART_POLICY",
+-       "subtotalVnd": 499000,
+-     },
+-   },
+-   "status": "OK",
++   "status": "UNAVAILABLE",
+  }
+
+ ❯ src/single-agent-commerce-quote.test.ts:299:12
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 58 passed (59)
+   Start at  12:50:47
+   Duration  5.54s (transform 1.97s, setup 0ms, collect 3.07s, tests 1.34s, environment 0ms, prepare 337ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-quote.test.ts --reporter=dot

@@ -1,0 +1,94 @@
+{
+  "kind": "AUTOMATED_NATIVE_ACCOUNTING_REQUEST_CAPTURE_HISTORY_CHECKS_NOT_FULL_GATE_REPLAY",
+  "sourceSha": "5613e8b37784f8c2eb6be4ce3a115d8b13b7100e",
+  "worldHash": "e641857a4c4c7d272a2a47dd30e7fc0848aa94483601af4b9a32a5b3cfe7359b",
+  "cases": 13,
+  "turns": 27,
+  "generationAttempts": 59,
+  "generationHttp": 58,
+  "roles": {
+    "OWNER": 42,
+    "VERIFIER": 17
+  },
+  "generationStatuses": {
+    "OK": 58,
+    "PROVIDER_ERROR": 1
+  },
+  "allGroupsSameSourceAndWorld": true,
+  "allRequestHashesMatch": "ALL_BUILT_REQUESTS",
+  "evaluatorFirewall": "PASS",
+  "metadataBPresent": false,
+  "perTurnRoleAndToolCaps": "PASS",
+  "acceptedTextOutboxHashes": "PASS",
+  "historyHashes": "PASS",
+  "exactFinalDraftToCapturedText": 15,
+  "nativeWitnessRowsObserved": 17,
+  "knownSyntheticPrivateInputValuesAbsentFromProviderRequests": true,
+  "privateValueTypesChecked": [
+    "FULL_NAME",
+    "PHONE",
+    "ADDRESS_FRAGMENT"
+  ],
+  "privateValueCount": 3,
+  "disposableModelDatabasesDropped": 1,
+  "initialStateDatabaseDropped": true,
+  "providerGenerationRetry": 0,
+  "ownerOAuthHttp": 1,
+  "liveSends": 0,
+  "sourceShopWrites": 0,
+  "observedModelVersionUnavailable": [],
+  "formalBlindQuality": "NOT_GRADED",
+  "fullFinalGateReplay": "NOT_PERFORMED",
+  "verifierProviderLatencyMs": {
+    "n": 17,
+    "p50": 7779,
+    "p95": 20434
+  },
+  "verifierAdapterWindowMs": {
+    "n": 17,
+    "p50": 8594.687399999995,
+    "p95": 21713.18519999995
+  },
+  "tokenUsage": {
+    "inputObserved": 615920,
+    "outputObserved": 40649,
+    "usageRows": 58,
+    "totalRows": 59,
+    "cost": "NOT_EXPOSED"
+  },
+  "groups": [
+    {
+      "group": "screen",
+      "cases": 13,
+      "turns": 27,
+      "sourceSha": "5613e8b37784f8c2eb6be4ce3a115d8b13b7100e",
+      "worldHash": "e641857a4c4c7d272a2a47dd30e7fc0848aa94483601af4b9a32a5b3cfe7359b",
+      "registrationHash": "a7de668e8b9ae2129171d8c759c606e079ae3fdd74f93cf7b92470dce7721dba",
+      "corpusHash": "b0a99ac6b0e921f634a0a1c3d964e9f0ca1598a261a18ba0fe114191e967087b",
+      "maximumGenerations": 108,
+      "actualTerminalCounts": {
+        "SEND_ELIGIBLE": 15,
+        "HANDOFF": 5,
+        "NO_SEND": 2,
+        "CODE_OWNED_SEND": 5
+      },
+      "attempts": 59,
+      "http": 58
+    }
+  ],
+  "preDispatchBlocks": [
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "code": "OWNER_REQUEST_BOUND",
+      "requestBudget": {
+        "textFrameBytes": 68237,
+        "systemBytes": 20651,
+        "toolSchemaBytes": 15638,
+        "trustedFrameBytes": 16818,
+        "dialogueBytes": 14870,
+        "textLimitBytes": 65536
+      }
+    }
+  ]
+}

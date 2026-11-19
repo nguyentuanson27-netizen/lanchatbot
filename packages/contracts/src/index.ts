@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ProductComponentRoleSchema } from "./v2/product-policy-media.js";
+import {SizeFitTargetV1Schema} from "./v2/size-fit-target.js";
 
 export const RoutingOwnerSchema = z.enum(["N8N", "APP"]);
 export type RoutingOwner = z.infer<typeof RoutingOwnerSchema>;
@@ -441,6 +442,7 @@ export const SizeRecommendationProtectedClaimV1Schema = z.object({
   type: z.literal("SIZE_RECOMMENDATION"),
   value: SizeRecommendationClaimValueV1Schema,
   productId: z.string().trim().min(1).max(128),
+  fitTarget: SizeFitTargetV1Schema.optional(),
   variantId: z.string().trim().min(1).max(128).nullable(),
   evidenceRef: z.string().trim().min(1).max(512),
   source: z.literal("VERIFIED_SIZE_ENGINE_V1"),
@@ -451,6 +453,8 @@ export const SizeRecommendationProtectedClaimV1Schema = z.object({
   measurementFingerprint: SizeRecommendationEvidenceHashV1Schema,
   evidenceBasis: SizeRecommendationEvidenceBasisV1Schema,
 }).strict().superRefine((claim, context) => {
+  if(claim.fitTarget&&(claim.fitTarget.kind==="PRODUCT"?claim.fitTarget.productId:claim.fitTarget.parentProductId)!==claim.productId)
+    context.addIssue({code:z.ZodIssueCode.custom,path:["fitTarget"],message:"size target parent must match claim product"});
   if (Date.parse(claim.expiresAt) <= Date.parse(claim.observedAt)) {
     context.addIssue({
       code: z.ZodIssueCode.custom,

@@ -1,0 +1,193 @@
+{
+  "runSourceSha": "36e45015c381ebe91a2591a288b112e3dd8caa0e",
+  "registeredSlots": 68,
+  "executedCandidateSlots": 46,
+  "notRunC3Slots": 22,
+  "nativeScenarios": 22,
+  "nativeCustomerTurns": 34,
+  "generationRecords": 94,
+  "generationHttpRequests": 93,
+  "maximumRequestsPerGeneration": 1,
+  "retries": 0,
+  "liveSends": 0,
+  "metrics": {
+    "SAFETY_VERIFIER": {
+      "records": 24,
+      "generationHttpRequests": 24,
+      "latencySamples": 24,
+      "latencyMsP50": 4603.583200000001,
+      "latencyMsP95": 7520.048700000003,
+      "statusCounts": {
+        "OK": 24
+      },
+      "inputTokens": {
+        "sum": 141379,
+        "available": 24,
+        "denominator": 24
+      },
+      "outputTokens": {
+        "sum": 2769,
+        "available": 24,
+        "denominator": 24
+      },
+      "costUSD": {
+        "sum": null,
+        "available": 0,
+        "denominator": 24
+      }
+    },
+    "NATIVE_OWNER": {
+      "records": 55,
+      "generationHttpRequests": 54,
+      "latencySamples": 54,
+      "latencyMsP50": 3402.2437999999383,
+      "latencyMsP95": 7961.0081000000355,
+      "statusCounts": {
+        "OK": 53,
+        "PROVIDER_ERROR": 1,
+        "MALFORMED": 1
+      },
+      "inputTokens": {
+        "sum": 463446,
+        "available": 54,
+        "denominator": 54
+      },
+      "outputTokens": {
+        "sum": 54729,
+        "available": 54,
+        "denominator": 54
+      },
+      "costUSD": {
+        "sum": null,
+        "available": 0,
+        "denominator": 54
+      }
+    },
+    "NATIVE_VERIFIER": {
+      "records": 15,
+      "generationHttpRequests": 15,
+      "latencySamples": 15,
+      "latencyMsP50": 5724.55569999991,
+      "latencyMsP95": 12301.993300000031,
+      "statusCounts": {
+        "OK": 15
+      },
+      "inputTokens": {
+        "sum": 90671,
+        "available": 15,
+        "denominator": 15
+      },
+      "outputTokens": {
+        "sum": 1612,
+        "available": 15,
+        "denominator": 15
+      },
+      "costUSD": {
+        "sum": null,
+        "available": 0,
+        "denominator": 15
+      }
+    }
+  },
+  "terminalScenarioCounts": {
+    "HANDOFF": 10,
+    "SEND_ELIGIBLE": 8,
+    "NO_SEND": 3,
+    "CODE_OWNED_SEND": 1
+  },
+  "terminalTurnCounts": {
+    "HANDOFF": 13,
+    "SEND_ELIGIBLE": 14,
+    "NO_SEND": 6,
+    "CODE_OWNED_SEND": 1
+  },
+  "terminalTurnDenominator": 34,
+  "primaryGradeCounts": {
+    "pass": 12,
+    "fail": 2,
+    "unresolved": 8,
+    "denominator": 22
+  },
+  "perModeGradeCounts": {
+    "SINGLE": {
+      "pass": 8,
+      "fail": 1,
+      "unresolved": 7,
+      "denominator": 16
+    },
+    "JOURNEY": {
+      "pass": 4,
+      "fail": 1,
+      "unresolved": 1,
+      "denominator": 6
+    }
+  },
+  "firewall": {
+    "actualBodiesChecked": 93,
+    "evaluatorMetadataKeyOrCaseIdLeaks": [],
+    "scope": "Parsed request keys and all registered caseId literal values; prompt semantic safety separately reviewed; no claim arbitrary semantic equivalence scanner"
+  },
+  "auxiliaryHttp": {
+    "embedding": 3,
+    "oauth": 1,
+    "notIncludedInGeneration93": true
+  },
+  "providerHttpTimeoutOrErrors": 0,
+  "generationFailureRecords": [
+    {
+      "id": "6b4bb7b2-3ec2-4202-b70d-b26fd3e9f11b:owner:3",
+      "status": "PROVIDER_ERROR",
+      "httpRequests": 0,
+      "telemetry": {
+        "failureLayer": null,
+        "failureCode": null,
+        "httpStatus": null,
+        "toolOutputDiagnostic": null
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND"
+    },
+    {
+      "id": "55e6a603-69be-44bc-a2f9-8eaf0ffad20b:owner:1",
+      "status": "MALFORMED",
+      "httpRequests": 1,
+      "telemetry": {
+        "failureLayer": null,
+        "failureCode": "OWNER_TOOL_OUTPUT",
+        "httpStatus": 200,
+        "toolOutputDiagnostic": {
+          "schemaCode": "OWNER_TOOL_OUTPUT",
+          "tool": "read_product",
+          "field": "offerType",
+          "valueType": "OBJECT"
+        }
+      },
+      "failureLayer": "MODEL_OUTPUT",
+      "errorCode": "PROVIDER_ERROR"
+    }
+  ],
+  "costUSD": null,
+  "costUnavailableReason": "Provider does not expose monetary charge; unknown is not zero. Offline judge internal requests/tokens unavailable and excluded from commerce request93.",
+  "terminalTurnRates": {
+    "HANDOFF": 0.382353,
+    "SEND_ELIGIBLE": 0.411765,
+    "NO_SEND": 0.176471,
+    "CODE_OWNED_SEND": 0.029412
+  },
+  "actualMessageBearingTurns": 16,
+  "noSendWithAcceptedCodeQuestionTurns": 1,
+  "verificationAddedMs": {
+    "samples": 25,
+    "denominator": 34,
+    "p50": 10725.952000000048,
+    "p95": 15484.006400000013,
+    "scope": "Captured samples only; missing values not imputed as0. Whole-turn elapsed includes harness overhead."
+  },
+  "wholeCustomerTurnElapsedMs": {
+    "samples": 34,
+    "denominator": 34,
+    "p50": 18129.742400000003,
+    "p95": 41266.22409999999,
+    "scope": "Captured samples only; missing values not imputed as0. Whole-turn elapsed includes harness overhead."
+  }
+}

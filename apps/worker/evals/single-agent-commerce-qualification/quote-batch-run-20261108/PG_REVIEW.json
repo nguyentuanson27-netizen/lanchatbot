@@ -1,0 +1,25 @@
+{
+  "status": "APPROVED_SCOPED_TEST_HARNESS_AND_REQUIRED_REAL_PG_ACCEPTANCE",
+  "reviewer": "/root/quote_pg_run_review",
+  "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "reviewedAt": "2026-11-07T17:17:00.042918+00:00",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-pg-20261108-04\\integration.json",
+  "integrationSha256": "11d249b73d3c57610ab3f2d85c8eacb1cdc8e6e9f01b8c7fddb2652389873e74",
+  "cases": 1,
+  "passed": 1,
+  "testDatabaseDropped": true,
+  "sourceDirty": false,
+  "providerGenerations": 0,
+  "sendEnabled": false,
+  "findings": [],
+  "reviewScope": [
+    "Explicit initialization of lazy synthetic sales state before before-state observation.",
+    "Correct five-unit first-contact accounting: initial read1 + opening image1 + quote read1/image1 + explicit BACK image1.",
+    "Exact original response order, verifier1, quote work2 and opening work1 retained.",
+    "No cart/processed-command mutation, restart and once-only text/image delivery assertions retained."
+  ],
+  "limits": [
+    "Synthetic domain inputs with real PostgreSQL and current policy capture; not model behaviour evidence.",
+    "No provider results, new sales-quality claim, qualification GO, merge or live send."
+  ]
+}

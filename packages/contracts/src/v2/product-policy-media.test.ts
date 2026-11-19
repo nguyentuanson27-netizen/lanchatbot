@@ -4,6 +4,7 @@ import {
   FactGroupMetadataV1Schema,
   FULFILLMENT_FRESH_FOR_SECONDS,
   MEDIA_FRESH_FOR_SECONDS,
+  MediaMetadataV1Schema,
   MediaSelectionV2Schema,
   PolicyBundleV1Schema,
   PRICE_INVENTORY_FRESH_FOR_SECONDS,
@@ -15,6 +16,13 @@ const bomExpiresAt = "2026-07-29T00:00:00.000Z";
 const shortExpiresAt = "2026-07-24T00:00:00.000Z";
 const etaValidUntil = "2026-07-27T00:00:00.000Z";
 const mediaExpiresAt = "2026-08-21T00:00:00.000Z";
+
+it("accepts until-replaced catalog media while preserving strict legacy TTL records",()=>{
+  expect(MediaMetadataV1Schema.safeParse({authority:"QDRANT_STABLE",sourceVersion:"media-1",observedAt,
+    expiresAt:null,freshForSeconds:null,freshnessState:"FRESH"}).success).toBe(true);
+  expect(MediaMetadataV1Schema.safeParse({authority:"QDRANT_STABLE",sourceVersion:"media-1",observedAt,
+    expiresAt:mediaExpiresAt,freshForSeconds:null,freshnessState:"FRESH"}).success).toBe(false);
+});
 
 const posBomMetadata = {
   authority: "PANCAKE_POS",

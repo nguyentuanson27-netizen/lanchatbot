@@ -1,0 +1,173 @@
+{
+  "kind": "PHASE_C_FULL_ONE_PASS_DEVELOPMENT_DIAGNOSTIC",
+  "source": "992e360f677bb3c391986ef201339b087e38606a",
+  "worldHash": "1d113b3b44d28a93cbc11c5eb74cd5808f7249186ac7738ac3c8a54934d39a8e",
+  "capturedProducts": 107,
+  "captureAt": "2026-11-19T04:05:04.786Z",
+  "casesScheduled": 34,
+  "turnsScheduled": 55,
+  "executedCases": 34,
+  "executedTurns": 55,
+  "statuses": {
+    "EXECUTED": 34
+  },
+  "terminals": {
+    "SEND_ELIGIBLE": 40,
+    "HANDOFF": 6,
+    "CODE_OWNED_SEND": 7,
+    "NO_SEND": 2
+  },
+  "verdicts": {
+    "PASS": 39,
+    "FAIL": 2
+  },
+  "generations": 130,
+  "generationsByRole": {
+    "OWNER": 89,
+    "VERIFIER": 41
+  },
+  "generationStatuses": {
+    "OK": 130
+  },
+  "verifierGenerationStatuses": {
+    "OK": 41
+  },
+  "requests": 130,
+  "embeddingRequests": 2,
+  "embeddingOAuthRequests": 1,
+  "oauth": 4,
+  "verifierProviderLatencyMs": {
+    "n": 41,
+    "p50": 6117,
+    "p95": 11673
+  },
+  "verifierAdapterLatencyMs": {
+    "n": 41,
+    "p50": 7057.011299999955,
+    "p95": 12500.516899999988
+  },
+  "addedVerificationLatencyMs": {
+    "n": 41,
+    "p50": 8883.053400000033,
+    "p95": 15195.232300000032
+  },
+  "turnElapsedMs": {
+    "n": 55,
+    "p50": 36427.8241,
+    "p95": 52110.9652
+  },
+  "tokenUsage": {
+    "input": 1468826,
+    "output": 92743,
+    "observedRows": 130,
+    "cost": "NOT_EXPOSED"
+  },
+  "runtimeOwnerRecoveriesStarted": 0,
+  "exactVerifierDraftSends": 39,
+  "quoteRecoveries": [
+    {
+      "turn": "c-20261028-j3/T1",
+      "rawTerminal": "SEND_ELIGIBLE",
+      "reason": "VERIFIED_QUOTE_REPLY",
+      "modelVerdict": "FAIL",
+      "proofBound": true,
+      "proofHash": "1a05f6fbe0ce04960d4b2ac0d929018927917686b8329ff5ba8684e5e0e7a5ab",
+      "verifiedQuoteTextHash": "3df9a4ed43df4704f77f04e48bb9b596a9e1f844fa7d251d777ff09a1b8330a2"
+    }
+  ],
+  "privateFixtureTypesChecked": [
+    "FULL_NAME",
+    "PHONE",
+    "ADDRESS"
+  ],
+  "privateFixtureLiteralsChecked": 5,
+  "issues": [],
+  "groups": [
+    {
+      "label": "r1",
+      "registeredSlots": 20,
+      "selectedCases": 4,
+      "executedCases": 4,
+      "expectedTurns": 7,
+      "executedTurns": 7,
+      "terminals": {
+        "SEND_ELIGIBLE": 7
+      },
+      "generationAttempts": 21,
+      "generationRequests": 21,
+      "registrationHash": "fee968f7d24fe0270b6bd895071b1490031d8a35d66b6c3413d3754a16e2203d",
+      "corpusHash": "55157ddd7e957ebb3911532536e2be9505aa2587d636310c44c7b0ca6c92dfaf",
+      "selectionHash": "bd6c2002c8060a44463e13fd783c90200b2c387643bcfefcadee17fa3eeaecc6",
+      "journalHash": "1b4bf88c92afcbeae4b1073f5d9f7d4c605ae24c1a2dcc41fd94bf853f96c844",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "dispatchExitCode": 0
+    },
+    {
+      "label": "r2",
+      "registeredSlots": 45,
+      "selectedCases": 9,
+      "executedCases": 9,
+      "expectedTurns": 17,
+      "executedTurns": 17,
+      "terminals": {
+        "SEND_ELIGIBLE": 13,
+        "HANDOFF": 2,
+        "CODE_OWNED_SEND": 2
+      },
+      "generationAttempts": 44,
+      "generationRequests": 44,
+      "registrationHash": "cbe2b557cb7620e45e23d78e73c05ad1816b4741a5cf37eb91930a1397603384",
+      "corpusHash": "2c928e7d38944ac8142c776d05081f9327af7d5109ed80ae2ec23c8936a399cf",
+      "selectionHash": "d0226035153e7ed88d098687a8157f18b8ff775c04d7ba65c0366decf4a4e55e",
+      "journalHash": "fce17e351603431969bf03491bc40b6342d249f05450f636170e50af62b354af",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "dispatchExitCode": 0
+    },
+    {
+      "label": "remainder",
+      "registeredSlots": 100,
+      "selectedCases": 20,
+      "executedCases": 20,
+      "expectedTurns": 24,
+      "executedTurns": 24,
+      "terminals": {
+        "SEND_ELIGIBLE": 19,
+        "HANDOFF": 3,
+        "NO_SEND": 2
+      },
+      "generationAttempts": 60,
+      "generationRequests": 60,
+      "registrationHash": "6e19f8ca46430a68a04d40939352f33e5245faee3389851abb730678985c9412",
+      "corpusHash": "6fdd2ac2031d9fb3cef5ee614e495968bfba10035497dd33bb25c26ad52b42e7",
+      "selectionHash": "17098e1d754d106738fe442809018b648c3f5b5402a5523892c053d7dafa6dd6",
+      "journalHash": "fb6a81a887a7ac3705a39767dba824a5534ee2d4e4e6419721f0659ef36af348",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "dispatchExitCode": 0
+    },
+    {
+      "label": "checkout",
+      "registeredSlots": 5,
+      "selectedCases": 1,
+      "executedCases": 1,
+      "expectedTurns": 7,
+      "executedTurns": 7,
+      "terminals": {
+        "SEND_ELIGIBLE": 1,
+        "CODE_OWNED_SEND": 5,
+        "HANDOFF": 1
+      },
+      "generationAttempts": 5,
+      "generationRequests": 5,
+      "registrationHash": "b1e5c4cdce3944491db227d1affddfa464a5455d7f1cbdf894994764f1e73229",
+      "corpusHash": "a116da72d2b29876d6aa9a2fd86058a5622df0ca4ba587765c60e822d1d16336",
+      "selectionHash": "ba918ac8f7d47f321f4a6c98910b36e9d6f1b4881d30ed4fde47c3422c79dec9",
+      "journalHash": "b84a6272e56d3aca0f2e13230033cb1fb71eec0092ef93150a23c9300c31e3d6",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "dispatchExitCode": 0
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "OFFLINE_COMPONENT_PROBE_NOT_EXACT_NATIVE_REPLAY",
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "clock": "2026-11-19T01:00:01.850Z",
+  "results": [
+    {
+      "stage": "READ_PREPARE",
+      "charged": 1,
+      "productBytes": 2186
+    },
+    {
+      "stage": "ADMISSION",
+      "subjects": 4,
+      "claims": 6
+    },
+    {
+      "stage": "PENDING_PREPARE",
+      "charged": 1
+    }
+  ]
+}

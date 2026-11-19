@@ -1,0 +1,54 @@
+{
+  "status": "STOP_R1_MATERIAL_TASK_FAILURE",
+  "runSourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "worldHash": "dd16e7c161f33f70e190b0510af85e685ff67a75d6ebeeea78db3fa1dd37ab79",
+  "casesExecuted": 4,
+  "customerTurnsExecuted": 7,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 6,
+    "HANDOFF": 1
+  },
+  "capturedTexts": 6,
+  "capturedImages": 4,
+  "acceptedOutbox": 10,
+  "materialTaskFailures": 1,
+  "notRunCases": 30,
+  "notRunTurns": 48,
+  "generations": 22,
+  "generationHttp": 22,
+  "ownerGenerations": 15,
+  "verifierGenerations": 7,
+  "authHttpSeparate": 1,
+  "auxiliaryRequestsSeparate": 0,
+  "generationErrors": 0,
+  "timeouts": 0,
+  "retry": 0,
+  "maxHttpPerGeneration": 1,
+  "verifierVerdicts": {
+    "PASS": 6,
+    "FAIL": 1
+  },
+  "verifierLatencyMs": {
+    "p50": 12238.88459999999,
+    "p95": 23313.323700000008
+  },
+  "addedVerificationReadbackLatencyMs": {
+    "p50": 14544.4136,
+    "p95": 25773.712699999975
+  },
+  "tokenUsage": {
+    "inputObserved": 235543,
+    "outputObserved": 15980,
+    "usageRows": 22,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "fallbackCustomerTextCount": 0,
+  "silentHandoffRate": 0.14285714285714285,
+  "noSendRate": 0,
+  "testDatabaseDropped": true,
+  "sourceDirty": false,
+  "sourceBusinessWrites": 0,
+  "liveSend": false,
+  "wholeReplyQuality": "NOT_GRADED",
+  "qualification": "BLOCKED_UNCHANGED_C3_NOT_RUN"
+}

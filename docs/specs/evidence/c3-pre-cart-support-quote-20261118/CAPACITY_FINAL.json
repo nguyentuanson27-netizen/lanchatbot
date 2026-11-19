@@ -1,0 +1,58 @@
+{
+  "kind": "SYNTHETIC_CAPACITY_ONLY_NOT_A_PROVIDER_OR_SEMANTIC_RUN",
+  "source": "ecdbf32591941f65ed31798a7b021445160da46d",
+  "bound": 70000,
+  "maximum": 69433,
+  "rows": [
+    {
+      "label": "CANDIDATE:1:1",
+      "beforeBytes": 66317,
+      "afterBytes": 68752,
+      "supportPayload": true
+    },
+    {
+      "label": "CANDIDATE:3:1",
+      "beforeBytes": 66342,
+      "afterBytes": 68777,
+      "supportPayload": true
+    },
+    {
+      "label": "CONTROLS:3:0",
+      "beforeBytes": 67006,
+      "afterBytes": 69433,
+      "supportPayload": true
+    },
+    {
+      "label": "CONTROLS:4:0",
+      "beforeBytes": 66206,
+      "afterBytes": 68633,
+      "supportPayload": true
+    },
+    {
+      "label": "CONTROLS:3:1",
+      "beforeBytes": 46320,
+      "afterBytes": 46559,
+      "supportPayload": false
+    },
+    {
+      "label": "CONTROLS:3:2",
+      "beforeBytes": 53104,
+      "afterBytes": 53732,
+      "supportPayload": false
+    },
+    {
+      "label": "OPENING_AD_QUOTE",
+      "beforeBytes": 50582,
+      "afterBytes": 51600,
+      "supportPayload": false
+    },
+    {
+      "label": "MEASUREMENT_CORRECTION",
+      "beforeBytes": 51849,
+      "afterBytes": 52707,
+      "supportPayload": false
+    }
+  ],
+  "providerRequests": 0,
+  "note": "Historical eight frames, current prompt/tool descriptions, full new support payload with 256-byte source id and two adjustments; current owner duplicate projection. Not a semantic proof or an all-future-frames guarantee."
+}

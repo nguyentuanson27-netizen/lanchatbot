@@ -1,0 +1,43 @@
+{
+  "status": "APPROVED",
+  "reviewer": "/root/missing_run_review",
+  "checkedAtUTC": "2026-11-03T05:38:03Z",
+  "sourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "worldHash": "a8ce90be5347e1d312ddf4f432ed8dfe42c47d06c09ab13013ede0b0d44ca280",
+  "launcherInventorySha256": "08bc061ae8e45e86f1b3cc36d4fac429e1d78b1fc014205a64b4ec0f2bc9f0ee",
+  "pendingRegistrationHash": "7f9146a85a1a7fee1af4bae0432291d22dc18925a89ffb3d08ab02a7e16fd0c3",
+  "scopeHash": "19f5d98df43a2a49a9f44206ceabe91f73fa1685b2f3e8b0bf4e1f9b4f500840",
+  "checks": {
+    "cleanExactSource": "PASS",
+    "registrationAndSourceBindings": "PASS",
+    "customerScriptsAndBranchesUnchanged": "PASS",
+    "runtimeProjectionAndLabelFirewall": "PASS",
+    "modelEffortPromptsAndContractsUnchanged": "PASS",
+    "initialStateRealPostgresDroppedProvider0": "PASS",
+    "isolatedHandoffPreservedWithoutTimestampRenewal": "PASS",
+    "actualTimeReadiness": "PASS",
+    "frozenHelperHashes": "PASS",
+    "originalRemainderScopeUnchanged": "PASS",
+    "newSlotsDisjointFromOldRegistration": "PASS",
+    "actualTimeReadinessCheckedAtUTC": "2026-11-03T05:37:08.601Z"
+  },
+  "limits": {
+    "cases": 12,
+    "nativeCustomerTurns": 20,
+    "maximumGenerationRequests": 80,
+    "repetitions": 1,
+    "generationRetry": 0,
+    "ownerGenerationsPerTurn": 3,
+    "verifierGenerationsPerTurn": 1,
+    "salesReadyCases": 2,
+    "sourceUnavailableCases": 10,
+    "sendEnabled": false,
+    "newProviderResultsObserved": 0
+  },
+  "conditions": [
+    "Run existing actual-time preflight before dispatch; preserve all hard-stop gates.",
+    "Start only after purchase completion passes existing cleanup, completeness and stop checks.",
+    "Approval does not guarantee future source availability or authorize TTL renewal.",
+    "Development evidence only; no qualification or stable-quality claim."
+  ]
+}

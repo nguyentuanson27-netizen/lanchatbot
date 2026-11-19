@@ -1,0 +1,36 @@
+{
+  "kind": "OFFLINE_UNCHANGED_SOURCE_HYDRATION_REPLAY",
+  "providerRequests": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "sourceClock": "2026-10-31T17:20:16.224Z",
+  "worldUnchanged": true,
+  "preparedCharts": [
+    {
+      "subjectRef": "SQ2447",
+      "charts": []
+    },
+    {
+      "subjectRef": "SV2447",
+      "charts": []
+    }
+  ],
+  "readbackCharts": [
+    {
+      "subjectRef": "SQ2447",
+      "charts": [
+        "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447"
+      ]
+    },
+    {
+      "subjectRef": "SV2447",
+      "charts": []
+    }
+  ],
+  "snapshotChanged": true,
+  "observedActualDiffPaths": [
+    "runtimeProducts[0].sizeCharts",
+    "state.factSnapshotVersion"
+  ],
+  "limitation": "Pure read-tools composition reproduces lazy chart hydration; no provider rerun or synthetic quality grade."
+}

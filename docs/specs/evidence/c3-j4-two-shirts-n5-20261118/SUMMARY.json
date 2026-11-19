@@ -1,0 +1,261 @@
+{
+  "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+  "worldHash": "dfbc11c72f413c1d4052c49cd574886e8ca413589841f44f5f6654687a5e0403",
+  "cases": 2,
+  "attempts": 10,
+  "terminalTurns": 30,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 5,
+    "HANDOFF": 10,
+    "NO_SEND": 15
+  },
+  "sourceFreshnessClock": "ACTUAL_WALL_CLOCK",
+  "nativeProviderRequests": 25,
+  "judgeProviderRequests": 10,
+  "providerRegisteredAttempts": 35,
+  "localBuildRejections": 10,
+  "localAdmissionRejections": 10,
+  "completeRuntimeGenerationAttemptCount": 45,
+  "generationOutcomes": {
+    "OWNER:OK": 20,
+    "VERIFIER:OK": 5,
+    "OWNER:PROVIDER_ERROR": 10
+  },
+  "models": {
+    "sourceSha": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "3d94082edc5412188ec922ce581304ccb8771c3e302dba6ba0bf29f7f494028c",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "cb898b99aadcedd597dadee07629150f196d7042aec8f4572bcba3ee75e4dd35",
+    "toolContractHash": "a508463e7afe545c9d6b2109e75227d8193dd2aa937f5a0ade401ac6e823a595",
+    "assemblyHash": "3f183d7c6cd3f730adcbf9e61a413a4611c7a93c9bfa3365258b2ed7696e533c",
+    "runtimeHash": "483657b9fe2a3473231ac623c6a55115d49c1a59dc40ad985d825fcacb87dde3",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "23e3315044995f2c5e8fc6ca0b242bc74e68b48f232fb7fefc8ce9528ca7d7bf",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "8ea6aa4f2122e8d7bca1153a5057799bd87b3d7b8d307ce5e4f7647749c76661",
+      "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+      "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+    }
+  },
+  "owner": {
+    "requests": 20,
+    "latencyP50Ms": 5476.3442,
+    "latencyP95Ms": 6841.1384000000035,
+    "inputTokens": 237138,
+    "outputTokens": 19592,
+    "usageExposed": 20
+  },
+  "verifier": {
+    "requests": 5,
+    "latencyP50Ms": 7452.5723,
+    "latencyP95Ms": 9932.51579999998,
+    "inputTokens": 49190,
+    "outputTokens": 321,
+    "usageExposed": 5
+  },
+  "providerErrorsOrTimeouts": 0,
+  "localBuildRequestBytes": {
+    "minimum": 65824,
+    "maximum": 66810,
+    "limit": 65536
+  },
+  "codeReplies": 0,
+  "continuityFrames": 0,
+  "testDatabasesDropped": true,
+  "voiceMeasuredOnCustomerVisibleTextOnly": true,
+  "cost": "NOT_EXPOSED",
+  "liveSends": 0,
+  "results": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "HANDOFF",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Lượt đầu hỏi màu gọn, đúng hai lựa chọn áo M từ tool và có ảnh hợp lệ. Lượt xin hỗ trợ đã được ghi nhận nhưng chưa xét, chưa có quyền giảm giá; không có concession trái phép. Tuy nhiên handoff im lặng dù đủ nguồn để giải thích đang chờ chọn màu làm đứt mạch bán; lượt cuối tiếp tục im lặng nên khách chưa nhận được tổng 529.000đ (áo 499.000đ + ship 30.000đ). NO_SEND cuối đúng trạng thái HUMAN; không có thông tin sai, tự giảm tiền hay giả nhận thanh toán, nhưng nhu cầu khách chưa được hoàn thành."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "HANDOFF",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Lượt đầu hỏi màu gọn, đúng bằng chứng áo M trắng có sẵn, be đặt trước. Yêu cầu hỗ trợ mới được lưu chờ chọn màu, chưa có quyền giảm thêm; không có lời hứa giảm hay freeship sai. Tuy nhiên lượt hai handoff im lặng dù tool đã đủ thông tin để tiếp tục, khiến lượt ba không trả lời tổng gửi Cần Thơ. Theo giá và phí ship hiện có, một áo là 529.000đ trước hỗ trợ chưa được xét. NO_SEND lượt cuối đúng quyền HUMAN nhưng toàn mạch bán hàng chưa hoàn thành."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "HANDOFF",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Lượt đầu hỏi màu gọn, đúng nguồn áo M trắng có sẵn/be đặt trước. Lời xin hỗ trợ đã được lưu nhưng chưa xét vì thiếu màu; không có receipt cấp ưu đãi và không tự giảm tiền hay freeship. Tuy nhiên handoff im lặng rồi NO_SEND khiến khách chưa được giải thích trạng thái hỗ trợ hoặc trả lời tổng gửi Cần Thơ (giá áo 499.000đ + ship 30.000đ, chưa áp dụng hỗ trợ). Lượt cuối tuân thủ quyền HUMAN, nhưng toàn mạch bán hàng chưa hoàn thành; không có thông tin sai hay thao tác tài chính sai có hậu quả."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "HANDOFF",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Lượt đầu hỏi màu gọn, đúng lựa chọn áo M trắng có sẵn/be đặt trước và có ảnh hợp lệ. Khi khách xin hỗ trợ, tool đã lưu yêu cầu chờ màu, chưa cấp ưu đãi; có thể giải thích và tiếp tục hỏi màu nhưng terminal lại handoff im lặng. Vì vậy câu hỏi tổng gửi Cần Thơ cũng không được trả lời, dù có cơ sở tính 499.000đ + 30.000đ ship = 529.000đ trước hỗ trợ. Không tự giảm giá, freeship hay nhận đã thanh toán; lượt cuối giữ đúng quyền HUMAN, nhưng toàn mạch bán hàng chưa hoàn thành."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "HANDOFF",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Lượt 1 hỏi màu tự nhiên, đúng lựa chọn AO size M trong nguồn. Lượt 2 chỉ ghi nhận yêu cầu hỗ trợ, chưa có receipt cấp ưu đãi; không tự giảm giá hay freeship. Tuy nhiên, handoff rồi im lặng ở lượt 3 khiến khách chưa được báo tổng cơ bản 529.000đ gửi Cần Thơ (áo 499.000đ + ship 30.000đ), dù đã đủ nguồn để trả lời và nói rõ hỗ trợ thêm còn chờ xét. Không có thông tin sai về thanh toán hay báo giá đã gửi, nhưng chưa hoàn thành nhu cầu khách."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "terminals": [
+        "HANDOFF",
+        "NO_SEND",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Đã lưu yêu cầu hỗ trợ đúng receipt, chưa cấp giảm hay tự thêm giỏ khi khách chưa chọn màu. Tuy nhiên, HANDOFF dù đã đọc được offer AO và có đủ nguồn khiến hai lượt sau im lặng: chưa tạo giỏ hai áo trắng M, chưa kích hoạt xét pending và chưa báo tổng gồm ship. Không có thông tin giá/ưu đãi sai hoặc thao tác cấp giảm trái phép, nhưng nhu cầu mua hàng chưa được hoàn thành."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "terminals": [
+        "HANDOFF",
+        "NO_SEND",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Receipt xác nhận đã lưu pending một lần, chưa cấp hỗ trợ hay tự thêm giỏ. Tuy nhiên, HANDOFF dù đủ nguồn khiến cả ba lượt không có phản hồi: khách chọn trắng nhưng chưa có giỏ hai áo M, pending chưa được xét và câu hỏi tổng cả ship bị bỏ ngỏ. Không có báo giá sai hoặc cấp ưu đãi trái phép; lỗi chính là không hoàn thành việc bán hàng."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "terminals": [
+        "HANDOFF",
+        "NO_SEND",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Đã lưu yêu cầu hỗ trợ đúng một lần, chưa tự cấp giảm. Tuy nhiên, HANDOFF rồi im lặng khiến mạch bán hàng không hoàn thành: khách chọn trắng nhưng chưa có giỏ hai áo M, pending chưa được xét và câu hỏi tổng gồm ship không được trả lời. Không có thông tin giá sai hay thao tác áp ưu đãi trái receipt."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "terminals": [
+        "HANDOFF",
+        "NO_SEND",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Đã lưu yêu cầu hỗ trợ đúng dạng pending, chưa cấp giảm hay tạo đơn trái phép. Tuy nhiên lượt đầu handoff im lặng dù đã có nguồn giá và lựa chọn màu, không hướng dẫn khách chọn tiếp. Hai lượt sau im lặng đúng quyền HUMAN nhưng mạch bán chưa hoàn thành: không có giỏ hai áo trắng M, pending chưa được xét và không trả lời tổng cả ship. Không có báo giá sai hoặc áp dụng ưu đãi sai được ghi nhận."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "terminals": [
+        "HANDOFF",
+        "NO_SEND",
+        "NO_SEND"
+      ],
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Đã lưu yêu cầu hỗ trợ trước giỏ đúng một lần theo receipt, chưa cấp giảm thêm. Tuy nhiên, lượt đầu HANDOFF im lặng dù có nguồn bán áo; hai lượt sau NO_SEND nên khi khách chọn trắng vẫn chưa tạo giỏ hai áo M, chưa xét pending và không trả lời tổng cả ship. Không có báo giá sai hay áp dụng ưu đãi trái quyền, nhưng luồng bán chưa hoàn thành."
+    }
+  ]
+}

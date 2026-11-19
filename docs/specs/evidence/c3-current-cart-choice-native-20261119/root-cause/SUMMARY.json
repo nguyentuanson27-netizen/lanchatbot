@@ -1,0 +1,63 @@
+{
+  "kind": "OFFLINE_FROZEN_SOURCE_COMPONENT_RECONSTRUCTION_NOT_NATIVE_STORE_REPLAY",
+  "runtimeSource": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "diagnosisHead": "363bb2bdda38b4d8b5a39c07287a958fbe12498c",
+  "runtimeSourceDelta": "NONE_IN_WORKER_CODE_OR_PROTOCOL",
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "verifierWireLimit": 65536,
+  "ownerWireLimit": 70000,
+  "changedVerifierPromptWireBytes": 785,
+  "rows": [
+    {
+      "repetition": 1,
+      "allOffersReservedVerifierBytes": 65743,
+      "overflowBytes": 207,
+      "sameContextPreviousPromptBytes": 64958,
+      "targetedAOReservedVerifierBytes": 64578,
+      "ordinaryReplyVerifierBytes": 37122,
+      "hardPrecheck": null
+    },
+    {
+      "repetition": 2,
+      "allOffersReservedVerifierBytes": 65729,
+      "overflowBytes": 193,
+      "sameContextPreviousPromptBytes": 64944,
+      "targetedAOReservedVerifierBytes": 64564,
+      "ordinaryReplyVerifierBytes": 37108,
+      "hardPrecheck": null
+    },
+    {
+      "repetition": 3,
+      "allOffersReservedVerifierBytes": 65710,
+      "overflowBytes": 174,
+      "sameContextPreviousPromptBytes": 64925,
+      "targetedAOReservedVerifierBytes": 64545,
+      "ordinaryReplyVerifierBytes": 37089,
+      "hardPrecheck": null
+    },
+    {
+      "repetition": 4,
+      "allOffersReservedVerifierBytes": 65733,
+      "overflowBytes": 197,
+      "sameContextPreviousPromptBytes": 64948,
+      "targetedAOReservedVerifierBytes": 64566,
+      "ordinaryReplyVerifierBytes": 37112,
+      "hardPrecheck": null
+    },
+    {
+      "repetition": 5,
+      "allOffersReservedVerifierBytes": 65830,
+      "overflowBytes": 294,
+      "sameContextPreviousPromptBytes": 65045,
+      "targetedAOReservedVerifierBytes": 64663,
+      "ordinaryReplyVerifierBytes": 37209,
+      "hardPrecheck": null
+    }
+  ],
+  "limitations": [
+    "Fresh native rejection has no captured exact prepared frame or exception. Reconstructed pending/identity use synthetic fields where full encrypted state was not exported.",
+    "Real frozen world, captured accepted dialogue/turn times and pending purchase used. Actual source CANDIDATE_TUPLES mode required; earlier legacy-selector probes did not test the same path.",
+    "Targeted-AO branch is an offline read-scope experiment, not implemented runtime behavior or new model result."
+  ]
+}

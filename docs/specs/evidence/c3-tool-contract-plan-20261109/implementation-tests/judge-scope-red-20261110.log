@@ -1,0 +1,66 @@
+✖ blind source context drops readiness cohorts and includes the same task rules in both packet modes (49.7769ms)
+✔ unsafe send eligibility overrides apparently perfect quality and C3 comparison (15.4608ms)
+✔ a stale verifier PASS from a different journey turn cannot authorize the next turn (7.6895ms)
+✔ an unresolved explicit customer need cannot be hidden by the overall quality score (12.1111ms)
+✔ missing semantic verifier, changed draft or snapshot cannot count as eligible evidence (13.4986ms)
+✔ observed model substitution and label-bearing actual requests are rejected (10.2933ms)
+✔ source or body tampering and provider retries cannot be hidden in metrics (9.443ms)
+✔ neutral or unmatched comparisons do not qualify a target-passing candidate to replace C3 (30.5961ms)
+✔ blind packets hide arm and case identifiers, and changed outcome invalidates old votes (7.0684ms)
+✔ labels nested in a captured JSON string cannot leak into either provider arm (3.7636ms)
+✔ quality judgement binds the actual terminal outcome and journey is graded separately (10.6882ms)
+✔ complete valid fixture separates product target, replacement and rollout authority (10.3064ms)
+✔ a missing attempt remains blocked, never removed from denominator (5.5602ms)
+✔ one broken journey state link cannot be rescued by all single turns (5.0116ms)
+✔ runtime projection omits all evaluator labels and refuses fixture-reset history (2.8951ms)
+✔ verifier and complete-candidate qualification invalidate at separate scopes (0.4844ms)
+✔ owner thresholds absent keep preregistration blocked (0.2088ms)
+✔ new case IDs cannot launder an exact development runtime (0.2794ms)
+✔ a baseline safety regression or reset cannot qualify replacement (11.7304ms)
+✔ empty executions and messages attached to silent handoff cannot count as evidence (12.087ms)
+✔ journey terminal and customer turn must match actual registered trajectory (9.1546ms)
+✔ unverified C3 bridge and a forged initial journey state cannot qualify (4.4564ms)
+✔ paired self-consistency cannot substitute for the preregistered world (2.6795ms)
+✔ safety evidence must verify the frozen draft in the captured provider request (10.4735ms)
+✔ successful model paths require their actual owner and C3 strategist (6.4593ms)
+✔ measurement absence is explicit and token cost unknowns are not fabricated zeroes (6.3339ms)
+✔ blind review includes source facts and actual effects and receipt audit (2.4342ms)
+✔ matched metadata cannot conceal another customer message in actual owner or C3 wires (2.8885ms)
+✔ a verifier checking another draft or snapshot cannot authorize the recorded exact reply (10.4636ms)
+✔ unverified baseline blocks replacement but cannot erase a complete independent absolute result (5.8373ms)
+✔ code-owned output cannot bypass the registered semantic safety verifier (6.1943ms)
+✔ registered common private checkout is accepted equally for both architectures without a model verdict (13.3601ms)
+✔ absolute SINGLE packet retains preparation coverage without identifying arms in paired packets (3.8147ms)
+✔ opening-photo wrapper cannot qualify replacement by claiming structural parity (5.9638ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 33
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3546.1562
+
+✖ failing tests:
+
+test at apps\worker\evals\single-agent-commerce-qualification\qualification.test.mjs:7:1
+✖ blind source context drops readiness cohorts and includes the same task rules in both packet modes (49.7769ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'TASK_OUTCOME_CONTEXT_V2'
+  - 'TASK_OUTCOME_CONTEXT_V3'
+                           ^
+  
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-qualification/qualification.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'TASK_OUTCOME_CONTEXT_V2',
+    expected: 'TASK_OUTCOME_CONTEXT_V3',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

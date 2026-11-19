@@ -1,0 +1,507 @@
+{
+  "identity": {
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "version": "gpt-6.1-sol",
+    "cliVersion": "0.159.2",
+    "rubricHash": "7337fd2e3b5a6b2e52910ccfcc5c55db7c375aa0a6bf2380d80427fad8f38f00",
+    "schemaHash": "79b1d3bac15af9cf8355a8dd65320befddb775d5ef055a6cd3d34e5162139b29",
+    "retry": 0,
+    "maximumJudgeRequests": 10,
+    "packetBytesLimit": 262144
+  },
+  "packetHash": "7c6eb05681ed3774c257a09e61143ea497fb59672440765dc89946115a7fdbb7",
+  "rows": [
+    {
+      "id": "1d65fc77c945a2f0345655876cf1eb7a51428d9f4c053ea529a4dbccf0305a58",
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Hai lượt đầu hỏi đúng màu còn thiếu và báo hỗ trợ miễn ship 30k đúng quote trước giỏ, không nhận đã ghi ưu đãi. Lượt cuối handoff im lặng, chưa trả lời tổng cho một áo gửi Cần Thơ dù đã có quote và chính sách phí ship đủ căn cứ; không có thông tin sai hay claim thao tác không được chứng minh."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 32785,
+        "output_tokens": 430,
+        "total_tokens": 33215,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 274
+        }
+      },
+      "latencyMs": 14091,
+      "error": null
+    },
+    {
+      "id": "29489a9acce14d72ee049a9ae9f78547e14fafa7d72c8331a9f257273796baf7",
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu hỏi đúng màu còn thiếu, nêu đúng trắng có sẵn/be đặt trước. Lượt xin hỗ trợ báo đúng quote trước giỏ: miễn phí vận chuyển 30k, tổng 499k; không nhận vơ đã ghi ưu đãi vào giỏ. Tuy nhiên lượt cuối handoff im lặng, chưa trả lời tổng một áo gửi Cần Thơ dù nguồn bán hàng đã đủ. Không có thông tin sai hoặc claim thao tác không được chứng minh."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 32634,
+        "output_tokens": 472,
+        "total_tokens": 33106,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 295
+        }
+      },
+      "latencyMs": 16245,
+      "error": null
+    },
+    {
+      "id": "875ffd7fad496fbfeb2020023c5a5d885c4ae23d3cf3236a7fe0b39e6d6a6b57",
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Hai lượt đầu hỏi đúng màu còn thiếu và báo đúng quote hỗ trợ trước giỏ: áo 499.000đ, miễn phí vận chuyển 30.000đ, tổng 499.000đ; không nhận đã ghi ưu đãi vào giỏ. Lượt cuối HANDOFF im lặng vì DEPENDENCY_FAILURE nên chưa trả lời tổng gửi Cần Thơ, dù ca có nguồn bán hàng sẵn sàng. Không có thông tin giá hay claim thao tác sai."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 32733,
+        "output_tokens": 402,
+        "total_tokens": 33135,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 226
+        }
+      },
+      "latencyMs": 14073,
+      "error": null
+    },
+    {
+      "id": "89fbd7b17fc13540705fdb398c253f6ddd87e3c31452097308fd9b8b8a6e709c",
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Hai lượt đầu hỏi đúng màu còn thiếu và báo đúng quote một áo 499k, hỗ trợ phí ship 30k; không nhận đã ghi ưu đãi vào giỏ. Lượt cuối handoff im lặng nên chưa trả lời tổng gửi về Cần Thơ dù ca đủ nguồn. Không có thông tin sai hay thao tác mua ngoài yêu cầu."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 32752,
+        "output_tokens": 572,
+        "total_tokens": 33324,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 421
+        }
+      },
+      "latencyMs": 19657,
+      "error": null
+    },
+    {
+      "id": "2c0b532093ba452c8e21e11379739709b381f8a3d2b617842dce0b33d3082ce7",
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Hai lượt đầu hỏi đúng màu còn thiếu và báo đúng quote trước giỏ: một áo 499.000đ, hỗ trợ phí ship 30.000đ, tổng 499.000đ; không nhận đã ghi ưu đãi vào giỏ. Lượt cuối HANDOFF im lặng vì DEPENDENCY_FAILURE, chưa trả lời tổng gửi Cần Thơ dù nguồn bán hàng đủ để tiếp tục kiểm tra báo giá. Không có thông tin sai hay claim thao tác không có căn cứ."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 32674,
+        "output_tokens": 465,
+        "total_tokens": 33139,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 286
+        }
+      },
+      "latencyMs": 13412,
+      "error": null
+    },
+    {
+      "id": "7123324b6e0b5d88e904a92b64abc2d2f87eaa503428735d16a3e47acc8c90d8",
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu báo đúng quote hỗ trợ trước giỏ: giảm 5%, freeship, tổng 948.100đ; không claim đã ghi ưu đãi. Tuy nhiên khách đã lấy hai áo M mà shop chưa hỏi màu còn thiếu để tiếp tục mua; tin chọn trắng dựng sẵn sau đó không bù được thiếu sót này. Lượt hai tạo đúng giỏ 2 áo M trắng và kích hoạt pending một lần, có receipt. Lượt cuối báo đúng tổng hiện hành 948.100đ gồm ship, không trừ phí giao hàng hai lần; mô tả freeship đang có được cartQuote chứng minh dù receipt lượt này rỗng."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 44700,
+        "output_tokens": 357,
+        "total_tokens": 45057,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 142
+        }
+      },
+      "latencyMs": 10621,
+      "error": null
+    },
+    {
+      "id": "9a1084130ac5a08083d207462194189ba3f2f5af00550b68d69492908406382e",
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Báo đúng quote trước giỏ: hai áo giảm 5%, hỗ trợ freeship, tổng 948.100đ; câu nói là báo mức cho lựa chọn mua, không nhận đã ghi ưu đãi vào giỏ. Hỏi màu còn thiếu đúng lúc khách đã lấy hai áo M. Khi khách chọn trắng, receipt xác nhận tạo đúng giỏ hai áo M trắng và kích hoạt pending một lần. Lượt cuối kiểm lại tổng khớp cartQuote cùng ưu đãi hiện hữu, không trừ ship hai lần; trả lời tự nhiên, gọn và đúng câu hỏi."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 45167,
+        "output_tokens": 321,
+        "total_tokens": 45488,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 122
+        }
+      },
+      "latencyMs": 11433,
+      "error": null
+    },
+    {
+      "id": "4eab868a557ab13a565368c1a908a8de7a8128c720aac93c53eb5773344cb029",
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu báo đúng mức hỗ trợ trước giỏ 948.100đ và hỏi màu còn thiếu; câu mô tả ưu đãi cho hai áo không khẳng định đã ghi hỗ trợ vào giỏ. Khi khách chọn trắng, giỏ được tạo đúng hai áo M trắng và pending được kích hoạt một lần, có receipt. Lượt cuối báo đúng tổng hiện hành, gồm miễn phí ship 30.000đ theo cartQuote, không trừ ship lần nữa; trả lời gọn, đủ câu hỏi của khách."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 45222,
+        "output_tokens": 702,
+        "total_tokens": 45924,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 516
+        }
+      },
+      "latencyMs": 22293,
+      "error": null
+    },
+    {
+      "id": "bca1f0ed4a73455baf8ae774f70175da1b50ec4da8ad5852378dc54c2ac2b915",
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu báo đúng quote trước giỏ 948.100đ gồm giảm 5% và hỗ trợ ship, không khẳng định đã ghi ưu đãi vào giỏ; nhưng bỏ sót hỏi màu khi khách đã lấy hai áo M. Tin chọn trắng ở lượt sau không bù được bước dẫn mua thiếu này. Sau đó tạo đúng giỏ hai áo trắng M, kích hoạt pending một lần có receipt; lượt cuối báo đúng tổng hiện hành và miễn ship theo cartQuote, không trừ ship lần nữa."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 44252,
+        "output_tokens": 344,
+        "total_tokens": 44596,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 160
+        }
+      },
+      "latencyMs": 15057,
+      "error": null
+    },
+    {
+      "id": "f96c1bc65acad88b749eb47ac640526d37ce2010a512b6f7b8912a9255ce1c0b",
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "order": [
+        0
+      ],
+      "rating": null,
+      "status": "PROVIDER_ERROR",
+      "providerRequests": 1,
+      "usage": null,
+      "latencyMs": 1693,
+      "error": "UPSTREAM_HTTP"
+    }
+  ]
+}

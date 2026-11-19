@@ -1,0 +1,12 @@
+{
+  "kind": "SEPARATE_BATCH_COVERAGE_NOT_PAIRED_QUALITY",
+  "firstRunSourceSha": "2628987aae6c62958db4484ba5f152907f833d83",
+  "remainderRunSourceSha": "1f6a358bc7f26865ca28caa1021614f3b61184a0",
+  "firstCases": 21,
+  "remainderCases": 12,
+  "overlap": [],
+  "uniqueRegisteredCases": 33,
+  "firstActualTurns": 28,
+  "remainderActualTurns": 20,
+  "note": "Two distinct source/world registrations; do not pool quality grades or observed safety populations."
+}

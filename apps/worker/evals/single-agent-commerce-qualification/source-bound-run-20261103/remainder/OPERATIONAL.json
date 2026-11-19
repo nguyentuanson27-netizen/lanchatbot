@@ -1,0 +1,76 @@
+{
+  "sourceSha": "a8c7ebee18e883770379f6fea665b8ab1cd31839",
+  "registeredCases": 12,
+  "registeredTurns": 20,
+  "executedTurns": 20,
+  "generationRecords": 23,
+  "generationHttp": 21,
+  "maxRequestsPerGeneration": 1,
+  "generationStatuses": {
+    "OK": 19,
+    "PROVIDER_ERROR": 3,
+    "MALFORMED": 1
+  },
+  "verifierVerdicts": {
+    "PASS": 1
+  },
+  "verifierLatencyMs": {
+    "n": 2,
+    "p50": 3040.720100000035,
+    "p95": 9196.675799999997
+  },
+  "nativeVerificationAndReadbackMs": {
+    "n": 2,
+    "p50": 7415.316099999996,
+    "p95": 11106.114099999977
+  },
+  "providerTransportErrors": 1,
+  "preDispatchFailures": 2,
+  "tokenUsage": {
+    "inputObserved": 216518,
+    "outputObserved": 26701,
+    "usageRows": 20,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "acceptedTexts": 1,
+  "acceptedImages": 1,
+  "terminalCounts": {
+    "HANDOFF": 12,
+    "SEND_ELIGIBLE": 1,
+    "NO_SEND": 7
+  },
+  "handoffNoSendRate": 0.95,
+  "databaseDropped": true,
+  "providerGenerationRetry": 0,
+  "liveSend": false,
+  "auxiliaryHttp": [
+    {
+      "slotId": "351535e140a749e6afd712ebc6b35e21389975e33a4394f9f2a4fcb6e8027820",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "OAUTH",
+      "ordinal": 1,
+      "status": 200,
+      "error": null,
+      "latencyMs": 168.3301999999967,
+      "requestHash": null,
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "351535e140a749e6afd712ebc6b35e21389975e33a4394f9f2a4fcb6e8027820",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "EMBEDDING",
+      "ordinal": 2,
+      "status": 200,
+      "error": null,
+      "latencyMs": 2155.477700000003,
+      "requestHash": "b4daa3ce17311488e48650a62f48b116fa17f0688d73b97b2d335192fbfeef86",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    }
+  ],
+  "note": "Harness measurements only, not production SLO or causal latency/quality improvement. Auxiliary OAuth/embedding HTTP retained separately from generation attempts; unexposed token/cost is unavailable.",
+  "providerErrorNoVerdict": 1
+}

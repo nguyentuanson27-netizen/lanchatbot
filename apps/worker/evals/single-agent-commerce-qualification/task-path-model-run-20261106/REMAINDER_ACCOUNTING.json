@@ -1,0 +1,42 @@
+{
+  "runSourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "casesRegistered": 20,
+  "turnsRegistered": 24,
+  "casesStatus": {
+    "EXECUTED": 20
+  },
+  "frames": 24,
+  "terminalCounts": {
+    "HANDOFF": 6,
+    "SEND_ELIGIBLE": 16,
+    "NO_SEND": 2
+  },
+  "actualTerminalCounts": {
+    "HANDOFF": 6,
+    "SEND_ELIGIBLE": 16,
+    "NO_SEND": 2
+  },
+  "generationCount": 49,
+  "roles": {
+    "OWNER": 33,
+    "VERIFIER": 16
+  },
+  "generationStatuses": {
+    "OK": 49
+  },
+  "providerRequests": 49,
+  "verifierLatencyMs": {
+    "p50": 8256.435899999997,
+    "p95": 22749.890399999975
+  },
+  "tokenUsage": {
+    "inputObserved": 441529,
+    "outputObserved": 35409,
+    "usageRows": 49,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "rawJournalSha256": "3371839dc37f8529a468f2b1a5f873145952fa86605a47cf69a211e51a484efc",
+  "journalRows": 223,
+  "sourceWrites": 0,
+  "liveSends": 0
+}

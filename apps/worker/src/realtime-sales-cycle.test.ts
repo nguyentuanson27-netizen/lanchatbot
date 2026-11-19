@@ -32,6 +32,52 @@ import {
 const now = new Date("2026-07-23T03:00:00.000Z");
 
 describe("customer-visible cart choices", () => {
+  it("cannot replenish the missing-name budget by disputing and recapturing the old payment method", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(createRealtimeSalesState(conversationId, pageId, now), "chốt CB182 size M", "budget-open"));
+    let tick = 1;
+    const run = (state: NonNullable<typeof opened.plan>["state"], text: string) => {
+      const request = input(state, text, "budget-source-" + tick);
+      request.policyResolution!.bundle!.artifacts.shopPolicy.allowedPaymentMethods = ["COD", "BANK_TRANSFER"];
+      return evaluateRealtimeSalesCycle({ ...request, checkoutCollection: "SINGLE_FIELD", now: new Date(now.getTime() + tick++ * 1000) });
+    };
+    const cod = await run(opened.plan!.state, "COD");
+    const nameRetry = await run(cod.plan!.state, "Chị chưa gửi tên");
+    expect(nameRetry.plan?.state.clarification?.attemptCount).toBe(2);
+    const dispute = await run(nameRetry.plan!.state, "Không COD");
+    expect(dispute.plan?.state.clarification?.attemptCount).toBe(3);
+    const recapture = await run(dispute.plan!.state, "COD");
+    expect(recapture.transferToHuman).toBe(true);
+    expect(recapture.reasonCode).toBe("CLARIFICATION_RETRY_EXHAUSTED");
+    expect(recapture.messages).toEqual([]);
+  });
+  it("keeps source colour sentinels private while retaining each committed size", () => {
+    const selected = line(1);
+    selected.components.forEach(component => { component.color = "__NO_COLOR__"; });
+    expect(formatCartLineSelection(selected)).toBe("1 bộ CB182 (áo, size M; chân váy, size M)");
+    selected.offerKind = "DIRECT";
+    selected.components = [selected.components[0]!];
+    expect(formatCartLineSelection(selected)).toBe("1 áo CB182, size M");
+    expect(selected.components[0]!.color).toBe("__NO_COLOR__");
+  });
+ it("retains unresolved payment across private fields and only fresh payment capture restores preview readiness",async()=>{
+  const opened=await evaluateRealtimeSalesCycle(input(createRealtimeSalesState(conversationId,pageId,now),"chốt CB182 size M","payment-start"));
+  const complete=await evaluateRealtimeSalesCycle(input(opened.plan!.state,"Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD","payment-complete"));
+  expect(complete.plan?.state.preview).not.toBeNull();
+  let tick=1;
+  const run=(state:NonNullable<typeof complete.plan>["state"],text:string)=>{const request=input(state,text,"payment-source-"+tick);
+   request.policyResolution!.bundle!.artifacts.shopPolicy.allowedPaymentMethods=["COD","BANK_TRANSFER"];
+   return evaluateRealtimeSalesCycle({...request,checkoutCollection:"SINGLE_FIELD",now:new Date(now.getTime()+tick++*1000)});};
+  const disputed=await run(complete.plan!.state,"không COD");
+  expect(disputed.plan?.state.clarification?.missingFields).toEqual(["PAYMENT_METHOD"]);
+  expect(disputed.plan?.state.checkoutDraft?.paymentMethod).toBe("COD");
+  const named=await run(disputed.plan!.state,"Tên: Nguyễn Thị Lan");
+  expect(named.plan?.state.preview).toBeNull();
+  expect(named.plan?.state.clarification?.missingFields).toEqual(["PAYMENT_METHOD"]);
+  const chosen=await run(named.plan!.state,"Chị chọn COD nhé");
+  expect(chosen.plan?.state.checkoutDraft?.paymentMethod).toBe("COD");
+  expect(chosen.plan?.state.clarification).toBeNull();
+  expect(chosen.plan?.state.stage).toBe("ORDER_PREVIEW");
+ });
   it("uses a scoped product name without presenting a separate component as the whole set", () => {
     const selected = line(2);
     selected.offerKind = "COMPONENT"; selected.offerId = "AO";
@@ -906,6 +952,7 @@ describe("realtime Phase 3 sales cycle", () => {
           sourceAuthority: "POS_SNAPSHOT",
           stockStatus: "IN_STOCK",
           stockAvailableQuantity: 3,
+          stockCounter: { source: "PANCAKE_BOM", unit: "PARENT_OFFER", identity: query.productId },
           sourceObservedAt: "2026-07-23T02:00:00.000Z",
           sourceExpiresAt: "2026-07-25T02:00:00.000Z",
         };

@@ -23,9 +23,10 @@ export function createCommerceHandoffSourceReader(input:{
       case "SIZE_SOURCE":{const q=toolArgs(raw,["subjectRef"]);if(!q||!id(q.subjectRef))throw Error("HANDOFF_SOURCE_QUERY");value=await input.size(q.subjectRef,binding);break;}
       case "RECEIPT":{const q=toolArgs(raw,["operationId"]);if(!q||!id(q.operationId))throw Error("HANDOFF_SOURCE_QUERY");value=await input.receipt(q.operationId,binding);break;}
       case "CART_SELECTION":{
-        const q=toolArgs(raw,["shopAlias","productId","offerType","size","color","quantity","lineId","deliveryAddress"]);
+        const q=toolArgs(raw,["shopAlias","productId","offerType","size","color","quantity","lineId","deliveryAddress","selectionMaxAgeSeconds"]);
         if(!q||!id(q.shopAlias)||!id(q.productId)||!id(q.lineId)||!Number.isInteger(q.quantity)||Number(q.quantity)<1||Number(q.quantity)>20||
           ["offerType","size","color"].some(k=>q[k]!==null&&!id(q[k]))||
+          q.selectionMaxAgeSeconds!==undefined&&(!Number.isInteger(q.selectionMaxAgeSeconds)||Number(q.selectionMaxAgeSeconds)<60||Number(q.selectionMaxAgeSeconds)>86400)||
           q.deliveryAddress!==undefined&&q.deliveryAddress!==null&&(typeof q.deliveryAddress!=="string"||q.deliveryAddress.length>1024))throw Error("HANDOFF_SOURCE_QUERY");
         value=await input.selection(q as unknown as CartSelectionQuery,binding);break;
       }

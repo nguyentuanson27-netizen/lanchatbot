@@ -69,7 +69,7 @@ export function createCommerceHandoffTools(input: {
       recipient: authority.recipient, bindingVersion: authority.bindingVersion, privacyAllowed: authority.privacyAllowed,
       permission: authority.permission && scopeMatches(authority), conversationOwner: authority.state.conversationOwner },
       subjects: base.boundSubjects, products: base.runtimeProducts ?? [], claims: base.protectedClaims, policies: base.policyLiterals,
-      receipts: base.effectReceipts, ...(base.cartBinding ? { cartBinding: base.cartBinding } : {}) });
+      receipts: base.effectReceipts,receiptContinuity:base.effectReceiptContinuity, ...(base.cartBinding ? { cartBinding: base.cartBinding } : {}) });
   };
   const policyIdentity = (bundle: RuntimePolicyBundle) => commerceHash({
     policy: publicPolicyLiteral(bundle, input.scope.pageId, input.scope.shopId, input.clock()), matrix: bundle.artifacts.handoffMatrix });
@@ -200,7 +200,23 @@ export function createCommerceHandoffTools(input: {
   }
   async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
     if (committed || uncertain || pending) return { status: "REJECTED", reason: "HANDOFF_TERMINAL" };
-    if (call.name !== "request_handoff") return input.base.invoke(call);
+    if (call.name !== "request_handoff") {
+      const result=await input.base.invoke(call);
+      if(["record_negotiation","apply_pending_negotiation","cancel_pending_negotiation"].includes(call.name)&&result.status==="OK"){
+        // Effects already read back their own durable commit and authority. Do
+        // not overlay that revision with this wrapper's pre-write cache, nor
+        // accept a later external revision merely because it is newer.
+        const proof=input.base.snapshot(),operationId=(result.data as {operationId?:unknown}|undefined)?.operationId;
+        const receipt=proof.effectReceipts.find(r=>r.operationId===operationId&&["NEGOTIATION_UPDATED","NEGOTIATION_REQUEST_RECORDED","NEGOTIATION_REQUEST_INVALIDATED"].includes(r.effect)&&r.status==="SUCCESS");
+        try{
+          const current=await read();
+          if(!receipt||proof.state.conversationRevision!==current.stateVersion||!scopeMatches(current)||
+            !current.permission||!current.privacyAllowed||current.state.conversationOwner!=="BOT")
+            return {status:"UNAVAILABLE",reason:"COMMITTED_AUTHORITY_CHANGED",failureStage:"READBACK"};
+        }catch{return {status:"UNAVAILABLE",reason:"COMMITTED_AUTHORITY_CHANGED",failureStage:"READBACK"};}
+      }
+      return result;
+    }
     const a = toolArgs(call.args, ["reason"]), parsed = HandoffReasonV2Schema.safeParse(a?.reason);
     if (!a || !parsed.success || parsed.data === "ADMIN_REQUEST") return { status: "REJECTED", reason: "HANDOFF_ARGUMENTS" };
     try { return await request(parsed.data); } catch { return { status: "UNAVAILABLE", reason: "HANDOFF_POLICY_OR_SOURCE" }; }
@@ -224,6 +240,7 @@ export function createCommerceHandoffTools(input: {
       } catch { /* Unknown/rejected commits never authorize output or another attempt. */ }
       return {disposition:"NO_SEND",reason:"FALLBACK_HANDOFF_UNPROVED",text:null,fallbackId:null};
     },
+    requestSilentHandoff:async(reason)=>request(reason,false,true),
     handoffStatus:()=>attempts?{attempts,status,reason:attemptedReason}:null,
     async readback() { await input.base.readback(); await read(); return snapshot(); }, async invokeBatch(calls) {
     if (committed || uncertain || pending) return calls.map(() => ({ status: "REJECTED", reason: "HANDOFF_TERMINAL" }));

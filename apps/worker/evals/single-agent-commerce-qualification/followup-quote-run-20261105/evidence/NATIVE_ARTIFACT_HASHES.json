@@ -1,0 +1,170 @@
+[
+  {
+    "group": "r1",
+    "caseId": "c-po-20261031-p06",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\native-426e58ba6fab6891ae1abe684da100c7c4ba31f25bd461866ffd563252c05265-turn-0.json",
+    "sha256": "07db2f0116c2163bd26767a7cee45eb26a64bb07c716dbe2c418a0dc7e97187b"
+  },
+  {
+    "group": "r1",
+    "caseId": "c-po-20261031-p07",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\native-4bd5a4e52bd6f0728781b714360c41cb6079161dd391fda83981757dca249cb0-turn-0.json",
+    "sha256": "01dba697c2e0d8e7bbd11025cf137391d581bdc36900e231f8fbe0e2650abb4d"
+  },
+  {
+    "group": "r1",
+    "caseId": "c-po-20261031-p08",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\native-2005a64f1903408857cf60dd59717c68f6938ae97f47d355352f5e009c93af04-turn-0.json",
+    "sha256": "482489fa6ac56e14930665fbda6fad32d293b06c9ca36b59ba7feea550be8345"
+  },
+  {
+    "group": "r1",
+    "caseId": "c-po-20261031-p08",
+    "turnIndex": 1,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\native-2005a64f1903408857cf60dd59717c68f6938ae97f47d355352f5e009c93af04-turn-1.json",
+    "sha256": "9cbb53471a4e90035d7ddd3e534b0f707af569b867ea5eea4f7d60b6db3806cb"
+  },
+  {
+    "group": "r1",
+    "caseId": "c-20261028-j1",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\native-b36ba8734a2af1fccc902ad22f3935567f328fa59a61424f6f0fd59a38f42c3e-turn-0.json",
+    "sha256": "bcf19779732407cf60c9ba4c893ac6f8498999894fd78aaf096310322aae8646"
+  },
+  {
+    "group": "r1",
+    "caseId": "c-20261028-j1",
+    "turnIndex": 1,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\native-b36ba8734a2af1fccc902ad22f3935567f328fa59a61424f6f0fd59a38f42c3e-turn-1.json",
+    "sha256": "bb4283499ccd111db7a9c640dbf692826d637b454f08cb9a2d7890be94ad4775"
+  },
+  {
+    "group": "r1",
+    "caseId": "c-20261028-j1",
+    "turnIndex": 2,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\native-b36ba8734a2af1fccc902ad22f3935567f328fa59a61424f6f0fd59a38f42c3e-turn-2.json",
+    "sha256": "68b7c0fb436db742d12b76e2bec0597c26d681e2bf7a45ac837a7455a415fc01"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-po-20261031-p04",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-15ad6a9a2d2beda6c84fb07792f5186d87bbf4c386853fff32c01cf44b4f7ba3-turn-0.json",
+    "sha256": "f261b9df32fce8f4a702cdabd4a7d1b819793dd3fbe1ead9295816fcc69e90d5"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-po-20261031-p04",
+    "turnIndex": 1,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-15ad6a9a2d2beda6c84fb07792f5186d87bbf4c386853fff32c01cf44b4f7ba3-turn-1.json",
+    "sha256": "e87e07bf340caa8a5e73d38bf3ffda5c06479ec472c285e970f5d963422f3bce"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-po-20261031-p09",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-17e2f9dc6371e64a6fcf296720d0396439b19e6be8171a3951d8e7bcc2ce1d09-turn-0.json",
+    "sha256": "864cdc46070707c00f44e819475a36ba066b5417f5a506d54435bd8d28003be7"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-po-20261031-p09",
+    "turnIndex": 1,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-17e2f9dc6371e64a6fcf296720d0396439b19e6be8171a3951d8e7bcc2ce1d09-turn-1.json",
+    "sha256": "43357488dca810958322e8f66b07b74748d5df310975c62b3f81d872f89bc949"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-s03",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-571c7e94cf54653a49302907657e530247a2d88900c48a1576be472bd2e0b6e9-turn-0.json",
+    "sha256": "c6ebb1f3548756c8638185505710952c3a6d0640c11792366d8669ab61039b9e"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-s13",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-8532951f089eba6b398ef6d13042391739d90f6be48cd6f616acff59e36d3326-turn-0.json",
+    "sha256": "dc3b5786219004f2c74969875af9e0ffe6aa82b5e725372a315d5aa2a5837da0"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-s15",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-55f9da48e743326e074a65ef4b641eef52b9586106c91536acd151f0bced1740-turn-0.json",
+    "sha256": "acedf377d1a0dc41ae1c1c008cf99a6c8799d09b0d4421fe46ecb950e6c60a09"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-s16",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-921622e8836cff103ce67237cacb18faeda7c9d760b89ad82f56f7a90cd513a1-turn-0.json",
+    "sha256": "e11b4104de9d0f8799552229c4012999fa34bc500c47a626c29899b4d3fc493e"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j2",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-76dec7be8cbd34d3d1c65444abc3c91d781e0963c78f35fb61adf3ac30e209f2-turn-0.json",
+    "sha256": "03242772ea134ae5fa1d9a41f1a547257e8f59d49eb7f5cb8de23bdcab2f1549"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j2",
+    "turnIndex": 1,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-76dec7be8cbd34d3d1c65444abc3c91d781e0963c78f35fb61adf3ac30e209f2-turn-1.json",
+    "sha256": "daa5446744bff9db0d854f3d74b6c2b83531ba21be455e383c25a33a70dd75f1"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j2",
+    "turnIndex": 2,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-76dec7be8cbd34d3d1c65444abc3c91d781e0963c78f35fb61adf3ac30e209f2-turn-2.json",
+    "sha256": "a9220f64c0cae5fdaba5977befdb20ec6493335ef74436d683f2462ac17efbf7"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j4",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-643bb7976e34cb13b9a5e6727923c2dbc61901958502ecfa4f40d241e82531c6-turn-0.json",
+    "sha256": "8d0f246731ee41ce5c61f8e306f45f3f71c95fa4005262803f064e8f4d2a32ee"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j4",
+    "turnIndex": 1,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-643bb7976e34cb13b9a5e6727923c2dbc61901958502ecfa4f40d241e82531c6-turn-1.json",
+    "sha256": "3eed64fb47e398f256e5536e2a67b0ac2b7de78a5f13a1ff8945e8613fc679ae"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j4",
+    "turnIndex": 2,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-643bb7976e34cb13b9a5e6727923c2dbc61901958502ecfa4f40d241e82531c6-turn-2.json",
+    "sha256": "d7852dc34591ff433ae486772e1ab575a7208e3dfe1680845de1e16dab539742"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j6",
+    "turnIndex": 0,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-537f22ef11eb01f5683cc0feb60438d4c9176dc80c947aaa0b02e42329adc578-turn-0.json",
+    "sha256": "b80da51da8adf352de025fd1c712c273251e15584e5f6359111b8354b0282b82"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j6",
+    "turnIndex": 1,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-537f22ef11eb01f5683cc0feb60438d4c9176dc80c947aaa0b02e42329adc578-turn-1.json",
+    "sha256": "860347b9cb66cfff33cc9c04b43ebdb2cd49d13396b3a755dac5d376be58fed7"
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j6",
+    "turnIndex": 2,
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\native-537f22ef11eb01f5683cc0feb60438d4c9176dc80c947aaa0b02e42329adc578-turn-2.json",
+    "sha256": "404634b66463f94c7d6ddbf9c055a6ea0dcb7e3d9e48820c9b0da44bd10a2d67"
+  }
+]

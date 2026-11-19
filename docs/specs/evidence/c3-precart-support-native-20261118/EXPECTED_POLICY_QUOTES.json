@@ -1,0 +1,97 @@
+{
+  "kind": "OFFLINE_POLICY_PREFLIGHT_NOT_PROVIDER_RESULT",
+  "providerRequests": 0,
+  "rows": [
+    {
+      "quantity": 1,
+      "objections": 0,
+      "result": {
+        "status": "AUTHORIZED",
+        "policyBundleId": "admin-policy:1198992073286645",
+        "policyVersion": "cf056b94651b9b37df96732539c59e1c",
+        "customerState": "READY",
+        "parentProductUnitCount": 1,
+        "subtotalVnd": 499000,
+        "shippingFeeVnd": 30000,
+        "adjustments": [],
+        "discountTotalVnd": 0,
+        "grandTotalVnd": 529000
+      }
+    },
+    {
+      "quantity": 1,
+      "objections": 1,
+      "result": {
+        "status": "AUTHORIZED",
+        "policyBundleId": "admin-policy:1198992073286645",
+        "policyVersion": "cf056b94651b9b37df96732539c59e1c",
+        "customerState": "HESITANT",
+        "parentProductUnitCount": 1,
+        "subtotalVnd": 499000,
+        "shippingFeeVnd": 30000,
+        "adjustments": [
+          {
+            "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+            "kind": "FREE_SHIPPING",
+            "amountVnd": 30000,
+            "percentageBps": null
+          }
+        ],
+        "discountTotalVnd": 30000,
+        "grandTotalVnd": 499000
+      }
+    },
+    {
+      "quantity": 2,
+      "objections": 0,
+      "result": {
+        "status": "AUTHORIZED",
+        "policyBundleId": "admin-policy:1198992073286645",
+        "policyVersion": "cf056b94651b9b37df96732539c59e1c",
+        "customerState": "READY",
+        "parentProductUnitCount": 2,
+        "subtotalVnd": 998000,
+        "shippingFeeVnd": 30000,
+        "adjustments": [
+          {
+            "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+            "kind": "PERCENT_DISCOUNT",
+            "amountVnd": 49900,
+            "percentageBps": 500
+          }
+        ],
+        "discountTotalVnd": 49900,
+        "grandTotalVnd": 978100
+      }
+    },
+    {
+      "quantity": 2,
+      "objections": 1,
+      "result": {
+        "status": "AUTHORIZED",
+        "policyBundleId": "admin-policy:1198992073286645",
+        "policyVersion": "cf056b94651b9b37df96732539c59e1c",
+        "customerState": "HESITANT",
+        "parentProductUnitCount": 2,
+        "subtotalVnd": 998000,
+        "shippingFeeVnd": 30000,
+        "adjustments": [
+          {
+            "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+            "kind": "PERCENT_DISCOUNT",
+            "amountVnd": 49900,
+            "percentageBps": 500
+          },
+          {
+            "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+            "kind": "FREE_SHIPPING",
+            "amountVnd": 30000,
+            "percentageBps": null
+          }
+        ],
+        "discountTotalVnd": 79900,
+        "grandTotalVnd": 948100
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "uniqueRegisteredArmAttempts": 16,
+  "requestHashMatches": 16,
+  "frozenInputArtifactHashes": "ALL_MATCH",
+  "controlsByteIdentical": 2,
+  "mainInputsByteIdentical": 2,
+  "allErrorsInDenominator": true,
+  "unknownCompletions": 0,
+  "replayedCompletedAttempts": 0,
+  "wireBoundsAndEvaluatorFirewall": "assertReplayWire before every dispatch; captured native dialogue binding retained",
+  "rawCaptures": "LOCAL_ONLY_NO_SIGNATURE_OR_CREDENTIAL_PUBLICATION"
+}

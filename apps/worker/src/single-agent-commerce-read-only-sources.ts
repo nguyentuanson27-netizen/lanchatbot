@@ -6,7 +6,7 @@ import type { CommerceScope, ReadOnlyCatalog } from "./single-agent-commerce-rea
 
 /** The only policy port passed to the resolver is SELECT of active pointers. No pin/audit/cache writer. */
 export function createCommerceReadSources(input: {
-  scope: CommerceScope; channel: RuntimePolicyDatabaseChannel; clock: () => Date;
+  scope: Pick<CommerceScope, "pageId" | "shopAlias">; channel: RuntimePolicyDatabaseChannel; clock: () => Date;
   policyStore: Pick<PostgresRuntimePolicyStore, "loadActivePointers">;
   catalog: Pick<StableCatalogSearchPort, "findByExactCode">;
   search: Pick<ProductSearchService, "searchText">;
@@ -33,12 +33,12 @@ export function createCommerceReadSources(input: {
       for (const p of found) known.set(p.productId, p.canonicalCode);
       return result;
     },
-    async readProduct(productId, readPos = true) {
+    async readProduct(productId, readPos = true,diagnostics) {
       const code = known.get(productId);
       if (!code) throw new Error("UNBOUND_PRODUCT");
-      const product = await input.catalog.findByExactCode(code);
+      const product = await (diagnostics?diagnostics.run("CATALOG_READ",{productId},()=>input.catalog.findByExactCode(code)):input.catalog.findByExactCode(code));
       if (!product || product.productId !== productId || product.canonicalCode !== code) throw new Error("PRODUCT_SOURCE_CHANGED");
-      return { product, snapshot: readPos ? await input.facts.readCatalogSnapshot(input.scope.shopAlias, productId) : null };
+      return { product, snapshot: readPos ? await (diagnostics?diagnostics.run("POS_READ",{productId},()=>input.facts.readCatalogSnapshot(input.scope.shopAlias,productId)):input.facts.readCatalogSnapshot(input.scope.shopAlias, productId)) : null };
     },
   };
   return { catalog, policy: () => {

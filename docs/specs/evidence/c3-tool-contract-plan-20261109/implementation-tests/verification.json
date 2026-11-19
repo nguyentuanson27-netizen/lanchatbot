@@ -1,0 +1,187 @@
+{
+  "status": "ACCEPTANCE_PASS_INDEPENDENT_IMPLEMENTATION_APPROVED",
+  "implementationBaseSha": "36058803b95324d8888ef4e6c76773e01b61bb6f",
+  "implementationCodeSha": "f4ba36b53abc69a682924c6103eb073d113114e3",
+  "primaryCodeSha": "450419334b9913c56a030e9b1d8f91d4f9924cf7",
+  "planSha256": "6495b49aff8016df34050d79f86b31330905ef2deb9714033b92ecde13cc3bdd",
+  "checks": {
+    "focused": {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce src/realtime-sales-catalog.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts --reporter=dot --maxWorkers=2 --no-file-parallelism",
+      "status": "PASS",
+      "artifact": "focused.log",
+      "sha256": "25a7362715e15cd03011cf351cfcc94a3d048f75cd81a73f0b53f60b2337236c"
+    },
+    "node": {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs apps/worker/evals/single-agent-commerce-read-only/tool-contract-completion.test.mjs apps/worker/evals/single-agent-commerce-qualification/diagnostic.test.mjs",
+      "status": "PASS",
+      "artifact": "node.log",
+      "sha256": "99f041972800b61faeae59d9fd33432550ed443b649020437c6ac414eba420c9"
+    },
+    "protected": {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts --reporter=dot",
+      "status": "PASS",
+      "artifact": "protected.log",
+      "sha256": "17dd00ba661988f5c822442d451cfebbc6e85d4b50c1aa2eaf9b6351b48f62be"
+    },
+    "build": {
+      "command": "pnpm --filter @lana/worker build",
+      "status": "PASS",
+      "artifact": "build.log",
+      "sha256": "a3cd5f0921c255ef23c7b28a5b985df09f44d6ce7c6934b764e18849d0830d54"
+    },
+    "typecheck": {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "status": "PASS",
+      "artifact": "typecheck.log",
+      "sha256": "d7d3c66ea3510a5dcf1186b278462c9e8dead6816081750675f4f0902ed0c7d9"
+    },
+    "lint": {
+      "command": "pnpm --filter @lana/worker lint",
+      "status": "PASS",
+      "artifact": "lint.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    },
+    "dataset": {
+      "command": "pnpm check:dataset-boundary",
+      "status": "PASS",
+      "artifact": "dataset.log",
+      "sha256": "745c52b41d3303a69e6595df2e22f28f9fc5f1f0b5392d560db215ff5a6e14ca"
+    }
+  },
+  "counts": {
+    "focused": 1094,
+    "node": 102,
+    "protected": 22,
+    "postgres": 14
+  },
+  "postgres": [
+    {
+      "label": "final",
+      "artifact": "final-pg.json",
+      "sourceSha": "f4ba36b53abc69a682924c6103eb073d113114e3",
+      "sourceDirty": false,
+      "passed": 14,
+      "failed": 0,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sha256": "f9444bf823a7669a45d26e76f2eec5a9e6ce14427de00bbea4c39e4d19f2455b"
+    },
+    {
+      "label": "unknown-target",
+      "artifact": "unknown-target-pg.json",
+      "sourceSha": "f4ba36b53abc69a682924c6103eb073d113114e3",
+      "sourceDirty": false,
+      "passed": 1,
+      "failed": 0,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sha256": "86eb28274ce2485d7ed1a1ac73c91090a2222a80b4e334f0eaf4de36b1d34db7"
+    },
+    {
+      "label": "initial",
+      "artifact": "initial-pg.json",
+      "sourceSha": "36058803b95324d8888ef4e6c76773e01b61bb6f",
+      "sourceDirty": true,
+      "passed": 11,
+      "failed": 0,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sha256": "9ebb735965d18129bf5d91f54b02031bb6bbd0ee37a7123a8929455503d6aa82"
+    },
+    {
+      "label": "failure-r2",
+      "artifact": "failure-r2-pg.json",
+      "sourceSha": "36058803b95324d8888ef4e6c76773e01b61bb6f",
+      "sourceDirty": true,
+      "passed": 3,
+      "failed": 1,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sha256": "8cd3097601510a1648dbc1fcfc53e2edb7a6b195a1f8887ccd525139392fdb32"
+    },
+    {
+      "label": "failure-r3",
+      "artifact": "failure-r3-pg.json",
+      "sourceSha": "36058803b95324d8888ef4e6c76773e01b61bb6f",
+      "sourceDirty": true,
+      "passed": 3,
+      "failed": 1,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sha256": "a8b7baf3fc3cc32a0277a1d5f237fc622a0a4ed0a2ca89230a6b0b03fcfee9be"
+    },
+    {
+      "label": "failure-r4-fixture",
+      "artifact": "failure-r4-fixture-pg.json",
+      "sourceSha": "36058803b95324d8888ef4e6c76773e01b61bb6f",
+      "sourceDirty": true,
+      "passed": 5,
+      "failed": 1,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sha256": "e6140beb48b2a5c21be4c6674fbdb237618f8984c79aaa5af07f1055b76189d8"
+    },
+    {
+      "label": "failure-r5-fixture",
+      "artifact": "failure-r5-fixture-pg.json",
+      "sourceSha": "36058803b95324d8888ef4e6c76773e01b61bb6f",
+      "sourceDirty": true,
+      "passed": 6,
+      "failed": 1,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sha256": "e719a4fd2d339e2aca112a0782c3e02941e418e9a607e6540d8fd6f9f0ca82c5"
+    },
+    {
+      "label": "failure-r6-terminal",
+      "artifact": "failure-r6-terminal-pg.json",
+      "sourceSha": "cb2c3daf90414e42c45176575af5a26c6f9cf8a8",
+      "sourceDirty": false,
+      "passed": 6,
+      "failed": 1,
+      "databaseDropped": true,
+      "providerGenerations": 0,
+      "sha256": "51bdfdbf972a5be762979e3ecbf25a9c5dbb3d62997967f9417a0991b7a997e9"
+    }
+  ],
+  "finalPostgresCommand": "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-tool-contract-pg-final-all-20261109 COD --check-prefix 'C tool contract'",
+  "sourceFileHashes": {
+    "apps/worker/evals/single-agent-commerce-qualification/TOOL_CONTRACT_SCREEN_SCOPE_20261109.json": "c4c22f5c41220014ec03c3d8aa2873a4304744aebbde89985a4be6160130b887",
+    "apps/worker/evals/single-agent-commerce-qualification/diagnostic.mjs": "1985e34e496af1af005c85a450f1a0726fa3ade5904fb78fce4f2f6ac8104c8e",
+    "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs": "9f61169c17510c7890ca55248802a2aff86b9c269da1c68810c00f405b8ad605",
+    "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs": "ff9636499a2aa31c5d52dee53242c14412e9438c83eaca7cf4833d95227ab064",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs": "5c653b4bf2c04ae52d764623ecb0ef9241d9fdb48e09203d70543827d2055c6b",
+    "apps/worker/evals/single-agent-commerce-read-only/manifest.json": "c02c75a2082eb79f93f5ac00677c83ea2b978a813e0316e3b4bb7aab63bd8105",
+    "apps/worker/evals/single-agent-commerce-read-only/product-read-selection.mjs": "08a2ee46d98be1782653f418cdc529e27a497eab39f7d2bc7b45b6dfd0b33b1b",
+    "apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs": "1bdbfd47f5ce7f66d8db0d9c656875eb83628ee76245d9c551fc9f1ceff69e7c",
+    "apps/worker/evals/single-agent-commerce-read-only/protocol.mjs": "c2fc8f74412e03ea7401c3d771f2231e92875752ca89c85b26076e11ba7fe1d3",
+    "apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs": "16eaaa08b483dccbe936cfee6898bdc031f1eefffeb3933b37b182c4c9d039fb",
+    "apps/worker/evals/single-agent-commerce-read-only/tool-contract-completion.test.mjs": "3731135ebffaf376fbeec73d66eed5f28e59150159267e159470a9491efc0ed1",
+    "apps/worker/src/single-agent-commerce-callable.ts": "0da628c76c3c3287a864b84751e06ccc10c8981068a910eb73fbd2ad92bc25af",
+    "apps/worker/src/single-agent-commerce-discovery-feasibility.test.ts": "3fc9a8b4054a3c6a8badff532e8f07d2924872ee0e3fa7c0ae38d86a0f491f6b",
+    "apps/worker/src/single-agent-commerce-effects.test.ts": "741b46a92bb7ec441667c9f69a1a03810330d8fcc9e9f7ee5f8f6885e2249116",
+    "apps/worker/src/single-agent-commerce-effects.ts": "de2d777fc795210cad0cfd88126eee6f326d92c5d729632e5e9a2ad985170178",
+    "apps/worker/src/single-agent-commerce-handoff.test.ts": "df4b5366ceee0f96ee384b8c15d107dd52d67e46bc1a0765cb3973eed92e5611",
+    "apps/worker/src/single-agent-commerce-handoff.ts": "03d53dda3d51534605f12d59933c37bf32d8a25200de5e9d8471710ad3593810",
+    "apps/worker/src/single-agent-commerce-ingress.test.ts": "7ee0156e34c1f681a378dffc8736da2738e2c773b11164701df13b70b588fc3a",
+    "apps/worker/src/single-agent-commerce-opening-media.test.ts": "b05c1740013d6c620c3111561298a10fbcb9dbdf2a22976957a7805eacc41443",
+    "apps/worker/src/single-agent-commerce-opening-media.ts": "202ea3c67b8bc0189ca0c50718768777897f615244f56205735d3346312b8626",
+    "apps/worker/src/single-agent-commerce-preparation.test.ts": "aea019760b32b1917f0dfd50cc5623208966ef4b5598a21ddd7c3d40a91a8139",
+    "apps/worker/src/single-agent-commerce-quote.test.ts": "7ce3cb290813022a4224e871f881ead026182e8cefd677ecc6c69c9f0755b159",
+    "apps/worker/src/single-agent-commerce-quote.ts": "860c788fc20b9e6c3b478e7060b1cc5cc8310c9c7d50e934ed9fefae891d8f96",
+    "apps/worker/src/single-agent-commerce-read-only-tools.test.ts": "a9d570e656b7752f0142e7d2393b780bc06877071a7279b036ebd6e65636f111",
+    "apps/worker/src/single-agent-commerce-read-only-tools.ts": "330141540544f70412d366eb602888e272f07905b2e9e557a31c775773779689",
+    "apps/worker/src/single-agent-commerce-read-only.ts": "85f0ae36246e6e6a3cd6f85e026d6c10b2e781eb683084f390e6c3726245ff04",
+    "apps/worker/src/single-agent-commerce.ts": "c90b5dd2c45e4a62eb32da41fa4444b96dbb311aca820595dd52584dab0e3c3c"
+  },
+  "providerGenerations": 0,
+  "liveSends": 0,
+  "sourceShopWrites": 0,
+  "roles": [
+    "OWNER",
+    "VERIFIER"
+  ],
+  "retry": 0,
+  "attribution": "Final PostgreSQL controls ran clean exact implementationCodeSha. RED/unit/build logs include precommit working-edit stages; source content saved in code lineage, not falsely relabelled clean-head executions. No model run yet.",
+  "independentReview": "../implementation-review-r3.json"
+}

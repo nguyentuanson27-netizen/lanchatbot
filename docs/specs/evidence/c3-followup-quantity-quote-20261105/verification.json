@@ -1,0 +1,161 @@
+{
+  "implementationBaseSha": "4530be07cc442333138c432b3a8ae7b4a8503509",
+  "reviewedExecutableSha": "94911899adaaceef5b314518a4d6bb237d8f2208",
+  "sourceManifest": "source-manifest.json",
+  "actualProviderGenerations": 0,
+  "modelCampaign": "NOT_RUN",
+  "historicalR1": "FAIL_UNCHANGED_NO_R2_DISPATCH",
+  "commands": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-quote.test.ts",
+      "phase": "RED observed",
+      "exitCode": 1,
+      "result": "6FAIL/26PASS before implementation",
+      "log": "logs/c3-followup-quote-red-20261105.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-quote.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-callable.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-opening-media.test.ts src/single-agent-semantic-verifier-boundary.test.ts",
+      "phase": "Final focused",
+      "exitCode": 0,
+      "result": "418PASS/6files",
+      "log": "logs/c3-followup-quote-worker-focused-20261105.log"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs",
+      "exitCode": 0,
+      "result": "6PASS actual HTTP mock, no real generation",
+      "log": "logs/c3-followup-quote-wire-green-20261105.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "exitCode": 0,
+      "result": "859PASS/2SKIP/0FAIL (861total) on clean94911899",
+      "log": "logs/c3-followup-quote-evals-20261105.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "log": "logs/c3-followup-quote-build-20261105.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "log": "logs/c3-followup-quote-typecheck-20261105.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "log": "logs/c3-followup-quote-lint-20261105.log"
+    },
+    {
+      "argv": [
+        "python",
+        "../c3-media-context-model-source-wrapper-20261103-02.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-followup-quote-pg-20261105-01",
+        "COD",
+        "--check-prefix",
+        "C follow-up quote"
+      ],
+      "exitCode": 0,
+      "result": "1PASS clean949/droptrue/provider0",
+      "artifact": "pg.json"
+    },
+    {
+      "command": "node ../c3-followup-quote-failed-world-replay-20261105.mjs",
+      "exitCode": 0,
+      "result": "Historical failed world/sameclock AOqty2 total978100; no cart/media/effect/generation",
+      "artifact": "failed-world-replay.json"
+    }
+  ],
+  "logs": [
+    {
+      "path": "logs/c3-followup-quote-build-20261105.log",
+      "sha256": "ae7d910086a47bb4f475e34c8b30339f03d7cae4971b0661bf6ac2dfb4fc76d6",
+      "bytes": 5249
+    },
+    {
+      "path": "logs/c3-followup-quote-evals-20261105.log",
+      "sha256": "6f6a993691e0bc51b6917f353b6fa700a94eff2c32c9aa0f45dd0be439232139",
+      "bytes": 94432
+    },
+    {
+      "path": "logs/c3-followup-quote-failed-world-replay-20261105.log",
+      "sha256": "9ab1f4a832fb471a8f3f5e360cdd1f34b30923f4d1662d09cdc71857a91fdd3c",
+      "bytes": 1415
+    },
+    {
+      "path": "logs/c3-followup-quote-green-20261105-02.log",
+      "sha256": "f3c1b72571154d7db794ca9f1f8e25a640a0234979239840e7f0bf4bd2144a17",
+      "bytes": 380
+    },
+    {
+      "path": "logs/c3-followup-quote-green-20261105.log",
+      "sha256": "61c3fa89e00a1369f6ff43357745d653e87562350cc31cee4107c9e8c67ac27f",
+      "bytes": 5820
+    },
+    {
+      "path": "logs/c3-followup-quote-ingress-20261105.log",
+      "sha256": "56e2012f1fd615d8df46ceb7b0a36de920e03cb9a87964f2032020ab71e2e6fa",
+      "bytes": 18938
+    },
+    {
+      "path": "logs/c3-followup-quote-lint-20261105.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "path": "logs/c3-followup-quote-pg-20261105-01.log",
+      "sha256": "0b7a374f50b3eff99567a04e36599da52239f70e061893d384e38180457398c6",
+      "bytes": 99
+    },
+    {
+      "path": "logs/c3-followup-quote-red-20261105.log",
+      "sha256": "b57b7cebcf4e1922209b68b90d8bb9e9eecea0646203a8b60d130cc89228b38d",
+      "bytes": 7963
+    },
+    {
+      "path": "logs/c3-followup-quote-typecheck-20261105.log",
+      "sha256": "58e79ec09e0ddfa0b5fc079313190923878f9b4c7f96e07b3e9855e7df997031",
+      "bytes": 5266
+    },
+    {
+      "path": "logs/c3-followup-quote-wire-green-20261105.log",
+      "sha256": "4c1933d572e2eaf8568a01c18a206df204c04796e323dd7c3a593d996ff9f662",
+      "bytes": 730
+    },
+    {
+      "path": "logs/c3-followup-quote-wire-red-20261105-02.log",
+      "sha256": "237cea6a1fb627601e1e9b19c4d12b5722eaaa147ff03dea86c3c652f4084af2",
+      "bytes": 1753
+    },
+    {
+      "path": "logs/c3-followup-quote-wire-red-20261105.log",
+      "sha256": "0933c9b0fa3d9e5622debbd99f4e886e5e73125300dfb2a3470652f9e6afd3bb",
+      "bytes": 3400
+    },
+    {
+      "path": "logs/c3-followup-quote-worker-focused-20261105.log",
+      "sha256": "1aa5c705e17f6f0d953152524a1ec2faf091ae02550ef93d18e4b6b37aa0b30b",
+      "bytes": 987
+    }
+  ],
+  "retainedIntermediateFailures": [
+    "Initial32quote tests: state equality assertion needed to exclude read-derived factSnapshotVersion; business state equality retained",
+    "InitialwireRED fixture missing provider modelVersion and manifest hash update; corrected then observed actual missing-quantity RED",
+    "Initialingress expected nonexistent cartQuote property null; corrected to real cart/checkout/confirmation assertions"
+  ],
+  "scopeLimits": [
+    "Code tests/scripted transport and captured-clock replay are not model acceptance or current freshness authorization",
+    "Follow-up quote requires one offer with verified common price and explicit quantity; no per-size or multi-product quote framework",
+    "No verifier prompt/model/caps/retry/source data/production wiring change",
+    "No full worker suite/rootpnpmcheck/remoteCI claim in this scoped repair; focused418 and complete Node859/2 actually run"
+  ],
+  "sourceDirtyAtFinalNodeAndPg": false,
+  "earlierCheckAttribution": {
+    "workerFocused418": "Ran on implementation worktree before commit; same final source bytes",
+    "build": "Ran before source commit; compiled runtime unchanged thereafter",
+    "typecheckAndLint": "Ran after executable commit; exit0"
+  }
+}

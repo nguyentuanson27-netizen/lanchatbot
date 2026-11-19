@@ -1,0 +1,2141 @@
+[
+  {
+    "population": "SAFETY",
+    "id": "b01409dbf7c47dbc3dbd02f038423ef8f962f54311ba4d771de2832097e638ed:verifier",
+    "role": "VERIFIER",
+    "slotId": "d3944048af2c31e67bb8288a7c600a1a077c81328ce3871961d209880c325fd2",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "ce7080e5e56f3f7215f8b9703f6d6c21e1df3c4bf0e5efe32928e56a606edbd1",
+    "canonicalBodyHash": "ce7080e5e56f3f7215f8b9703f6d6c21e1df3c4bf0e5efe32928e56a606edbd1",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 5332.2237,
+      "inputTokens": 5908,
+      "outputTokens": 51,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "d9e0d17754b8d1f3ce8ed4e214803813c4b50cc2875d1b0cd8f95b479a6e5c3c:verifier",
+    "role": "VERIFIER",
+    "slotId": "f423be480973b35367d48fcf77db1e0133b66463913ab128360bf3fee11bf976",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "c17471ff17c1f352ba18778d5f77385712da5f8eddc30fc0ea975944b3f17fbb",
+    "canonicalBodyHash": "c17471ff17c1f352ba18778d5f77385712da5f8eddc30fc0ea975944b3f17fbb",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 5902.0597,
+      "inputTokens": 5918,
+      "outputTokens": 139,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "17bbb1d38d8c8cf6fe80d5c618ec5235095e80bd2036362db8fe9152a1c4748d:verifier",
+    "role": "VERIFIER",
+    "slotId": "8b265555b73e2e9cbb98dbfc8b01352b6242d2cb0ac1662886d05ee79a77d687",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "1196c30eb52552ed3bb3955c2a0b335389828b468ba298135bf66450e02e71a3",
+    "canonicalBodyHash": "1196c30eb52552ed3bb3955c2a0b335389828b468ba298135bf66450e02e71a3",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 3184.9252000000015,
+      "inputTokens": 5873,
+      "outputTokens": 22,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "8943716748bdc1a205c5ca4f8a87c543ddc1fad0589ba4117a36aabcf6743705:verifier",
+    "role": "VERIFIER",
+    "slotId": "e713bf1415be93fdfda305bc56bfe89864a0d5adb493656680fb3dfafa7b63b0",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "ec49f6392664e5155c6ba74be7553b8cd9cccfe7bd4a1b15567df51575950673",
+    "canonicalBodyHash": "ec49f6392664e5155c6ba74be7553b8cd9cccfe7bd4a1b15567df51575950673",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 5047.8225999999995,
+      "inputTokens": 5866,
+      "outputTokens": 132,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "1a810546ee2558ffa39270586d2277f7af076a5b021cc8d5defdcce789fe50e9:verifier",
+    "role": "VERIFIER",
+    "slotId": "b7a4aec5a245837c10428608f43980532423a6a77caec9fee2974ecf02f6b95b",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "0cffc458f7fc5b6f1f83d85ff35a07c6292de7ddfdc9ece0a112ccc0723f664c",
+    "canonicalBodyHash": "0cffc458f7fc5b6f1f83d85ff35a07c6292de7ddfdc9ece0a112ccc0723f664c",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4027.4809999999998,
+      "inputTokens": 5938,
+      "outputTokens": 49,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "ed3185f72ea27ca12eb55dc0b99f379cbff17afc6cd5a1a1e823ef6da5759cec:verifier",
+    "role": "VERIFIER",
+    "slotId": "85c867effb32afc081c04eb2a2ba07f9bb5f878f969b2d46afb954013650e085",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "f9e4ae80c6b5e3ff709620ac90217a7d88930651aee9865bfa3dcbdf2e85af65",
+    "canonicalBodyHash": "f9e4ae80c6b5e3ff709620ac90217a7d88930651aee9865bfa3dcbdf2e85af65",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 7520.048700000003,
+      "inputTokens": 5930,
+      "outputTokens": 163,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "a795b1afcdf87222f7d87344cec7be0251049b98a75cb972ddc203fb73d98558:verifier",
+    "role": "VERIFIER",
+    "slotId": "cce5650ac055c55494cb5eb85bcbe6a9540c4f5cbd9ee0a7380f86d759dcd740",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "9acc9e3023b9176c6d6db4c7875d3cf48716f96e409993e99a55285a032658e3",
+    "canonicalBodyHash": "9acc9e3023b9176c6d6db4c7875d3cf48716f96e409993e99a55285a032658e3",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 3609.2042999999976,
+      "inputTokens": 5866,
+      "outputTokens": 39,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "c5fb7e454a244d22f33154521ee6efd49a15b24ba360cef5d37c659cb80cd388:verifier",
+    "role": "VERIFIER",
+    "slotId": "496274421a545afb6c9d503f3f114cae298d513485c2a68e4d7bf487444978c6",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "21def1203f357b43dde9bb2b1f8f131ffc4408a7b6b7d3a609fdf4d4838fffe6",
+    "canonicalBodyHash": "21def1203f357b43dde9bb2b1f8f131ffc4408a7b6b7d3a609fdf4d4838fffe6",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4603.583200000001,
+      "inputTokens": 5878,
+      "outputTokens": 149,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "adc5f41970ade17880ac740dde501406bf2f9a4a0eb1f65b30fa5e298ae8664c:verifier",
+    "role": "VERIFIER",
+    "slotId": "535b4376346b14a018e1e21817afac789c25109e7b9c462135897ef609b460ad",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "b9106f60427d7b632ff25e0f8bf999debe8bf7278e9fc12f41c61b198eafb6b3",
+    "canonicalBodyHash": "b9106f60427d7b632ff25e0f8bf999debe8bf7278e9fc12f41c61b198eafb6b3",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 5079.5538000000015,
+      "inputTokens": 5889,
+      "outputTokens": 53,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "07a4095d2e1c3e0a5604b4444f7d0ff6abdade7a8c8154108313308d0c27b55d:verifier",
+    "role": "VERIFIER",
+    "slotId": "4beb3bb982be7c5deb6ecb12a42685e94e3082a6a30e2b9a91e1e765c9279543",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "a9a8aeeeb68ddf6345bbde3fa86dd9ab81a57e14d83177ab02426566a41f3659",
+    "canonicalBodyHash": "a9a8aeeeb68ddf6345bbde3fa86dd9ab81a57e14d83177ab02426566a41f3659",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 6569.176000000007,
+      "inputTokens": 5888,
+      "outputTokens": 214,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "5925ec8f4979bddb08d9eb3efc43bc049c1e18a976dad23d20fe866bf39bc500:verifier",
+    "role": "VERIFIER",
+    "slotId": "00e4a6ca68a98ba6eb2921d1db7dac202a4b1e6a178bcb5cc6d136923f38f2c5",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "23822d3fea64b5ce8ebca2fd8894bf9cceca7ecc7831c4ec3d8530f0e1dab8d8",
+    "canonicalBodyHash": "23822d3fea64b5ce8ebca2fd8894bf9cceca7ecc7831c4ec3d8530f0e1dab8d8",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 5189.823700000001,
+      "inputTokens": 5827,
+      "outputTokens": 55,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "e8eb2e4f66b660d6926dd2e3a308f4bd05cd8c40ffb25d0ee892c68edb3eeb88:verifier",
+    "role": "VERIFIER",
+    "slotId": "d6211155efaa2ffb5963adc3d0ff9af17289a1720eed4d7fcde760b6b0261ff8",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "3826b391e56caaad5c1a5be86d84360330cd7a71d8f886949ea48dc421595aa9",
+    "canonicalBodyHash": "3826b391e56caaad5c1a5be86d84360330cd7a71d8f886949ea48dc421595aa9",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4707.2151000000085,
+      "inputTokens": 5846,
+      "outputTokens": 146,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "7fc17d2916af58cab6de473dc7fbd71d8b67ffd7077dc2bc078e031482c2a7a1:verifier",
+    "role": "VERIFIER",
+    "slotId": "b071e6caa5de05217f1819fb493f9139192794e9ae5caa7b30907f9e7b8d597a",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "fe1b75dcc3c71c54c628f2d77b00c0e8c89781272a06044fb39b7634b3787d6f",
+    "canonicalBodyHash": "fe1b75dcc3c71c54c628f2d77b00c0e8c89781272a06044fb39b7634b3787d6f",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 3656.747800000012,
+      "inputTokens": 5918,
+      "outputTokens": 49,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "cb29a54c4471aae95020e361e4500f240c9ab6e2bc1d400ef2db7055edab23eb:verifier",
+    "role": "VERIFIER",
+    "slotId": "480091e77362e767b7d9e883464558384aefd67bafbdaf4827a52cae26d8c1ad",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "2dbca8ab265c970e0a5d00f5945cebfb10156ab8141d6521a1ba4d60f830fbe3",
+    "canonicalBodyHash": "2dbca8ab265c970e0a5d00f5945cebfb10156ab8141d6521a1ba4d60f830fbe3",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4279.709999999992,
+      "inputTokens": 5922,
+      "outputTokens": 95,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "8986edaa6aba05eb713353d55ec8fb4a2eeb93126c4126b577eed93f4334e992:verifier",
+    "role": "VERIFIER",
+    "slotId": "23f995c50e829ebbf13dcaf13ec66dd7d6b6df82e1a4eab177e754a5339bde71",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "b02db81b42e2e7916982f2ed51a0564bdcb66e52fd35db9038502fb9fab98700",
+    "canonicalBodyHash": "b02db81b42e2e7916982f2ed51a0564bdcb66e52fd35db9038502fb9fab98700",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4242.528600000005,
+      "inputTokens": 5909,
+      "outputTokens": 55,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "ec65bd7cf7d1e2a5ea8e043d8627cc3fcd19dd08f6a55c660eec0ef0792da44d:verifier",
+    "role": "VERIFIER",
+    "slotId": "f0a7a29e0382d663b2e9d9a350fe3d9cd72e4e54aa1c296afabc9219fa2a764f",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "c1e95444d7601ca9baf120e2b888bcaa7d1ea3a6be90cb3aafbe799c83ffdac7",
+    "canonicalBodyHash": "c1e95444d7601ca9baf120e2b888bcaa7d1ea3a6be90cb3aafbe799c83ffdac7",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4317.061999999991,
+      "inputTokens": 5922,
+      "outputTokens": 99,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "46c5fcaebce5d3ea66545388b10c53a2d4ff00f3f2b13e318b8d01eb21d1b8bd:verifier",
+    "role": "VERIFIER",
+    "slotId": "68a2b009e1390b816cfde6f66fbce4b3b4c73956fc632902dd5bac9cefe4dddd",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "e576482011727c43dc5100903014f6cb93d445cdb2242ff56b521413923cbe49",
+    "canonicalBodyHash": "e576482011727c43dc5100903014f6cb93d445cdb2242ff56b521413923cbe49",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4539.488900000011,
+      "inputTokens": 5880,
+      "outputTokens": 68,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "20dbebbcbf2a3c6c1cc2a0368ee4c59fc3b6e424fd82374b4d0f300d40578046:verifier",
+    "role": "VERIFIER",
+    "slotId": "3fc445cbf71f5ff8a3591840b8f9eea799f92aca96fddc838285866870dee551",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "775a84ae11f4a9a4d3947b5c1ade33071d8509a4ab162e076da7b26418fa20d0",
+    "canonicalBodyHash": "775a84ae11f4a9a4d3947b5c1ade33071d8509a4ab162e076da7b26418fa20d0",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 6321.9272000000055,
+      "inputTokens": 5882,
+      "outputTokens": 163,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "eb054eebef0523f8c93d9a27b0126cd80bd5a8f4f59c55fa1a52e858baf08c10:verifier",
+    "role": "VERIFIER",
+    "slotId": "e2799643c469f7f5a85efc59e13630d81392d8de3e06976b8c010b1e66172220",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "2d1c35bf6825fdf9d42285bfab9d0192627fc3ab96eeef94071c9015b8f6188b",
+    "canonicalBodyHash": "2d1c35bf6825fdf9d42285bfab9d0192627fc3ab96eeef94071c9015b8f6188b",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 2836.1077000000078,
+      "inputTokens": 5868,
+      "outputTokens": 22,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "81db9d862ac19fb44bd4d7bf89df3463580212c837bbc21dd6e6320125149fd0:verifier",
+    "role": "VERIFIER",
+    "slotId": "ce4e96ea93f83e5c4c590a598e94e5fc7d3ac8d12cd925d67a777dc580e0af6f",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "0aeaf4c9f7d5f74b11e8ead0da2d74009294864452ca50629dd2e42fdec432f1",
+    "canonicalBodyHash": "0aeaf4c9f7d5f74b11e8ead0da2d74009294864452ca50629dd2e42fdec432f1",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4938.300900000002,
+      "inputTokens": 5868,
+      "outputTokens": 118,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "1b4c7a894fc8768fba2da224c911e19e96e6335bcb53ca3ddb0e336a894fff51:verifier",
+    "role": "VERIFIER",
+    "slotId": "fd6184e92ebb10703bd326706a2d7150c6c6963542bd5dc9f3f3b4e57069aca4",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "99ff8a7d79d454599b0debc58bd9704f43625ef191a3c7228d5e85c1a7e7516d",
+    "canonicalBodyHash": "99ff8a7d79d454599b0debc58bd9704f43625ef191a3c7228d5e85c1a7e7516d",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 16338.438599999994,
+      "inputTokens": 5914,
+      "outputTokens": 508,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "3c25fa252281880b63328feafc0b46f0486e957b6b3fe16f06d3c2ecacd13196:verifier",
+    "role": "VERIFIER",
+    "slotId": "5f742597fde2c88ab59148a1ab8ee0bd0e1e230fec115f596cf8e8f4ac6b978c",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "3b2fd5419d37b486460f5f6b39a6a5b3268e2f5627665020d583c5a48694ccf9",
+    "canonicalBodyHash": "3b2fd5419d37b486460f5f6b39a6a5b3268e2f5627665020d583c5a48694ccf9",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 7061.602299999999,
+      "inputTokens": 5920,
+      "outputTokens": 190,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "3359123fb2874e33ccfc10c0ee4ceaf35c5f3f231a7cfa49c90caa15c71810b2:verifier",
+    "role": "VERIFIER",
+    "slotId": "37dde479dd21162c3b66dac82104dbea6bb3b0b98f85cc84b9492f7138e2c8f1",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "10f6fa6fe8855a7166c9b30b1a7af72d2b7a73c583cb68a036438e15a4d4d545",
+    "canonicalBodyHash": "10f6fa6fe8855a7166c9b30b1a7af72d2b7a73c583cb68a036438e15a4d4d545",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 3890.9646999999823,
+      "inputTokens": 5874,
+      "outputTokens": 55,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "SAFETY",
+    "id": "c847cd9f494074a4838f107c72a84c67437a58b4c19081f47950f82f5eb4a5fb:verifier",
+    "role": "VERIFIER",
+    "slotId": "fda6a8eee473a8cb9af7a70a82ef2e2d75aac7142f579e6e5416b6a8c0050865",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "a59803b1d44b841ac136c32faf39cd57a06f8d8bdbb3864810e75fcff2fc466f",
+    "canonicalBodyHash": "a59803b1d44b841ac136c32faf39cd57a06f8d8bdbb3864810e75fcff2fc466f",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4428.027700000006,
+      "inputTokens": 5875,
+      "outputTokens": 135,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "4892ea07-d555-4422-bee5-35f12ed10a1e:owner:1",
+    "role": "OWNER",
+    "slotId": "d665289cdaa208b9f4f159cafee43feb628330fa37019602be96f3cea2fc4876",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "0c1d51c40617fd2e2c560b74b797abef2da874df98c14e79ab09e14120ea06cb",
+    "canonicalBodyHash": "0c1d51c40617fd2e2c560b74b797abef2da874df98c14e79ab09e14120ea06cb",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3060.672200000001,
+      "inputTokens": 8171,
+      "outputTokens": 392,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "a1832b08-0dfe-4f3f-9331-6a601c5472b7:owner:1",
+    "role": "OWNER",
+    "slotId": "23e124b6435f09874c0b5e6ceafa902a14a203090d0bbd9a3f8c1db3ca8e5060",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "59da69c9bc97898f9e3e0e5e475a2fc221a45c8f2d8afef719e072e524961fff",
+    "canonicalBodyHash": "59da69c9bc97898f9e3e0e5e475a2fc221a45c8f2d8afef719e072e524961fff",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 5365.245200000005,
+      "inputTokens": 7643,
+      "outputTokens": 1605,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "a1832b08-0dfe-4f3f-9331-6a601c5472b7:owner:2",
+    "role": "OWNER",
+    "slotId": "23e124b6435f09874c0b5e6ceafa902a14a203090d0bbd9a3f8c1db3ca8e5060",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "784067fa8ad756161850f373b46c9abaeb273436b832973316da52a33d85df48",
+    "canonicalBodyHash": "784067fa8ad756161850f373b46c9abaeb273436b832973316da52a33d85df48",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2899.749100000001,
+      "inputTokens": 10348,
+      "outputTokens": 669,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "a1832b08-0dfe-4f3f-9331-6a601c5472b7:owner:3",
+    "role": "OWNER",
+    "slotId": "23e124b6435f09874c0b5e6ceafa902a14a203090d0bbd9a3f8c1db3ca8e5060",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "276f6fe3ed03dff2d2acb96ba91f3c37bc64ff6a7807192f9c64b605ba688d14",
+    "canonicalBodyHash": "276f6fe3ed03dff2d2acb96ba91f3c37bc64ff6a7807192f9c64b605ba688d14",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 6209.8076,
+      "inputTokens": 8418,
+      "outputTokens": 2086,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "a1832b08-0dfe-4f3f-9331-6a601c5472b7:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "23e124b6435f09874c0b5e6ceafa902a14a203090d0bbd9a3f8c1db3ca8e5060",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "cd4ab3dc7ddfaaabca0c6616f8b22d877d4689742f22739ddfd326c116f154a6",
+    "canonicalBodyHash": "cd4ab3dc7ddfaaabca0c6616f8b22d877d4689742f22739ddfd326c116f154a6",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 5098.174200000001,
+      "inputTokens": 7163,
+      "outputTokens": 59,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "30900fee-79d7-45b5-90b8-ba4b854300a6:owner:1",
+    "role": "OWNER",
+    "slotId": "97d3cf747db61aed28cc650e2026fac38511cb3fe7821761eba971453c4598f3",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "840b684d97f711b9b2bd2651b7eeb6d78e5f17177e9442916e79fa95c2f1bba0",
+    "canonicalBodyHash": "840b684d97f711b9b2bd2651b7eeb6d78e5f17177e9442916e79fa95c2f1bba0",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4490.361399999994,
+      "inputTokens": 8099,
+      "outputTokens": 1262,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "1ab71c53-68b4-4754-87f8-98d17860919c:owner:1",
+    "role": "OWNER",
+    "slotId": "1b1c7598dc42dd869cb0a07fa2f9d971001eb41124c63cd58376394107ccef21",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "cffc04408a966affe12f9dcd227c2a1468fdbb6754444d23bb790c5b3104204c",
+    "canonicalBodyHash": "cffc04408a966affe12f9dcd227c2a1468fdbb6754444d23bb790c5b3104204c",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4342.853600000002,
+      "inputTokens": 7635,
+      "outputTokens": 1052,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "1ab71c53-68b4-4754-87f8-98d17860919c:owner:2",
+    "role": "OWNER",
+    "slotId": "1b1c7598dc42dd869cb0a07fa2f9d971001eb41124c63cd58376394107ccef21",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "7b14f4dfc83e474c2d8fb0b44a1505af041d85dc21d743e99fd743763b727f67",
+    "canonicalBodyHash": "7b14f4dfc83e474c2d8fb0b44a1505af041d85dc21d743e99fd743763b727f67",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4218.636400000003,
+      "inputTokens": 9787,
+      "outputTokens": 1191,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "9530b9cf-2250-4c5a-b603-9f767501cb42:owner:1",
+    "role": "OWNER",
+    "slotId": "36bff315a5f5b4068797f76a6a12417f0e19e7ba0b39e722076aef733b97b304",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "5ce9fb4f9b2bdf6e1a78098dc53dd858177e6eaead18fec7a5b937929c846acb",
+    "canonicalBodyHash": "5ce9fb4f9b2bdf6e1a78098dc53dd858177e6eaead18fec7a5b937929c846acb",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 1847.2168999999994,
+      "inputTokens": 7529,
+      "outputTokens": 288,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "9530b9cf-2250-4c5a-b603-9f767501cb42:owner:2",
+    "role": "OWNER",
+    "slotId": "36bff315a5f5b4068797f76a6a12417f0e19e7ba0b39e722076aef733b97b304",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "a9c9214493a99c5c83a40f37d6fbf685253544b75a1a224c12f1d0dcfc2fa02f",
+    "canonicalBodyHash": "a9c9214493a99c5c83a40f37d6fbf685253544b75a1a224c12f1d0dcfc2fa02f",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3750.075600000011,
+      "inputTokens": 9641,
+      "outputTokens": 1018,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "9530b9cf-2250-4c5a-b603-9f767501cb42:owner:3",
+    "role": "OWNER",
+    "slotId": "36bff315a5f5b4068797f76a6a12417f0e19e7ba0b39e722076aef733b97b304",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "eb826bcc5612ecb7f400ae586b8ae510bde165bc7ae8b68b5f60ff7451ec8596",
+    "canonicalBodyHash": "eb826bcc5612ecb7f400ae586b8ae510bde165bc7ae8b68b5f60ff7451ec8596",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 5222.3122,
+      "inputTokens": 7946,
+      "outputTokens": 1617,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "9530b9cf-2250-4c5a-b603-9f767501cb42:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "36bff315a5f5b4068797f76a6a12417f0e19e7ba0b39e722076aef733b97b304",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "3bc58dc054d1b5bdba86050213fb53a91c74f6c82ea6009518a7fcb7e2ad9ccc",
+    "canonicalBodyHash": "3bc58dc054d1b5bdba86050213fb53a91c74f6c82ea6009518a7fcb7e2ad9ccc",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4434.781100000007,
+      "inputTokens": 6596,
+      "outputTokens": 63,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "6b4bb7b2-3ec2-4202-b70d-b26fd3e9f11b:owner:1",
+    "role": "OWNER",
+    "slotId": "2b50e6528cd43b32b5b7a34a78b882c593960473801cf000098cac6f1ebaf531",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "8342758d6c848dea143a6ff99e95f924036325dd72518d450b9085764e2bd592",
+    "canonicalBodyHash": "8342758d6c848dea143a6ff99e95f924036325dd72518d450b9085764e2bd592",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3561.529200000019,
+      "inputTokens": 7640,
+      "outputTokens": 895,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "6b4bb7b2-3ec2-4202-b70d-b26fd3e9f11b:owner:2",
+    "role": "OWNER",
+    "slotId": "2b50e6528cd43b32b5b7a34a78b882c593960473801cf000098cac6f1ebaf531",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "6727c18da1a227372eaefc399a53a885581f8d7e29b414ffe79eff467b480690",
+    "canonicalBodyHash": "6727c18da1a227372eaefc399a53a885581f8d7e29b414ffe79eff467b480690",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2887.3568999999843,
+      "inputTokens": 9635,
+      "outputTokens": 620,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "4cd88f5c-c843-4a61-81af-a260d913a0b7:owner:1",
+    "role": "OWNER",
+    "slotId": "1cd0a9366b462156dc5a4cc8b2f3ec2ba1bb3620b9175485d7101ae22f4b14ec",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "3ff6cf39a499d1c091717edc54d7e18ca44731e8027ac9c917f0868aa56d8856",
+    "canonicalBodyHash": "3ff6cf39a499d1c091717edc54d7e18ca44731e8027ac9c917f0868aa56d8856",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 5638.9234,
+      "inputTokens": 7653,
+      "outputTokens": 1723,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "4cd88f5c-c843-4a61-81af-a260d913a0b7:owner:2",
+    "role": "OWNER",
+    "slotId": "1cd0a9366b462156dc5a4cc8b2f3ec2ba1bb3620b9175485d7101ae22f4b14ec",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "9afcbc10a498d720db59f3ca5be6ddff7aef8408a2820fdd2c8a54b324303552",
+    "canonicalBodyHash": "9afcbc10a498d720db59f3ca5be6ddff7aef8408a2820fdd2c8a54b324303552",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3354.4853000000003,
+      "inputTokens": 11560,
+      "outputTokens": 845,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "4cd88f5c-c843-4a61-81af-a260d913a0b7:owner:3",
+    "role": "OWNER",
+    "slotId": "1cd0a9366b462156dc5a4cc8b2f3ec2ba1bb3620b9175485d7101ae22f4b14ec",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "719fa6763cc40845a255508930d7a7d252a71fbfb2c988cbfc4193b7a4c8e6a3",
+    "canonicalBodyHash": "719fa6763cc40845a255508930d7a7d252a71fbfb2c988cbfc4193b7a4c8e6a3",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 9566.927800000005,
+      "inputTokens": 8169,
+      "outputTokens": 1884,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "4cd88f5c-c843-4a61-81af-a260d913a0b7:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "1cd0a9366b462156dc5a4cc8b2f3ec2ba1bb3620b9175485d7101ae22f4b14ec",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "9b2d9e6e0a628ea807cd718091076ad18092814f8da99d8e3502260d5d655797",
+    "canonicalBodyHash": "9b2d9e6e0a628ea807cd718091076ad18092814f8da99d8e3502260d5d655797",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 6058.147100000002,
+      "inputTokens": 6725,
+      "outputTokens": 83,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "512bcd85-b102-42bd-b436-6c182ca36b8b:owner:1",
+    "role": "OWNER",
+    "slotId": "1a3a12dfb6aefa8d43519c31c8df03be52f3aab22740a1df0f29ea49f3cf5d2b",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "394836de04860f033fff69ac1e09f040d7223eb5e585f4777643b7eedaa7bd06",
+    "canonicalBodyHash": "394836de04860f033fff69ac1e09f040d7223eb5e585f4777643b7eedaa7bd06",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3187.4548999999824,
+      "inputTokens": 7626,
+      "outputTokens": 779,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "512bcd85-b102-42bd-b436-6c182ca36b8b:owner:2",
+    "role": "OWNER",
+    "slotId": "1a3a12dfb6aefa8d43519c31c8df03be52f3aab22740a1df0f29ea49f3cf5d2b",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "e3d4b002f38209a57caefb3211b870c429bf38b43c8fcf6a123f0bb3d5777966",
+    "canonicalBodyHash": "e3d4b002f38209a57caefb3211b870c429bf38b43c8fcf6a123f0bb3d5777966",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3314.5936999999976,
+      "inputTokens": 9464,
+      "outputTokens": 791,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "512bcd85-b102-42bd-b436-6c182ca36b8b:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "1a3a12dfb6aefa8d43519c31c8df03be52f3aab22740a1df0f29ea49f3cf5d2b",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "e76b17e5e03d21e6c2e2bd7ec8afc061201fc8e946cdc0f2b9e537a7299d0a85",
+    "canonicalBodyHash": "e76b17e5e03d21e6c2e2bd7ec8afc061201fc8e946cdc0f2b9e537a7299d0a85",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4872.710500000016,
+      "inputTokens": 5107,
+      "outputTokens": 60,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "b195467c-aced-41c2-b758-5728452735e5:owner:1",
+    "role": "OWNER",
+    "slotId": "f38f626f07e06de125cdd9cc621253a15e0e584f3f7cf30f6aabf75b971697bd",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "71f203b895d0173f0b59efc5b70341fb47ddf5dcf2705a7201b06e609c01423d",
+    "canonicalBodyHash": "71f203b895d0173f0b59efc5b70341fb47ddf5dcf2705a7201b06e609c01423d",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2874.828599999979,
+      "inputTokens": 7642,
+      "outputTokens": 602,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "b195467c-aced-41c2-b758-5728452735e5:owner:2",
+    "role": "OWNER",
+    "slotId": "f38f626f07e06de125cdd9cc621253a15e0e584f3f7cf30f6aabf75b971697bd",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "c163cf17f87678d3d2e7ed00d81cdc63f4c776339912b9c3a4f3df19e75ae737",
+    "canonicalBodyHash": "c163cf17f87678d3d2e7ed00d81cdc63f4c776339912b9c3a4f3df19e75ae737",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3296.3685000000114,
+      "inputTokens": 9344,
+      "outputTokens": 649,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "5336bd4d-b944-4675-9c50-df22afc08f4e:owner:1",
+    "role": "OWNER",
+    "slotId": "8dbf1c42b95d728dda19acac10e135a70f8783851c995cd981abc7196d04d655",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "b98228a0293f8b3cc99b5b662b6741eb30302100bd3177dfa64c05eff6f7dc32",
+    "canonicalBodyHash": "b98228a0293f8b3cc99b5b662b6741eb30302100bd3177dfa64c05eff6f7dc32",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3380.3047999999835,
+      "inputTokens": 7526,
+      "outputTokens": 963,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "55e6a603-69be-44bc-a2f9-8eaf0ffad20b:owner:1",
+    "role": "OWNER",
+    "slotId": "46131d048ef650e292f8e98c5d68a5313b7ddcd3b52ce06e70f924f01c518de4",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "157fda93523c7eecdb378546fe32d7d9f8c44ac3253e85eadf51f50b8bad4876",
+    "canonicalBodyHash": "157fda93523c7eecdb378546fe32d7d9f8c44ac3253e85eadf51f50b8bad4876",
+    "status": "MALFORMED",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 5659.604699999996,
+      "inputTokens": 7637,
+      "outputTokens": 1811,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "971e8428-8a9d-4103-b8f5-eb2569ab53d8:owner:1",
+    "role": "OWNER",
+    "slotId": "a1b14c25e4794e628b2b4efba9fa8409a31ca652777ef4c7bf4909df0c2910ba",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "c83c38455172b30da7f77d8228a523f0b29c33f3b0046a96a4b5058bc6f7e5f3",
+    "canonicalBodyHash": "c83c38455172b30da7f77d8228a523f0b29c33f3b0046a96a4b5058bc6f7e5f3",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4506.373499999987,
+      "inputTokens": 7527,
+      "outputTokens": 1391,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "7229c526-32b4-4585-846b-33c205853960:owner:1",
+    "role": "OWNER",
+    "slotId": "424fd7180aa41dd60139df929bddf8d81cda3f668a6197196b5b368bb30267b3",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "5728e6e19f1fbb28d99c2966a7a4ca1f62321652127b14c2e01dfee3d99861dd",
+    "canonicalBodyHash": "5728e6e19f1fbb28d99c2966a7a4ca1f62321652127b14c2e01dfee3d99861dd",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4596.252600000007,
+      "inputTokens": 7646,
+      "outputTokens": 1188,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "7229c526-32b4-4585-846b-33c205853960:owner:2",
+    "role": "OWNER",
+    "slotId": "424fd7180aa41dd60139df929bddf8d81cda3f668a6197196b5b368bb30267b3",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "fcbcd04dfd82c648ea8934c77da2d7676ec7df137bdbceab604d61c63e7d2500",
+    "canonicalBodyHash": "fcbcd04dfd82c648ea8934c77da2d7676ec7df137bdbceab604d61c63e7d2500",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2993.8388999999734,
+      "inputTokens": 9934,
+      "outputTokens": 655,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "7229c526-32b4-4585-846b-33c205853960:owner:3",
+    "role": "OWNER",
+    "slotId": "424fd7180aa41dd60139df929bddf8d81cda3f668a6197196b5b368bb30267b3",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "14ce05b4b55fed04a0c88faec805103e1752c114a76eebcb7cf3967046a9c409",
+    "canonicalBodyHash": "14ce05b4b55fed04a0c88faec805103e1752c114a76eebcb7cf3967046a9c409",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 8185.403500000015,
+      "inputTokens": 8421,
+      "outputTokens": 2548,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "cf6eefbf-bfe0-434b-855c-9de95bdb5db2:owner:1",
+    "role": "OWNER",
+    "slotId": "f46b5b591fd527fb64087c0a9baed35c6b825b58f3e20fecb643c932cf6b841f",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "29b72a075b7463399fedf4973f3cdaabf13c7c5ffe65b012cb569bd8abc9817d",
+    "canonicalBodyHash": "29b72a075b7463399fedf4973f3cdaabf13c7c5ffe65b012cb569bd8abc9817d",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2807.681900000025,
+      "inputTokens": 7518,
+      "outputTokens": 504,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "cf6eefbf-bfe0-434b-855c-9de95bdb5db2:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "f46b5b591fd527fb64087c0a9baed35c6b825b58f3e20fecb643c932cf6b841f",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "830ee7281e3756e7cfed35caca9a3db4891fd346c1f56c5981940ab829c76155",
+    "canonicalBodyHash": "830ee7281e3756e7cfed35caca9a3db4891fd346c1f56c5981940ab829c76155",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 3421.9114999999874,
+      "inputTokens": 3993,
+      "outputTokens": 22,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "bf9c2119-898d-4982-b09d-c9f86155ffe4:owner:1",
+    "role": "OWNER",
+    "slotId": "9ff9de1dca2d04f5abdd871bc8470b224163721dde4dc1edc3e2eaa874a09973",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "23e3dfb190d1f1437e84ca74b78740798094d367cc436ec2bd5354d43dd792c9",
+    "canonicalBodyHash": "23e3dfb190d1f1437e84ca74b78740798094d367cc436ec2bd5354d43dd792c9",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4677.060200000007,
+      "inputTokens": 7634,
+      "outputTokens": 1362,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "bf9c2119-898d-4982-b09d-c9f86155ffe4:owner:2",
+    "role": "OWNER",
+    "slotId": "9ff9de1dca2d04f5abdd871bc8470b224163721dde4dc1edc3e2eaa874a09973",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "f1ea646bcdff45e9adc84f3ba10fcea5d90e00338cdacd475c0ec34e456508ef",
+    "canonicalBodyHash": "f1ea646bcdff45e9adc84f3ba10fcea5d90e00338cdacd475c0ec34e456508ef",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2650.5444000000134,
+      "inputTokens": 10096,
+      "outputTokens": 565,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "bf9c2119-898d-4982-b09d-c9f86155ffe4:owner:3",
+    "role": "OWNER",
+    "slotId": "9ff9de1dca2d04f5abdd871bc8470b224163721dde4dc1edc3e2eaa874a09973",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "5a5ab3c173d17d91ce201397d6b89f5c651aa9c105403c7f27b5abba126f9856",
+    "canonicalBodyHash": "5a5ab3c173d17d91ce201397d6b89f5c651aa9c105403c7f27b5abba126f9856",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 7961.0081000000355,
+      "inputTokens": 8409,
+      "outputTokens": 2364,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "bf9c2119-898d-4982-b09d-c9f86155ffe4:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "9ff9de1dca2d04f5abdd871bc8470b224163721dde4dc1edc3e2eaa874a09973",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "ab4b225b1f75f2e8f215ddd4394665ce6ee773f9eaa72bfa735e36eaf773eb65",
+    "canonicalBodyHash": "ab4b225b1f75f2e8f215ddd4394665ce6ee773f9eaa72bfa735e36eaf773eb65",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 12301.993300000031,
+      "inputTokens": 7134,
+      "outputTokens": 351,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "739c8105-b47f-4633-a6a7-637963caff36:owner:1",
+    "role": "OWNER",
+    "slotId": "07b66ac9c01e1d9ac7bd0e5ea8cd63a45a12f90d2191e542157ef16118d4ae47",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "a5eb787f20918929334dd074d3c3122ec88ca8239c41ed9dce2b5eaa66ca2c3f",
+    "canonicalBodyHash": "a5eb787f20918929334dd074d3c3122ec88ca8239c41ed9dce2b5eaa66ca2c3f",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4338.706700000039,
+      "inputTokens": 7636,
+      "outputTokens": 1254,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "739c8105-b47f-4633-a6a7-637963caff36:owner:2",
+    "role": "OWNER",
+    "slotId": "07b66ac9c01e1d9ac7bd0e5ea8cd63a45a12f90d2191e542157ef16118d4ae47",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "9a503b978b283418247594eca7035dbc6b253cda5100cf572ca074211a7dbd2d",
+    "canonicalBodyHash": "9a503b978b283418247594eca7035dbc6b253cda5100cf572ca074211a7dbd2d",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3581.861900000018,
+      "inputTokens": 10566,
+      "outputTokens": 990,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "acb7ac16-4517-474d-8638-c4e610f2d0c1:owner:1",
+    "role": "OWNER",
+    "slotId": "1ed274c06ee5944ebafea86fccabc9d14bf4e68d282633f0f36a7cc88a509254",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "2efd609005268b3cbb34ad1bf2882b1410a0f1582505f7b68f6a8fb956f34dce",
+    "canonicalBodyHash": "2efd609005268b3cbb34ad1bf2882b1410a0f1582505f7b68f6a8fb956f34dce",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3471.915800000017,
+      "inputTokens": 8047,
+      "outputTokens": 860,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "acb7ac16-4517-474d-8638-c4e610f2d0c1:owner:2",
+    "role": "OWNER",
+    "slotId": "1ed274c06ee5944ebafea86fccabc9d14bf4e68d282633f0f36a7cc88a509254",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "d23f6bda82cc47736363c2f4391299e749aec0fc6287741bc840741f020755c3",
+    "canonicalBodyHash": "d23f6bda82cc47736363c2f4391299e749aec0fc6287741bc840741f020755c3",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 1495.336100000015,
+      "inputTokens": 9706,
+      "outputTokens": 236,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "acb7ac16-4517-474d-8638-c4e610f2d0c1:owner:3",
+    "role": "OWNER",
+    "slotId": "1ed274c06ee5944ebafea86fccabc9d14bf4e68d282633f0f36a7cc88a509254",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "1ed1ca3ddb8b80c3b6fd4e00a999ee565dd9d0266e596ddb949da3c862d4059b",
+    "canonicalBodyHash": "1ed1ca3ddb8b80c3b6fd4e00a999ee565dd9d0266e596ddb949da3c862d4059b",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 6596.60500000004,
+      "inputTokens": 7208,
+      "outputTokens": 2005,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "acb7ac16-4517-474d-8638-c4e610f2d0c1:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "1ed274c06ee5944ebafea86fccabc9d14bf4e68d282633f0f36a7cc88a509254",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "589083f602e7af245dd94ec55481818da0e37dcc5c7792da96bba9a9b848e27f",
+    "canonicalBodyHash": "589083f602e7af245dd94ec55481818da0e37dcc5c7792da96bba9a9b848e27f",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 9420.98550000001,
+      "inputTokens": 6070,
+      "outputTokens": 248,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "f706f94b-51ba-4fcb-a649-c97c1ecfee0c:owner:1",
+    "role": "OWNER",
+    "slotId": "282074fc868eee7b1dc21bc9cbfebee49d2a901e9b8ca1dca942f5aea3ed9e27",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "e41594a22edb3981c8625a95428151c2db5a05fc99e859471944e8a87befa240",
+    "canonicalBodyHash": "e41594a22edb3981c8625a95428151c2db5a05fc99e859471944e8a87befa240",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3244.7519999999786,
+      "inputTokens": 8054,
+      "outputTokens": 943,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "f706f94b-51ba-4fcb-a649-c97c1ecfee0c:owner:2",
+    "role": "OWNER",
+    "slotId": "282074fc868eee7b1dc21bc9cbfebee49d2a901e9b8ca1dca942f5aea3ed9e27",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "5161fb5ea4f24121d33701896cbfb20226c2440ad3f9503f55642bdb45c4c258",
+    "canonicalBodyHash": "5161fb5ea4f24121d33701896cbfb20226c2440ad3f9503f55642bdb45c4c258",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 1800.5074000000022,
+      "inputTokens": 9580,
+      "outputTokens": 347,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "f706f94b-51ba-4fcb-a649-c97c1ecfee0c:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "282074fc868eee7b1dc21bc9cbfebee49d2a901e9b8ca1dca942f5aea3ed9e27",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "85e30ff70ee4c3d7003600fd9cb09ed66eb232c3e5549ebabaa02c89cd4aec42",
+    "canonicalBodyHash": "85e30ff70ee4c3d7003600fd9cb09ed66eb232c3e5549ebabaa02c89cd4aec42",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 6085.662100000016,
+      "inputTokens": 5283,
+      "outputTokens": 95,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "70005db8-e3b1-4d7f-b2fa-aaa908b1f74d:owner:1",
+    "role": "OWNER",
+    "slotId": "282074fc868eee7b1dc21bc9cbfebee49d2a901e9b8ca1dca942f5aea3ed9e27",
+    "turnIndex": 1,
+    "requests": 1,
+    "capturedRequestHash": "160ac5dd1316badb88fbdde9ed8ae486be6696a074068b235000dcc1cf9a4db7",
+    "canonicalBodyHash": "160ac5dd1316badb88fbdde9ed8ae486be6696a074068b235000dcc1cf9a4db7",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4079.489899999986,
+      "inputTokens": 7970,
+      "outputTokens": 1301,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "70005db8-e3b1-4d7f-b2fa-aaa908b1f74d:owner:2",
+    "role": "OWNER",
+    "slotId": "282074fc868eee7b1dc21bc9cbfebee49d2a901e9b8ca1dca942f5aea3ed9e27",
+    "turnIndex": 1,
+    "requests": 1,
+    "capturedRequestHash": "59e2f74edfc58b88acbae80a792f082fafc288bbe6ae324bef7d82037775cdf3",
+    "canonicalBodyHash": "59e2f74edfc58b88acbae80a792f082fafc288bbe6ae324bef7d82037775cdf3",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3392.1140000000014,
+      "inputTokens": 9612,
+      "outputTokens": 977,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "9f0857cd-9c57-4efc-8dad-1f68609d6677:owner:1",
+    "role": "OWNER",
+    "slotId": "092274c1dab83e7e5b3e4029bd1825a1f0ff55c41b8683d37d32d5697a0f9439",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "9274ae28015387a483ba2250dab6329d1c6815ae2ddb65d5c55f1b8958a521f0",
+    "canonicalBodyHash": "9274ae28015387a483ba2250dab6329d1c6815ae2ddb65d5c55f1b8958a521f0",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3336.9515000000247,
+      "inputTokens": 8052,
+      "outputTokens": 653,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "9f0857cd-9c57-4efc-8dad-1f68609d6677:owner:2",
+    "role": "OWNER",
+    "slotId": "092274c1dab83e7e5b3e4029bd1825a1f0ff55c41b8683d37d32d5697a0f9439",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "d8e89e3457babc37ab6a7381c0e78c18c706a90607a60379cf03c80833885b6c",
+    "canonicalBodyHash": "d8e89e3457babc37ab6a7381c0e78c18c706a90607a60379cf03c80833885b6c",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2257.663600000029,
+      "inputTokens": 10214,
+      "outputTokens": 453,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "9f0857cd-9c57-4efc-8dad-1f68609d6677:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "092274c1dab83e7e5b3e4029bd1825a1f0ff55c41b8683d37d32d5697a0f9439",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "1bd4765b9a24ec10446ef1b9f623d57188dccfdf7681bbe0741a06bd234b1293",
+    "canonicalBodyHash": "1bd4765b9a24ec10446ef1b9f623d57188dccfdf7681bbe0741a06bd234b1293",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4302.988300000026,
+      "inputTokens": 6650,
+      "outputTokens": 59,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "399062ca-d4c0-45c2-862a-2bf06a1d5046:owner:1",
+    "role": "OWNER",
+    "slotId": "092274c1dab83e7e5b3e4029bd1825a1f0ff55c41b8683d37d32d5697a0f9439",
+    "turnIndex": 1,
+    "requests": 1,
+    "capturedRequestHash": "368f46beb16847c1d21b74187d27a951b87e64294325734c1f2a3d39c95d5e0e",
+    "canonicalBodyHash": "368f46beb16847c1d21b74187d27a951b87e64294325734c1f2a3d39c95d5e0e",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4081.6814000000013,
+      "inputTokens": 8188,
+      "outputTokens": 1182,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "399062ca-d4c0-45c2-862a-2bf06a1d5046:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "092274c1dab83e7e5b3e4029bd1825a1f0ff55c41b8683d37d32d5697a0f9439",
+    "turnIndex": 1,
+    "requests": 1,
+    "capturedRequestHash": "33c13db85e09e8e3b90f356e5114b032a96298de67af56ba35d2c88d54672f41",
+    "canonicalBodyHash": "33c13db85e09e8e3b90f356e5114b032a96298de67af56ba35d2c88d54672f41",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4527.790100000042,
+      "inputTokens": 4881,
+      "outputTokens": 59,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "d818ecc8-574c-4393-bd7c-a39cddb11361:owner:1",
+    "role": "OWNER",
+    "slotId": "092274c1dab83e7e5b3e4029bd1825a1f0ff55c41b8683d37d32d5697a0f9439",
+    "turnIndex": 2,
+    "requests": 1,
+    "capturedRequestHash": "592a9ad7f49bdc23e7c01968dd3b769fda2b7df7d22861907350da2124f716ce",
+    "canonicalBodyHash": "592a9ad7f49bdc23e7c01968dd3b769fda2b7df7d22861907350da2124f716ce",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4185.248399999924,
+      "inputTokens": 8273,
+      "outputTokens": 1200,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "d818ecc8-574c-4393-bd7c-a39cddb11361:owner:2",
+    "role": "OWNER",
+    "slotId": "092274c1dab83e7e5b3e4029bd1825a1f0ff55c41b8683d37d32d5697a0f9439",
+    "turnIndex": 2,
+    "requests": 1,
+    "capturedRequestHash": "0e83b4dbd17ae98614977de210c388e1735d8b576068c5fb8888152ebac2020a",
+    "canonicalBodyHash": "0e83b4dbd17ae98614977de210c388e1735d8b576068c5fb8888152ebac2020a",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2409.0399000000907,
+      "inputTokens": 10224,
+      "outputTokens": 505,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "d818ecc8-574c-4393-bd7c-a39cddb11361:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "092274c1dab83e7e5b3e4029bd1825a1f0ff55c41b8683d37d32d5697a0f9439",
+    "turnIndex": 2,
+    "requests": 1,
+    "capturedRequestHash": "9274ca1c29ff335ccd3b5dada13bbeff91a1fccca869ef27221f991611c2899e",
+    "canonicalBodyHash": "9274ca1c29ff335ccd3b5dada13bbeff91a1fccca869ef27221f991611c2899e",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 7786.485299999942,
+      "inputTokens": 5982,
+      "outputTokens": 129,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "843c42e7-189b-464a-99af-6931dc6bb155:owner:1",
+    "role": "OWNER",
+    "slotId": "9855c1ad42f0c4edf1693bf070cc9182e93af0644e3f80e08b2d11d915d08a0a",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "bb4148db37507a0fa1446482e897a49a3a7f53c4ba9cdb5297655f08e6fd0396",
+    "canonicalBodyHash": "bb4148db37507a0fa1446482e897a49a3a7f53c4ba9cdb5297655f08e6fd0396",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3520.462899999926,
+      "inputTokens": 8045,
+      "outputTokens": 845,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "843c42e7-189b-464a-99af-6931dc6bb155:owner:2",
+    "role": "OWNER",
+    "slotId": "9855c1ad42f0c4edf1693bf070cc9182e93af0644e3f80e08b2d11d915d08a0a",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "00e5aec03dcd42bf629c8f9de4446cc787e3ce6cc69874222e45d0874fadae3b",
+    "canonicalBodyHash": "00e5aec03dcd42bf629c8f9de4446cc787e3ce6cc69874222e45d0874fadae3b",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3072.8090000000084,
+      "inputTokens": 9436,
+      "outputTokens": 719,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "843c42e7-189b-464a-99af-6931dc6bb155:owner:3",
+    "role": "OWNER",
+    "slotId": "9855c1ad42f0c4edf1693bf070cc9182e93af0644e3f80e08b2d11d915d08a0a",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "0378f660a5fe86377f489d48bca288055d23c714b24534ca4612ddcfc30c7322",
+    "canonicalBodyHash": "0378f660a5fe86377f489d48bca288055d23c714b24534ca4612ddcfc30c7322",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3402.2437999999383,
+      "inputTokens": 7298,
+      "outputTokens": 1001,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "843c42e7-189b-464a-99af-6931dc6bb155:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "9855c1ad42f0c4edf1693bf070cc9182e93af0644e3f80e08b2d11d915d08a0a",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "b6b9330cb7ae07cc210510c7ede34586a373fec4132a599517f1c74b1dff3a16",
+    "canonicalBodyHash": "b6b9330cb7ae07cc210510c7ede34586a373fec4132a599517f1c74b1dff3a16",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 6967.916399999987,
+      "inputTokens": 6260,
+      "outputTokens": 142,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "b0d9d205-d3bc-414a-be16-243310ea868b:owner:1",
+    "role": "OWNER",
+    "slotId": "9855c1ad42f0c4edf1693bf070cc9182e93af0644e3f80e08b2d11d915d08a0a",
+    "turnIndex": 1,
+    "requests": 1,
+    "capturedRequestHash": "2a7a88e5b013d0a6d9b7d272f15baf7973e8b1b5edcd0e05439e0b7245f3468a",
+    "canonicalBodyHash": "2a7a88e5b013d0a6d9b7d272f15baf7973e8b1b5edcd0e05439e0b7245f3468a",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 1949.956200000015,
+      "inputTokens": 8469,
+      "outputTokens": 370,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "b0d9d205-d3bc-414a-be16-243310ea868b:owner:2",
+    "role": "OWNER",
+    "slotId": "9855c1ad42f0c4edf1693bf070cc9182e93af0644e3f80e08b2d11d915d08a0a",
+    "turnIndex": 1,
+    "requests": 1,
+    "capturedRequestHash": "eec4c366baa4922157a7e0715a1b7ee0c9da8e527516a5e5737e050fd3350960",
+    "canonicalBodyHash": "eec4c366baa4922157a7e0715a1b7ee0c9da8e527516a5e5737e050fd3350960",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4471.25159999996,
+      "inputTokens": 9897,
+      "outputTokens": 1251,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "b0d9d205-d3bc-414a-be16-243310ea868b:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "9855c1ad42f0c4edf1693bf070cc9182e93af0644e3f80e08b2d11d915d08a0a",
+    "turnIndex": 1,
+    "requests": 1,
+    "capturedRequestHash": "64d7e989ef623d8e6dbd974cd318e58162ee09b77a8ad2225e9a49d90f99999d",
+    "canonicalBodyHash": "64d7e989ef623d8e6dbd974cd318e58162ee09b77a8ad2225e9a49d90f99999d",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 5967.235900000087,
+      "inputTokens": 6328,
+      "outputTokens": 82,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "00ae9a71-fc4b-480c-b5e9-33c91e06bed0:owner:1",
+    "role": "OWNER",
+    "slotId": "9855c1ad42f0c4edf1693bf070cc9182e93af0644e3f80e08b2d11d915d08a0a",
+    "turnIndex": 2,
+    "requests": 1,
+    "capturedRequestHash": "6d6ea19987fd5c658ec8399aa85093fb7947a75b25b8bc6483d0c84c860c8ab1",
+    "canonicalBodyHash": "6d6ea19987fd5c658ec8399aa85093fb7947a75b25b8bc6483d0c84c860c8ab1",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 4295.553500000038,
+      "inputTokens": 8530,
+      "outputTokens": 1297,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "00ae9a71-fc4b-480c-b5e9-33c91e06bed0:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "9855c1ad42f0c4edf1693bf070cc9182e93af0644e3f80e08b2d11d915d08a0a",
+    "turnIndex": 2,
+    "requests": 1,
+    "capturedRequestHash": "8a69e9b2144babf270ab339b62ccba38825c38c94e03bd7fd309e37e72e762f3",
+    "canonicalBodyHash": "8a69e9b2144babf270ab339b62ccba38825c38c94e03bd7fd309e37e72e762f3",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 4366.684000000008,
+      "inputTokens": 5688,
+      "outputTokens": 58,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "625396bd-df65-478e-912c-3b0044abfff1:owner:1",
+    "role": "OWNER",
+    "slotId": "edf470d0265e07b6c655d23354d94cf84cde80912d7b2a2131f64ec5705ff531",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "4d3fb2a833d792c3a22f168cbe78dd3970c64eb49cdff966f92881815d960cc6",
+    "canonicalBodyHash": "4d3fb2a833d792c3a22f168cbe78dd3970c64eb49cdff966f92881815d960cc6",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2770.223400000017,
+      "inputTokens": 7514,
+      "outputTokens": 617,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "e8cbacc1-6d20-43c4-9efe-7b48d3925056:owner:1",
+    "role": "OWNER",
+    "slotId": "bc2887c314b7ff706883c8b87ff0bebe542ea8eea097ac63c8cea94f83461c15",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "66ea7531504f72adffb905555968f9405b6777e4672f368237bb7adf405506a3",
+    "canonicalBodyHash": "66ea7531504f72adffb905555968f9405b6777e4672f368237bb7adf405506a3",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 3697.5953000000445,
+      "inputTokens": 8042,
+      "outputTokens": 1023,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "e8cbacc1-6d20-43c4-9efe-7b48d3925056:owner:2",
+    "role": "OWNER",
+    "slotId": "bc2887c314b7ff706883c8b87ff0bebe542ea8eea097ac63c8cea94f83461c15",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "d3aaa7e192d230ce0174819d991a0c7081818a5709035540d22a27bbdc119150",
+    "canonicalBodyHash": "d3aaa7e192d230ce0174819d991a0c7081818a5709035540d22a27bbdc119150",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 1595.1330999999773,
+      "inputTokens": 9908,
+      "outputTokens": 249,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "e8cbacc1-6d20-43c4-9efe-7b48d3925056:owner:3",
+    "role": "OWNER",
+    "slotId": "bc2887c314b7ff706883c8b87ff0bebe542ea8eea097ac63c8cea94f83461c15",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "cf0f51800ba2aebdf87edcbf8886754b5d93f054b29db127f284b6d27d754264",
+    "canonicalBodyHash": "cf0f51800ba2aebdf87edcbf8886754b5d93f054b29db127f284b6d27d754264",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2894.150200000033,
+      "inputTokens": 8218,
+      "outputTokens": 703,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "e8cbacc1-6d20-43c4-9efe-7b48d3925056:verifier:1",
+    "role": "VERIFIER",
+    "slotId": "bc2887c314b7ff706883c8b87ff0bebe542ea8eea097ac63c8cea94f83461c15",
+    "turnIndex": 0,
+    "requests": 1,
+    "capturedRequestHash": "a9c7d4aa8652487aa7a8b830313456c212b4ed12509af4767acb63717605b922",
+    "canonicalBodyHash": "a9c7d4aa8652487aa7a8b830313456c212b4ed12509af4767acb63717605b922",
+    "status": "OK",
+    "observedModelVersion": "gpt-6.1-sol",
+    "metrics": {
+      "latencyMs": 5724.55569999991,
+      "inputTokens": 6811,
+      "outputTokens": 102,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  },
+  {
+    "population": "NATIVE",
+    "id": "b059597f-eb0c-4ba7-9da0-6c783559f370:owner:1",
+    "role": "OWNER",
+    "slotId": "bc2887c314b7ff706883c8b87ff0bebe542ea8eea097ac63c8cea94f83461c15",
+    "turnIndex": 1,
+    "requests": 1,
+    "capturedRequestHash": "e82e0aa22cdea9485db24e9a29a30816c89cc87d9d69f553c9f2147200ecd2d0",
+    "canonicalBodyHash": "e82e0aa22cdea9485db24e9a29a30816c89cc87d9d69f553c9f2147200ecd2d0",
+    "status": "OK",
+    "observedModelVersion": "gemini-3.5-flash-lite",
+    "metrics": {
+      "latencyMs": 2114.013200000045,
+      "inputTokens": 8461,
+      "outputTokens": 429,
+      "costUSD": null,
+      "unavailable": {
+        "inputTokens": "PROVIDER_NOT_EXPOSED",
+        "outputTokens": "PROVIDER_NOT_EXPOSED",
+        "costUSD": "PROVIDER_NOT_EXPOSED"
+      }
+    }
+  }
+]

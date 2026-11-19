@@ -1,0 +1,43 @@
+{
+  "status": "APPROVED",
+  "reviewer": "/root/missing_run_review",
+  "checkedAtUTC": "2026-11-03T05:38:03Z",
+  "sourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "worldHash": "a8ce90be5347e1d312ddf4f432ed8dfe42c47d06c09ab13013ede0b0d44ca280",
+  "launcherInventorySha256": "08bc061ae8e45e86f1b3cc36d4fac429e1d78b1fc014205a64b4ec0f2bc9f0ee",
+  "pendingRegistrationHash": "bb8c5cbdfdab5638a66369baee7bbcab0ed2e15e030a0296bee4673119f217d8",
+  "scopeHash": "70f0878e4186c788af27ee1a39b3698e07a20469c186f85818c3c44784af395b",
+  "checks": {
+    "cleanExactSource": "PASS",
+    "registrationAndSourceBindings": "PASS",
+    "customerScriptsAndBranchesUnchanged": "PASS",
+    "runtimeProjectionAndLabelFirewall": "PASS",
+    "modelEffortPromptsAndContractsUnchanged": "PASS",
+    "initialStateRealPostgresDroppedProvider0": "PASS",
+    "isolatedHandoffPreservedWithoutTimestampRenewal": "PASS",
+    "actualTimeReadiness": "PASS",
+    "frozenHelperHashes": "PASS",
+    "completedCasesExcluded": "PASS",
+    "newSlotsDisjointFromInterruptedRun": "PASS",
+    "actualTimeReadinessCheckedAtUTC": "2026-11-03T05:36:47.889Z"
+  },
+  "limits": {
+    "cases": 7,
+    "nativeCustomerTurns": 11,
+    "maximumGenerationRequests": 44,
+    "repetitions": 1,
+    "generationRetry": 0,
+    "ownerGenerationsPerTurn": 3,
+    "verifierGenerationsPerTurn": 1,
+    "salesReadyCases": 4,
+    "sourceUnavailableCases": 3,
+    "sendEnabled": false,
+    "newProviderResultsObserved": 0
+  },
+  "conditions": [
+    "Run existing actual-time preflight before dispatch; preserve all hard-stop gates.",
+    "Keep all interrupted requests and errors, including the three s09 generations.",
+    "Approval does not guarantee future source availability or authorize TTL renewal.",
+    "Development evidence only; no qualification or stable-quality claim."
+  ]
+}

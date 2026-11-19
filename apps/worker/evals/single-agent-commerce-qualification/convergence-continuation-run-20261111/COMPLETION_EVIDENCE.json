@@ -1,0 +1,327 @@
+{
+  "kind": "RECONCILED_DEVELOPMENT_MODEL_EVIDENCE",
+  "status": "PASS",
+  "registeredAttempts": 65,
+  "capturedTurns": 103,
+  "generationAttempts": 268,
+  "providerRequests": 268,
+  "unknownProviderCompletion": 0,
+  "retry": 0,
+  "liveSends": 0,
+  "requestHashes": "PASS",
+  "evaluatorFirewall": "PASS",
+  "syntheticPrivateValuesAbsent": "PASS",
+  "acceptedOutputBinding": "PASS",
+  "segments": [
+    {
+      "sourceSha": "93b3859180c8ec93eccbb251962ae300756ebd4f",
+      "worldHash": "7d342091387df57808a32ffd6f23303cf337ea36cc18644f179e6e30fd959e2e",
+      "segment": "02",
+      "slots": 39,
+      "turns": 67,
+      "rawArtifacts": 67,
+      "exactSentDraftBindings": 55,
+      "codeOwnedTurns": 0,
+      "terminals": {
+        "HANDOFF": 8,
+        "SEND_ELIGIBLE": 55,
+        "NO_SEND": 4
+      },
+      "statuses": {
+        "OK": 174,
+        "MALFORMED": 3
+      },
+      "providerRequests": 177,
+      "artifactSha256": {
+        "CANDIDATE_EVIDENCE.partial.json": "695a2b7cab60d1d91a7a9e792db9c2686841bbdf54f63547b457755fa6799ec7",
+        "NATIVE_REQUESTS.jsonl": "6c019e6d8490297dda790cf852562596df43280282f0b3431311f2f81b3bcd4d",
+        "integration.json": "9b48d9a2bf9bba391cc4f0b8ac7798a967278c931c139679635c8a6fce6cf300"
+      }
+    },
+    {
+      "sourceSha": "6f8a050268f6421abf30b9c7a899c43c7f1129aa",
+      "worldHash": "afeffff346e6a0c14576fc9be6765b4c05cf2efb7287a7623a02598c391d0888",
+      "segment": "03a",
+      "slots": 1,
+      "turns": 1,
+      "rawArtifacts": 1,
+      "exactSentDraftBindings": 1,
+      "codeOwnedTurns": 0,
+      "terminals": {
+        "SEND_ELIGIBLE": 1
+      },
+      "statuses": {
+        "OK": 5
+      },
+      "providerRequests": 5,
+      "artifactSha256": {
+        "CANDIDATE_EVIDENCE.partial.json": "62d596c32d41df1f8e852cea1e06df4c409e78e39cdd2a64ae53b70e6bd519db",
+        "NATIVE_REQUESTS.jsonl": "26cc122ece7d613fb27c96ebd7feac75c9420c8fefade18910c571ad8a495b19",
+        "integration.json": "bee1f5c36b2dfb2faedb47650e7cba7d645704c8c50680726e2367ce5e2408c0"
+      }
+    },
+    {
+      "sourceSha": "6f8a050268f6421abf30b9c7a899c43c7f1129aa",
+      "worldHash": "afeffff346e6a0c14576fc9be6765b4c05cf2efb7287a7623a02598c391d0888",
+      "segment": "03b",
+      "slots": 9,
+      "turns": 15,
+      "rawArtifacts": 15,
+      "exactSentDraftBindings": 6,
+      "codeOwnedTurns": 0,
+      "terminals": {
+        "HANDOFF": 5,
+        "NO_SEND": 4,
+        "SEND_ELIGIBLE": 6
+      },
+      "statuses": {
+        "OK": 33,
+        "MALFORMED": 1
+      },
+      "providerRequests": 34,
+      "artifactSha256": {
+        "CANDIDATE_EVIDENCE.partial.json": "20459ebf251b4d986372a959eba14feacf109f118a69cf0f8a0ae2080bc4824b",
+        "NATIVE_REQUESTS.jsonl": "142079834b5c78414a345b23f4aa81ad3fbdbcbca4cf4b956719fdeca9520b0b",
+        "integration.json": "65e3df679610e3bb43d15abc1fd68d4de2a05e8bf3f20c2b93e49066c4aba1d9"
+      }
+    },
+    {
+      "sourceSha": "6f8a050268f6421abf30b9c7a899c43c7f1129aa",
+      "worldHash": "afeffff346e6a0c14576fc9be6765b4c05cf2efb7287a7623a02598c391d0888",
+      "segment": "03c",
+      "slots": 8,
+      "turns": 12,
+      "rawArtifacts": 12,
+      "exactSentDraftBindings": 6,
+      "codeOwnedTurns": 0,
+      "terminals": {
+        "HANDOFF": 3,
+        "NO_SEND": 3,
+        "SEND_ELIGIBLE": 6
+      },
+      "statuses": {
+        "OK": 28
+      },
+      "providerRequests": 28,
+      "artifactSha256": {
+        "CANDIDATE_EVIDENCE.partial.json": "1959a3a8ab9cf12446495aee74c8020541d822a4720d38ba4d37ba0ee237f10a",
+        "NATIVE_REQUESTS.jsonl": "a4d4ec5e366c8722bac8d347522e0376cc21783033d738b580a24b74b62a2230",
+        "integration.json": "55249dae637057d2cffe5fa9a616de451743ad46efc8ab29cae8ff9316f755ca"
+      }
+    },
+    {
+      "sourceSha": "c6953dcdc8a760f77f755d8ec7b20c5e2d8f47ff",
+      "worldHash": "1c72f3156501c801e6720df0bc232f03639d235b29256f7b518d270535bd1902",
+      "segment": "04",
+      "slots": 8,
+      "turns": 8,
+      "rawArtifacts": 8,
+      "exactSentDraftBindings": 5,
+      "codeOwnedTurns": 0,
+      "terminals": {
+        "HANDOFF": 3,
+        "SEND_ELIGIBLE": 5
+      },
+      "statuses": {
+        "OK": 24
+      },
+      "providerRequests": 24,
+      "artifactSha256": {
+        "CANDIDATE_EVIDENCE.partial.json": "3be1c5a5da402752f1182b605138cd3ebe8380e3eb20dcb2accaff72fd6ac881",
+        "NATIVE_REQUESTS.jsonl": "7fa7316296c8614b0b46062416c1f982d4cda91f782a52adf00d4f0cf1dd0294",
+        "integration.json": "c9f2da291ceef78f30be34bdccd6ff59ca2d20c32fef3ff55b1aa982bcbecb0c"
+      }
+    }
+  ],
+  "repetitionOutcomes": {
+    "SCRIPT_COMPLETE": 59,
+    "INFRASTRUCTURE_INTERRUPTED": 1,
+    "COMMITTED_HANDOFF": 5
+  },
+  "registeredScriptTurns": 135,
+  "checkoutTurnsNotReachedAfterCommittedHandoff": 30,
+  "j1TurnsMissingAfterDatabaseDisconnect": 2,
+  "nativeGenerationsByRole": {
+    "OWNER": 183,
+    "VERIFIER": 85
+  },
+  "nativeStatuses": {
+    "OK": 264,
+    "MALFORMED": 4
+  },
+  "nativeCapturedTurnTerminals": {
+    "HANDOFF": 19,
+    "SEND_ELIGIBLE": 73,
+    "NO_SEND": 11
+  },
+  "verifierProviderLatencyMs": {
+    "p50": 4088.0301000000327,
+    "p95": 9404.740100000003
+  },
+  "tokenCounts": {
+    "inputTokens": 3062315,
+    "outputTokens": 210308
+  },
+  "providerCost": "NOT_EXPOSED",
+  "sourceWrites": 0,
+  "cleanup03a": {
+    "status": "CLEANUP_CONFIRMED",
+    "database": "c3_b_test_10e1604d806084a9",
+    "existed": true,
+    "activeConnections": 0,
+    "testDatabaseDropped": true,
+    "providerRequests": 0,
+    "shopSourceWrites": 0,
+    "liveSends": 0,
+    "at": "2026-11-11T14:22:26.949Z"
+  },
+  "review": "AUTHOR_PER_CASE_DEVELOPMENT_REVIEW",
+  "safetyGate": "FAIL_PRIOR_FALSE_PASS_RETAINED",
+  "commandsActuallyRun": [
+    [
+      "python",
+      "../c3-convergence-model-launch-20261111-03.py"
+    ],
+    [
+      "python",
+      "../c3-convergence-native-reconnect-20261111.py",
+      "03a"
+    ],
+    [
+      "python",
+      "../c3-convergence-native-reconnect-20261111.py",
+      "03b"
+    ],
+    [
+      "python",
+      "../c3-convergence-native-reconnect2-20261111.py",
+      "03b"
+    ],
+    [
+      "python",
+      "../c3-convergence-native-reconnect-03c-20261111.py",
+      "03c"
+    ],
+    [
+      "node",
+      "--test",
+      "apps/worker/evals/single-agent-commerce-qualification/customer-branches.test.mjs",
+      "apps/worker/evals/single-agent-commerce-qualification/native-slot-selection.test.mjs"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-prepare-20261111-04.mjs"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-seal-20261111-04.mjs"
+    ],
+    [
+      "python",
+      "../c3-convergence-model-launch-20261111-04.py"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-audit-20261111-reconciled.mjs"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-public-view-20261111-reconciled.mjs"
+    ]
+  ],
+  "finalResumeCommand": {
+    "command": [
+      "python",
+      "../c3-convergence-source-connect60-20261111.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "..\\c3-convergence-model-run-20261111-04",
+      "COD",
+      "--phase-c-diagnostic-registration",
+      "..\\c3-convergence-model-sealed-20261111-04\\REGISTRATION.json",
+      "--phase-c-world",
+      "../c3-convergence-model-world-20261111-10/WORLD.json",
+      "--phase-c-seed",
+      "..\\c3-convergence-model-sealed-20261111-04\\PRIVATE_BLIND_SEED.json",
+      "--phase-c-slot-ids",
+      "../c3-convergence-model-resume-slots-20261111-04.json"
+    ],
+    "slots": [
+      {
+        "slotId": "c99c32d3af3bbf7d05925bcef5d3cf69459adfee916bbf7664ba9b0e16ac4784",
+        "caseId": "c-20261104-checkout-complete",
+        "mode": "JOURNEY",
+        "arm": "CANDIDATE",
+        "repetition": 3,
+        "maximumGenerations": 28
+      },
+      {
+        "slotId": "bb3cfb9ddb2539aea69f91d584e99b290c7cd7257db635c0608d5a3c1af7c75d",
+        "caseId": "c-20261104-checkout-complete",
+        "mode": "JOURNEY",
+        "arm": "CANDIDATE",
+        "repetition": 4,
+        "maximumGenerations": 28
+      },
+      {
+        "slotId": "2546152194db49917a6ad341d9614c3e7832f5bf1f1095ea242083420ca70fe1",
+        "caseId": "c-20261104-checkout-complete",
+        "mode": "JOURNEY",
+        "arm": "CANDIDATE",
+        "repetition": 5,
+        "maximumGenerations": 28
+      },
+      {
+        "slotId": "c2c42935369a202bd9fd42078003c8557c16a845594bd70538142da990af484b",
+        "caseId": "c-20261028-s08",
+        "mode": "SINGLE",
+        "arm": "CANDIDATE",
+        "repetition": 1,
+        "maximumGenerations": 4
+      },
+      {
+        "slotId": "e885c2940fe16fe0896ad7b933a2a646e6d6da850d0edb72d0a6d618eada6a14",
+        "caseId": "c-20261028-s08",
+        "mode": "SINGLE",
+        "arm": "CANDIDATE",
+        "repetition": 2,
+        "maximumGenerations": 4
+      },
+      {
+        "slotId": "e2f01469a0a077651fd9f470d190cc48ce41f9f5e4edfed3987bf55ea648732e",
+        "caseId": "c-20261028-s08",
+        "mode": "SINGLE",
+        "arm": "CANDIDATE",
+        "repetition": 3,
+        "maximumGenerations": 4
+      },
+      {
+        "slotId": "51b59f482820e0f45de7eb61f3a71e01f5005b7dfdc55da03b777f687ebf6840",
+        "caseId": "c-20261028-s08",
+        "mode": "SINGLE",
+        "arm": "CANDIDATE",
+        "repetition": 4,
+        "maximumGenerations": 4
+      },
+      {
+        "slotId": "e18981fd60d0d433c1084a67f9c8e794ac34e035569b1b40eb185e25442a5783",
+        "caseId": "c-20261028-s08",
+        "mode": "SINGLE",
+        "arm": "CANDIDATE",
+        "repetition": 5,
+        "maximumGenerations": 4
+      }
+    ],
+    "sourceSha": "c6953dcdc8a760f77f755d8ec7b20c5e2d8f47ff",
+    "worldHash": "1c72f3156501c801e6720df0bc232f03639d235b29256f7b518d270535bd1902",
+    "startedAt": "2026-11-11T14:09:51.161904+00:00",
+    "generationRetries": 0,
+    "exitCode": 0,
+    "completedAt": "2026-11-11T14:16:38.865056+00:00"
+  },
+  "retainedSetupFailures": [
+    "SSH TCP or banner timeouts before dispatch. See local reconnect logs.",
+    "The first fresh capture began before the checkout harness commit and rejected the changed HEAD. The next attempt timed out. Capture 10 completed.",
+    "P08/checkout receipts in the verifier wire and P07 SIZE_FIT claims were independently read from saved raw artifacts by the author of this report."
+  ]
+}

@@ -1,0 +1,4 @@
+# Keep captured verification artifacts byte-identical to their recorded SHA256.
+*.json -text whitespace=cr-at-eol
+# Captured stdout may intentionally contain whitespace from failed assertions.
+logs/*.log -text -whitespace

@@ -1,0 +1,696 @@
+{
+  "kind": "SOURCE_URL_PRODUCT_MAPPING_NOT_SEMANTIC_COHERENCE_PROOF",
+  "cases": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ, với số đo của chị, mẫu Set quần Thạch Thảo này tư vấn áo size M và quần size M đều vừa vặn và mặc đẹp chị nhé!"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "6dcba53ad128fe765f9be74223adfa69d29caea6f7b177d353af8d0cee08540b",
+              "sourceProducts": [
+                "SQ2447"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng thanh toán là 829.000đ (đã gồm 30.000đ phí ship). Chị có muốn em chốt đơn luôn không ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "sentText": [
+            "Áo thêu Thạch Thảo có hai màu là trắng và be (màu trắng có sẵn, màu be hàng đặt trước). Chị lấy áo màu nào ạ?"
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ, áo thêu Thạch Thảo size L có hai màu là TRẮNG và BE. Chị thích lấy màu nào để em thêm vào giỏ cho mình ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "sentText": [
+            "Dạ, áo thêu Thạch Thảo có hai màu Trắng (có sẵn) và Be (đặt trước) cho cả hai size M và L. Chị muốn lấy màu nào cho size M và size L ạ?"
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 3,
+          "sentText": [
+            "Dạ, tổng đơn 2 áo thêu Thạch Thảo (gồm size M và L) của mình là 978.100đ (đã gồm 998.000đ tiền áo, phí ship 30.000đ và ưu đãi 49.900đ). \n\nChị lấy màu Trắng (có sẵn) hay Be (đặt trước) cho các size này để em lưu lại nhé ạ?"
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ với chiều cao 1m60 và cân nặng 55kg, em gợi ý chị chọn size M cho set váy Thạch Thảo nhé ạ."
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "sentText": [
+            "Set váy Thạch Thảo (cả bộ) có giá 799.000đ chị nhé. Bộ gồm áo tơ Hàn thêu và chân váy ren tơ mềm, form nhẹ nhàng, rất hợp với size M mà em tư vấn cho chị ạ. Phí vận chuyển 30.000đ, tổng cộng là 829.000đ chị nha."
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ, bên em có Set quần Thạch Thảo và Set váy Thạch Thảo. Chị quan tâm set quần hay set váy để em kiểm tra size M chính xác cho chị nhé ạ?"
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 2,
+          "sentText": [
+            "Dạ, Set quần Thạch Thảo size M hiện còn hàng chị nhé ạ. \n\nSet gồm áo và quần chất liệu tơ Hàn thêu cao cấp, form nhẹ nhàng, mềm mại và bay bổng, giá 769.000đ ạ. Chị có muốn em lên đơn set này luôn không ạ?"
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Áo lẻ Thạch Thảo có giá 499.000đ, phí ship về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé. Mẫu này có các size S, M, L, XL, chị lấy size nào ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "6dcba53ad128fe765f9be74223adfa69d29caea6f7b177d353af8d0cee08540b",
+              "sourceProducts": [
+                "SQ2447"
+              ]
+            },
+            {
+              "urlSha256": "93c7862ce5b7dd0bd86153d926c7fd881f9f843bd89c94e7734a78065b5cad69",
+              "sourceProducts": [
+                "SQ2447"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ áo trong set váy Thạch Thảo, chị mặc size M giúp em nhé ạ."
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "sentText": [
+            "Dạ vâng, với các số đo này thì áo trong set váy Thạch Thảo chị vẫn mặc size M giúp em nhé ạ."
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 3,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ, áo lẻ Thạch Thảo size M có hai màu Trắng và Be. Chị lấy màu nào ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 3,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng đơn của mình là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển). Chị muốn chốt đơn luôn không ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "sentText": [
+            "Chị cho em tên người nhận nhé."
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 3,
+          "sentText": [
+            "Chị cho em tên người nhận nhé."
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p01",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ áo Thạch Thảo có bán riêng chị nhé. Áo lẻ giá 499.000đ, làm từ chất liệu tơ Hàn thêu họa tiết nổi với form nhẹ, mềm và thoáng tự nhiên. Áo hiện đủ size S, M, L, XL ạ."
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            },
+            {
+              "urlSha256": "93fcd4f03ce774d34bd21b0329b4209765f21659e9b9b2aeb04d93c905b75e87",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p02",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ, quần lẻ Set Thạch Thảo có giá 429.000đ chị nhé. Chất liệu tơ Hàn thêu mềm mịn, độ rũ nhẹ nhàng và dễ mặc ạ. \n\nQuần hiện có các size S, M, L, XL, chị lấy quần size mấy ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "6dcba53ad128fe765f9be74223adfa69d29caea6f7b177d353af8d0cee08540b",
+              "sourceProducts": [
+                "SQ2447"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p03",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Chân váy ren tơ Hàn Thạch Thảo (chân váy lẻ) giá 449.000đ, chất liệu ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Size M hiện còn hàng chị nhé!"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ, bên em có Set quần Uyển hoa (SQ748) hiện còn sẵn size S và L, còn Set quần SQ675 là hàng đặt trước. Chị đang quan tâm mẫu nào ạ?"
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-h01",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ, mẫu áo thêu Thạch Thảo size L có hai màu Trắng và Be. Chị lấy áo màu nào ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-h02",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Set váy Khánh Trang giá 999.000đ ạ. Thiết kế chất liệu thô boi phối ren thoáng mát, mềm nhẹ với áo form suông nhẹ và chân váy cạp chun thoải mái, độ rũ tự nhiên, hiện có sẵn size S. \n\nNgoài ra chị có thể mua lẻ áo (499.000đ, sẵn size S, L) hoặc chân váy (499.000đ, sẵn size S, L, XL) ạ."
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "09210ed49221b5861f9750710ec0a09f1e092c79ce5d1637d4396405d5e44694",
+              "sourceProducts": [
+                "SV1561"
+              ]
+            },
+            {
+              "urlSha256": "2affc968c1b452310ac31d825aca88ace226ffdadfcd8c1d37cf766df0cf6e90",
+              "sourceProducts": [
+                "SV1561"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Chị chọn set quần Uyển Hoa (SQ748) tone kem rất hợp ạ. Set dùng chất thô đũi mềm mịn, thoáng mát, thiết kế áo bèo nhẹ nhàng kết hợp quần short gọn gàng, mang lại cảm giác thoải mái và thanh lịch cho buổi đi ăn cùng gia đình. \n\nMẫu này có giá 799.000đ và đang có sẵn size S, L. Chị cho em xin size hoặc số đo để em kiểm tra xem mình mặc vừa vặn không nhé ạ!"
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ, áo Thạch Thảo làm từ chất liệu tơ Hàn thêu cao cấp với bề mặt họa tiết thêu nổi tinh tế, form áo nhẹ nhàng, mềm mại và có độ bay tự nhiên. \n\nQuần nâu sẫm có sắc trầm, trung tính sẽ tạo nên sự kết hợp rất nhã nhặn và sang trọng, làm nổi bật nét thanh lịch, nữ tính của áo. Chị có thể phối cùng quần âu hoặc quần ống suông dáng gọn để tổng thể trang phục hài hòa và bay bổng nhé ạ."
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Chị đi lễ thì em gợi ý mẫu Váy Diệp An (mã V168, giá 699.000đ) nhé ạ. Mẫu này có thiết kế 2 lớp kín đáo, lịch sự cùng form suông nhẹ thanh thoát, rất phù hợp mặc đi lễ. \n\nHoặc nếu chị thích nét sang trọng của chất ren phối tơ và cần sẵn size S thì xem qua Váy Odette (mã V039, giá 799.000đ). Chị ưng mẫu nào ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "7e6331f8cd8eaf807ad2ea16acef66be6c840ea17b2b7ade11f99561d321a0eb",
+              "sourceProducts": [
+                "V168"
+              ]
+            },
+            {
+              "urlSha256": "52a9601037b79508bace62497d6a91729b0bca2cca17c5e75ab349fcfd66f3fa",
+              "sourceProducts": [
+                "V168"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ vâng, chị cứ xem tự nhiên nhé ạ. Cần hỗ trợ thêm thông tin gì chị cứ nhắn em nha."
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s01",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Set váy Khánh Trang có giá 999.000đ cho cả bộ (gồm áo và chân váy). Sản phẩm làm từ chất liệu thô boi phối ren mềm nhẹ, thoáng mát với áo form suông nhẹ và chân váy cạp chun thoải mái, dễ mặc. Hiện bộ này sẵn size S chị nhé ạ."
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "09210ed49221b5861f9750710ec0a09f1e092c79ce5d1637d4396405d5e44694",
+              "sourceProducts": [
+                "SV1561"
+              ]
+            },
+            {
+              "urlSha256": "2affc968c1b452310ac31d825aca88ace226ffdadfcd8c1d37cf766df0cf6e90",
+              "sourceProducts": [
+                "SV1561"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s02",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Áo lẻ Thạch Thảo có giá 499.000đ chị nhé. Áo làm từ chất liệu tơ Hàn thệu cao cấp, họa tiết thêu nổi tinh xảo với form dáng nhẹ nhàng, bay bổng, hiện có các size S, M, L, XL ạ."
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            },
+            {
+              "urlSha256": "93fcd4f03ce774d34bd21b0329b4209765f21659e9b9b2aeb04d93c905b75e87",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s07",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ với chiều cao 1m60, nặng 55kg và thích mặc rộng thoải mái, chị lấy **size M** áo Thạch Thảo là vừa đẹp chị nha. Áo lẻ có giá 499.000đ ạ."
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s11",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Dạ, mẫu áo lẻ Thạch Thảo có giá 499.000đ, chất liệu tơ Hàn thêu hoa nổi, form nhẹ nhàng và có độ bay tự nhiên, mặc phối cùng quần nâu ở nhà sẽ rất hợp và xinh ạ. Áo có đủ các size S, M, L, XL. \n\nChị mặc size nào để em chuẩn bị gửi áo cho chị nhé ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            },
+            {
+              "urlSha256": "93fcd4f03ce774d34bd21b0329b4209765f21659e9b9b2aeb04d93c905b75e87",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "sentText": [
+            "Dạ, chân váy ren tơ Hàn có chất liệu mềm, form nhẹ và độ rũ tự nhiên nên rất dễ phối đồ ạ. Chị có thể mặc cùng áo thêu trong set hoặc phối linh hoạt với các mẫu áo blouse, áo phông trơn để đi làm, đi chơi đều rất xinh và dịu dàng. \n\nNếu lấy cả bộ Thạch Thảo thì có giá 799.000đ (trong khi mua lẻ áo là 499.000đ và chân váy lẻ là 449.000đ), chọn cả bộ sẽ đồng bộ và thuận tiện hơn rất nhiều ạ. Chị lấy cả bộ hay chỉ lấy áo lẻ ạ?"
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 3,
+          "sentText": [
+            "Dạ vâng ạ, em ghi nhận áo lẻ Thạch Thảo cho chị nhé. Chị lấy size nào (S, M, L, XL) để em chuẩn bị gửi áo cho chị ạ?"
+          ],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 2,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 3,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "turns": [
+        {
+          "turn": 1,
+          "sentText": [
+            "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng thanh toán của mình là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển). Chị cần em hỗ trợ chốt đơn luôn không ạ?"
+          ],
+          "capturedImageSourceProducts": [
+            {
+              "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+              "sourceProducts": [
+                "SV2447"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "sentText": [
+            "Chị cho em tên người nhận nhé."
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 3,
+          "sentText": [
+            "Chị cho em số điện thoại nhé."
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 4,
+          "sentText": [
+            "Chị cho em địa chỉ nhé."
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 5,
+          "sentText": [
+            "Chị cho em COD hoặc chuyển khoản nhé."
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 6,
+          "sentText": [
+            "1 bộ (mẫu “Set váy Thạch Thảo”) (áo, size M; chân váy, size M): 799.000đ\nTạm tính: 799.000đ\nPhí ship: 30.000đ\nTổng: 829.000đ\nNgười nhận: [ĐÃ ẨN]\nĐịa chỉ: [ĐÃ ẨN]\nThanh toán: COD\nDự kiến nhận hàng: 4-8 ngày.\nChị xác nhận chốt đơn nhé."
+          ],
+          "capturedImageSourceProducts": []
+        },
+        {
+          "turn": 7,
+          "sentText": [],
+          "capturedImageSourceProducts": []
+        }
+      ]
+    }
+  ]
+}

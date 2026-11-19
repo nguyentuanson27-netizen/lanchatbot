@@ -1,0 +1,18 @@
+{
+  "previousSource": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+  "source": "6cb3be513905cf48230cc977b18832ab23bab8a3",
+  "worldHash": "dfbc11c72f413c1d4052c49cd574886e8ca413589841f44f5f6654687a5e0403",
+  "sameModels": true,
+  "samePrompts": true,
+  "sameSchema": true,
+  "sameCustomerScripts": {
+    "CANDIDATE": true,
+    "CONTROLS": true
+  },
+  "ownerTextBound": {
+    "previous": 65536,
+    "current": 70000
+  },
+  "verifierTextBound": 65536,
+  "signatureBound": 65536
+}

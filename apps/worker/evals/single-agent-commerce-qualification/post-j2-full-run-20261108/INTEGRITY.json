@@ -1,0 +1,128 @@
+{
+  "kind": "AUTOMATED_NATIVE_ACCOUNTING_REQUEST_CAPTURE_HISTORY_CHECKS_NOT_FULL_GATE_REPLAY",
+  "sourceSha": "eb134d5d8ba5f3f4099929ba67ee019cad2ba0f4",
+  "worldHash": "878a8091ae59cec41ba0a6d7f1543fd4588ebf30edaa4b0fa48478270a9af236",
+  "cases": 34,
+  "turns": 55,
+  "generationAttempts": 128,
+  "generationHttp": 128,
+  "roles": {
+    "OWNER": 89,
+    "VERIFIER": 39
+  },
+  "generationStatuses": {
+    "OK": 127,
+    "PROVIDER_ERROR": 1
+  },
+  "allGroupsSameSourceAndWorld": true,
+  "allRequestHashesMatch": true,
+  "evaluatorFirewall": "PASS",
+  "metadataBPresent": false,
+  "perTurnRoleAndToolCaps": "PASS",
+  "acceptedTextOutboxHashes": "PASS",
+  "historyHashes": "PASS",
+  "exactFinalDraftToCapturedText": 33,
+  "nativeWitnessRowsObserved": 39,
+  "knownSyntheticPrivateInputValuesAbsentFromProviderRequests": true,
+  "privateValueTypesChecked": [
+    "FULL_NAME",
+    "PHONE",
+    "ADDRESS_FRAGMENT"
+  ],
+  "privateValueCount": 3,
+  "disposableModelDatabasesDropped": 4,
+  "initialStateDatabaseDropped": true,
+  "providerGenerationRetry": 0,
+  "ownerOAuthHttp": 4,
+  "liveSends": 0,
+  "sourceShopWrites": 0,
+  "formalBlindQuality": "NOT_GRADED",
+  "fullFinalGateReplay": "NOT_PERFORMED",
+  "verifierProviderLatencyMs": {
+    "n": 39,
+    "p50": 9600,
+    "p95": 23866
+  },
+  "verifierAdapterWindowMs": {
+    "n": 39,
+    "p50": 10415.559600000008,
+    "p95": 24648.55489999999
+  },
+  "tokenUsage": {
+    "inputObserved": 1230196,
+    "outputObserved": 95593,
+    "usageRows": 127,
+    "totalRows": 128,
+    "cost": "NOT_EXPOSED"
+  },
+  "groups": [
+    {
+      "group": "r1",
+      "cases": 4,
+      "turns": 7,
+      "sourceSha": "eb134d5d8ba5f3f4099929ba67ee019cad2ba0f4",
+      "worldHash": "878a8091ae59cec41ba0a6d7f1543fd4588ebf30edaa4b0fa48478270a9af236",
+      "registrationHash": "2eb8ac44bb22f7928efab28d973205d18b1c63d4c296b9ca29474ad8ae40d4ae",
+      "corpusHash": "e99c54c7955c4f062e85859712d1f2e00de487d65bee84777a8e9b4e366d75d7",
+      "maximumGenerations": 28,
+      "actualTerminalCounts": {
+        "SEND_ELIGIBLE": 5,
+        "HANDOFF": 2
+      },
+      "attempts": 22,
+      "http": 22
+    },
+    {
+      "group": "r2",
+      "cases": 9,
+      "turns": 17,
+      "sourceSha": "eb134d5d8ba5f3f4099929ba67ee019cad2ba0f4",
+      "worldHash": "878a8091ae59cec41ba0a6d7f1543fd4588ebf30edaa4b0fa48478270a9af236",
+      "registrationHash": "df47eaeef519c8989b6b980f88c7e86fdb7abde99907502b6342a88709feb77a",
+      "corpusHash": "a9e4171f9a025cbe319a97b6af0af757a1f9d4582c02e81477e9af133d76aa05",
+      "maximumGenerations": 68,
+      "actualTerminalCounts": {
+        "SEND_ELIGIBLE": 10,
+        "HANDOFF": 4,
+        "NO_SEND": 1,
+        "CODE_OWNED_SEND": 2
+      },
+      "attempts": 41,
+      "http": 41
+    },
+    {
+      "group": "remainder",
+      "cases": 20,
+      "turns": 24,
+      "sourceSha": "eb134d5d8ba5f3f4099929ba67ee019cad2ba0f4",
+      "worldHash": "878a8091ae59cec41ba0a6d7f1543fd4588ebf30edaa4b0fa48478270a9af236",
+      "registrationHash": "e29afa898adc0f771ba0f2ad6e4b8059b9f36b42c9a50b2583ab7809e219dba4",
+      "corpusHash": "a392a892241a181e98a9db4256417daed927ded56be4e800d3ec6a3d29067a31",
+      "maximumGenerations": 96,
+      "actualTerminalCounts": {
+        "SEND_ELIGIBLE": 17,
+        "HANDOFF": 5,
+        "NO_SEND": 2
+      },
+      "attempts": 60,
+      "http": 60
+    },
+    {
+      "group": "checkout",
+      "cases": 1,
+      "turns": 7,
+      "sourceSha": "eb134d5d8ba5f3f4099929ba67ee019cad2ba0f4",
+      "worldHash": "878a8091ae59cec41ba0a6d7f1543fd4588ebf30edaa4b0fa48478270a9af236",
+      "registrationHash": "2cdab81d985c769ced487f47d5c66018faaf00b9c888c17687f452e82f062b1d",
+      "corpusHash": "3b8aa25cef771da3a07fe60686a3ae7f459acb675de59dfe4f7f984f2d71e799",
+      "maximumGenerations": 28,
+      "actualTerminalCounts": {
+        "SEND_ELIGIBLE": 1,
+        "CODE_OWNED_SEND": 5,
+        "HANDOFF": 1
+      },
+      "attempts": 5,
+      "http": 5
+    }
+  ]
+}

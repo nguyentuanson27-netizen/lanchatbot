@@ -1,0 +1,338 @@
+{
+  "status": "AUDITED_INTEGRITY_PASS_FUNCTIONAL_GATE_FAIL",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-06T09:15:52.307111+00:00",
+  "sourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "registrationHash": "db328ebd7e95bbbd47772f38a1eade738ee9904c8bfd1b5ce7dd0752dea1e024",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-remainder-run-20261106-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "2966b72548b45a8284e18a593cf05b1141dbd26a7bd50342970d6f49163b9f5c",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-remainder-run-20261106-02\\integration.json",
+  "integrationSha256": "7c4e4a6f4fbe5e98d285b28a9c3966e077501da477db6d2b08fae16e48aa624a",
+  "accountingSha256": "884f34df608d57f0328d6fbc784dd76e7ccee4cdad802b63226de6e462cfbd02",
+  "casesRegistered": 20,
+  "casesExecuted": 20,
+  "capturedTurns": 24,
+  "generationRecords": 49,
+  "generationHttpRequests": 49,
+  "roles": {
+    "OWNER": 33,
+    "VERIFIER": 16
+  },
+  "generationStatus": {
+    "OK": 49
+  },
+  "automaticGenerationRetries": 0,
+  "actualTerminalCounts": {
+    "HANDOFF": 6,
+    "SEND_ELIGIBLE": 16,
+    "NO_SEND": 2
+  },
+  "capturedTexts": 16,
+  "capturedImages": 7,
+  "acceptedOutbox": 23,
+  "testDatabaseDropped": true,
+  "sourceDirty": false,
+  "liveSend": false,
+  "materialTaskFailures": 5,
+  "materialFailures": [
+    {
+      "caseId": "c-po-20261031-p01",
+      "category": "OWNER_TOOL_BATCH_MODE_VIOLATION",
+      "detail": "Owner emits quote_product plus select_product_media in same batch; standalone quote contract rejects batch OWNER_TOOL_MODE. Actual silent handoff instead of requested price/recommendation. Source itself not missing."
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "category": "OWNER_TOOL_BATCH_MODE_VIOLATION",
+      "detail": "Owner emits quote_product plus select_product_media in same batch; standalone quote contract rejects batch OWNER_TOOL_MODE. Actual silent handoff instead of requested price/recommendation. Source itself not missing."
+    },
+    {
+      "caseId": "c-20261028-s01",
+      "category": "OWNER_TOOL_BATCH_MODE_VIOLATION",
+      "detail": "Owner emits quote_product plus select_product_media in same batch; standalone quote contract rejects batch OWNER_TOOL_MODE. Actual silent handoff instead of requested price/recommendation. Source itself not missing."
+    },
+    {
+      "caseId": "c-20261028-s02",
+      "category": "OWNER_SHARED_COMPONENT_PRESENTATION_NOT_USED",
+      "detail": "Exact owner wire includes sharedSingleItemReads SV2447-AO/TOP with both independent parent AO read targets. Customer asks price of shirt; owner instead asks which set, does not supply499000 price. Unnecessary distinction defers task despite prepared source."
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "category": "SALES_DECISION_NOT_COMPLETED",
+      "detail": "Customer asks shop choose one dress for church. Owner lists both and asks customer choose aesthetic preference, without selecting a purchase direction. Source reads and safety pass; failure is decision help, not word choice or keyword omission."
+    }
+  ],
+  "frames": [
+    {
+      "caseId": "c-po-20261031-p01",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "nativeArtifact": "native-71fdfdb23c7653cc1249524d509cb6ea35a294be7d0de6e6e01222b41691a9d0-turn-0.json",
+      "nativeRawSha256": "5a68452e36666bcf22648f940ff8f9dff72243d1d67bed6695b43c38acc9ab8d"
+    },
+    {
+      "caseId": "c-po-20261031-p02",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, quần lẻ mẫu Thạch Thảo có giá 429.000đ chị nha. Quần chất tơ Hàn thêu mềm mịn, có độ rũ nhẹ, mặc bay bổng và rất dễ phối đồ ạ. Chị lấy quần này size gì để em hỗ trợ mình ạ?"
+      ],
+      "imageCount": 1,
+      "nativeArtifact": "native-741422a827d726ea9c1c2a52d619bfee14448f36049617b32941a70771dbc6b7-turn-0.json",
+      "nativeRawSha256": "5bc6937ef5015d0e4fb70248940d3e8cb921dcf918789b3d194f0ee6c7456aeb"
+    },
+    {
+      "caseId": "c-po-20261031-p03",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, chân váy Thạch Thảo size M còn chị nhé, giá 449.000đ ạ."
+      ],
+      "imageCount": 1,
+      "nativeArtifact": "native-8834e4832dc4d7a7cf2b7b1c3e62c325cf61b9163fe1694b706a587372d12b1b-turn-0.json",
+      "nativeRawSha256": "d85a35880730d7144bb2063c74ce127d06907312288055e430fdd0445e4ff641"
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, shop có set quần Uyển Hoa và set quần phối ren hoa. Chị đang nhắc đến mẫu nào để em kiểm tra tình trạng còn hàng giúp mình ạ?"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-e376db2b10095e08674f8da68d5910933e2752e1f34675f48ab4bf1fbe22924e-turn-0.json",
+      "nativeRawSha256": "db0918d67127a0fe46ce4f6f2e86eac537ef6014a3736b4c2e1c024cb71bb013"
+    },
+    {
+      "caseId": "c-po-20261031-h01",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo lẻ Set Thạch Thảo size L nhà em có hai màu Trắng và Be. Chị lấy màu nào ạ?"
+      ],
+      "imageCount": 1,
+      "nativeArtifact": "native-d1c2c672f2c7e770e3c7146a9a81c854408054dea0c56a307346e2eb36f3a6f7-turn-0.json",
+      "nativeRawSha256": "c4a648a255c2940799bb9bc08e5cb517d5e2191bbba14724f8e4001c8ddc32e1"
+    },
+    {
+      "caseId": "c-po-20261031-h02",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Set váy Khánh Trang được làm từ chất liệu thô boi phối ren nhẹ nhàng, thoáng mát với thiết kế form suông dễ mặc ạ:\n\n- Set váy: 999.000đ (sẵn size S)\n- Áo lẻ: 499.000đ (sẵn size S, L)\n- Chân váy lẻ: 499.000đ (sẵn size S, L, XL)\n\nChị xem mình ưng lấy cả bộ hay mua lẻ món nào nhắn em nha ạ!"
+      ],
+      "imageCount": 2,
+      "nativeArtifact": "native-aee6b4e40cebbc69bf68402a670e38dd7f0250222005aed93a589ec7a7e4ca3d-turn-0.json",
+      "nativeRawSha256": "bce3408d3c54e686cd66d3745cb19614363c1c2dd633aacaa986e5fd5167a2c1"
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "nativeArtifact": "native-c1953d04d23af525ee603da0141ea4c2a7a96df5c1ac640a7dc914471178ac1e-turn-0.json",
+      "nativeRawSha256": "628135acd5f269bd0be9d600a937f5014ff988ceac98cef6c26134eb58a85201"
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ phối rất hợp và nhã nhặn chị nhé! Áo Thạch Thảo làm bằng chất liệu tơ Hàn thêu mềm mại, bay bổng với form dáng nhẹ nhàng, khi kết hợp cùng quần nâu sẫm trầm ấm sẽ tạo nên tổng thể rất thanh lịch, sang trọng và nữ tính ạ."
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-9cc7f50ee1655f08299ce53e49407e1a9f7a928685526950c36a89062f55c42a-turn-0.json",
+      "nativeRawSha256": "31df9313dc3d42e9390775a2178ac283406ee48e0da13b0a2b143addcee2f3fe"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, đi lễ thì cả hai mẫu **Váy Odette** và **Váy Diệp An** đều rất thanh lịch, kín đáo và trang nhã ạ:\n\n- **Váy Odette (799.000đ)**: Thiết kế ren phối tơ Hàn mang lại nét sang trọng, bay bổng và rất tôn dáng. Mẫu này hiện có sẵn size S giao ngay ạ.\n- **Váy Diệp An (699.000đ)**: Chất liệu tơ hoa thêu tinh tế kết hợp chi tiết đuôi cá nhẹ nhàng, form suông thoải mái và kín đáo (mẫu này là hàng đặt trước chị nhé).\n\nChị thiên về phong cách ren sang trọng (Odette) hay tơ thêu nhẹ nhàng (Diệp An) hơn ạ?"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-312c13bbb1c7bdb1baee987c28590aa9f030c0d3b3927c5b5d8413cf2f259840-turn-0.json",
+      "nativeRawSha256": "997c6988550e71afac61180dcf8fa27c92bd292e8150013e5fc9a37c52023696"
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo thạch thảo nhà em ưu tiên giặt tay để giữ độ bền và form dáng tốt nhất chị nhé. Ngoài ra, mình vẫn có thể giặt máy nhưng chị nhớ cho vào túi giặt và chọn chế độ nhẹ (gentle cycle) giúp em nha!"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-a647835359d6abfeaf1949017f106f977213a9fceb8cbcc853d5329a024f8f5e-turn-0.json",
+      "nativeRawSha256": "3879df3fb08db50286f3a1438be15e657271467a10b5912497b7c543a4cd9909"
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "nativeArtifact": "native-761b054e87e3ca85d64b0c4380b2ca5af87a32a39aea67ecdd4c2fd9bfd71c60-turn-0.json",
+      "nativeRawSha256": "bfc60272acaff841564c53f3009855467478656caa83838f7a7a8a5b48705a3f"
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "nativeArtifact": "native-98b827f56e5f226e30ff6395af3785a7cc39e85a37a6aef110aacd25f7d6dfd3-turn-0.json",
+      "nativeRawSha256": "6589bb19b6a4bf8941316a7e0b3620302699f99987d097d7fd8b2b7e0af95832"
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ vâng, chị cứ thong thả xem thêm nhé ạ. Khi nào cần tư vấn thêm thông tin gì, chị cứ nhắn em nha!"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-ae64551aa31af024bc0df09e0a3f8ccda4fde8cff0915472a78062f3046b0f6c-turn-0.json",
+      "nativeRawSha256": "14a595bc05c2e707a68247d732dd07b37dc38f881c03cb7a27cb87089cf5231b"
+    },
+    {
+      "caseId": "c-20261028-s01",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "nativeArtifact": "native-cc5be8a5a1350f0fd7948b6b96ff24b8025a9a4ee6f0edcc2fab470572402812-turn-0.json",
+      "nativeRawSha256": "072f89e45a4cda457a604a7228ef6de8fb58c9394bbf292fb1544424e3251d9f"
+    },
+    {
+      "caseId": "c-20261028-s02",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, shop có cả Set quần Thạch Thảo và Set váy Thạch Thảo đều có áo lẻ. Chị muốn lấy áo của set nào để em báo giá chuẩn cho mình ạ?"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-96907ed188b5437e4ec0b2ea8b0dcd46c960193bda8a32a1df8caa0af7e6d822-turn-0.json",
+      "nativeRawSha256": "70aff05103dc287e602380a482f5f5938157bde1353eeb160e8c313c88db9a6d"
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo Thạch Thảo có 2 màu là trắng và be ạ. Chị thích mẫu màu nào hơn để em hỗ trợ thêm thông tin cho mình nhé ạ?"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-29c926c8f827153f9ef45718203e20431d74f7830d70e0541d99cbfa3fcecf85-turn-0.json",
+      "nativeRawSha256": "73394a22acf43948b7ae25223c28afbff8abb1ad2aa064beb886176e0702785e"
+    },
+    {
+      "caseId": "c-20261028-s07",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, với chiều cao 1m60 và cân nặng 55kg, áo Thạch Thảo chị lấy **size M** là vừa vặn, thoải mái đúng ý thích ạ. Áo lẻ hiện có giá 499.000đ, chị nhé!"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-41554a569a0ebe4749c0af6f08c5acdb1b94e4a7ef27532ff2afc5df64bb8631-turn-0.json",
+      "nativeRawSha256": "a9e04a6ed3569fd3f59d2a23ffb10d94fd85776f4255a92f2bc259cfe79dc508"
+    },
+    {
+      "caseId": "c-20261028-s11",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, Set Thạch Thảo bên em có cả Set quần lẫn Set váy. Chị đang quan tâm set quần hay set váy để em kiểm tra size L màu be cho mình ạ?"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-52b02b613e75f7c8488c01b366eaa7db75e1e4c3ebf302d45cecfe1c7ee81a3f-turn-0.json",
+      "nativeRawSha256": "f7243ca03ccfc88589488f6520cbacbd1699f5b66b2463a93c54230d98ce39fc"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Áo tơ Hàn thêu Thạch Thảo (áo lẻ): 499.000đ. \n\nÁo làm từ chất liệu tơ Hàn thêu với họa tiết thêu nổi tinh tế, phom nhẹ mềm mại, thoáng mát và có độ bay tự nhiên rất sang. Mẫu này shop có sẵn các size S, M, L, XL ạ. Chị mặc size nào để em kiểm tra chi tiết cho mình nhé ạ?"
+      ],
+      "imageCount": 2,
+      "nativeArtifact": "native-8fd62743c0c2e51640b8e1006b31f20835fef5a448bf6dd428aaa737f7321e61-turn-0.json",
+      "nativeRawSha256": "7b503fb3382c0b45abbcec48116709eb16df1b59ff91933c623642ab4bcf921a"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 1,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, chân váy ren tơ Hàn của set này form nhẹ, mềm và có độ rũ tự nhiên rất dễ phối đồ ạ. Ngoài mặc chung với áo tơ thêu, chị có thể kết hợp chân váy này cùng các kiểu áo sơ mi trơn hoặc áo kiểu đơn giản để đi làm hay đi chơi đều rất thanh lịch và nữ tính.\n\nNếu lấy cả bộ Thạch Thảo thì giá là 799.000đ (tiết kiệm hơn hẳn so với mua lẻ áo 499k và chân váy 449k ạ). Chị lấy cả bộ luôn để diện cho đồng bộ và tiện phối nhé ạ?"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-8fd62743c0c2e51640b8e1006b31f20835fef5a448bf6dd428aaa737f7321e61-turn-1.json",
+      "nativeRawSha256": "d1ba65cf182aee01feb6f07e46080d74523cefa1ea2927a06b4bee4e3c0ae0cc"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 2,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ vạ, em ghi nhận chị lấy áo lẻ Thạch Thảo (499.000đ ạ). Chị lấy size nào (S, M, L, XL) để em thêm vào giỏ cho mình luôn nhé ạ?"
+      ],
+      "imageCount": 0,
+      "nativeArtifact": "native-8fd62743c0c2e51640b8e1006b31f20835fef5a448bf6dd428aaa737f7321e61-turn-2.json",
+      "nativeRawSha256": "0d73afd896539d7ef8086a49157f884516d439656b4892b91455f0e695d72230"
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "nativeArtifact": "native-d87ad5962c30d06dd0f18be88b042808c3c4276f7bc2e1a045ce91bd15d3bb6a-turn-0.json",
+      "nativeRawSha256": "1c25e18f35fae59aae80d0fd898eb21bffb758c0ed30eeb90298b65d7d374632"
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "turnIndex": 1,
+      "actualDisposition": "NO_SEND",
+      "messages": [],
+      "imageCount": 0,
+      "nativeArtifact": "native-d87ad5962c30d06dd0f18be88b042808c3c4276f7bc2e1a045ce91bd15d3bb6a-turn-1.json",
+      "nativeRawSha256": "0701beb4dc9f59fa6c1e38b23892f0d89ff0656f3a48a8a3ef41fd56f8979601"
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "turnIndex": 2,
+      "actualDisposition": "NO_SEND",
+      "messages": [],
+      "imageCount": 0,
+      "nativeArtifact": "native-d87ad5962c30d06dd0f18be88b042808c3c4276f7bc2e1a045ce91bd15d3bb6a-turn-2.json",
+      "nativeRawSha256": "9e5f1fc053c92f1efa2bd2058964b891f21432a94691e69321dfdd9022929108"
+    }
+  ],
+  "integrityChecks": [
+    "All registered attempts EXECUTED; all native canonical artifact digests/requestBody hashes match; evaluator firewall passes; unique generation IDs and1HTTP/generation; all statusOK.",
+    "Exact verifier draft and snapshot input hashes match; final native witness expected/current bindings match where present. Captured text count/hashes equal accepted Outbox. Silent handoff and human-owned no-send contain zero text/images/Outbox.",
+    "Native PostgreSQL DB dropped, source clean and exact9b2cfff, no recorded hardstop or safetyFindings. Original source timestamps preserved; group execution before09:29:08.912Z POS stock expiry. No model calls/source edits by reviewer."
+  ],
+  "limits": [
+    "Owner authorization continued development diagnostics after failed gates; R1 and R2FAIL remain immutable. This audit does not retrospectively approve original staged progression.",
+    "No Phase C qualification, paired C3 comparison, stable improvement or promotionGO.",
+    "Synthetic feedback is owner-approved test provenance, not real verified customer feedback."
+  ],
+  "legitimateHandoffCases": [
+    "c-20261028-s10 EXCHANGE",
+    "c-20261028-s12 DEFECT",
+    "c-20261028-j5 ORDER_STATUS; subsequent2turns human silence"
+  ],
+  "sourceGapControl": {
+    "caseId": "c-20261028-s11",
+    "actual": "Clarifies set-quan versus set-vay, not stock assertion or source-gap handoff.",
+    "interpretation": "Referent clarification is reasonable before checking requested exact offer. However frozen BE variant-missing handoff branch was not reached by this N1 script; do not count gap handling as passed or sales completed.",
+    "additionalMaterialFailureCount": 0
+  },
+  "deferredVoice": [
+    "h02 opens unsolicited full price menu; s06/s08/j3 remain adjective-heavy; j3 final asks size without cart effect. Not elevated solely for style under frozen policy."
+  ]
+}

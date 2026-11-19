@@ -1,0 +1,114 @@
+{
+  "kind": "ACTUAL_OPERATIONAL_MEASUREMENTS",
+  "verificationPathLatencyMs": {
+    "samples": 14,
+    "p50": 9135.742700000003,
+    "p95": 26685.569000000018,
+    "definition": "native verificationLatencyMs includes verifier path and final readback/recovery"
+  },
+  "verdicts": {
+    "PASS": 13,
+    "PROVIDER_ERROR": 1
+  },
+  "sourceGates": [],
+  "errors": [
+    {
+      "caseId": "c-20261028-s08",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "providerRequests": 0,
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "errorStage": "BUILD",
+      "httpStatus": null,
+      "requestBudget": {
+        "textFrameBytes": 67258,
+        "systemBytes": 22000,
+        "toolSchemaBytes": 19174,
+        "trustedFrameBytes": 10815,
+        "dialogueBytes": 15009,
+        "textLimitBytes": 65536
+      }
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "failureLayer": "MODEL_OUTPUT",
+      "errorCode": "PROVIDER_ERROR",
+      "failureCode": "OWNER_TOOL_OUTPUT",
+      "errorStage": "COMPLETION",
+      "httpStatus": 200,
+      "requestBudget": {
+        "textFrameBytes": 49729,
+        "systemBytes": 22000,
+        "toolSchemaBytes": 19256,
+        "trustedFrameBytes": 8097,
+        "dialogueBytes": 116,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 49906,
+        "basePresentedFrameBytes": 49906,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      }
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "role": "VERIFIER",
+      "status": "PROVIDER_ERROR",
+      "providerRequests": 1,
+      "failureLayer": "PROVIDER",
+      "errorCode": "PROVIDER_ERROR",
+      "failureCode": "UPSTREAM_TRANSPORT",
+      "errorStage": "GENERATION_TRANSPORT",
+      "httpStatus": null,
+      "requestBudget": null
+    }
+  ],
+  "auxiliaryRequests": [
+    {
+      "slotId": "273e1ad72614bcdd39584202a864a0cd9c2caaff77216879cb9797c1545aa304",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "OAUTH",
+      "ordinal": 1,
+      "status": 200,
+      "error": null,
+      "latencyMs": 171.46960000001127,
+      "requestHash": null,
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "273e1ad72614bcdd39584202a864a0cd9c2caaff77216879cb9797c1545aa304",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "EMBEDDING",
+      "ordinal": 2,
+      "status": 200,
+      "error": null,
+      "latencyMs": 1676.4792000000016,
+      "requestHash": "06fd1ec68a142b1426023ec062599711a5cf4886715903364747068b2b46ba5e",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "6ae16e3db4746d261b7a7c7274cbce6f4c6820305c2d50188d577b8c0adaf3ea",
+      "turnIndex": 0,
+      "invocation": 2,
+      "kind": "EMBEDDING",
+      "ordinal": 3,
+      "status": 200,
+      "error": null,
+      "latencyMs": 1708.8156999999774,
+      "requestHash": "5e18028098922e531e2a28efc673c13e3c3fe6a315758ab4c2c7c45403f09459",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    }
+  ]
+}

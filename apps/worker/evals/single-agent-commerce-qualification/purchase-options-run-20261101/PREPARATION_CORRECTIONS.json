@@ -1,0 +1,20 @@
+{
+  "kind": "PREREGISTRATION_CORRECTIONS_NO_PROVIDER_RESULTS",
+  "invalidated": [
+    {
+      "path": "../c3-purchase-sealed-20261031-01/REGISTRATION.pending.json",
+      "reason": "Evaluator policy readiness omitted publishedEnabled; source/hash changed before dispatch"
+    },
+    {
+      "path": "../c3-purchase-sealed-20261031-02/REGISTRATION.pending.json",
+      "reason": "j6 requirement mistakenly referenced unrelated SQ748; corrected exact subject and added coverage assertion"
+    },
+    {
+      "path": "../c3-purchase-sealed-20261031-03/REGISTRATION.pending.json",
+      "reason": "Inherited historical provenance could overstate freshness/approval; replaced with current development metadata"
+    }
+  ],
+  "retainedFinal": "../c3-purchase-sealed-20261031-04/REGISTRATION.json",
+  "providerRequestsBeforeCorrections": 0,
+  "sourceWrites": 0
+}

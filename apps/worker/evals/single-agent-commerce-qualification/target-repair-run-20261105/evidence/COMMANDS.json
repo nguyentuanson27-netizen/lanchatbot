@@ -1,0 +1,66 @@
+[
+  {
+    "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-commerce-qualification/target-repair-stages.test.mjs apps/worker/evals/single-agent-commerce-qualification/diagnostic.test.mjs apps/worker/evals/single-agent-commerce-qualification/purchase-missing-diagnostic.test.mjs apps/worker/evals/single-agent-commerce-qualification/full-native-diagnostic.test.mjs",
+    "exitCode": 0,
+    "result": "13PASS/0FAIL",
+    "log": "../c3-target-model-stages-final-20261105.log"
+  },
+  {
+    "argv": [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "../c3-target-model-world-20261105-01",
+      "../c3-target-model-codes-20261105-01.json"
+    ],
+    "exitCode": 1,
+    "result": "BLOCKED before generation: invalid synthetic required SKU; preserved failure"
+  },
+  {
+    "argv": [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "../c3-target-model-world-20261105-02",
+      "../c3-media-context-model-codes-20261103-02.json"
+    ],
+    "exitCode": 0,
+    "result": "107products fresh capture, 0generation"
+  },
+  {
+    "argv": [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "../c3-target-model-initial-20261105-01",
+      "COD",
+      "--phase-c-initial-world",
+      "../c3-target-model-world-20261105-02/WORLD.json"
+    ],
+    "exitCode": 0,
+    "result": "PASS realPGinitial/droptrue/clean94/generation0"
+  },
+  {
+    "command": "node ../c3-target-model-prepare-20261105-01.mjs",
+    "exitCode": 0,
+    "result": "4pending registrations before independent review"
+  },
+  {
+    "command": "node ../c3-target-model-finalize-20261105-01.mjs",
+    "exitCode": 0,
+    "result": "4PREFLIGHT_PASS, 0generation"
+  },
+  {
+    "command": "python ../c3-target-model-launch-20261105-01.py r1",
+    "exitCode": 0,
+    "result": "Collected4cases7turns; not a taskPASS"
+  },
+  {
+    "command": "node ../c3-target-model-accounting-20261105-01.mjs r1",
+    "exitCode": 0,
+    "result": "22generationHTTP/6eligible1handoff"
+  }
+]

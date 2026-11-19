@@ -1,0 +1,315 @@
+{
+  "kind": "VARIANT_STOCK_SEARCH_DEVELOPMENT_ACCOUNTING_CAPTURE_AUDIT_V1",
+  "verdict": "PASS",
+  "reviewer": "/root/bc_fix_review",
+  "reviewedAt": "2026-10-30T16:21:08.152Z",
+  "sourceSha": "e43e1b75c6ba3da2b3f77243e17bd6045131731a",
+  "registrationHash": "0c6615a249c044d4011a534e8572ba014f8b9f35802f6731c13c0b2d0b6f981f",
+  "evidenceHash": "943d304bcc0acaaf400b28af63a2a1cc2f607cfc1c2740e240a16cdcac8cb488",
+  "integrationHash": "2f580a89940fc50ca7bdccaf49f929b2c73406eb9ca2255e3a1aacc2128e8af9",
+  "accountingHash": "6e6e97e342265238656605a5c0ce20b43196649465194a0d150e48931dbdbb11",
+  "generationReconciliation": {
+    "journalUnique": 65,
+    "attemptSum": 65,
+    "rawTurnSum": 65,
+    "httpDispatches": 65,
+    "unexplainedExtra": [],
+    "missing": [],
+    "note": "Finalized journal, attempts, raw turns and dispatch records reconcile exactly; no prior-run generation count was adopted."
+  },
+  "counts": {
+    "cases": 22,
+    "turns": 34,
+    "generations": 65,
+    "owner": 51,
+    "verifier": 14,
+    "retries": 0,
+    "errors": 0,
+    "maximum": 136,
+    "messages": 14,
+    "images": 2,
+    "acceptedOutboxRows": 16,
+    "fallbackOutput": 0
+  },
+  "terminals": {
+    "HANDOFF": 13,
+    "SEND_ELIGIBLE": 12,
+    "NO_SEND": 7,
+    "CODE_OWNED_SEND": 2
+  },
+  "reasons": {
+    "DEPENDENCY_FAILURE": 3,
+    "RESPONSE_UNAVAILABLE": 3,
+    "SIZE_RULE_UNAVAILABLE": 2,
+    "EXCHANGE": 1,
+    "PRODUCT_AMBIGUOUS": 1,
+    "DEFECT": 1,
+    "PRICE_UNAVAILABLE": 1,
+    "HUMAN_OWNS_CONVERSATION": 7,
+    "ORDER_STATUS": 1
+  },
+  "recoveries": {
+    "FAIL": 2
+  },
+  "verdicts": {
+    "PASS": 12,
+    "FAIL": 2
+  },
+  "codeOwnedWitnesses": [
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "owner": 1,
+      "verifier": 0,
+      "kind": "NATIVE_CHECKOUT_CLARIFICATION",
+      "paymentMethod": null,
+      "missingFields": [
+        "FULL_NAME"
+      ],
+      "confirmation": null
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "owner": 0,
+      "verifier": 0,
+      "kind": "NATIVE_CHECKOUT_CLARIFICATION",
+      "paymentMethod": "COD",
+      "missingFields": [
+        "FULL_NAME"
+      ],
+      "confirmation": null
+    }
+  ],
+  "actualMedia": [
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 0,
+      "imageCount": 2
+    }
+  ],
+  "finalGateWitnessChecks": [
+    {
+      "caseId": "c-20261028-s02",
+      "turnIndex": 0,
+      "verifierId": "06f2346e-2d79-4cd0-b971-c556ea6db8e3:verifier:1",
+      "exactDraftHash": "722732443e72d01dd5e9fc398f42b3d2e52d7a49710ab04b616c5cb2400063f0",
+      "exactSnapshotHash": "46ba6347e09609e8b36d2eef3b068b559ee3bb7d2165045c08a59352c8d5ac20",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "turnIndex": 0,
+      "verifierId": "c23b9203-3d89-450d-8132-ca2b10397520:verifier:1",
+      "exactDraftHash": "604d776171b6b75bb5e9c2a96b077940dfad6119727e1611a6babc863c921670",
+      "exactSnapshotHash": "703613a26afe7e124a1cbf87f493795a4d1902cb39ddf9b5e9d077e6ff30600a",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "turnIndex": 0,
+      "verifierId": "68b9d069-eb8e-4d41-b57d-2e69157eeefe:verifier:1",
+      "exactDraftHash": "58297172af94140297b676b93d7cfa67f4e74e92eca13c574ccb19e89e448db6",
+      "exactSnapshotHash": "99991abb56ba1b53a69ea87e2c158dfc2c2260f0b6661685d65617d9ef05708e",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "turnIndex": 0,
+      "verifierId": "5b85cc58-8b7c-486f-947f-006b82cb61d5:verifier:1",
+      "exactDraftHash": "33fc4900d42f94c129010966ec7d63fe4676468acdd0ba48dd63274075db22b9",
+      "exactSnapshotHash": "19ce87038596066d4ae6ee5de1c30dea66f4abf1fc150ee80798f13be2c0ffe7",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "turnIndex": 0,
+      "verifierId": "18cad108-18b8-435c-8fb7-809dd9c08751:verifier:1",
+      "exactDraftHash": "5ebb37139e99dca346def6ab98282e25eb987235bd636cc499aa1aff24989da5",
+      "exactSnapshotHash": "fab1314e3c98d385346617ce180345c2410ae2ece2af823a57d5f3c0a3410080",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "turnIndex": 0,
+      "verifierId": "a68b1f9b-7400-4bc0-af3d-2f572be25d87:verifier:1",
+      "exactDraftHash": "af2804dc90a6c2f933d34e432de9b1ecc1fd8c2cf071714cf1bb255fe1b75a1c",
+      "exactSnapshotHash": "9dfca1d7028e33bb137b3b6f1fc9f1975b0c9ab64663a2810281957ecca01338",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "verifierId": "9701051b-c090-48d4-b728-a4b555fb6f2a:verifier:1",
+      "exactDraftHash": "ece0b3307e4bd82f360ac6d3688325c03b96e59cce67c7460f722198b0f2134f",
+      "exactSnapshotHash": "f7937071ab5ea11382f1d2a1ba9caedd290ebdeb266d17f390eb4c7e186b8e3d",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "verifierId": "c711d52a-19fa-42d4-bbe0-c2490571a125:verifier:1",
+      "exactDraftHash": "4dfea7c57cbdfaf23d6722a272c81104ece59da72af0df9356e32d32e18085d3",
+      "exactSnapshotHash": "8603ac1b382f553ed4b42a9b08bcd234bf9dee490cfb99ac7ce7bc13603acc52",
+      "gate": "FALLBACK"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "verifierId": "405c52ae-0658-4b1e-875f-68c0a9efdc81:verifier:1",
+      "exactDraftHash": "f0d29260ae290c57563706baffd21f191980066ab2ea785b8ee1253f1a735102",
+      "exactSnapshotHash": "8defa08f68bd7cfcfe3b4827ae40d4c45c6a5d1937e570cbf16645e6b32fb5f8",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 0,
+      "verifierId": "011bee0c-b825-46b6-8cf5-3bf7bd1aced8:verifier:1",
+      "exactDraftHash": "9ad268f590d97dd603f05c9f52d44231325d0842682189d2ce134c7311d911f4",
+      "exactSnapshotHash": "79ec45d2c7756de78f3c7ede078a997d83eb9d4d8c57e40bc267a97cdcc97cfd",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 1,
+      "verifierId": "039e18ff-1b74-4549-baad-0a5c78c2d0ba:verifier:1",
+      "exactDraftHash": "d99ab313961c9ea29cdc9fad906878bf87092f5b005f877d0a229d2a0ce42476",
+      "exactSnapshotHash": "80a3c734fe8ac2a503a9cd36f46ac2d4b1bb5e8a6d907d4ac7827c09b6896c17",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 2,
+      "verifierId": "df32c56e-d422-4168-81e5-5428e73467d0:verifier:1",
+      "exactDraftHash": "32e4688d2f94973b15fc742e35526a023429be89bde5df55ef3952a6578cd254",
+      "exactSnapshotHash": "be23d56d99a54f9c98e1b33f868cc18a2134638f2b44cc6ed508752ea2b84fd0",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "verifierId": "4f1113c9-f9e2-45ea-99f2-5a90aca49947:verifier:1",
+      "exactDraftHash": "fd80083e34efac2e56549bf774a0eca86cfa0a367c1271eb121a0da62639afc6",
+      "exactSnapshotHash": "c317b88e04de05636abce0a81432aa9d290473120de2f88c7c38bb131f0f0bde",
+      "gate": "FALLBACK"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "verifierId": "dcb10157-9d57-4e39-89f8-422aaf965f79:verifier:1",
+      "exactDraftHash": "78f830f82546f89b518d09a8dc2c268b1d2ca74ca6779e85843ea08efd0c5931",
+      "exactSnapshotHash": "42bba8b9a66016196dd4759fe5d122ded4c696fb65e9ac570630391094625583",
+      "gate": "SEND_ELIGIBLE"
+    }
+  ],
+  "privateBlindSeedRead": false,
+  "privateAssignmentsRead": false,
+  "diagnostics": {
+    "events": 1008,
+    "stages": {
+      "RESULT_PROJECTION": 308,
+      "CATALOG_READ": 332,
+      "POS_READ": 154,
+      "ARGUMENT_VALIDATION": 100,
+      "MEDIA_SELECT": 8,
+      "FINAL_GATE": 43,
+      "RESULT_BOUND": 25,
+      "CURRENT_READBACK": 28,
+      "POLICY_READ": 10
+    },
+    "reasons": {
+      "NO_VERIFIED_MATCHING_MEDIA": 6,
+      "DEPENDENCY_FAILURE": 6,
+      "UNKNOWN_INTERNAL": 13,
+      "RESPONSE_UNAVAILABLE": 3,
+      "PRODUCT_BOUND": 6,
+      "SIZE_RULE_UNAVAILABLE": 2,
+      "EXCHANGE": 1,
+      "PRODUCT_AMBIGUOUS": 1,
+      "DEFECT": 1,
+      "PRICE_UNAVAILABLE": 1,
+      "SELECTION_UNAVAILABLE": 4,
+      "ORDER_STATUS": 1
+    }
+  },
+  "auxiliaryHttp": [
+    {
+      "kind": "OAUTH",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    }
+  ],
+  "verified": {
+    "rawCanonicalHashes": 34,
+    "artifactByteHashes": 40,
+    "requestFirewallAndNativeWire": 65,
+    "modelAndConfigBindings": 65,
+    "perTurnRoleCaps": true,
+    "receiptsAndOutboxCapture": true,
+    "sourceCleanAtExecution": true,
+    "testDatabaseDropped": true,
+    "sendEnabled": false,
+    "diagnosticStop": null,
+    "probeExecuted": 0,
+    "c3Executed": 0
+  },
+  "findings": [],
+  "qualityApproval": false,
+  "qualificationApproval": false,
+  "providerCallsDuringAudit": 0,
+  "supplementalIndependentChecks": {
+    "sealedHelperHashesChecked": 8,
+    "exactWireEffort": {
+      "ownerHigh": 51,
+      "verifierHigh": 14
+    },
+    "verifierActualRelayAccounting": {
+      "providerRequests": 14,
+      "clientRequests": 14,
+      "rejectedClientRequests": 0
+    },
+    "pinnedCli": {
+      "version": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+    },
+    "sourceCapture": {
+      "failedCapturesRetained": 2,
+      "successfulAttempt": 3,
+      "route": "QDRANT_ORIGIN_ONLY_HTTPS_OVER_SSH_TCP",
+      "providerRouteChanged": false
+    },
+    "newReceiptsByTurn": [
+      {
+        "caseId": "c-20261028-j6",
+        "turnIndex": 0,
+        "count": 4
+      },
+      {
+        "caseId": "c-20261028-j6",
+        "turnIndex": 1,
+        "count": 1
+      },
+      {
+        "caseId": "c-20261028-j6",
+        "turnIndex": 2,
+        "count": 3
+      }
+    ],
+    "handoffNoSendCustomerMessages": 0
+  }
+}

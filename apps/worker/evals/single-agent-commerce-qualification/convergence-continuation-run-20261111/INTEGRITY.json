@@ -1,0 +1,3998 @@
+{
+  "status": "PASS",
+  "kind": "INTERRUPTED_RUN_ACCOUNTING_ONLY",
+  "segment": {
+    "sourceSha": "93b3859180c8ec93eccbb251962ae300756ebd4f",
+    "worldHash": "7d342091387df57808a32ffd6f23303cf337ea36cc18644f179e6e30fd959e2e",
+    "segment": "02",
+    "slots": 39,
+    "turns": 67,
+    "rawArtifacts": 67,
+    "exactSentDraftBindings": 55,
+    "codeOwnedTurns": 0,
+    "terminals": {
+      "HANDOFF": 8,
+      "SEND_ELIGIBLE": 55,
+      "NO_SEND": 4
+    },
+    "statuses": {
+      "OK": 174,
+      "MALFORMED": 3
+    },
+    "ledger": [
+      {
+        "id": "b4e20cca-aae2-41ce-b85d-080310f3d899:owner:1",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6421.771200000003,
+          "inputTokens": 9146,
+          "outputTokens": 1453,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "b4e20cca-aae2-41ce-b85d-080310f3d899:owner:2",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "MALFORMED",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 2856.041400000002,
+          "inputTokens": 12680,
+          "outputTokens": 351,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": "PROVIDER_ERROR",
+        "failureLayer": "MODEL_OUTPUT"
+      },
+      {
+        "id": "29d35800-badb-4d28-bb49-377cc1ed3dd3:owner:1",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6131.597599999994,
+          "inputTokens": 9144,
+          "outputTokens": 1748,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "29d35800-badb-4d28-bb49-377cc1ed3dd3:owner:2",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3443.38930000001,
+          "inputTokens": 12955,
+          "outputTokens": 423,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "29d35800-badb-4d28-bb49-377cc1ed3dd3:verifier:1",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4626.189899999998,
+          "inputTokens": 9365,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3824.0424000000057,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "bbc8c113-23a2-4aee-9185-7f5065d3c053:owner:1",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5893.6282000000065,
+          "inputTokens": 9143,
+          "outputTokens": 1430,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "bbc8c113-23a2-4aee-9185-7f5065d3c053:owner:2",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3268.218399999998,
+          "inputTokens": 12644,
+          "outputTokens": 356,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "bbc8c113-23a2-4aee-9185-7f5065d3c053:verifier:1",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3988.0723,
+          "inputTokens": 9382,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3167.035400000008,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "c829094f-d83b-44b4-bce2-1225bdb85cb4:owner:1",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5472.022100000002,
+          "inputTokens": 9147,
+          "outputTokens": 1152,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "c829094f-d83b-44b4-bce2-1225bdb85cb4:owner:2",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 2903.392200000002,
+          "inputTokens": 13345,
+          "outputTokens": 315,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "c829094f-d83b-44b4-bce2-1225bdb85cb4:verifier:1",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5225.872499999998,
+          "inputTokens": 10064,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4367.646000000008,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "531995c8-5f9a-421a-b012-8299a0a2ab3d:owner:1",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6007.512799999997,
+          "inputTokens": 9146,
+          "outputTokens": 1620,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "531995c8-5f9a-421a-b012-8299a0a2ab3d:owner:2",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3213.8785999999964,
+          "inputTokens": 12820,
+          "outputTokens": 500,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "531995c8-5f9a-421a-b012-8299a0a2ab3d:verifier:1",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4869.596500000014,
+          "inputTokens": 9319,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4053.4275999999954,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "9fd5e88c-13af-47eb-8769-0dc3bfe9564f:owner:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6527.028200000001,
+          "inputTokens": 10007,
+          "outputTokens": 1592,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "9fd5e88c-13af-47eb-8769-0dc3bfe9564f:owner:2",
+        "caseId": "c-20261028-s15",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 2643.996199999994,
+          "inputTokens": 11949,
+          "outputTokens": 302,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "9fd5e88c-13af-47eb-8769-0dc3bfe9564f:verifier:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6294.492800000007,
+          "inputTokens": 8001,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 5493.111999999994,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "416a3fcc-a454-4980-a954-fbb7fec338be:owner:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 8626.759099999996,
+          "inputTokens": 10006,
+          "outputTokens": 2403,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "416a3fcc-a454-4980-a954-fbb7fec338be:owner:2",
+        "caseId": "c-20261028-s15",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5194.659499999951,
+          "inputTokens": 16268,
+          "outputTokens": 1190,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "416a3fcc-a454-4980-a954-fbb7fec338be:verifier:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4565.49840000004,
+          "inputTokens": 13356,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3752.3804000000237,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2d77093a-c237-4fec-9c7b-1b024de704ff:owner:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 9100.202100000053,
+          "inputTokens": 10003,
+          "outputTokens": 2758,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2d77093a-c237-4fec-9c7b-1b024de704ff:owner:2",
+        "caseId": "c-20261028-s15",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4984.433299999975,
+          "inputTokens": 15341,
+          "outputTokens": 881,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2d77093a-c237-4fec-9c7b-1b024de704ff:verifier:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4954.230099999986,
+          "inputTokens": 12564,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4116.728099999949,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "e8db8926-e7d0-42b4-abe8-5b8abda76715:owner:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6158.812100000039,
+          "inputTokens": 10006,
+          "outputTokens": 1415,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "e8db8926-e7d0-42b4-abe8-5b8abda76715:owner:2",
+        "caseId": "c-20261028-s15",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3461.213300000003,
+          "inputTokens": 11773,
+          "outputTokens": 434,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "e8db8926-e7d0-42b4-abe8-5b8abda76715:verifier:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6474.918000000005,
+          "inputTokens": 7985,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 5579.500399999961,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "49d2e91f-4e3e-40bd-b5d2-f630f7c783d2:owner:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4740.965499999991,
+          "inputTokens": 10005,
+          "outputTokens": 751,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "49d2e91f-4e3e-40bd-b5d2-f630f7c783d2:owner:2",
+        "caseId": "c-20261028-s15",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6994.437100000039,
+          "inputTokens": 14452,
+          "outputTokens": 1599,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "49d2e91f-4e3e-40bd-b5d2-f630f7c783d2:owner:3",
+        "caseId": "c-20261028-s15",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 7847.163499999966,
+          "inputTokens": 12491,
+          "outputTokens": 1853,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "49d2e91f-4e3e-40bd-b5d2-f630f7c783d2:verifier:1",
+        "caseId": "c-20261028-s15",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5730.907100000011,
+          "inputTokens": 13592,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4772.460299999977,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "ed53b294-869f-4b15-98b7-ddf3db896cc4:owner:1",
+        "caseId": "c-20261028-s16",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6137.104500000016,
+          "inputTokens": 10004,
+          "outputTokens": 1543,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "f6201a08-ee44-42da-9339-984c35e83895:owner:1",
+        "caseId": "c-20261028-s16",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 13425.22080000001,
+          "inputTokens": 10002,
+          "outputTokens": 4121,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "629c0253-205e-4a78-93fe-5382e74404c0:owner:1",
+        "caseId": "c-20261028-s16",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 9232.55249999999,
+          "inputTokens": 10005,
+          "outputTokens": 2994,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "8247b473-86fe-45ed-8f7e-b4539f070493:owner:1",
+        "caseId": "c-20261028-s16",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6345.801099999982,
+          "inputTokens": 10002,
+          "outputTokens": 1619,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "e64f8c36-7798-40ea-ac14-3282004f80df:owner:1",
+        "caseId": "c-20261028-s16",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 12149.259999999951,
+          "inputTokens": 10002,
+          "outputTokens": 4022,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "d9f594df-ba52-475f-89d9-918ee70d4ec4:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5383.699299999978,
+          "inputTokens": 9906,
+          "outputTokens": 1185,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "d9f594df-ba52-475f-89d9-918ee70d4ec4:owner:2",
+        "caseId": "c-20261028-j2",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3525.0111000000034,
+          "inputTokens": 12116,
+          "outputTokens": 300,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "d9f594df-ba52-475f-89d9-918ee70d4ec4:verifier:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5324.559600000037,
+          "inputTokens": 11266,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4205.2809000000125,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "c12914f3-b5c9-49fe-b7c4-de2bf90fe2fa:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5629.848400000017,
+          "inputTokens": 10200,
+          "outputTokens": 1610,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "c12914f3-b5c9-49fe-b7c4-de2bf90fe2fa:owner:2",
+        "caseId": "c-20261028-j2",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3165.3800000000047,
+          "inputTokens": 12358,
+          "outputTokens": 491,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "c12914f3-b5c9-49fe-b7c4-de2bf90fe2fa:verifier:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5470.907999999938,
+          "inputTokens": 10703,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4183.848099999945,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "23ae1c48-68b0-4d62-931c-8cdbecee8133:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 1,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5225.861599999946,
+          "inputTokens": 10304,
+          "outputTokens": 1257,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "23ae1c48-68b0-4d62-931c-8cdbecee8133:owner:2",
+        "caseId": "c-20261028-j2",
+        "repetition": 1,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3067.6404999999795,
+          "inputTokens": 12113,
+          "outputTokens": 325,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "23ae1c48-68b0-4d62-931c-8cdbecee8133:verifier:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 1,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5671.98880000005,
+          "inputTokens": 10792,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4628.314499999979,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2019b976-b43c-40d5-bcb5-214394289001:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4470.616500000004,
+          "inputTokens": 9904,
+          "outputTokens": 1008,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2019b976-b43c-40d5-bcb5-214394289001:owner:2",
+        "caseId": "c-20261028-j2",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3084.0966999999946,
+          "inputTokens": 11947,
+          "outputTokens": 285,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2019b976-b43c-40d5-bcb5-214394289001:verifier:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5447.619700000039,
+          "inputTokens": 11233,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4021.7522999999346,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "fa064fe0-2731-4703-91f4-2f09a53384df:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5289.619700000039,
+          "inputTokens": 10211,
+          "outputTokens": 1213,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "fa064fe0-2731-4703-91f4-2f09a53384df:owner:2",
+        "caseId": "c-20261028-j2",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3488.0383000000147,
+          "inputTokens": 11946,
+          "outputTokens": 449,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "fa064fe0-2731-4703-91f4-2f09a53384df:verifier:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5431.954599999939,
+          "inputTokens": 10655,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4501.935700000031,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "45613ff8-5cf9-4aff-8257-6b6391407b1a:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 2,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5302.309299999964,
+          "inputTokens": 10305,
+          "outputTokens": 1170,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "45613ff8-5cf9-4aff-8257-6b6391407b1a:owner:2",
+        "caseId": "c-20261028-j2",
+        "repetition": 2,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4026.6123999999836,
+          "inputTokens": 12009,
+          "outputTokens": 517,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "45613ff8-5cf9-4aff-8257-6b6391407b1a:verifier:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 2,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4903.389400000102,
+          "inputTokens": 10763,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3931.6101999999955,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "6515e19f-fc3b-40a9-af92-c7d115f24a7d:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "MALFORMED",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4580.747699999949,
+          "inputTokens": 9905,
+          "outputTokens": 975,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": "PROVIDER_ERROR",
+        "failureLayer": "MODEL_OUTPUT"
+      },
+      {
+        "id": "a52339c7-0973-4c60-ada7-ff10e5fcc55f:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "MALFORMED",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3715.785900000017,
+          "inputTokens": 9905,
+          "outputTokens": 552,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": "PROVIDER_ERROR",
+        "failureLayer": "MODEL_OUTPUT"
+      },
+      {
+        "id": "6537f9d3-4cca-433c-9d01-a40a1c6f0405:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4708.531500000041,
+          "inputTokens": 9903,
+          "outputTokens": 1063,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "6537f9d3-4cca-433c-9d01-a40a1c6f0405:owner:2",
+        "caseId": "c-20261028-j2",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3690.371199999936,
+          "inputTokens": 11983,
+          "outputTokens": 385,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "6537f9d3-4cca-433c-9d01-a40a1c6f0405:verifier:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3867.422799999942,
+          "inputTokens": 11246,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 2497.4992000000784,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "bab25599-9479-4abe-a9e9-4a3db2f6722e:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 5,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6143.796399999992,
+          "inputTokens": 10198,
+          "outputTokens": 1608,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "bab25599-9479-4abe-a9e9-4a3db2f6722e:owner:2",
+        "caseId": "c-20261028-j2",
+        "repetition": 5,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 2979.0984999999637,
+          "inputTokens": 12336,
+          "outputTokens": 179,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "bab25599-9479-4abe-a9e9-4a3db2f6722e:verifier:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 5,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5848.678900000057,
+          "inputTokens": 10680,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4377.24310000008,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "31508788-5804-4b3c-b5b6-19130aa1be9c:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 5,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5415.985499999952,
+          "inputTokens": 10296,
+          "outputTokens": 1052,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "31508788-5804-4b3c-b5b6-19130aa1be9c:owner:2",
+        "caseId": "c-20261028-j2",
+        "repetition": 5,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3713.5112000000663,
+          "inputTokens": 11896,
+          "outputTokens": 356,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "31508788-5804-4b3c-b5b6-19130aa1be9c:verifier:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 5,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5681.541499999934,
+          "inputTokens": 10753,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4050.7841999999946,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "0838a960-5d30-4d31-bc73-3b05f1e400cf:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5617.39870000002,
+          "inputTokens": 9894,
+          "outputTokens": 1106,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "0838a960-5d30-4d31-bc73-3b05f1e400cf:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4243.504099999904,
+          "inputTokens": 12275,
+          "outputTokens": 404,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "0838a960-5d30-4d31-bc73-3b05f1e400cf:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5259.170999999973,
+          "inputTokens": 11098,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3791.421800000011,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "a87dce78-bf2e-4787-b4c5-11ab92ea8c92:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 7622.2192000000505,
+          "inputTokens": 9676,
+          "outputTokens": 1805,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "a87dce78-bf2e-4787-b4c5-11ab92ea8c92:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4692.603699999978,
+          "inputTokens": 11541,
+          "outputTokens": 724,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "a87dce78-bf2e-4787-b4c5-11ab92ea8c92:owner:3",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6441.349399999948,
+          "inputTokens": 10844,
+          "outputTokens": 1465,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "a87dce78-bf2e-4787-b4c5-11ab92ea8c92:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 7634.191700000083,
+          "inputTokens": 12369,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 6119.8848,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "0266df2e-b31b-4662-9ab2-215a1eaeb846:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6139.939499999979,
+          "inputTokens": 9745,
+          "outputTokens": 1382,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "0266df2e-b31b-4662-9ab2-215a1eaeb846:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3388.837300000014,
+          "inputTokens": 14413,
+          "outputTokens": 421,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "0266df2e-b31b-4662-9ab2-215a1eaeb846:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4877.804899999988,
+          "inputTokens": 12468,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3661.1805000000168,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "c61f204a-1ed3-4548-b7e3-8c954575dcbe:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4318.630899999989,
+          "inputTokens": 9891,
+          "outputTokens": 743,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "c61f204a-1ed3-4548-b7e3-8c954575dcbe:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3533.3794999998063,
+          "inputTokens": 11909,
+          "outputTokens": 380,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "c61f204a-1ed3-4548-b7e3-8c954575dcbe:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3916.965199999977,
+          "inputTokens": 11096,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3000.125699999975,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2a0809c9-b99d-43ff-9e9e-b64d3c88203d:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 12683.873099999968,
+          "inputTokens": 9677,
+          "outputTokens": 3852,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2a0809c9-b99d-43ff-9e9e-b64d3c88203d:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4896.779300000053,
+          "inputTokens": 14864,
+          "outputTokens": 873,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2a0809c9-b99d-43ff-9e9e-b64d3c88203d:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4522.778299999889,
+          "inputTokens": 10499,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3725.2919000000693,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "970e5f55-62c4-44cc-9c84-54d9493b4a41:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5599.130899999989,
+          "inputTokens": 9769,
+          "outputTokens": 1076,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "970e5f55-62c4-44cc-9c84-54d9493b4a41:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3818.9440999999642,
+          "inputTokens": 14128,
+          "outputTokens": 618,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "970e5f55-62c4-44cc-9c84-54d9493b4a41:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6063.616300000111,
+          "inputTokens": 12495,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 5107.879299999913,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "3f2bc398-97ba-4a84-9f9f-f93b79b3eb83:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 8607.787000000011,
+          "inputTokens": 9894,
+          "outputTokens": 2415,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "3f2bc398-97ba-4a84-9f9f-f93b79b3eb83:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3259.2608000000473,
+          "inputTokens": 13980,
+          "outputTokens": 324,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "3f2bc398-97ba-4a84-9f9f-f93b79b3eb83:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4458.96120000002,
+          "inputTokens": 11616,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3535.841500000097,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "f11827e8-e9b6-4319-9175-bd906c2448d6:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 7198.578000000212,
+          "inputTokens": 9792,
+          "outputTokens": 1988,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "f11827e8-e9b6-4319-9175-bd906c2448d6:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4862.391299999785,
+          "inputTokens": 15050,
+          "outputTokens": 778,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "f11827e8-e9b6-4319-9175-bd906c2448d6:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5725.20250000013,
+          "inputTokens": 12485,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4842.3293000000995,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "29fb3298-791d-4d2f-b431-f25d215f44b8:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5584.128599999938,
+          "inputTokens": 9900,
+          "outputTokens": 1007,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "29fb3298-791d-4d2f-b431-f25d215f44b8:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 2739.3916999998037,
+          "inputTokens": 14176,
+          "outputTokens": 234,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "29fb3298-791d-4d2f-b431-f25d215f44b8:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4316.19849999994,
+          "inputTokens": 12561,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3476.55569999991,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "5e120941-498c-4a70-845d-3054136dd8bf:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3827.6739999998827,
+          "inputTokens": 9894,
+          "outputTokens": 699,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "5e120941-498c-4a70-845d-3054136dd8bf:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3409.379700000165,
+          "inputTokens": 11868,
+          "outputTokens": 310,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "5e120941-498c-4a70-845d-3054136dd8bf:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5410.528299999889,
+          "inputTokens": 11039,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4550.31799999997,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "ad6b20bd-4ef2-4773-8d3a-15196ea38674:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 7502.152699999977,
+          "inputTokens": 9681,
+          "outputTokens": 1911,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "ad6b20bd-4ef2-4773-8d3a-15196ea38674:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4228.816899999976,
+          "inputTokens": 14826,
+          "outputTokens": 646,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "ad6b20bd-4ef2-4773-8d3a-15196ea38674:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5094.319000000134,
+          "inputTokens": 12260,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4160.108899999876,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "4549d043-5487-43af-af7c-34ef82314cc3:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5146.767400000012,
+          "inputTokens": 9755,
+          "outputTokens": 1222,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "4549d043-5487-43af-af7c-34ef82314cc3:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3584.814999999944,
+          "inputTokens": 14215,
+          "outputTokens": 591,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "4549d043-5487-43af-af7c-34ef82314cc3:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5438.2360000000335,
+          "inputTokens": 12369,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4565.670599999838,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "9eba3b3d-5766-4830-8828-bcab18c313bf:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3419.4154000000563,
+          "inputTokens": 9895,
+          "outputTokens": 574,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "9eba3b3d-5766-4830-8828-bcab18c313bf:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 2806.9509000000544,
+          "inputTokens": 11744,
+          "outputTokens": 227,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "9eba3b3d-5766-4830-8828-bcab18c313bf:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5034.533699999796,
+          "inputTokens": 11083,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4252.653399999952,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "049558e6-6ffd-4262-a24b-cc0e9e05dbd9:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 9116.88329999987,
+          "inputTokens": 9672,
+          "outputTokens": 2660,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "049558e6-6ffd-4262-a24b-cc0e9e05dbd9:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4316.927699999884,
+          "inputTokens": 13667,
+          "outputTokens": 718,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "049558e6-6ffd-4262-a24b-cc0e9e05dbd9:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6144.066499999957,
+          "inputTokens": 10490,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 5120.616599999834,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "97dab678-946d-4ad2-b55e-51af379e9283:owner:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4865.513400000054,
+          "inputTokens": 9742,
+          "outputTokens": 981,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "97dab678-946d-4ad2-b55e-51af379e9283:owner:2",
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3203.596499999985,
+          "inputTokens": 14010,
+          "outputTokens": 515,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "97dab678-946d-4ad2-b55e-51af379e9283:verifier:1",
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4670.727200000081,
+          "inputTokens": 12495,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3832.4240999999456,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "920733b3-7ee8-49ac-81a9-ec66decc1ddc:owner:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4108.885499999858,
+          "inputTokens": 10005,
+          "outputTokens": 728,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "920733b3-7ee8-49ac-81a9-ec66decc1ddc:owner:2",
+        "caseId": "c-20261028-s04",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4470.621700000018,
+          "inputTokens": 14429,
+          "outputTokens": 825,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "920733b3-7ee8-49ac-81a9-ec66decc1ddc:verifier:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3622.753800000064,
+          "inputTokens": 12938,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 2828.930799999973,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "0d5853d8-5ee3-450b-bff7-9de4efbd8431:owner:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3597.715599999996,
+          "inputTokens": 10003,
+          "outputTokens": 587,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "0d5853d8-5ee3-450b-bff7-9de4efbd8431:owner:2",
+        "caseId": "c-20261028-s04",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4048.0135999999475,
+          "inputTokens": 14286,
+          "outputTokens": 700,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "0d5853d8-5ee3-450b-bff7-9de4efbd8431:verifier:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4486.377600000007,
+          "inputTokens": 12901,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3493.4576000000816,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "88323d68-288e-4ded-93d3-b346630227e4:owner:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5244.001200000057,
+          "inputTokens": 10003,
+          "outputTokens": 999,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "88323d68-288e-4ded-93d3-b346630227e4:owner:2",
+        "caseId": "c-20261028-s04",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3783.2415000000037,
+          "inputTokens": 14698,
+          "outputTokens": 599,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "88323d68-288e-4ded-93d3-b346630227e4:verifier:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3792.938000000082,
+          "inputTokens": 12865,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 2961.1388999999035,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "efde01a4-872f-45e3-aa0d-f53d8b5e3c51:owner:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3763.091199999908,
+          "inputTokens": 10003,
+          "outputTokens": 615,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "efde01a4-872f-45e3-aa0d-f53d8b5e3c51:owner:2",
+        "caseId": "c-20261028-s04",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4297.464000000153,
+          "inputTokens": 14314,
+          "outputTokens": 812,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "efde01a4-872f-45e3-aa0d-f53d8b5e3c51:verifier:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4833.571599999908,
+          "inputTokens": 12908,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3856.934000000125,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "abc04106-7de9-45cd-9714-902fb8887f0b:owner:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3606.341099999845,
+          "inputTokens": 10005,
+          "outputTokens": 640,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "abc04106-7de9-45cd-9714-902fb8887f0b:owner:2",
+        "caseId": "c-20261028-s04",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4070.2953000001144,
+          "inputTokens": 14341,
+          "outputTokens": 760,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "abc04106-7de9-45cd-9714-902fb8887f0b:owner:3",
+        "caseId": "c-20261028-s04",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4393.084999999963,
+          "inputTokens": 12502,
+          "outputTokens": 997,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "abc04106-7de9-45cd-9714-902fb8887f0b:verifier:1",
+        "caseId": "c-20261028-s04",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4198.386500000022,
+          "inputTokens": 14248,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3353.5139999999665,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "d036b026-ccb8-4d7c-9de9-8af804a7eb45:owner:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 9260.304300000193,
+          "inputTokens": 10008,
+          "outputTokens": 2268,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "d036b026-ccb8-4d7c-9de9-8af804a7eb45:verifier:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5897.971499999985,
+          "inputTokens": 7588,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 5043.833399999887,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "cf328ced-def1-40b2-a8d6-3b86af06b222:owner:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3838.2027000000235,
+          "inputTokens": 10006,
+          "outputTokens": 710,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "cf328ced-def1-40b2-a8d6-3b86af06b222:owner:2",
+        "caseId": "c-20261028-s09",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3516.6167000001296,
+          "inputTokens": 12156,
+          "outputTokens": 644,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "cf328ced-def1-40b2-a8d6-3b86af06b222:verifier:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3865.5533000000287,
+          "inputTokens": 9020,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3035.404700000072,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "452d5ac2-8b9b-4de7-b4d7-1f184a614410:owner:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4324.155199999921,
+          "inputTokens": 10005,
+          "outputTokens": 808,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "452d5ac2-8b9b-4de7-b4d7-1f184a614410:owner:2",
+        "caseId": "c-20261028-s09",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3999.0400000000373,
+          "inputTokens": 12253,
+          "outputTokens": 716,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "452d5ac2-8b9b-4de7-b4d7-1f184a614410:verifier:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3181.441099999938,
+          "inputTokens": 9024,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 2349.6333999999333,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2c282aba-9110-446f-8c9a-4194c654b082:owner:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4256.054800000042,
+          "inputTokens": 10008,
+          "outputTokens": 1060,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2c282aba-9110-446f-8c9a-4194c654b082:owner:2",
+        "caseId": "c-20261028-s09",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4166.065699999919,
+          "inputTokens": 16024,
+          "outputTokens": 670,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "2c282aba-9110-446f-8c9a-4194c654b082:verifier:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3665.8675000001676,
+          "inputTokens": 14411,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 2724.1762999999337,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "dbafb0c5-0cf0-48f3-92ff-4bc786a6e967:owner:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5873.230600000126,
+          "inputTokens": 10006,
+          "outputTokens": 1569,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "dbafb0c5-0cf0-48f3-92ff-4bc786a6e967:owner:2",
+        "caseId": "c-20261028-s09",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4635.206999999937,
+          "inputTokens": 14901,
+          "outputTokens": 599,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "dbafb0c5-0cf0-48f3-92ff-4bc786a6e967:verifier:1",
+        "caseId": "c-20261028-s09",
+        "repetition": 5,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3816.1714999999385,
+          "inputTokens": 11657,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 2612.6979999998584,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "8cadc917-6da5-498e-bd88-0edd2c13b3ff:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 7193.194299999857,
+          "inputTokens": 9893,
+          "outputTokens": 1555,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "8cadc917-6da5-498e-bd88-0edd2c13b3ff:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3575.345399999991,
+          "inputTokens": 12719,
+          "outputTokens": 377,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "8cadc917-6da5-498e-bd88-0edd2c13b3ff:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4384.955199999968,
+          "inputTokens": 11098,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3331.7325999999885,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "13712b43-80b0-43fd-8c0c-e328cb09543c:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6730.241500000004,
+          "inputTokens": 9681,
+          "outputTokens": 1794,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "13712b43-80b0-43fd-8c0c-e328cb09543c:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3820.597399999853,
+          "inputTokens": 13444,
+          "outputTokens": 345,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "13712b43-80b0-43fd-8c0c-e328cb09543c:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 1,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4460.070300000021,
+          "inputTokens": 11022,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3058.9777999999933,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "57e3214b-0086-4aa0-b688-60fc398e7fd5:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 1,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6930.340799999889,
+          "inputTokens": 9735,
+          "outputTokens": 1654,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "57e3214b-0086-4aa0-b688-60fc398e7fd5:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 1,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4441.080599999987,
+          "inputTokens": 14883,
+          "outputTokens": 844,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "57e3214b-0086-4aa0-b688-60fc398e7fd5:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 1,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4957.846399999922,
+          "inputTokens": 12503,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3903.0463000000454,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "9e51b7b3-b8ab-47e0-ae2f-fc21bd4c7010:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5984.893500000006,
+          "inputTokens": 9896,
+          "outputTokens": 1261,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "9e51b7b3-b8ab-47e0-ae2f-fc21bd4c7010:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3884.9472000000533,
+          "inputTokens": 12428,
+          "outputTokens": 454,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "9e51b7b3-b8ab-47e0-ae2f-fc21bd4c7010:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6988.131099999882,
+          "inputTokens": 11102,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 5659.626699999906,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "7627689c-2648-48f4-b7f2-c7c7605de514:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6907.512899999972,
+          "inputTokens": 9681,
+          "outputTokens": 1448,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "7627689c-2648-48f4-b7f2-c7c7605de514:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6646.342999999877,
+          "inputTokens": 12676,
+          "outputTokens": 733,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "7627689c-2648-48f4-b7f2-c7c7605de514:owner:3",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4904.887400000123,
+          "inputTokens": 10762,
+          "outputTokens": 935,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "7627689c-2648-48f4-b7f2-c7c7605de514:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5475.443199999863,
+          "inputTokens": 12383,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4486.775200000033,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "1d01f6cb-d9ce-4f30-9df7-3bb81c1e956b:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 8162.112599999877,
+          "inputTokens": 9733,
+          "outputTokens": 2150,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "1d01f6cb-d9ce-4f30-9df7-3bb81c1e956b:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3599.7361999999266,
+          "inputTokens": 13869,
+          "outputTokens": 534,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "1d01f6cb-d9ce-4f30-9df7-3bb81c1e956b:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 2,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 7819.0123999998905,
+          "inputTokens": 11120,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 6642.478400000138,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "e2a970ae-fe92-4937-a835-b71489dd59b3:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4059.3417000002228,
+          "inputTokens": 9892,
+          "outputTokens": 579,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "e2a970ae-fe92-4937-a835-b71489dd59b3:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3999.0202999999747,
+          "inputTokens": 11742,
+          "outputTokens": 507,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "e2a970ae-fe92-4937-a835-b71489dd59b3:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4971.243999999948,
+          "inputTokens": 11116,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3903.0559000000358,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "13cc4602-b02d-4900-968e-5597aec004d5:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 3,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 7841.653299999889,
+          "inputTokens": 9677,
+          "outputTokens": 1888,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "13cc4602-b02d-4900-968e-5597aec004d5:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 3,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3815.002299999818,
+          "inputTokens": 13534,
+          "outputTokens": 386,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "13cc4602-b02d-4900-968e-5597aec004d5:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 3,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4063.5422999998555,
+          "inputTokens": 11028,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 2856.9525000001304,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "eabde762-63ef-42cd-b576-443ab0a29fb7:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 3,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 12676.356999999844,
+          "inputTokens": 9726,
+          "outputTokens": 3107,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "eabde762-63ef-42cd-b576-443ab0a29fb7:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 3,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4154.058800000232,
+          "inputTokens": 14802,
+          "outputTokens": 319,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "eabde762-63ef-42cd-b576-443ab0a29fb7:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 3,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5192.014400000218,
+          "inputTokens": 11112,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4013.1491000000387,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "61bf67f3-e291-4927-85dc-6a396c52d5c8:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5744.003600000404,
+          "inputTokens": 9895,
+          "outputTokens": 974,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "61bf67f3-e291-4927-85dc-6a396c52d5c8:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4365.582699999679,
+          "inputTokens": 12140,
+          "outputTokens": 287,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "61bf67f3-e291-4927-85dc-6a396c52d5c8:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5368.2093000002205,
+          "inputTokens": 11083,
+          "outputTokens": 9,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4118.397799999919,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "8b67f21b-f61a-4761-a19b-cad10327d9e6:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 4,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6900.4552000002,
+          "inputTokens": 9686,
+          "outputTokens": 1815,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "8b67f21b-f61a-4761-a19b-cad10327d9e6:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 4,
+        "turnIndex": 1,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4015.9512000000104,
+          "inputTokens": 13469,
+          "outputTokens": 219,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "8b67f21b-f61a-4761-a19b-cad10327d9e6:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 4,
+        "turnIndex": 1,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5087.666999999899,
+          "inputTokens": 10987,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 3768.5669999998063,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "69f97bb5-8bc6-4654-ad7b-7381b519fe83:owner:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 4,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 8597.054000000004,
+          "inputTokens": 9737,
+          "outputTokens": 1957,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "69f97bb5-8bc6-4654-ad7b-7381b519fe83:owner:2",
+        "caseId": "c-20261028-j1",
+        "repetition": 4,
+        "turnIndex": 2,
+        "role": "OWNER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 6701.013400000054,
+          "inputTokens": 14957,
+          "outputTokens": 1310,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": null,
+        "failureLayer": null
+      },
+      {
+        "id": "69f97bb5-8bc6-4654-ad7b-7381b519fe83:verifier:1",
+        "caseId": "c-20261028-j1",
+        "repetition": 4,
+        "turnIndex": 2,
+        "role": "VERIFIER",
+        "status": "OK",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 5521.351900000125,
+          "inputTokens": 12419,
+          "outputTokens": 18,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": 4030.6387999998406,
+        "errorCode": null,
+        "failureLayer": null
+      }
+    ],
+    "failures": [
+      {
+        "id": "b4e20cca-aae2-41ce-b85d-080310f3d899:owner:2",
+        "caseId": "c-po-20261031-p06",
+        "repetition": 1,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "MALFORMED",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 2856.041400000002,
+          "inputTokens": 12680,
+          "outputTokens": 351,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": "PROVIDER_ERROR",
+        "failureLayer": "MODEL_OUTPUT"
+      },
+      {
+        "id": "6515e19f-fc3b-40a9-af92-c7d115f24a7d:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 3,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "MALFORMED",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 4580.747699999949,
+          "inputTokens": 9905,
+          "outputTokens": 975,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": "PROVIDER_ERROR",
+        "failureLayer": "MODEL_OUTPUT"
+      },
+      {
+        "id": "a52339c7-0973-4c60-ada7-ff10e5fcc55f:owner:1",
+        "caseId": "c-20261028-j2",
+        "repetition": 4,
+        "turnIndex": 0,
+        "role": "OWNER",
+        "status": "MALFORMED",
+        "providerRequests": 1,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "metrics": {
+          "latencyMs": 3715.785900000017,
+          "inputTokens": 9905,
+          "outputTokens": 552,
+          "costUSD": null,
+          "unavailable": {
+            "costUSD": "PROVIDER_NOT_EXPOSED"
+          }
+        },
+        "providerLatencyMs": null,
+        "errorCode": "PROVIDER_ERROR",
+        "failureLayer": "MODEL_OUTPUT"
+      }
+    ],
+    "providerRequests": 177,
+    "database": "c3_b_test_0d802a39561f2cbc"
+  },
+  "registeredCaseRepetitions": 65,
+  "completedCaseRepetitions": 39,
+  "pendingCaseRepetitions": 26,
+  "capturedTurns": 67,
+  "pendingTurns": 68,
+  "retry": 0,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "quality": "NOT_REVIEWED_PENDING_RUN_COMPLETION"
+}

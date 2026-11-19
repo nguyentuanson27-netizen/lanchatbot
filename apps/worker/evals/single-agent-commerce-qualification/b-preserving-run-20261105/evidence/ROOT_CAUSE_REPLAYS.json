@@ -1,0 +1,53 @@
+{
+  "status": "MATERIAL_FAILURES_OBSERVED_PARTIAL_RUN_NOT_APPROVED",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T08:45:33.112764+00:00",
+  "sourceSha": "69bd122100f51584acd6d2ac97dde9254b3e562c",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-run-20261105-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256AtReview": "72d09e4730e6b18983c52836d3c0c057aa15a2d3016d0c179a287944e93385a9",
+  "findings": [
+    {
+      "priority": "P1",
+      "caseId": "c-po-20261031-p06",
+      "code": "COMPONENT_ORDER_FALSE_VARIANCE",
+      "cause": "COMPOSITE has three rows with the same component multiset (QD001 twice, SD023-AO once); order-sensitive array hash removes structure from owner projection as VARIANT_DEPENDENT. Bound product SD023 and price 989000 are available; owner hands off PRODUCT_AMBIGUOUS after read_product + quote_product. Material task failure, not legitimate missing customer product selection.",
+      "paths": [
+        "apps/worker/src/single-agent-commerce-read-only-tools.ts:109",
+        "apps/worker/src/single-agent-commerce-read-only-tools.ts:121"
+      ],
+      "nativeArtifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-run-20261105-02\\native-d963081202a7a520dc3ce5acaf1766ae4195eb8fe4935a39a29bd636d6825fd3-turn-0.json",
+      "nativeSha256": "29dd54c00648a28724742328a4b1c0701cced06b2eab962acf17cc944a37e3d5",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "PRODUCT_AMBIGUOUS"
+      }
+    },
+    {
+      "priority": "P1",
+      "caseId": "c-po-20261031-p07",
+      "code": "COMPONENT_FIT_FALSE_CONFLICT",
+      "cause": "Two current valid SIZE_FIT claims for TOP and PANTS share PRODUCT SQ2447 / variantId=null. Generic conflict key ignores fitTarget and treats their differing contentHash as conflict. Pure built-package readiness replay yields only CLAIM_CONFLICT. Verifier PASS and final snapshot gate PASS; delivery is NO_SEND EGRESS_READINESS.",
+      "paths": [
+        "packages/contracts/src/v2/canonical-evidence-readiness.ts:475",
+        "packages/contracts/src/v2/canonical-evidence-readiness.ts:524",
+        "apps/worker/src/single-agent-commerce-ingress.ts:372"
+      ],
+      "nativeArtifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-run-20261105-02\\native-7ca3d033f20d2aced84dc97a9b8639ccfae1d25a8e7d60e4bd0acd1216492395-turn-0.json",
+      "nativeSha256": "8bd3d0df6e174695ded3288bf4702908c9bdfc8ddf79616ede28de580a537a2d",
+      "actualTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "EGRESS_READINESS"
+      }
+    }
+  ],
+  "limits": [
+    "Run still in progress; no final denominator, cleanup or request-accounting approval.",
+    "No provider calls, source writes, reruns, runtime or evidence edits by reviewer.",
+    "No locked-quality or Phase C GO conclusion."
+  ],
+  "nextScopeDecision": "Do not approve prefix PASS gate / remainder dispatch if these material failures remain. Complete registered prefix and audit awaited cleanup before final accounting."
+}

@@ -1,0 +1,476 @@
+{
+  "kind": "SINGLE_INDEPENDENT_ROOTCAUSE_REVIEW",
+  "language": "vi",
+  "reviewDate": "2026-11-08",
+  "repository": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+  "head": "b7dc99c9dbc1d87cd67f38dd3264b670eb5ffe66",
+  "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+  "scope": {
+    "runtimeEdited": false,
+    "repositoryEdited": false,
+    "providerRequests": 0,
+    "modelEvalRuns": 0,
+    "testsRun": 0,
+    "probeRerun": false,
+    "existingProbeRead": true,
+    "newSubagents": 0,
+    "fullWorldDumped": false,
+    "checkoutRawPayloadRead": false,
+    "qualificationOrDeploymentDecision": false
+  },
+  "evidenceIntegrity": {
+    "selectedNativeFiles": 7,
+    "allNativeHashesMatchPacket": true,
+    "runtimeSourcePromptCodecDiffFromRunSource": false,
+    "publicationMaskingKnownDefects": {
+      "imageUrlOccurrences": 13,
+      "policyHashRefs": 2,
+      "marker": "[PHONE_TEST]",
+      "attribution": "PUBLICATION_HELPER_NOT_RUNTIME"
+    }
+  },
+  "severityMeaning": "Ảnh hưởng task/bán hàng, không là phân hạng security.",
+  "conclusions": [
+    {
+      "id": 1,
+      "caseId": "c-20261028-j1",
+      "turns": [
+        2
+      ],
+      "verdict": "PARTIALLY_SUPPORTED",
+      "severity": "HIGH",
+      "confirmed": [
+        "Owner chọn hai add_to_cart thiếu màu và quote_cart; mutation trả COLOR_REQUIRED, quote bị DEPENDENT_EFFECT_REJECTED.",
+        "quote_product thực sự callable; prompt line 33 hướng dẫn đúng; lịch sử 05/11 và 06/11 có total 978100.",
+        "Reachability cố ý conservative; tests dùng direct tool/mock owner chỉ kiểm capacity."
+      ],
+      "necessaryCorrections": [
+        "Overloaded discovery/mutation là giả thuyết thiết kế, không phải nhân quả đã được cô lập.",
+        "Không quy hiện tượng hiện tại cho missing tool/instruction hoặc rewrite 07/11."
+      ],
+      "unknown": [
+        "Vì sao model chọn lại cart path; tần suất ổn định và tác dụng nhân quả của tool exposure."
+      ],
+      "sourceRefs": [
+        "apps/worker/src/single-agent-commerce-callable.ts:3-24",
+        "apps/worker/src/single-agent-commerce-effects.ts:415-422",
+        "apps/worker/src/single-agent-commerce-quote.ts:65-69",
+        "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt:33",
+        "apps/worker/src/single-agent-commerce-quote.test.ts:128-146",
+        "apps/worker/src/single-agent-commerce-ingress.test.ts:1352-1362"
+      ],
+      "nativeEvidence": [
+        {
+          "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r1-run-20261108-01\\native-39fdf96a18b56ac055792a8cb8774593c7e30d656ae9373ca98df143d397c951-turn-2.json",
+          "sha256": "1a47af5236a5aecede128c4019ab675c2bceaa417f8c809a4f8eb6a602851e35",
+          "packetHashMatches": true,
+          "turnIndex": 2,
+          "journalPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r1-run-20261108-01\\NATIVE_REQUESTS.jsonl",
+          "journalEntries": [
+            {
+              "line": 91,
+              "phase": "RESULT",
+              "generationId": "116cfc53-5333-417d-b1cb-c2f4798861be:owner:1"
+            },
+            {
+              "line": 95,
+              "phase": "RESULT",
+              "generationId": "116cfc53-5333-417d-b1cb-c2f4798861be:owner:2"
+            },
+            {
+              "line": 100,
+              "phase": "RESULT",
+              "generationId": "116cfc53-5333-417d-b1cb-c2f4798861be:verifier:1"
+            }
+          ],
+          "selectors": [
+            "observed.result",
+            "observed.toolResponses",
+            "before.publicState",
+            "after.publicState",
+            "generations[*].requestBody.tools",
+            "generations[role=VERIFIER].requestBody.input[0].content JSON -> trusted",
+            "sourceReads[*].observation.source.products[*].pos.snapshot.offers.AO"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "caseId": "c-20261028-j2",
+      "turns": [
+        1
+      ],
+      "verdict": "CONFIRMED",
+      "severity": "HIGH",
+      "confirmed": [
+        "Journal first call có năm normalized ops; old HEIGHT quote bị QUOTE_NOT_IN_CURRENT_MESSAGE.",
+        "Journal second call chỉ còn bốn correction hợp lệ; after profile revision 4 đúng HEIGHT162/WEIGHT51/BUST88/WAIST70/HIPS94.",
+        "pendingFields thêm attempted fields trước apply; successful four-op patch không xóa pending HEIGHT, blocked() còn true; recommend_size STATE_OR_REF rồi hard gate STATE_UPDATE_INCOMPLETE.",
+        "Core pending add/delete blame c3951fc66 ngày 2026-10-17."
+      ],
+      "necessaryCorrections": [
+        "Không gọi đây là cân nặng chưa sửa hoặc thiếu chart.",
+        "Probe chỉ minh họa real-code PRODUCT/QU714/in-memory, không full captured COMPONENT/PostgreSQL replay; chưa chạy lại trong review này.",
+        "sizeCalls=0 chỉ thuộc dependency PRODUCT của probe, không chứng minh captured COMPONENT không đọc chart."
+      ],
+      "unknown": [
+        "Kết quả fit chính xác của captured COMPONENT sau khi loại blocker; chưa replay."
+      ],
+      "sourceRefs": [
+        "apps/worker/src/single-agent-commerce-state.ts:104-108",
+        "apps/worker/src/single-agent-commerce-state.ts:152",
+        "apps/worker/src/single-agent-commerce-state.ts:284-317",
+        "apps/worker/src/single-agent-semantic-verifier-boundary.ts:101"
+      ],
+      "probeRefs": [
+        "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-rootcause-state-probe-20261108.mjs",
+        "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-rootcause-state-probe-20261108.json"
+      ],
+      "nativeEvidence": [
+        {
+          "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\native-c4f06f9e7c45647c34243296ccddef3c04d37473efe46985c7b9d77dbc7e2cc9-turn-1.json",
+          "sha256": "1e40924b033b1599223707c4ebc8c08efc4ea0e07a693cc4163f40e4a68331d6",
+          "packetHashMatches": true,
+          "turnIndex": 1,
+          "journalPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\NATIVE_REQUESTS.jsonl",
+          "journalEntries": [
+            {
+              "line": 91,
+              "phase": "RESULT",
+              "generationId": "1274d766-a62d-40f7-872b-3de2e6aad3ba:owner:1"
+            },
+            {
+              "line": 95,
+              "phase": "RESULT",
+              "generationId": "1274d766-a62d-40f7-872b-3de2e6aad3ba:owner:2"
+            },
+            {
+              "line": 99,
+              "phase": "RESULT",
+              "generationId": "1274d766-a62d-40f7-872b-3de2e6aad3ba:owner:3"
+            }
+          ],
+          "selectors": [
+            "observed.result",
+            "observed.toolResponses",
+            "before.publicState",
+            "after.publicState",
+            "generations[*].requestBody.tools",
+            "generations[role=VERIFIER].requestBody.input[0].content JSON -> trusted",
+            "sourceReads[*].observation.source.products[*].pos.snapshot.offers.AO"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "caseId": "c-20261028-j4",
+      "turns": [
+        0,
+        1
+      ],
+      "verdict": "PARTIALLY_SUPPORTED",
+      "severity": "HIGH",
+      "confirmed": [
+        "record_negotiation yêu cầu cart và negotiation hiện tại; cart null đủ để reject.",
+        "T1 exact AO/M Trắng IN_STOCK, Be PRE_ORDER; T2 selectionEvidence absent, presentation chỉ __NO_COLOR__.",
+        "Maps theo instance turn, preparationOnly không xây candidate tuples; T2 không read AO lại.",
+        "T2 CATALOG_READ source vẫn có AO tám rows Trắng/Be; đúng read_product AO có đường dựng lại proof.",
+        "Negotiation reject chưa terminal: có OWNER generation 2 rồi draft khẳng định màu thiếu current proof, verifier FAIL, recovery handoff."
+      ],
+      "necessaryCorrections": [
+        "Hai trở ngại chưa chứng minh là một chuỗi nguyên nhân tất định.",
+        "Không khẳng định mọi hỗ trợ pre-cart là bất khả thi, hoặc persist proof là giải pháp bắt buộc.",
+        "Không dùng shop history thay current source proof, không quy lỗi riêng verifier."
+      ],
+      "unknown": [
+        "Sửa riêng negotiation hay proof có đủ hoàn tất bán hàng hay không."
+      ],
+      "sourceRefs": [
+        "apps/worker/src/single-agent-commerce-effects.ts:50",
+        "apps/worker/src/single-agent-commerce-effects.ts:120-127",
+        "apps/worker/src/single-agent-commerce-effects.ts:147-169",
+        "apps/worker/src/single-agent-commerce-effects.ts:226-233",
+        "apps/worker/src/single-agent-commerce-callable.ts:12-22",
+        "apps/worker/src/single-agent-commerce-read-only-tools.ts:54",
+        "apps/worker/src/single-agent-commerce-read-only-tools.ts:266-271",
+        "apps/worker/src/single-agent-commerce-read-only-tools.ts:404-419"
+      ],
+      "nativeEvidence": [
+        {
+          "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\native-3c62ee5b8347ab9a55d8742c05487f502239852f49b299a34e56b4fd2efb9ac8-turn-0.json",
+          "sha256": "bb81e83b96a6d736f0d26ead6e64b38502a23c1cc7d3cc9a677dd1458dd7dbbb",
+          "packetHashMatches": true,
+          "turnIndex": 0,
+          "journalPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\NATIVE_REQUESTS.jsonl",
+          "journalEntries": [
+            {
+              "line": 103,
+              "phase": "RESULT",
+              "generationId": "b4b6a64c-e7f1-4910-9a06-53c1c6803db3:owner:1"
+            },
+            {
+              "line": 107,
+              "phase": "RESULT",
+              "generationId": "b4b6a64c-e7f1-4910-9a06-53c1c6803db3:owner:2"
+            },
+            {
+              "line": 112,
+              "phase": "RESULT",
+              "generationId": "b4b6a64c-e7f1-4910-9a06-53c1c6803db3:verifier:1"
+            }
+          ],
+          "selectors": [
+            "observed.result",
+            "observed.toolResponses",
+            "before.publicState",
+            "after.publicState",
+            "generations[*].requestBody.tools",
+            "generations[role=VERIFIER].requestBody.input[0].content JSON -> trusted",
+            "sourceReads[*].observation.source.products[*].pos.snapshot.offers.AO"
+          ]
+        },
+        {
+          "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\native-3c62ee5b8347ab9a55d8742c05487f502239852f49b299a34e56b4fd2efb9ac8-turn-1.json",
+          "sha256": "8fcbdffd92aade77e19332921b930effbea04e6cb3d16c9d717f6cf4d95e4891",
+          "packetHashMatches": true,
+          "turnIndex": 1,
+          "journalPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\NATIVE_REQUESTS.jsonl",
+          "journalEntries": [
+            {
+              "line": 116,
+              "phase": "RESULT",
+              "generationId": "87646518-e317-4ab7-af2e-d74a35d44882:owner:1"
+            },
+            {
+              "line": 120,
+              "phase": "RESULT",
+              "generationId": "87646518-e317-4ab7-af2e-d74a35d44882:owner:2"
+            },
+            {
+              "line": 125,
+              "phase": "RESULT",
+              "generationId": "87646518-e317-4ab7-af2e-d74a35d44882:verifier:1"
+            }
+          ],
+          "selectors": [
+            "observed.result",
+            "observed.toolResponses",
+            "before.publicState",
+            "after.publicState",
+            "generations[*].requestBody.tools",
+            "generations[role=VERIFIER].requestBody.input[0].content JSON -> trusted",
+            "sourceReads[*].observation.source.products[*].pos.snapshot.offers.AO"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "caseId": "c-20261028-s15",
+      "turns": [
+        0
+      ],
+      "verdict": "PARTIALLY_SUPPORTED",
+      "severity": "MEDIUM",
+      "confirmed": [
+        "Normalized owner calls quote_product AO/be và extra select_product_media GENERIC/be dù tin chỉ thích màu/cảm ơn.",
+        "openingMediaWork NOT_REQUIRED với requiredProducts rỗng; ảnh Be cụ thể không phải prerequisite ACK.",
+        "Media lookup bên trong opening quote trả MEDIA_COLOR_BINDING_UNVERIFIED; handoff trước owner tiếp theo/verifier."
+      ],
+      "necessaryCorrections": [
+        "Extra select call là đề xuất, chưa có bằng chứng thực thi hoặc là nguyên nhân trực tiếp; media bên trong quote đã đủ gây fail.",
+        "Coupling giá/ảnh và silent fail-closed là contract/policy hiện hành; bug chọn operation không chứng minh coupling tự nó sai.",
+        "Giữ binding checks, required-image rules và silent handoff; không dùng generic image để lách yêu cầu màu thật."
+      ],
+      "unknown": [
+        "Vì sao owner mở operation không cần thiết; lợi ích/rủi ro của thay coupling chưa được kiểm."
+      ],
+      "sourceRefs": [
+        "apps/worker/src/single-agent-commerce-quote.ts:71-73",
+        "apps/worker/src/single-agent-commerce-quote.ts:101-115",
+        "apps/worker/src/single-agent-commerce-quote.ts:129-134",
+        "apps/worker/src/single-agent-commerce.ts:21-23",
+        "apps/worker/src/single-agent-commerce.ts:111-120",
+        "apps/worker/src/single-agent-commerce-opening-media.ts:15-18",
+        "apps/worker/src/single-agent-commerce-opening-media.ts:75-77",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:100",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:111"
+      ],
+      "nativeEvidence": [
+        {
+          "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\native-1b04f4dc5f36dc990a66c2761771bd7b30cb5fd87bd34d484e2ba1153e5fae41-turn-0.json",
+          "sha256": "92add968fbac6ba22cfbf2222fd5bfa09a3a14ed96c50b428eb8c29822c2149f",
+          "packetHashMatches": true,
+          "turnIndex": 0,
+          "journalPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\NATIVE_REQUESTS.jsonl",
+          "journalEntries": [
+            {
+              "line": 61,
+              "phase": "RESULT",
+              "generationId": "9cfd7e91-a75f-42e7-ba8e-587e458534fd:owner:1"
+            }
+          ],
+          "selectors": [
+            "observed.result",
+            "observed.toolResponses",
+            "before.publicState",
+            "after.publicState",
+            "generations[*].requestBody.tools",
+            "generations[role=VERIFIER].requestBody.input[0].content JSON -> trusted",
+            "sourceReads[*].observation.source.products[*].pos.snapshot.offers.AO"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "caseId": "c-20261028-s04",
+      "turns": [
+        0
+      ],
+      "verdict": "PARTIALLY_SUPPORTED",
+      "severity": "MEDIUM",
+      "confirmed": [
+        "Hai màu/status đều có exact evidence; verifier phản đối exhaustive meaning.",
+        "Completeness interface/validator/builder chỉ chấp nhận FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY và cắt options ở tám.",
+        "candidateCartOptions không tự cắt tám: gate >64 rows rồi lọc/dedup; frozen source AO có tám rows Trắng/Be.",
+        "Current frame không có chứng nhận exhaustive offer-colour facet."
+      ],
+      "necessaryCorrections": [
+        "Conservative completeness là intentional contract, chưa là bug đã chứng minh.",
+        "Không suy complete từ mảng <=8 hoặc suy có màu thứ ba từ incomplete.",
+        "Pipeline không giữ chứng cứ exhaustive, không chứng minh đã đánh rơi một complete certificate có sẵn.",
+        "Cách đọc có 2 màu là exhaustive có cơ sở theo câu hỏi nhưng chưa đủ kết án verifier quá cứng hay hallucination hai màu."
+      ],
+      "unknown": [
+        "Đánh giá semantics duy nhất cho câu có 2 màu; complete facet có giải quyết mọi ca hay không."
+      ],
+      "sourceRefs": [
+        "apps/worker/src/single-agent-commerce-selection-evidence.ts:8-12",
+        "apps/worker/src/single-agent-commerce-selection-evidence.ts:24-48",
+        "apps/worker/src/realtime-sales-catalog.ts:106-126",
+        "apps/worker/src/single-agent-commerce-read-only-tools.ts:408-415"
+      ],
+      "nativeEvidence": [
+        {
+          "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-remainder-run-20261108-01\\native-07d44acc6075e01467a6ddef9ce7e11ebe85cdb1bcf6232ad853a0d70e761e16-turn-0.json",
+          "sha256": "314ea7072a07f529186f52bcf9fd7fb670e86eff014c971bbbd73d06cd7e2c16",
+          "packetHashMatches": true,
+          "turnIndex": 0,
+          "journalPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-remainder-run-20261108-01\\NATIVE_REQUESTS.jsonl",
+          "journalEntries": [
+            {
+              "line": 200,
+              "phase": "RESULT",
+              "generationId": "f0274a66-0c55-42b1-b460-fefc3c739487:owner:1"
+            },
+            {
+              "line": 204,
+              "phase": "RESULT",
+              "generationId": "f0274a66-0c55-42b1-b460-fefc3c739487:owner:2"
+            },
+            {
+              "line": 209,
+              "phase": "RESULT",
+              "generationId": "f0274a66-0c55-42b1-b460-fefc3c739487:verifier:1"
+            }
+          ],
+          "selectors": [
+            "observed.result",
+            "observed.toolResponses",
+            "before.publicState",
+            "after.publicState",
+            "generations[*].requestBody.tools",
+            "generations[role=VERIFIER].requestBody.input[0].content JSON -> trusted",
+            "sourceReads[*].observation.source.products[*].pos.snapshot.offers.AO"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "caseId": "c-po-20261031-p04",
+      "turns": [
+        0
+      ],
+      "verdict": "CONFIRMED",
+      "internalProviderCauseVerdict": "UNKNOWN",
+      "severity": "HIGH",
+      "confirmed": [
+        "First OWNER HTTP200 MALFORMED_FUNCTION_CALL, inspectedParts0, truncatedfalse, under request frame limits.",
+        "No owner tool invocation/verifier before failure; preparation price/stock AVAILABLE.",
+        "Generic adapter errorCode PROVIDER_ERROR coexists with failureLayer MODEL_OUTPUT and retained raw finish.",
+        "FALLBACK maps to silent DEPENDENCY_FAILURE/HUMAN; T2 NO_SEND follows same event."
+      ],
+      "necessaryCorrections": [
+        "PROVIDER_ERROR là adapter wrapper, không chứng minh transport outage, quota hoặc provider internal cause.",
+        "Request under bounds không chứng minh schema/prompt không có tương tác với malformed output.",
+        "Không tự recover verified facts ra khách dưới owner-approved silent fallback policy; không retry/substitute/repair."
+      ],
+      "unknown": [
+        "Nguyên nhân nội bộ provider đánh malformed; inspectedParts0 không chẩn đoán được."
+      ],
+      "sourceRefs": [
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:377-380",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:459-465",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:482",
+        "apps/worker/evals/single-agent-commerce-qualification/candidate-provider.mjs:160-169",
+        "apps/worker/src/single-agent-commerce-handoff.ts:209-225"
+      ],
+      "nativeEvidence": [
+        {
+          "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\native-c1481f9ca542372249e6dd6501a83d89ee5de49f88ddf13ae5c64429a33fa5b5-turn-0.json",
+          "sha256": "02c03d3a74155af484cfde1bf54b338f6a1d12efd0e8c537988258588de6e20a",
+          "packetHashMatches": true,
+          "turnIndex": 0,
+          "journalPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\NATIVE_REQUESTS.jsonl",
+          "journalEntries": [
+            {
+              "line": 5,
+              "phase": "ERROR",
+              "generationId": "19618e45-fa0f-433d-9f24-98afe84f648c:owner:1"
+            }
+          ],
+          "selectors": [
+            "observed.result",
+            "observed.toolResponses",
+            "before.publicState",
+            "after.publicState",
+            "generations[*].requestBody.tools",
+            "generations[role=VERIFIER].requestBody.input[0].content JSON -> trusted",
+            "sourceReads[*].observation.source.products[*].pos.snapshot.offers.AO"
+          ]
+        }
+      ]
+    }
+  ],
+  "confirmedCodeRootCause": [
+    "j2: pending HEIGHT từ attempted rejected patch còn tồn tại sau successful corrected four-field patch và chặn turn dù profile đã đúng."
+  ],
+  "confirmedProximateCauses": [
+    "j1: owner chọn cart path thay available pre-cart quote.",
+    "j4: cart prerequisite rejects negotiation; current colour proof không được rebuild trước draft colour/status claims.",
+    "s15: unnecessary quote/media operation encounters binding failure and triggers current terminal policy.",
+    "s04: exhaustive interpretation of draft conflicts with bounded incomplete contract.",
+    "p04: malformed completion rejected and current policy maps fallback to silent HUMAN."
+  ],
+  "mustRemainHypotheses": [
+    "Overloaded discovery/mutation surface causes planner selection.",
+    "Coupling quote/image inherently constitutes a design bug.",
+    "Turn-local colour proof must be persisted rather than rebuilt.",
+    "Complete-colour facet resolves every colour-listing issue.",
+    "Verifier is conclusively too rigid for có 2 màu.",
+    "Provider internal malformed cause or causal effect of latest rewrite/batching."
+  ],
+  "guardrailsRetained": [
+    "1 owner / <=1 verifier",
+    "code truth/freshness/identity/state/effects/receipts/privacy",
+    "no semantic router/generic parser/per-case production regex",
+    "no repair/reverify loop/hidden retry/cap increase",
+    "no broad rollback or prompt bloat proposed"
+  ],
+  "reportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-rootcause-independent-review-20261108.md"
+}

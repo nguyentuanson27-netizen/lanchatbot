@@ -1,0 +1,1187 @@
+{
+  "schemaVersion": 1,
+  "reviewKind": "ONE_INDEPENDENT_OFFLINE_REVIEW_AFTER_ALL_RUNS",
+  "language": "vi",
+  "dateLocal": "2026-11-08",
+  "result": "MATERIAL_FAIL_OBSERVED_NOT_GO",
+  "scopeVi": "Một review độc lập sau khi toàn bộ 34 ca/55 lượt đã chạy. Đọc ALL_CONVERSATIONS.md đầu tiên, toàn bộ REVIEW_COMPACT, đối chiếu có chọn lọc exact facts/policy/native frames. Không gọi provider, không chạy lại model, không sửa source/runtime/commit hoặc evidence gốc. Giữ lịch sử R1 FAIL; không mở thêm review.",
+  "identity": {
+    "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
+    "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+    "observedCurrentHead": "db4afe0538b903c39cc821e6aa654df438cb95d3",
+    "headVsRun": "git diff --stat chỉ16file báo cáo/tasks; không córuntime code/prompt khác biệt trong diff đã xem. Head hiện tại không phải runsource.",
+    "ownerModel": "Vertex Gemini3.5FlashLite HIGH",
+    "verifierModel": "GPT6.1Sol HIGH",
+    "N": 1,
+    "generationRetry": 0,
+    "caps": {
+      "ownerGenerations": 3,
+      "verifierGenerations": 1,
+      "primitiveCalls": 6,
+      "toolRounds": 2
+    }
+  },
+  "aggregate": {
+    "cases": 34,
+    "turns": 55,
+    "actualTerminalCounts": {
+      "SEND_ELIGIBLE": 33,
+      "HANDOFF": 10,
+      "NO_SEND": 5,
+      "CODE_OWNED_SEND": 7
+    },
+    "generations": 120,
+    "roles": {
+      "OWNER": 84,
+      "VERIFIER": 36
+    },
+    "statuses": {
+      "OK": 119,
+      "MALFORMED": 1
+    },
+    "generationHttpRequests": 120,
+    "tokens": {
+      "input": 1176409,
+      "output": 98741
+    },
+    "sourceWrites": 0,
+    "liveSends": 0,
+    "generationRetry": 0,
+    "notRun": 0
+  },
+  "independentlyRecomputed": {
+    "caseCount": 34,
+    "frameCount": 55,
+    "actualTerminalCounts": {
+      "SEND_ELIGIBLE": 33,
+      "HANDOFF": 10,
+      "NO_SEND": 5,
+      "CODE_OWNED_SEND": 7
+    },
+    "generationCount": 120,
+    "roles": {
+      "OWNER": 84,
+      "VERIFIER": 36
+    },
+    "statuses": {
+      "OK": 119,
+      "MALFORMED": 1
+    },
+    "httpRequests": 120,
+    "inputTokens": 1176409,
+    "outputTokens": 98741,
+    "methodVi": "Tự cộng55 frames và120 generation records từ publication packet, so vớiAUTOMATED_INTEGRITY: khớp. Không tự rerun toàn bộ120hash/firewall/runtime-history hoặc55outbox/final gate replay."
+  },
+  "automatedAuditRelianceVi": "Audit tự động báo sourceWrites 0/liveSends 0/retry 0/notRun 0, isolated DB đã drop 4/4, hash/firewall/caps/binding và final gate đúng recorded timePASS. Đây là technical audit, không phải chấm SALES và không được mô tả như reviewer này đã tự kiểm lại từng hash/source. Không dùng đồng hồ hiện tại để kết luận snapshot hết hạn.",
+  "caseStatusCounts": {
+    "TASK_OK": 23,
+    "MATERIAL_FAIL": 6,
+    "EXPECTED_HANDOFF": 4,
+    "CONTROL_NOT_REACHED": 1
+  },
+  "cases": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Báo đúng giá 989.000đ của composite ba món, không cộng giá lẻ sai.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Engine trả M cho cả TOP/PANTS sau khi tool đầu bị từ chối; tin cuối đúng kết quả engine, không ép quần L chỉ từ thói quen khách. Giữ PASS lịch sử R1.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "status": "TASK_OK",
+      "turns": 2,
+      "findingIds": [],
+      "reasonVi": "T1 có cart set M và tổng 829.000đ; T2 replace không commit vì màu, bot hỏi màu chứ không nói đã sửa xong. Cart cũ còn nguyên đang chờ khách; hành trình dừng ở clarification hợp lệ. Giữ PASS R1.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        },
+        {
+          "turn": 2,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "status": "MATERIAL_FAIL",
+      "turns": 3,
+      "findingIds": [
+        "F01"
+      ],
+      "reasonVi": "Lặp hỏi màu ở T3 thay vì dùng khả năng báo tổng trước giỏ cho hai áo. Giữ nguyên R1 FAIL lịch sử; chưa có cart commit và không chứng minh nhánh sửa quantity đã hoàn thành.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 2,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 3,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "status": "MATERIAL_FAIL",
+      "turns": 2,
+      "findingIds": [
+        "F02"
+      ],
+      "reasonVi": "T1 provider trả MALFORMED/PROVIDER_ERROR, chuyển HUMAN; T2 hỏi giá cũng không có câu trả lời. Đây là gián đoạn khả dụng, không phải thiếu dữ liệu shop hay lỗi size engine.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "HANDOFF",
+          "reason": "DEPENDENCY_FAILURE",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 2,
+          "disposition": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "status": "TASK_OK",
+      "turns": 2,
+      "findingIds": [],
+      "reasonVi": "Nêu rõ hai loại set, khách chọn bộ quần rồi trả đúng M còn hàng, 769.000đ và ảnh; không hỏi lại loại set đã chọn.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 2,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "status": "EXPECTED_HANDOFF",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Nguồn DETAIL/FRONT không xác nhận phần ren; draft khẳng định ảnh cận ren bị chặn đúng. Bàn giao theo thiếu proof ảnh là hợp lệ, không tính draft là lời đã gửi.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "HANDOFF",
+          "reason": "RESPONSE_UNAVAILABLE",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "quote_product tạo PRE_CART_TOTAL_V1 cho 1 áo/Cần Thơ: 499.000 + 30.000 = 529.000đ; không đòi màu để trả tổng.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "status": "MATERIAL_FAIL",
+      "turns": 1,
+      "findingIds": [
+        "F03"
+      ],
+      "reasonVi": "Khách chỉ nói thích màu/cảm ơn; owner đọc hàng và chọn ảnh màu không cần thiết, MEDIA_COLOR_BINDING_UNVERIFIED kéo cả ACK thành handoff. Không có cart hay lưu preference giả.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "HANDOFF",
+          "reason": "DEPENDENCY_FAILURE",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Gửi 1 ảnh với provenance feedback=true, confirmedParts=[AO]; không dùng MODEL làm FEEDBACK. Review dựa metadata, chưa kiểm trực quan nội dung ảnh.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "status": "MATERIAL_FAIL",
+      "turns": 3,
+      "findingIds": [
+        "F04"
+      ],
+      "reasonVi": "T1 chọn M đúng engine. T2 profile thực đã sửa 51kg, giữ 162cm và thêm 88/70/94, nhưng recommend_size bị từ chối rồi STATE_UPDATE_INCOMPLETE dẫn handoff; T3 im lặng là hậu quả HUMAN, không thêm một lỗi độc lập.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 2,
+          "disposition": "HANDOFF",
+          "reason": "RESPONSE_UNAVAILABLE",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 3,
+          "disposition": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "status": "MATERIAL_FAIL",
+      "turns": 3,
+      "findingIds": [
+        "F05"
+      ],
+      "reasonVi": "T1 có exact selection trắng/Be size M. T2 negotiation bị từ chối do chưa có cart; snapshot verifier mất selectionEvidence và chỉ còn NO_COLOR, draft lặp màu bị chặn. Mất hỗ trợ thương lượng và tổng Cần Thơ T3; không có giảm giá giả.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 2,
+          "disposition": "HANDOFF",
+          "reason": "RESPONSE_UNAVAILABLE",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 3,
+          "disposition": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "status": "TASK_OK",
+      "turns": 3,
+      "findingIds": [],
+      "reasonVi": "T1 thêm set M thật; T2/T3 code hỏi tên còn thiếu, COD được capture bằng code. Không coi nhãn semantic NO_SEND là không có tin, không ép preview khi chưa có liên hệ.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        },
+        {
+          "turn": 2,
+          "disposition": "CODE_OWNED_SEND",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        },
+        {
+          "turn": 3,
+          "disposition": "CODE_OWNED_SEND",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p01",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Báo áo bán riêng 499.000đ, mô tả áo và size đúng nguồn, ảnh được chấp nhận.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p02",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Báo quần lẻ 429.000đ đúng offer QUAN, không dùng giá áo hay cả bộ.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p03",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Trả lời chân váy M còn hàng và 449.000đ đúng offer CV; chất ren tơ Hàn theo description nguồn.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Không nhận vơ mẫu khách xem hôm trước; hỏi phân biệt 2 ứng viên, giá/tồn đã đọc cho từng ứng viên chứ không gán vào một mẫu đã xác định.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-h01",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Thiếu lựa chọn màu của khách; hỏi trắng sẵn/Be đặt trước từ exact selection, không handoff hay báo thêm giỏ thành công.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-h02",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Giá set Khánh Trang 999.000đ, giá lẻ 499.000đ/món và set S/áo S,L có source; không nhầm component với cả bộ.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Có gợi ý chính SQ629 phù hợp hướng đơn giản rồi nêu một lựa chọn họa tiết; giá/thiết kế được đọc. Còn hỏi sở thích giữa 2 mẫu nhưng đã có lời khuyên dùng được, không nâng thành lỗi trọng yếu.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Trả lời khả năng phối quần nâu bằng nhận xét thẩm mỹ hợp lệ; mô tả áo và 499.000đ có nguồn. Không đòi chứng cứ thực nghiệm cho đánh giá phối màu.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Chọn một mẫu Diệp An, giải thích 2 lớp/cổ tròn/form suông đúng nguồn và hỏi dữ liệu size còn thiếu. Không buộc phải lặp mọi chi tiết mẫu Odette.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Trả đúng cả hai phần giặt tay/giặt máy theo frozen customerFaq: giặt tay ưu tiên; máy với túi giặt và gentle cycle được phép.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "status": "EXPECTED_HANDOFF",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Yêu cầu đổi màu đơn cũ chưa nhận thuộc EXCHANGE; handoff hợp lệ, không nhận đã đổi đơn.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "HANDOFF",
+          "reason": "EXCHANGE",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "status": "EXPECTED_HANDOFF",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Lỗi khóa váy vừa nhận thuộc DEFECT; handoff hợp lệ, không tự cam kết kết quả xử lý hoặc sửa đơn.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "HANDOFF",
+          "reason": "DEFECT",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Tôn trọng khách muốn xem thêm, ACK ngắn và dừng; không thúc mua.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s01",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Báo đúng 999.000đ và phân biệt set S sẵn với M/L/XL đặt trước; mô tả Khánh Trang đúng nguồn.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s02",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Báo đúng giá 499.000đ của áo chung; không bắt khách phân biệt parent và không nhận tạo đơn.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "status": "MATERIAL_FAIL",
+      "turns": 1,
+      "findingIds": [
+        "F06"
+      ],
+      "reasonVi": "Trắng/Be và trạng thái thật đều có exact tuples; qualifier FIRST_8 không cho kết luận inventory đầy đủ. Draft dùng có 2 màu dẫn verifier FAIL và im lặng, trong khi đủ dữ kiện để nêu các màu đã xác minh. Handoff tránh được, không phải bịa hai màu.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "HANDOFF",
+          "reason": "RESPONSE_UNAVAILABLE",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s07",
+      "status": "TASK_OK",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Dùng preference RELAXED, engine TOP trả M; không tự tăng L hoặc hỏi lại số đo có sẵn.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s11",
+      "status": "CONTROL_NOT_REACHED",
+      "turns": 1,
+      "findingIds": [],
+      "reasonVi": "Hỏi phân biệt set quần/set váy hợp lý; chưa kiểm màu Be/L/quantity 2 nên nhánh SHOP_GAP không được chạm. Không gọi đây là acceptance của missing-source control.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "status": "TASK_OK",
+      "turns": 3,
+      "findingIds": [],
+      "reasonVi": "Tư vấn áo với quần nâu, giải thích tái phối chân váy rồi tôn trọng chọn áo. Không cart/váy bị thêm trái ý; ghi nhận trong hội thoại không khẳng định receipt lưu/chốt.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 2,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 3,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "status": "EXPECTED_HANDOFF",
+      "turns": 3,
+      "findingIds": [],
+      "reasonVi": "Hỏi đơn cũ → handoff; T2/T3 giữ HUMAN/NO_SEND hợp lệ, không tự quay BOT hoặc bịa quyền đọc đơn.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "HANDOFF",
+          "reason": "ORDER_STATUS",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 2,
+          "disposition": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        },
+        {
+          "turn": 3,
+          "disposition": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "DISCOVERY"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "status": "TASK_OK",
+      "turns": 7,
+      "findingIds": [],
+      "reasonVi": "Đúng cart SET_VAY/M, code hỏi lần lượt tên/điện thoại/địa chỉ/thanh toán, preview 829.000đ/COD/4–8 ngày trước xác nhận; CONFIRM_PURCHASE APPLIED ở T7 và HUMAN/PURCHASE_CONFIRMED. Handoff cuối là thành công code trong phạm vi test, không chứng minh đã gửi Meta hay tạo đơn POS.",
+      "actualTerminalByTurn": [
+        {
+          "turn": 1,
+          "disposition": "SEND_ELIGIBLE",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        },
+        {
+          "turn": 2,
+          "disposition": "CODE_OWNED_SEND",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        },
+        {
+          "turn": 3,
+          "disposition": "CODE_OWNED_SEND",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        },
+        {
+          "turn": 4,
+          "disposition": "CODE_OWNED_SEND",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        },
+        {
+          "turn": 5,
+          "disposition": "CODE_OWNED_SEND",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "CART_OPEN"
+        },
+        {
+          "turn": 6,
+          "disposition": "CODE_OWNED_SEND",
+          "reason": null,
+          "ownerAfter": "BOT",
+          "stageAfter": "ORDER_PREVIEW"
+        },
+        {
+          "turn": 7,
+          "disposition": "HANDOFF",
+          "reason": "PURCHASE_CONFIRMED",
+          "ownerAfter": "HUMAN",
+          "stageAfter": "PURCHASE_CONFIRMED"
+        }
+      ]
+    }
+  ],
+  "materialFindings": [
+    {
+      "id": "F01",
+      "caseId": "c-20261028-j1",
+      "turn": 3,
+      "severity": "HIGH",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "actualText": [
+        "Dạ, áo lẻ Set Thạch Thảo có hai màu Trắng và Be. Chị chọn màu nào cho size M và size L để em tính tổng tiền và phí ship chính xác cho mình nhé ạ?"
+      ],
+      "rejectedDraftNotSent": null,
+      "causeDomains": [
+        "MODEL",
+        "TOOL_SELECTION"
+      ],
+      "reasonVi": "R1 FAIL lịch sử được giữ: câu hỏi tổng cả phí ship không được trả lời. Owner lặp add_to_cart khi còn thiếu màu và quote_cart bị DEPENDENT_EFFECT_REJECTED thay vì lấy pre-cart total; verifier PASS không kiểm chất lượng hoàn thành. Không yêu cầu bot tự tính hoặc giả cart commit.",
+      "evidence": [
+        "REVIEW_COMPACT.json:j1/T1–T3",
+        "SOURCE_REFERENCE.json:3c5f16cef5261ca6f8b89a0633ed044916519520558db924da50a1b0cd53e811",
+        "REVIEW_COMPACT.json:s13/T1:PRE_CART_TOTAL_V1"
+      ],
+      "consequenceTurns": []
+    },
+    {
+      "id": "F02",
+      "caseId": "c-po-20261031-p04",
+      "turn": 1,
+      "severity": "HIGH",
+      "actualDisposition": "HANDOFF",
+      "actualText": [
+        "(không gửi tin nhắn)"
+      ],
+      "rejectedDraftNotSent": null,
+      "causeDomains": [
+        "PROVIDER_OUTPUT",
+        "RECOVERY"
+      ],
+      "reasonVi": "Một generation OWNER MALFORMED, errorCode PROVIDER_ERROR. Handoff chặn tin sai nhưng làm mất tư vấn size, rồi mất giá T2; không có evidence đây là thiếu shop data hay 429. N1 không định lượng xác suất lỗi.",
+      "evidence": [
+        "REVIEW_COMPACT.json:p04/T1–T2:generationStatuses/recovery",
+        "AUTOMATED_INTEGRITY.json:groups.r2"
+      ],
+      "consequenceTurns": [
+        {
+          "turn": 2,
+          "disposition": "NO_SEND",
+          "interpretation": "Hậu quả của HUMAN ownership; không tính failure độc lập."
+        }
+      ]
+    },
+    {
+      "id": "F03",
+      "caseId": "c-20261028-s15",
+      "turn": 1,
+      "severity": "MEDIUM",
+      "actualDisposition": "HANDOFF",
+      "actualText": [
+        "(không gửi tin nhắn)"
+      ],
+      "rejectedDraftNotSent": null,
+      "causeDomains": [
+        "MODEL",
+        "TOOL_DEPENDENCY"
+      ],
+      "reasonVi": "Tin thích màu/cảm ơn chỉ cần ACK/preference đúng phạm vi. Owner gọi đọc hàng và chọn ảnh màu không bắt buộc; media thiếu binding màu Be dẫn DEPENDENCY_FAILURE và chuyển HUMAN. Guard ảnh không sai; việc để tool không cần thiết làm hỏng ACK là mất hữu ích tránh được. Profile không ghi màu, cart vẫn null.",
+      "evidence": [
+        "REVIEW_COMPACT.json:s15/T1",
+        "native s15/T1:observed.result.readCoverage ordinal 5 MEDIA_COLOR_BINDING_UNVERIFIED",
+        "native s15/T1:before/after.publicState.profile"
+      ],
+      "consequenceTurns": []
+    },
+    {
+      "id": "F04",
+      "caseId": "c-20261028-j2",
+      "turn": 2,
+      "severity": "HIGH",
+      "actualDisposition": "HANDOFF",
+      "actualText": [
+        "(không gửi tin nhắn)"
+      ],
+      "rejectedDraftNotSent": null,
+      "causeDomains": [
+        "MODEL",
+        "TOOL_STATE_CONTRACT",
+        "RECOVERY"
+      ],
+      "reasonVi": "T2 đã cập nhật profile đúng: revision 4 giữ 162cm, thay 56kg bằng 51kg và thêm ngực 88, eo 70, mông 94. Tuy nhiên lần recommend_size đầu bị MEASUREMENT_SOURCE_INVALID (diagnostics ghi UNKNOWN_INTERNAL), lần sau bị STATE_OR_REF, rồi recovery STATE_UPDATE_INCOMPLETE dẫn handoff. Lệnh đầu có gửi lại chiều cao với sourceQuote từ lượt trước. Không có SIZE_FIT mới hoặc bằng chứng thiếu chart. Lỗi quan sát là flow recommend/recovery không hoàn thành sau sửa số đo; chưa xác định đầy đủ nguyên nhân nội bộ, không được nói profile còn giữ 56kg.",
+      "evidence": [
+        "REVIEW_COMPACT.json:j2/T2:tools/recovery",
+        "native j2/T2:before/after.publicState.profile",
+        "native j2/T2:diagnostics ordinals 14–23"
+      ],
+      "consequenceTurns": [
+        {
+          "turn": 3,
+          "disposition": "NO_SEND",
+          "interpretation": "ĐúngHUMAN ownership, hậu quảT2; preference thoải mái chưa được tư vấn, không thêm một lỗi."
+        }
+      ]
+    },
+    {
+      "id": "F05",
+      "caseId": "c-20261028-j4",
+      "turn": 2,
+      "severity": "HIGH",
+      "actualDisposition": "HANDOFF",
+      "actualText": [
+        "(không gửi tin nhắn)"
+      ],
+      "rejectedDraftNotSent": "Dạ, áo lẻ Thạch Thảo có giá 499.000đ chị ạ. Chị chọn màu trắng (sẵn hàng) hay be (hàng đặt trước) để em hỗ trợ mình tiếp nhé ạ?",
+      "causeDomains": [
+        "CONTEXT",
+        "MODEL",
+        "TOOL_SELECTION",
+        "VERIFIER_INPUT"
+      ],
+      "reasonVi": "T1 có exact selection SV2447/AO/M: TRẮNG IN_STOCK và BE PRE_ORDER. Sang T2, snapshot verifier không có selectionEvidence, presentation chỉ còn NO_COLOR. FAIL có căn cứ trong frame verifier thực nhận, nhưng không chứng minh màu bị bịa trong thế giới đóng băng. Owner gọi record_negotiation khi chưa có cart nên bị NEGOTIATION_SOURCE_OR_CART, rồi lặp hỏi màu thay vì giải quyết xin hỗ trợ; proof màu không được đọc lại hoặc truyền sang frame. Handoff có thể tránh do đường context/tool; câu hỏi tổng tiền T3 bỏ trống là hậu quả. Chưa chứng minh lỗi riêng của model verifier.",
+      "evidence": [
+        "native j4/T1:generations.VERIFIER.verifierInput.trustedSnapshotJson.runtimeProducts.selectionEvidence",
+        "native j4/T2:cùng path, selectionEvidence absent; presentation.variants NO_COLOR",
+        "REVIEW_COMPACT.json:j4/T2:record_negotiation REJECTED"
+      ],
+      "consequenceTurns": [
+        {
+          "turn": 3,
+          "disposition": "NO_SEND",
+          "interpretation": "Hậu quảHUMAN, không phải lỗi quote mới hoặc verifier mới."
+        }
+      ]
+    },
+    {
+      "id": "F06",
+      "caseId": "c-20261028-s04",
+      "turn": 1,
+      "severity": "MEDIUM",
+      "actualDisposition": "HANDOFF",
+      "actualText": [
+        "(không gửi tin nhắn)"
+      ],
+      "rejectedDraftNotSent": "Áo Thạch Thảo có 2 màu là Trắng và Be chị nhé. Trong đó màu Trắng có sẵn, còn màu Be là hàng đặt trước ạ.",
+      "causeDomains": [
+        "MODEL_WORDING",
+        "VERIFIER_SEMANTICS"
+      ],
+      "reasonVi": "Exact tuples xác minh TRẮNG có sẵn và BE đặt trước cho S/M/L/XL. Completeness FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY không chứng minh danh sách màu đầy đủ. Verifier có cơ sở hẹp để phản đối khẳng định đúng hai màu, nhưng hai màu được nêu đều có bằng chứng. Trong ngữ cảnh bán hàng, câu có 2 màu cũng có thể chỉ liệt kê lựa chọn đang biết; chưa đủ để kết án hallucination vật chất cao. Actual silent handoff vẫn làm câu hỏi màu không được phục vụ dù đã có dữ kiện dùng được: lỗi flow mức vừa, không phải lỗi bịa hai màu.",
+      "evidence": [
+        "native s04/T1:verifierInput.trustedSnapshotJson.runtimeProducts.selectionEvidence",
+        "REVIEW_COMPACT.json:s04/T1:verdict/rejectedDraft"
+      ],
+      "consequenceTurns": []
+    }
+  ],
+  "handoffs": {
+    "total": 10,
+    "expectedBusinessOrSourceGap": 5,
+    "avoidableOrExecutionFailure": 5,
+    "expected": [
+      {
+        "caseId": "c-20261028-s03",
+        "turn": 1,
+        "reasonVi": "Thiếu trusted proof ảnh cận ren; verifier chặn đúng draft suy từ chất liệu sản phẩm sang nội dung ảnh."
+      },
+      {
+        "caseId": "c-20261028-s10",
+        "turn": 1,
+        "reasonVi": "EXCHANGE đơn cũ, chưa có quyền/identity để sửa."
+      },
+      {
+        "caseId": "c-20261028-s12",
+        "turn": 1,
+        "reasonVi": "DEFECT hậu mãi cần người xử lý."
+      },
+      {
+        "caseId": "c-20261028-j5",
+        "turn": 1,
+        "reasonVi": "Hỏi đơn cũ, handoff theo capability matrix."
+      },
+      {
+        "caseId": "c-20261104-checkout-complete",
+        "turn": 7,
+        "reasonVi": "CONFIRM_PURCHASE APPLIED, HUMAN/PURCHASE_CONFIRMED sau preview; kết thúc checkout hợp lệ trong test."
+      }
+    ],
+    "avoidable": [
+      {
+        "caseId": "c-po-20261031-p04",
+        "turn": 1,
+        "findingId": "F02"
+      },
+      {
+        "caseId": "c-20261028-s15",
+        "turn": 1,
+        "findingId": "F03"
+      },
+      {
+        "caseId": "c-20261028-j2",
+        "turn": 2,
+        "findingId": "F04"
+      },
+      {
+        "caseId": "c-20261028-j4",
+        "turn": 2,
+        "findingId": "F05"
+      },
+      {
+        "caseId": "c-20261028-s04",
+        "turn": 1,
+        "findingId": "F06"
+      }
+    ],
+    "interpretationVi": "Avoidable gồm cả lỗi khả dụngprovider; không khẳng định có thể tránh mọi provider failure hay 5 handoff đều lỗi model. MATERIAL_FAIL j1 không handoff."
+  },
+  "noSend": {
+    "total": 5,
+    "consequencesOfAvoidableHandoff": 3,
+    "expectedHumanContinuation": 2,
+    "additionalDistinctFailures": 0,
+    "details": [
+      {
+        "caseId": "c-po-20261031-p04",
+        "turns": [
+          2
+        ],
+        "linkedFinding": "F02"
+      },
+      {
+        "caseId": "c-20261028-j2",
+        "turns": [
+          3
+        ],
+        "linkedFinding": "F04"
+      },
+      {
+        "caseId": "c-20261028-j4",
+        "turns": [
+          3
+        ],
+        "linkedFinding": "F05"
+      },
+      {
+        "caseId": "c-20261028-j5",
+        "turns": [
+          2,
+          3
+        ],
+        "reasonVi": "GiữHUMAN đúng nghiệp vụ."
+      }
+    ]
+  },
+  "verifierAssessment": [
+    {
+      "caseId": "c-20261028-s03",
+      "turn": 1,
+      "assessment": "SUPPORTED_BLOCK",
+      "reasonVi": "DETAIL/FRONT,confirmedParts=[],componentKnown=false không chứng minh ảnh ren. Product V406 có ren không đủ chứng minh ảnh đang cho thấy ren. SourceReference 0cabdcf9e3a09e36cfb625bd20de10529efb6ca72e3d30bb3e552a814ba2dbbb."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turn": 2,
+      "assessment": "FRAME_SUPPORTED_BUT_CONTEXT_LOSS",
+      "reasonVi": "Chặn theo current frame có lý; thế giới đóng băng và T1 có proof màu, nhưng T2 không truyền proof đó. Không đồng nhất nguồn thiếu trongsnapshot với shop không có màu."
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "turn": 1,
+      "assessment": "COMPLETENESS_CAUTION_SUPPORTED_MATERIALITY_LIMITED",
+      "reasonVi": "Chưa đủ nói danh sách đầy đủ; có đủ nêuTRẮNG/BE và status. Không tự động chấp nhận định tínhhallucination cao; actualhandoff vẫn tránh được."
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turn": 3,
+      "assessment": "PASS_NOT_COMPLETION_PROOF",
+      "reasonVi": "Semanticverifier không có trách nhiệm chấm hoàn thành bán hàng; PASS không xoáR1 FAIL."
+    }
+  ],
+  "controlNotReached": [
+    {
+      "caseId": "c-20261028-s11",
+      "turn": 1,
+      "actualText": [
+        "Dạ, bên em có cả Set quần Thạch Thảo và Set váy Thạch Thảo. Chị đang quan tâm mẫu set quần hay set váy để em kiểm tra màu be size L ạ?"
+      ],
+      "reasonVi": "Hỏi làm rõset quần/set váy hợp lý, chưa đọc Be/L/quantity 2. SHOP_GAP trong readiness chỉ là purpose đăng ký; không phải demonstrated gap acceptance. TASKclarification dùng được nhưng control chưa đạt."
+    }
+  ],
+  "severity": {
+    "highMaterialCaseCount": 4,
+    "mediumMaterialCaseCount": 2,
+    "criticalSafetyFailureDemonstrated": 0,
+    "minorVi": [
+      "Một số câu dài/lặp tính từ và nhắc lại số đo; owner đã defer giọng, không nâng thành MATERIAL_FAIL.",
+      "s05 vẫn nêu2 lựa chọn dù có gợi ý chính; usable advice nên không dùng keyword rubric đểfail.",
+      "s05/SQ629 vàs08/Diệp An làPRE_ORDER trongfacts nhưng không được nhắc lại trong lời khuyên. Khách không hỏi tồn/ngày cần và bot không nói hàng sẵn; chưa đủ kết luận lỗi trọng yếu, cần hỏi tiếp nếu lịch nhận là yếu tố quyết định."
+    ]
+  },
+  "strengthsVi": [
+    "Giá lẻ/cả bộ đúng và có nguồn; s13 trả được pre-cart total 529.000đ không cần màu.",
+    "s02 hiểu shared áo, s08 chọnDiệp An với lý do cụ thể; j3 dùng quần nâu để tư vấn và tôn trọng quyết định chỉ mua áo.",
+    "s07 dùng RELAXED và result engine M; p07 không chiều khách bằng sizeL không đượcengine cấp.",
+    "Cart mutation bị reject không được nói đã hoàn thành; không có giảm giá/freeship bịa ởj4.",
+    "7CODE_OWNED_SEND là nội dung thật; checkout đủ intake → preview → confirmation rồiHUMAN, không phải7 NO_SEND.",
+    "s10/s12/j5 bàn giao đúng phạm vi; mọi NO_SEND sau HUMAN giữ quyền sở hữu."
+  ],
+  "unknownsVi": [
+    "N1/retry0 không chứng minh độ ổn định, tần suất lỗi hoặc quan hệ nhân quả giữa thay đổi và kết quả.",
+    "Không phải formal blinded qualification, C3 parity hay Phase C/production GO.",
+    "Không có live Meta Send hoặc bằng chứng tạo đơn POS; chỉ isolated PG/outbox đã chấp nhận.",
+    "Chưa kiểm trực quan từng ảnh hoặc phát lại toàn bộ hash/source. Redaction của packet làm một số URL/ref không nguyên vẹn.",
+    "s11 chưa thực thi control thiếu dữ liệu BE. j1 chưa chứng minh quantity/cart không cộng thành 3 vì chưa có cart commit.",
+    "j2 chưa xác định đầy đủ nguyên nhân nội bộ của STATE_OR_REF/recovery; phải phân biệt profile commit thành công với recommend thất bại.",
+    "Chưa đo conversion, SLA handoff, latency end-to-end hoặc độ tin cậy provider; chi phí provider không được expose."
+  ],
+  "nextStepsNoImplementation": [
+    {
+      "priority": 1,
+      "evidence": "F01",
+      "actionVi": "Ưu tiên đường báo tổng trước giỏ khi khách hỏi tiền; quyết định tổng phải lấy tool quote/policy thật, độc lập với việc thiếu lựa chọn để commit cart."
+    },
+    {
+      "priority": 1,
+      "evidence": "F04",
+      "actionVi": "Chẩn đoán ranh giới sourceQuote/profile commit/size fact invalidation để giải thích tại sao đã sửa đúng số đo mà recommend/recovery vẫn bàn giao; không gán sẵn lỗi model hay chart."
+    },
+    {
+      "priority": 1,
+      "evidence": "F05",
+      "actionVi": "Làm rõ vì sao proof exact màu từ T1 biếnmất ở T2; giữ distinction nguồnshop có fact với frame verifier chưa có fact, rồi quyết định hànhvi xin hỗ trợ khi chưa cócart."
+    },
+    {
+      "priority": 2,
+      "evidence": "F03",
+      "actionVi": "Giảm dependency không cần thiết cho ACK/preference; không để việc tìm ảnh màu không được khách hỏi buộc chuyển HUMAN."
+    },
+    {
+      "priority": 2,
+      "evidence": "F06 / s03",
+      "actionVi": "Phânbiệt liệt kê lựa chọn đã xác minh với khẳngđịnh đầy đủ inventory; giữ chặn ảnh detail chưa cóproof và dùng actual outcome để đánhgiá thiệt hại bán hàng."
+    },
+    {
+      "priority": 2,
+      "evidence": "F02",
+      "actionVi": "Xem exactmalformedprovider output và recoveryđã có; xácđịnh phần verified facts nào còn dùng được, không tự thay bằng câu trảlời hoặc retry ngoài caps."
+    },
+    {
+      "priority": 2,
+      "evidence": "D01 / D02",
+      "actionVi": "Ở lần phát hành packet sau, redact theo typed contact fields thay cho regex trên toàn JSON; bảo toànURL/content hash/reference keys. Giữ original evidence hiện tại bất biến."
+    }
+  ],
+  "publicationProjectionIssues": [
+    {
+      "id": "D01",
+      "severity": "MEDIUM_EVIDENCE_LIMIT",
+      "reasonVi": "REVIEW_COMPACT có 13 occurrences URL ảnh chứa[PHONE_TEST] do regex số khớp một đoạn media identifier. Ví dụj2T1/j4T1. Đây là URL trong publication bị sửa, không chứngminh runtime gửi URL hỏng.",
+      "affectedArtifact": "REVIEW_COMPACT.json:frames[*].actualTerminal.images[*].url"
+    },
+    {
+      "id": "D02",
+      "severity": "MEDIUM_EVIDENCE_LIMIT",
+      "reasonVi": "Hai policyLiteralRefs chứa[PHONE_TEST] và không lookup được SOURCE_REFERENCE bằng exact key: p02 T1 vàj3 T3. Mọiproduct sourceRef đềulookup được. Không tự recompute hash trên bản redacted rồi tuyênbố nguyên bản sai.",
+      "affected": [
+        {
+          "caseId": "c-po-20261031-p02",
+          "turn": 1
+        },
+        {
+          "caseId": "c-20261028-j3",
+          "turn": 3
+        }
+      ]
+    }
+  ],
+  "priorCampaignComparison": {
+    "source": "apps/worker/evals/single-agent-commerce-qualification/task-path-model-run-20261106/FULL_REPORT.md",
+    "priorRunSource": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+    "priorWorldHash": "436a5be7095ec64c2eaa851b1fcdf7c0a6a6ee5b381a049c3a84978be1159b4f",
+    "priorActualCounts": {
+      "SEND_ELIGIBLE": 31,
+      "CODE_OWNED_SEND": 5,
+      "HANDOFF": 13,
+      "NO_SEND": 6
+    },
+    "priorGenerationRecords": 113,
+    "priorHttp": 112,
+    "priorObservedInputTokens": 1051127,
+    "priorObservedOutputTokens": 76050,
+    "priorProviderFailures": "1 local bound trước HTTP +2 verifier HTTP429;110 OK",
+    "currentVsPriorVi": "Cùng34 ca/55 lượt: hiện tại +2 model send, +2 code send, −3 handoff, −1 NO_SEND;120 HTTP thay 112. Đơn vị đếm phản ánh actual outcome, không là điểm chất lượng. Prior report ghi p07/s13/p01/s05/s01 bịchặn vàs02/s08 thiếuhữu ích; các ca này hiện có outcome dùng được. Hiện tại cóp04 malformed,j2/s15/j4/s04 failure như phân loại và giữ j1 R1 FAIL. Source/world khác nhau và N1, không kết luận batching gây cải thiện hay suy giảm."
+  },
+  "historicalR1": {
+    "preserved": true,
+    "caseStatuses": {
+      "c-po-20261031-p06": "TASK_OK",
+      "c-po-20261031-p07": "TASK_OK",
+      "c-po-20261031-p08": "TASK_OK",
+      "c-20261028-j1": "MATERIAL_FAIL"
+    },
+    "reasonVi": "Owner yêu cầu chạy hết phầncòn lại sauR1 FAIL không phải xoá/thay kết luậnR1."
+  }
+}

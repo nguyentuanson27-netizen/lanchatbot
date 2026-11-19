@@ -1,0 +1,19 @@
+{
+  "status": "APPROVED_R1_DISPATCH_CONDITIONAL_ON_LAUNCHER_ACTUAL_TIME_PREFLIGHT",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T14:08:12.833Z",
+  "sourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "registrationHash": "2abaa2a14137da7391164857112cc14e0d62c462e15ab4bfd923bb949017ab85",
+  "pendingRegistrationHash": "416de9e8d32bc3b1b4d242e726bad5c6108233f74af3bd9650eb110e72c449db",
+  "worldHash": "dd16e7c161f33f70e190b0510af85e685ff67a75d6ebeeea78db3fa1dd37ab79",
+  "helperInventoryHash": "7aa0325529a1107937653ef7d14b523856a1eb0f9dbb5b8488423f4bd9edade4",
+  "cases": 4,
+  "turns": 7,
+  "maximumGenerationRequests": 28,
+  "providerRequestsAtReview": 0,
+  "limits": [
+    "OnlyR1; latergroupsrequireindependentauditedpriorPASS.",
+    "No retry orsource/clockrenewal; hardstop/error denominator retained.",
+    "No modelqualification orqualityGO."
+  ]
+}

@@ -1,0 +1,197 @@
+{
+  "sourceRunSha": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "worldHash": "5025411cef9782e97173b9bee63bf68bd900bea6dd31c2a8e445a0507c2cfd1a",
+  "meaning": "Copies of prior accepted public messages for scripted native setup; not new model outcomes or a renewed source proof",
+  "conversations": [
+    {
+      "repetition": 1,
+      "turns": [
+        {
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo thêu Thạch Thảo size M có hai màu trắng (có sẵn) và be (đặt trước). Chị thích màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          }
+        },
+        {
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ giá 499k và đơn của chị được hỗ trợ miễn phí vận chuyển 30k ạ. Chị lấy áo màu trắng hay be ạ?"
+            ],
+            "images": []
+          }
+        },
+        {
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          }
+        }
+      ]
+    },
+    {
+      "repetition": 2,
+      "turns": [
+        {
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ size M có màu trắng (có sẵn) và be (đặt trước). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          }
+        },
+        {
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ giá 499k, shop hỗ trợ miễn phí vận chuyển 30k còn 499k ạ. Chị lấy màu trắng có sẵn hay be đặt trước ạ?"
+            ],
+            "images": []
+          }
+        },
+        {
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          }
+        }
+      ]
+    },
+    {
+      "repetition": 3,
+      "turns": [
+        {
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Chị lấy áo Thạch Thảo size M, chị chọn màu Trắng hay Be ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          }
+        },
+        {
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Áo giá 499.000đ và shop hỗ trợ miễn phí vận chuyển 30.000đ (tổng thanh toán 499.000đ) chị nhé. Chị lấy áo màu Trắng hay Be ạ?"
+            ],
+            "images": []
+          }
+        },
+        {
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          }
+        }
+      ]
+    },
+    {
+      "repetition": 4,
+      "turns": [
+        {
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Áo set Thạch Thảo size M có hai màu là trắng và be, chị thích mặc màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          }
+        },
+        {
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ áo lẻ giá 499k được shop hỗ trợ miễn phí vận chuyển 30k, tổng thanh toán là 499k chị nha. Chị lấy màu trắng hay be ạ?"
+            ],
+            "images": []
+          }
+        },
+        {
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          }
+        }
+      ]
+    },
+    {
+      "repetition": 5,
+      "turns": [
+        {
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Áo lẻ Thạch Thảo size M có hai màu trắng (có sẵn) và be (đặt trước). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          }
+        },
+        {
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Áo lẻ Thạch Thảo size M giá 499.000đ, shop hỗ trợ miễn phí vận chuyển 30.000đ nên tổng thanh toán là 499.000đ ạ. Chị lấy màu trắng (có sẵn) hay be (đặt trước) để em lên đơn nhé ạ?"
+            ],
+            "images": []
+          }
+        },
+        {
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          }
+        }
+      ]
+    }
+  ]
+}

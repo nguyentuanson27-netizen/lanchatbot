@@ -1,0 +1,43 @@
+{
+  "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "providerRequestsBeforeInputReview": 0,
+  "generationRetry": 0,
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-checkout-relax-model-make-helpers-20261103-01.py",
+      "sha256": "589aefd2df52feac05923fc2dfaefd8370497c293891142e50a448495cdd5f75"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-checkout-relax-model-resolve-world-20261103-01.mjs",
+      "sha256": "b4cc8d0b2b2411a6145195733770defdba223c97ddd991cc69ed080fd358aeb9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-checkout-relax-model-prepare-20261103-01.mjs",
+      "sha256": "924d80b74d8abb3e92e1989f664dbc5abee8ebe4030082a179485e5b60fc9e85"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-checkout-relax-model-finalize-inputs-20261103-01.mjs",
+      "sha256": "510c48005c0896d766761b337b28badf38d9d1773961af972eea2042c8acbeb3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-checkout-relax-model-launch-20261103-01.py",
+      "sha256": "d2ae947d19f28c289e87b24374f61cb61787e0498546e5816ea58f73442f667b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-checkout-relax-model-purchase-accounting-20261103-01.mjs",
+      "sha256": "5e2eeb0c6a1de884ebfac63bc2e3196bc6ba8e845837d4a593f0aba2f5ce0d80"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-checkout-relax-model-remainder-accounting-20261103-01.mjs",
+      "sha256": "ef3bbc43e3b348a73fe96b86986543d92a9915aa982b19565d6009cd8d3e7d27"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-source-wrapper-20261103-02.py",
+      "sha256": "21a677bf3ed5afa959ed00fb87053edabe603b677fbb4c0db7d099f140ac68d3"
+    },
+    {
+      "path": "C:/Users/nguye/Documents/Sản phẩm AI/c3-checkout-relax-model-input-metadata-amendment-20261103-01.mjs",
+      "sha256": "92f035b618e9d5fb84a72d7da5830c8c41b06f9aef5f46988d42d6a7fa41d5b8"
+    }
+  ]
+}

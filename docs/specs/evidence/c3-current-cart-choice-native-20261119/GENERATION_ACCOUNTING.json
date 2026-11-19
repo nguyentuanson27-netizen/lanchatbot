@@ -1,0 +1,67 @@
+{
+  "source": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "registeredConversations": 10,
+  "terminalTurns": 30,
+  "nativeGenerationRequests": 72,
+  "judgeGenerationRequests": 10,
+  "totalGenerationRequests": 82,
+  "owner": 47,
+  "verifier": 25,
+  "judgeErrors": 1,
+  "ownerErrors": 0,
+  "verifierErrors": 0,
+  "generationRetries": 0,
+  "preparationFailuresBeforeGeneration": 5,
+  "journalChecks": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "started": 30,
+      "requests": 30,
+      "terminals": 30,
+      "providerRequests": 0
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "started": 9,
+      "requests": 9,
+      "terminals": 9,
+      "providerRequests": 0
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "started": 9,
+      "requests": 9,
+      "terminals": 9,
+      "providerRequests": 0
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "started": 8,
+      "requests": 8,
+      "terminals": 8,
+      "providerRequests": 0
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "started": 8,
+      "requests": 8,
+      "terminals": 8,
+      "providerRequests": 0
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "started": 8,
+      "requests": 8,
+      "terminals": 8,
+      "providerRequests": 0
+    }
+  ],
+  "preflightFailureBeforeGeneration": "Default CLI version mismatch; corrected route before dispatch; zero generation consumed.",
+  "failedOriginalSummary": "Frozen helper assumed all judge ratings present; failed after collection without extra provider requests. Separate post-run aggregation preserves missing score."
+}

@@ -1,0 +1,112 @@
+{
+  "mode": "J4_RECHECK",
+  "registeredAt": "2026-11-19T02:40:48.918Z",
+  "runSourceSha": "82c86a3c67d1f12f0f87f6956e0c44c68b265957",
+  "worldHash": "02f5aaec99f1b22de1ca944ec950a1febbf85db37a2dfd0e2107b7dd412579ac",
+  "slots": [
+    {
+      "repetition": 1,
+      "latest": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?"
+    },
+    {
+      "repetition": 2,
+      "latest": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?"
+    },
+    {
+      "repetition": 3,
+      "latest": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?"
+    },
+    {
+      "repetition": 4,
+      "latest": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?"
+    },
+    {
+      "repetition": 5,
+      "latest": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?"
+    }
+  ],
+  "slotsHash": "3822ddcf680c45fc8423e695bbda93c9105d9951510b1b9cc9b909bca76242d8",
+  "prefixHash": "33dab6adb34a460c2cb6a5d508b633cdc6d2862dc54f0884b107b2d3011f337b",
+  "maximumGenerationRequests": 20,
+  "minimumProofExpiresAt": "2026-11-19T04:30:02.290Z",
+  "safetyMarginMs": 1000,
+  "toolchainHash": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a",
+  "ownerRequest": "tăng verifier lên 70000 byte đồng bộ rồi chạy lại 5 lượt J4 bị chặn",
+  "candidate": {
+    "sourceSha": "82c86a3c67d1f12f0f87f6956e0c44c68b265957",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "7f87a56de66eb9e313a7c29642e0f7233645c33d9417a057d8e343070d15bdd5",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "f88bde15d3c40c843782c0c5709e3b2b6c2577ba2c8e4d4d0f19c32639dc0ef9",
+    "toolContractHash": "a508463e7afe545c9d6b2109e75227d8193dd2aa937f5a0ade401ac6e823a595",
+    "assemblyHash": "3f183d7c6cd3f730adcbf9e61a413a4611c7a93c9bfa3365258b2ed7696e533c",
+    "runtimeHash": "f5a177250795ab2be17b66105ff3ca455086324135e22656dc35757273dad691",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "fa3ab818444aedd06a25a5a4f7956bc25e3162125e109d845430011e2635909c",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "595a0c8204261b1c0703e6720d33c4d8bff7c0c137f4bc5239716dd19f9ce94e",
+      "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+      "boundsHash": "f9a9c8acbe38408dfb7dfd03047e848ea6466653d6bd66045c52d516252842a2"
+    }
+  },
+  "setup": "10 scripted fixture turns using prior public accepted text and current-source real tools; not new model outcomes",
+  "measured": "5 final turns only",
+  "captureSourceSha": "2d81c26493b79eab12dec9be4c95f8cf960b855d",
+  "judgeRequests": 0,
+  "automaticEvaluatorRetry": 0,
+  "runtimeOwnerRecovery": "Existing bounded recovery within 3 owner calls; any used retries retained",
+  "sendEnabled": false,
+  "sourceWrites": 0,
+  "localRun": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-verifier70000-j4-five-82c86a3c-20261119-094045",
+  "priorAbortedRun": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-verifier70000-j4-five-2d81c264-20261119-092836"
+}

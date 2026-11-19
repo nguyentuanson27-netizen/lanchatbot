@@ -1,0 +1,121 @@
+{
+  "kind": "INDEPENDENT_POST_RUN_ACCOUNTING_AND_CAPTURE_AUDIT_V1",
+  "status": "APPROVED",
+  "reviewer": "/root/sales_completion_implementation_review",
+  "auditedAt": "2026-11-04T08:54:24.144Z",
+  "scope": "Purchase development diagnostic only; accounting, provenance, request capture and deterministic binding evidence. Not conversation quality grading, semantic safety proof, qualification, GO or deployment authorization.",
+  "sourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "worldHash": "524aeac4caaa99c1042b4347f4f945a317ae3351cd1b304cdd11e5838b78f1d3",
+  "registrationHash": "075142db8d413cd89e618a6769a05e208b2854d3d452cae80d0af0e38e5a38d4",
+  "pendingRegistrationHash": "1a633ff2cdaa9d5bcbbd53c134f941e2b6111e8741a29d1b33037fd4e1ab9826",
+  "accountingHash": "7379841ac8a179acf343d81d958ae0933ba98ce4389a503297309ea75f3cb6d2",
+  "artifacts": {
+    "registration": {
+      "path": "../c3-test-sources-model-purchase-sealed-20261104-01/REGISTRATION.json",
+      "sha256": "14a3c5aa507fd025f22e9adbd542c340a85535de9d6c3a1b48d9b5ff75068244"
+    },
+    "inputApproval": {
+      "path": "../c3-test-sources-model-purchase-sealed-20261104-01/INPUT_APPROVAL.json",
+      "sha256": "6da59b725181b6bad12364b30da0850ec746620252dc730fe4ef21076bcad1ca"
+    },
+    "integration": {
+      "path": "../c3-test-sources-model-purchase-run-20261104-01/integration.json",
+      "sha256": "dd244801ffd7226b62c8f9895cd3c4cefa368334d1bf83905fbc2498b1c63ef0"
+    },
+    "candidateEvidence": {
+      "path": "../c3-test-sources-model-purchase-run-20261104-01/CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "7bfdec79a21a4f2076ba79e09678d54a135bd73e7102798f8a62a9f02931dd1b"
+    },
+    "nativeJournal": {
+      "path": "../c3-test-sources-model-purchase-run-20261104-01/NATIVE_REQUESTS.jsonl",
+      "sha256": "69b2e38bdb4b78ee8606d48810ab476c02903298c7a589fd50fb7b9f9a006ed2"
+    },
+    "accounting": {
+      "path": "../c3-test-sources-model-purchase-accounting-20261104-01.json",
+      "sha256": "7d6b8593de5f58c67c6239081fdce55dba006f5255354c1d9fb883d8cc87daa2"
+    },
+    "command": {
+      "path": "../c3-test-sources-model-purchase-command-20261104-01.json",
+      "sha256": "adde79e8c74e62eee311921f35ff3ca97dbdad5510fa7dc011527c59da4c2206"
+    }
+  },
+  "checks": {
+    "registeredDenominator": "PASS: 21 unique executed slots, 28 registered turns and 28 native artifacts; no hard stop or omitted frame",
+    "generationAccounting": "PASS: 68 unique generation records = 68 instrumented generation HTTP requests; 49 OWNER / 19 VERIFIER; all OK; exact REQUEST/DISPATCH/RESULT identity reconciled",
+    "requestCapAndRetry": "PASS: one recorded generation HTTP per generation, at most 3 OWNER and 1 VERIFIER per turn, retry0; 68 of registered cap112",
+    "nativeArtifactHashes": "PASS: all 28 raw artifact hashes match evidence",
+    "runtimeRequestAndFirewall": "PASS: all 68 request hashes/model identities/runtime projections/native wire captures match; evaluator labels and case IDs absent under current firewall",
+    "verifierBinding": "PASS: all 19 exact draft and trusted-snapshot hashes, bound hashes and decoded provider wire binding match",
+    "finalGateReplay": "PASS: all 17 SEND_ELIGIBLE outputs replay as SEND_ELIGIBLE under captured current readback and checkedAt; exact request/draft/snapshot/revision/fact/recipient binding matches",
+    "acceptedCapture": "PASS: 19 actual TEXT and 14 IMAGE payload hashes match accepted Outbox IDs/status/group/sequence and new DB rows; silent terminals have no customer units",
+    "codeOwnedCapture": "PASS: 2 NATIVE_CHECKOUT_CLARIFICATION outputs validate against committed receipt/authority/state/native result and accepted text hashes; distinct from native NO_SEND labels",
+    "blockedDraftRetention": "PASS: 2 verifier FAIL drafts retained in original native artifacts; actual outcomes silent HANDOFF, not sent text",
+    "sourceAndExecution": "PASS: command exit0, runtime source e14d2659 and sourceDirty=false; same current HEAD and clean worktree observed during audit",
+    "databaseCleanup": "PASS: integration testDatabaseDropped=true; harness sets flag only after awaited DROP DATABASE resolves; no independent DB-catalog query by reviewer",
+    "measurements": "PASS: accounting frame/disposition/role/token totals and verifier nearest-rank p50/p95 independently recomputed"
+  },
+  "counts": {
+    "casesRegistered": 21,
+    "casesExecuted": 21,
+    "turnsRegistered": 28,
+    "frames": 28,
+    "generationHttp": 68,
+    "ownerGenerations": 49,
+    "verifierGenerations": 19,
+    "generationStatus": {
+      "OK": 68
+    },
+    "actualTerminal": {
+      "SEND_ELIGIBLE": 17,
+      "CODE_OWNED_SEND": 2,
+      "HANDOFF": 8,
+      "NO_SEND": 1
+    },
+    "nativeTerminal": {
+      "SEND_ELIGIBLE": 17,
+      "HANDOFF": 8,
+      "NO_SEND": 3
+    },
+    "verifierVerdicts": {
+      "PASS": 17,
+      "FAIL": 2
+    },
+    "acceptedTexts": 19,
+    "acceptedImages": 14,
+    "auxiliary": {
+      "ownerAuthStarted": 1,
+      "embeddingInvocations": 2,
+      "httpResults": {
+        "OAUTH": 1,
+        "EMBEDDING": 2
+      },
+      "allAuxiliaryHttp200": true,
+      "generationHttpExcludesAuxiliary": true
+    }
+  },
+  "blockedDrafts": [
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "draftHash": "841afd8fed656deddc7d5bf76278f124b44cde6b07159b4a59fc301a147ff42e",
+      "verdict": "FAIL",
+      "actualDisposition": "HANDOFF"
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "turnIndex": 0,
+      "draftHash": "3e59a188e62010b065eb5ecdb08e19e4b89adcc284145def21cf23a17e2bc2ab",
+      "verdict": "FAIL",
+      "actualDisposition": "HANDOFF"
+    }
+  ],
+  "exclusions": [
+    "This audit does not grade usefulness, persuasion, naturalness, policy meaning or verifier false PASS/false rejection correctness. No locked judge result or quality/GO conclusion.",
+    "Only purchase 21/28 audited here; remainder 12/20 was actively running at audit start. Not full55/S6 qualification.",
+    "Uses owner-approved isolated test assumptions: non-age-expiring photos, shared SQ2447 component chart, AO WHITE mapping, assumed feedback image and silent test HANDOFF_MATRIX. These are not upstream publication or genuine customer-feedback provenance.",
+    "Instrumented per-generation accounting is not independent packet-level network tracing. Owner OAuth and embedding auxiliary requests are separate from 68 generation HTTP. OAuth bodies are intentionally not retained; embedding token/cost unavailable under native port.",
+    "Database cleanup is attested by successful harness control flow and artifact; reviewer did not query database catalog.",
+    "No provider calls, repository/helper/input/world changes, source publication, deployment or live send performed by reviewer. One outside-repository audit metadata file written."
+  ],
+  "findings": []
+}

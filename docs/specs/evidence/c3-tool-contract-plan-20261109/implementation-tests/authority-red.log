@@ -1,0 +1,58 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+···························xx
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-handoff.test.ts > synchronizes only receipt-proven own negotiation authority and rejects an external revision (external=false)
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/single-agent-commerce-handoff.test.ts:256:83
+    254|  const r=await t.invoke({name:'record_negotiation',args:{intent:'PRICE…
+    255|  if(external)expect(r).toMatchObject({status:'UNAVAILABLE',reason:'COM…
+    256|  else{expect(r.status).toBe('OK');expect(t.snapshot().state.conversati…
+       |                                                                                   ^
+    257| });
+    258| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/single-agent-commerce-handoff.test.ts > synchronizes only receipt-proven own negotiation authority and rejects an external revision (external=true)
+AssertionError: expected { status: 'OK', …(1) } to match object { status: 'UNAVAILABLE', …(1) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "reason": "COMMITTED_AUTHORITY_CHANGED",
+-   "status": "UNAVAILABLE",
++   "status": "OK",
+  }
+
+ ❯ src/single-agent-commerce-handoff.test.ts:255:24
+    253|  await t.readback(); // cache old outer authority before the valid own…
+    254|  const r=await t.invoke({name:'record_negotiation',args:{intent:'PRICE…
+    255|  if(external)expect(r).toMatchObject({status:'UNAVAILABLE',reason:'COM…
+       |                        ^
+    256|  else{expect(r.status).toBe('OK');expect(t.snapshot().state.conversati…
+    257| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 27 passed (29)
+   Start at  12:45:22
+   Duration  12.65s (transform 5.44s, setup 0ms, collect 10.67s, tests 827ms, environment 0ms, prepare 334ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-handoff.test.ts --reporter=dot

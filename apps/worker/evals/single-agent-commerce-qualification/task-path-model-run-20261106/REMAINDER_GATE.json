@@ -1,0 +1,17 @@
+{
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-06T09:15:52.307111+00:00",
+  "sourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "registrationHash": "db328ebd7e95bbbd47772f38a1eade738ee9904c8bfd1b5ce7dd0752dea1e024",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-remainder-run-20261106-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "2966b72548b45a8284e18a593cf05b1141dbd26a7bd50342970d6f49163b9f5c",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-remainder-run-20261106-02\\integration.json",
+  "integrationSha256": "7c4e4a6f4fbe5e98d285b28a9c3966e077501da477db6d2b08fae16e48aa624a",
+  "capturedTurns": 24,
+  "casesExecuted": 20,
+  "materialTaskFailures": 5,
+  "status": "FAIL",
+  "scope": "Independent task-outcome gate for completed owner-overridden diagnostic group only; priorFAIL unchanged",
+  "reason": "Five incomplete sales tasks; integrity valid.",
+  "nextStageAllowed": false
+}

@@ -1,0 +1,39 @@
+{
+  "sourceSha": "69bd122100f51584acd6d2ac97dde9254b3e562c",
+  "outputs": [
+    {
+      "label": "prefix",
+      "out": "../c3-b-preserve-model-prefix-sealed-20261105-02",
+      "pendingRegistrationHash": "2781004693a9426b9422044af36cbdfc598fda35e8badc4c55f6d3180e50b7fb",
+      "worldHash": "35644f4ed3fa0e1dea4f51212a35ca3badd64a0c4ab2af5cf2d7d3c833d67e44",
+      "cases": 13,
+      "turns": 24,
+      "maxRequests": 96,
+      "ready": 13,
+      "sourceGaps": 0
+    },
+    {
+      "label": "remainder",
+      "out": "../c3-b-preserve-model-remainder-sealed-20261105-02",
+      "pendingRegistrationHash": "6bb2d25a998208258946a1746a4ac829a562990c45080948ee5a4485952b2d55",
+      "worldHash": "35644f4ed3fa0e1dea4f51212a35ca3badd64a0c4ab2af5cf2d7d3c833d67e44",
+      "cases": 20,
+      "turns": 24,
+      "maxRequests": 96,
+      "ready": 19,
+      "sourceGaps": 1
+    },
+    {
+      "label": "checkout",
+      "out": "../c3-b-preserve-model-checkout-sealed-20261105-02",
+      "pendingRegistrationHash": "b494f20e1c8fdcc9878f39241ed6a4465598cdac05af411a1ab4e830445da140",
+      "worldHash": "35644f4ed3fa0e1dea4f51212a35ca3badd64a0c4ab2af5cf2d7d3c833d67e44",
+      "cases": 1,
+      "turns": 7,
+      "maxRequests": 28,
+      "ready": 1,
+      "sourceGaps": 0
+    }
+  ],
+  "providerRequests": 0
+}

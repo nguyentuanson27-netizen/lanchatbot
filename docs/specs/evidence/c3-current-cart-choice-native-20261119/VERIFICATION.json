@@ -1,0 +1,75 @@
+{
+  "source": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "runtimeWorktreeCleanThroughout": true,
+  "helperHashesMatch": true,
+  "initialDatabaseDropped": true,
+  "modelDatabasesDropped": 6,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "generationRequests": 82,
+  "nativeAccountingFirewallAndModelChecks": "PASS_BY_AUDIT",
+  "observedVerifierVerdicts": {
+    "PASS": 25,
+    "FAIL": 0
+  },
+  "unobservedPreGenerationHandoffs": 5,
+  "fullSafetyAudit": false,
+  "files": [
+    {
+      "name": "RUN_PLAN.json",
+      "sha256": "833c6961b0abc04686ee43cf3ae487c59843e600d8d0e459dfc0d1ec6a2fbc0e"
+    },
+    {
+      "name": "RUN_HELPER_IDENTITY.json",
+      "sha256": "b07fa02fc07debb027a42a936773b7ce606e5091e38a9a5ae46b2c6113848f8a"
+    },
+    {
+      "name": "BATCH_JUDGE_IDENTITY.json",
+      "sha256": "50af4ff4792a9469b774143d0ed73f5177de6ff4af6fcba1503d6d3c9a2e2080"
+    },
+    {
+      "name": "BATCH_JUDGE_PACKET.json",
+      "sha256": "39306ed0fee4b46a3997d8fff7be81158474e25359736431aefd5896cb0e677f"
+    },
+    {
+      "name": "BATCH_JUDGE_RESULTS.json",
+      "sha256": "58aeb891b9918abf69f6965770a29fef4e1d7fe131e78410e094e9d2cd7837e2"
+    },
+    {
+      "name": "AUDIT.json",
+      "sha256": "8f93bd467eac0f79a83131518eb40ed15ad2852639f2e42e022bbbe1628b490d"
+    },
+    {
+      "name": "SUMMARY.json",
+      "sha256": "a06ebca0745ac5b3b8b0aaf93d871ec027d72385960b06f3f95799b949783456"
+    },
+    {
+      "name": "PROVENANCE.json",
+      "sha256": "48b8f0645c948e990057ab15f2a8e07a587982998f6d3d48b1b0efacc6b71035"
+    },
+    {
+      "name": "PUBLIC_AUDIT.json",
+      "sha256": "688140e5148adce12c163040b00469b641bd18121e4d066a371b4d2d1058e51b"
+    },
+    {
+      "name": "PREPARATION_FAILURES.json",
+      "sha256": "d6c597becacc0477f8a638d91e3e89f6428cc785a2482dcdcb823ba3b00a28dd"
+    },
+    {
+      "name": "AUTHOR_REVIEW.json",
+      "sha256": "1622d0c456d2cf62858164c2ff314975752c83f153bceeeeb2d581850576b600"
+    },
+    {
+      "name": "GENERATION_ACCOUNTING.json",
+      "sha256": "4c5582cce8be7e2f95570c2df7e8df48507995e6f0ec4a4bb23d962ae717b0ed"
+    },
+    {
+      "name": "REQUEST_SIZE_AUDIT.json",
+      "sha256": "690f258ba19d0a8b717319b374f1ee43f3a4f10e361cb20d53f3b2ea2f0e7bbc"
+    },
+    {
+      "name": "CONVERSATIONS.md",
+      "sha256": "a507c2d627599aeb224aa6ade2e7c190c891de1e11cbb5f29113e9b3f19ec1b6"
+    }
+  ]
+}

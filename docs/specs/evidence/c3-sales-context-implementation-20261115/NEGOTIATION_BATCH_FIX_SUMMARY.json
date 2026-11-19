@@ -1,0 +1,446 @@
+{
+  "implementationBaseSha": "a88becc45626211f80c1dc736e630f45de859272",
+  "batchFixSha": "09ac48e74f26439d7b1c3544bd19ba5a4c525593",
+  "finalFixSha": "9d5108ca1c3f4c576c86d43108b09b3744609690",
+  "runs": [
+    {
+      "source": "09ac48e74f26439d7b1c3544bd19ba5a4c525593",
+      "worldHash": "6b0c5c9f78bcaea8e53ee53776be6be72e8926ebe271c376db2523938344af10",
+      "attempts": 6,
+      "turns": 18,
+      "jobs": [
+        {
+          "kind": "CANDIDATE",
+          "source": "09ac48e74f26439d7b1c3544bd19ba5a4c525593",
+          "attempts": 5,
+          "providerRequests": 28,
+          "owner": 20,
+          "verifier": 8,
+          "errors": [],
+          "testDatabaseDropped": true
+        },
+        {
+          "kind": "CONTROLS",
+          "source": "09ac48e74f26439d7b1c3544bd19ba5a4c525593",
+          "attempts": 1,
+          "providerRequests": 9,
+          "owner": 6,
+          "verifier": 3,
+          "errors": [],
+          "testDatabaseDropped": true
+        }
+      ],
+      "dispositions": {
+        "SEND_ELIGIBLE": 8,
+        "HANDOFF": 5,
+        "NO_SEND": 5
+      },
+      "recovery": {
+        "FAIL": 3,
+        "OWNER_TOOL_MODE": 2
+      },
+      "nativeRequests": 37,
+      "judge": {
+        "requests": 6,
+        "valid": 6,
+        "expected": 6,
+        "statuses": {
+          "OK": 6
+        },
+        "identity": {
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "version": "gpt-6.1-sol",
+          "cliVersion": "0.159.2",
+          "rubricHash": "95f8bb5e0e436fa5fc7d6286fb34028e6d631f54e4549b4f1984db8a24c01d88",
+          "schemaHash": "79b1d3bac15af9cf8355a8dd65320befddb775d5ef055a6cd3d34e5162139b29",
+          "retry": 0,
+          "maximumJudgeRequests": 6,
+          "packetBytesLimit": 262144
+        },
+        "packetHash": "11125e8f885abd417605c72212a58dfa821c4c81da7bde3582b0f9efc955afbb"
+      },
+      "twoUnits": {
+        "pending": [
+          {
+            "id": "812988882a6c6f01257fd66f10d6f762fd0e7fe8b2bfb1230da31df709ced2f5",
+            "status": "PENDING",
+            "sourceObservedAt": "2026-11-15T14:18:27.907Z",
+            "cartId": null
+          },
+          {
+            "id": "812988882a6c6f01257fd66f10d6f762fd0e7fe8b2bfb1230da31df709ced2f5",
+            "status": "PENDING",
+            "sourceObservedAt": "2026-11-15T14:18:27.907Z",
+            "cartId": null
+          },
+          {
+            "id": "812988882a6c6f01257fd66f10d6f762fd0e7fe8b2bfb1230da31df709ced2f5",
+            "status": "PENDING",
+            "sourceObservedAt": "2026-11-15T14:18:27.907Z",
+            "cartId": null
+          }
+        ],
+        "events": [
+          "PENDING_NEGOTIATION_RECORDED",
+          "MEASUREMENTS_REQUIRED",
+          "SIZE_RECOMMENDED",
+          "FACTS_PRESENTED",
+          "CART_OPENED"
+        ],
+        "receipts": [
+          "PENDING_NEGOTIATION_RECORDED",
+          "FACTS_PRESENTED",
+          "MEASUREMENTS_REQUIRED",
+          "SIZE_RECOMMENDED",
+          "CART_OPENED"
+        ],
+        "finalCart": {
+          "schemaVersion": 1,
+          "cartId": "38c011fb-4a17-526b-8ecc-7a0330704e17",
+          "salesEpisodeId": "12ef63a3-fe69-5dfd-803d-a3c12b9569ef",
+          "customerProfileId": "4b2e3cd9-8f88-493e-bd44-ed14cbc912c5",
+          "revision": 1,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "178a7fba-a634-51a6-835b-157ac6e40726",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "TRẮNG",
+                  "size": "M",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default",
+                  "observedAt": "2026-11-15T13:59:47.533Z",
+                  "expiresAt": "2026-11-17T13:59:47.533Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "acb86495-7c72-59d4-8cf7-3adf5a937507",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "40f984a4-815b-55c2-b413-721a0ebc7cca",
+                "authorizedAt": "2026-11-15T14:19:33.396Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 49900,
+          "grandTotalVnd": 978100,
+          "createdAt": "2026-11-15T14:19:33.396Z",
+          "updatedAt": "2026-11-15T14:19:33.396Z"
+        }
+      },
+      "observedJ4Full": 0,
+      "registrations": {
+        "CANDIDATE": {
+          "registrationHash": "416278030e78f938d0496c3529017a1d72000e5424a60d3e85979253521f3491",
+          "corpusHash": "4163a50e9b9c27ae6bd4887b4c93a4cdf9dff94e5d27baed4891ad3364be37fc",
+          "worldHash": "6b0c5c9f78bcaea8e53ee53776be6be72e8926ebe271c376db2523938344af10",
+          "initialStateArtifactHash": "88dc4664728324030217c3f799f1a42f6457f2bceaacf5db2a4f4f9c714d0c3f",
+          "seedCommitment": "1665a766f5b6f4bd8ab5b97e89dac00cf18ecb63d6f1c43a9de32db9a54726b3"
+        },
+        "CONTROLS": {
+          "registrationHash": "f6ce921820156b336c1e5d7debec491f38d382ccdf9c496a425d345ec67c87be",
+          "corpusHash": "04871446f385f01db0cc0495ef34d2484d2577df2204857caa50747a8b2f82f4",
+          "worldHash": "6b0c5c9f78bcaea8e53ee53776be6be72e8926ebe271c376db2523938344af10",
+          "initialStateArtifactHash": "88dc4664728324030217c3f799f1a42f6457f2bceaacf5db2a4f4f9c714d0c3f",
+          "seedCommitment": "1665a766f5b6f4bd8ab5b97e89dac00cf18ecb63d6f1c43a9de32db9a54726b3"
+        }
+      }
+    },
+    {
+      "source": "9d5108ca1c3f4c576c86d43108b09b3744609690",
+      "worldHash": "6b0c5c9f78bcaea8e53ee53776be6be72e8926ebe271c376db2523938344af10",
+      "attempts": 6,
+      "turns": 18,
+      "jobs": [
+        {
+          "kind": "CANDIDATE",
+          "source": "9d5108ca1c3f4c576c86d43108b09b3744609690",
+          "attempts": 5,
+          "providerRequests": 33,
+          "owner": 22,
+          "verifier": 11,
+          "errors": [],
+          "testDatabaseDropped": true
+        },
+        {
+          "kind": "CONTROLS",
+          "source": "9d5108ca1c3f4c576c86d43108b09b3744609690",
+          "attempts": 1,
+          "providerRequests": 11,
+          "owner": 8,
+          "verifier": 3,
+          "errors": [],
+          "testDatabaseDropped": true
+        }
+      ],
+      "dispositions": {
+        "SEND_ELIGIBLE": 10,
+        "HANDOFF": 4,
+        "NO_SEND": 4
+      },
+      "recovery": {
+        "FAIL": 4
+      },
+      "nativeRequests": 44,
+      "judge": {
+        "requests": 6,
+        "valid": 5,
+        "expected": 6,
+        "statuses": {
+          "OK": 5,
+          "PROVIDER_ERROR": 1
+        },
+        "identity": {
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "version": "gpt-6.1-sol",
+          "cliVersion": "0.159.2",
+          "rubricHash": "95f8bb5e0e436fa5fc7d6286fb34028e6d631f54e4549b4f1984db8a24c01d88",
+          "schemaHash": "79b1d3bac15af9cf8355a8dd65320befddb775d5ef055a6cd3d34e5162139b29",
+          "retry": 0,
+          "maximumJudgeRequests": 6,
+          "packetBytesLimit": 262144
+        },
+        "packetHash": "32d8fa47b82f8cc98bafca2c6f408644e0925ba975eafb2e5ec559e9117ace3f"
+      },
+      "twoUnits": {
+        "pending": [
+          {
+            "id": "6328842b7de1006e6277cbe055a7908e25b71372e83f4ca7772dbfc1fe262b2a",
+            "status": "PENDING",
+            "sourceObservedAt": "2026-11-15T14:33:42.503Z",
+            "cartId": null
+          },
+          {
+            "id": "6328842b7de1006e6277cbe055a7908e25b71372e83f4ca7772dbfc1fe262b2a",
+            "status": "PENDING",
+            "sourceObservedAt": "2026-11-15T14:33:42.503Z",
+            "cartId": null
+          },
+          {
+            "id": "6328842b7de1006e6277cbe055a7908e25b71372e83f4ca7772dbfc1fe262b2a",
+            "status": "ACTIVATED",
+            "sourceObservedAt": "2026-11-15T14:33:42.503Z",
+            "cartId": "1b49ed9c-35f1-5e5b-8842-d21197bb1dfa"
+          }
+        ],
+        "events": [
+          "PENDING_NEGOTIATION_RECORDED",
+          "SIZE_RECOMMENDED",
+          "FACTS_PRESENTED",
+          "CART_OPENED",
+          "MEASUREMENTS_REQUIRED",
+          "NEGOTIATION_EVENT"
+        ],
+        "receipts": [
+          "PENDING_NEGOTIATION_RECORDED",
+          "FACTS_PRESENTED",
+          "MEASUREMENTS_REQUIRED",
+          "SIZE_RECOMMENDED",
+          "CART_OPENED",
+          "NEGOTIATION_EVENT"
+        ],
+        "finalCart": {
+          "schemaVersion": 1,
+          "cartId": "1b49ed9c-35f1-5e5b-8842-d21197bb1dfa",
+          "salesEpisodeId": "51d97b30-561b-5b50-82b7-670b50bf82db",
+          "customerProfileId": "a6bc965b-e777-4b2f-b623-f34775058d7b",
+          "revision": 2,
+          "currency": "VND",
+          "status": "OPEN",
+          "checkoutEligibility": "ELIGIBLE",
+          "lines": [
+            {
+              "lineId": "fb877a45-c346-5752-81d3-820dfe63ca80",
+              "parentProductId": "SV2447",
+              "offerId": "AO",
+              "offerKind": "DIRECT",
+              "quantity": 2,
+              "components": [
+                {
+                  "componentProductId": "SV2447_AO",
+                  "componentSku": "SV2447_AO",
+                  "componentRole": "TOP",
+                  "color": "TRẮNG",
+                  "size": "M",
+                  "quantity": 1
+                }
+              ],
+              "allowMixedSizes": false,
+              "allowComponentSale": false,
+              "posUnitPriceVnd": 499000,
+              "priceAuthority": {
+                "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                "shopId": "LANA_DESIGN",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerPriceKind": "DIRECT",
+                "componentProductId": null,
+                "metadata": {
+                  "authority": "PANCAKE_POS",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default",
+                  "observedAt": "2026-11-15T13:59:47.533Z",
+                  "expiresAt": "2026-11-17T13:59:47.533Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH"
+                }
+              },
+              "lineTotalVnd": 998000
+            }
+          ],
+          "adjustments": [
+            {
+              "adjustmentId": "4770bd36-799b-5c62-bd44-b88488c724bd",
+              "kind": "PERCENT_DISCOUNT",
+              "amountVnd": 49900,
+              "percentageBps": 500,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+                "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                "decisionId": "f1243338-5c8a-512e-a3ac-a8e682a2f714",
+                "authorizedAt": "2026-11-15T14:35:49.702Z"
+              }
+            },
+            {
+              "adjustmentId": "676b4db2-9a87-5459-8290-4194c6177e63",
+              "kind": "FREE_SHIPPING",
+              "amountVnd": 30000,
+              "percentageBps": null,
+              "policyAuthorization": {
+                "policyBundleId": "admin-policy:1198992073286645",
+                "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+                "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+                "decisionId": "d817ad35-2e3f-554f-bab3-4d35aeee1692",
+                "authorizedAt": "2026-11-15T14:35:49.702Z"
+              }
+            }
+          ],
+          "shippingFeeVnd": 30000,
+          "subtotalVnd": 998000,
+          "discountTotalVnd": 79900,
+          "grandTotalVnd": 948100,
+          "createdAt": "2026-11-15T14:34:51.323Z",
+          "updatedAt": "2026-11-15T14:35:49.702Z"
+        }
+      },
+      "observedJ4Full": 1,
+      "registrations": {
+        "CANDIDATE": {
+          "registrationHash": "6f334713500972da76e5f43abdf042fac9d296e1dc765d7a6203ca35499b0712",
+          "corpusHash": "364b8b1b41467e95d462b496a452a0861b2dcd134a6ed8da473269633fdecf44",
+          "worldHash": "6b0c5c9f78bcaea8e53ee53776be6be72e8926ebe271c376db2523938344af10",
+          "initialStateArtifactHash": "429737031de86397c607513965b0c40a1409ea11e8da9872d6d03595e292e040",
+          "seedCommitment": "1665a766f5b6f4bd8ab5b97e89dac00cf18ecb63d6f1c43a9de32db9a54726b3"
+        },
+        "CONTROLS": {
+          "registrationHash": "9db000ebbe610564144fe9a416fa5d1f025b656fa0d08e921fb70e6fad686aab",
+          "corpusHash": "a4d00331bc00729f4ed5ca0039f1c862c93c5501d3b4bb6e87ed03ed5a49f13a",
+          "worldHash": "6b0c5c9f78bcaea8e53ee53776be6be72e8926ebe271c376db2523938344af10",
+          "initialStateArtifactHash": "429737031de86397c607513965b0c40a1409ea11e8da9872d6d03595e292e040",
+          "seedCommitment": "1665a766f5b6f4bd8ab5b97e89dac00cf18ecb63d6f1c43a9de32db9a54726b3"
+        }
+      }
+    }
+  ],
+  "status": "STOP",
+  "qualificationEligible": false,
+  "nativeRequests": 81,
+  "judgeRequests": 12,
+  "modelManifest": {
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "promptHashes": {
+      "owner": "3a5e4a84f52182047afef36e41daee39731171a3bdd6ef6a29ec5cb5a487a7f7",
+      "verifier": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3"
+    },
+    "verdictSchemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115"
+  }
+}

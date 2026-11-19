@@ -1,0 +1,352 @@
+{
+  "kind": "FROZEN_SOURCE_COMPONENT_RECONSTRUCTION_NOT_NATIVE_STORE_REPLAY",
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "rows": [
+    {
+      "repetition": 1,
+      "stages": [
+        {
+          "stage": "AFTER_READ_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 12072,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 51341,
+          "verifierBytes": 64600,
+          "currentAdmission": true,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 64600,
+          "previousPromptReservedBytes": 63815,
+          "asciiMaxDraftVerifierBytes": 40024,
+          "ordinaryReplyVerifierBytes": 35979,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 0
+            }
+          ]
+        },
+        {
+          "stage": "AFTER_PENDING_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 13101,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 52488,
+          "verifierError": "VERIFIER_INPUT_BOUND",
+          "currentAdmission": false,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 65743,
+          "previousPromptReservedBytes": 64958,
+          "asciiMaxDraftVerifierBytes": 41167,
+          "ordinaryReplyVerifierBytes": 37122,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 1
+            }
+          ]
+        },
+        {
+          "pendingCharged": 1,
+          "statePending": {
+            "lines": [
+              {
+                "color": null,
+                "missing": "COLOR",
+                "offerType": "AO",
+                "productId": "SV2447",
+                "quantity": 1,
+                "size": "M"
+              }
+            ],
+            "recordedAt": "2026-11-19T00:45:07.033Z"
+          },
+          "scopeBinding": "commerce:3:a06c0f85b104b92b462c4b8bb55f140e3c3356c1bb467dab9fcf8fd1baf64c49",
+          "baseBinding": "commerce:3:a06c0f85b104b92b462c4b8bb55f140e3c3356c1bb467dab9fcf8fd1baf64c49",
+          "permission": true,
+          "recipient": "a06c0f85b104b92b462c4b8bb55f140e3c3356c1bb467dab9fcf8fd1baf64c49",
+          "scopeRecipient": "a06c0f85b104b92b462c4b8bb55f140e3c3356c1bb467dab9fcf8fd1baf64c49"
+        }
+      ],
+      "error": null
+    },
+    {
+      "repetition": 2,
+      "stages": [
+        {
+          "stage": "AFTER_READ_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 12072,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 51327,
+          "verifierBytes": 64586,
+          "currentAdmission": true,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 64586,
+          "previousPromptReservedBytes": 63801,
+          "asciiMaxDraftVerifierBytes": 40010,
+          "ordinaryReplyVerifierBytes": 35965,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 0
+            }
+          ]
+        },
+        {
+          "stage": "AFTER_PENDING_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 13101,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 52474,
+          "verifierError": "VERIFIER_INPUT_BOUND",
+          "currentAdmission": false,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 65729,
+          "previousPromptReservedBytes": 64944,
+          "asciiMaxDraftVerifierBytes": 41153,
+          "ordinaryReplyVerifierBytes": 37108,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 1
+            }
+          ]
+        },
+        {
+          "pendingCharged": 1,
+          "statePending": {
+            "lines": [
+              {
+                "color": null,
+                "missing": "COLOR",
+                "offerType": "AO",
+                "productId": "SV2447",
+                "quantity": 1,
+                "size": "M"
+              }
+            ],
+            "recordedAt": "2026-11-19T00:46:39.209Z"
+          },
+          "scopeBinding": "commerce:6:eec720bd411d9914d318f0c7da3bf0340349ec22ad66fcfdb18176712be6c5fa",
+          "baseBinding": "commerce:6:eec720bd411d9914d318f0c7da3bf0340349ec22ad66fcfdb18176712be6c5fa",
+          "permission": true,
+          "recipient": "eec720bd411d9914d318f0c7da3bf0340349ec22ad66fcfdb18176712be6c5fa",
+          "scopeRecipient": "eec720bd411d9914d318f0c7da3bf0340349ec22ad66fcfdb18176712be6c5fa"
+        }
+      ],
+      "error": null
+    },
+    {
+      "repetition": 3,
+      "stages": [
+        {
+          "stage": "AFTER_READ_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 12072,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 51308,
+          "verifierBytes": 64567,
+          "currentAdmission": true,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 64567,
+          "previousPromptReservedBytes": 63782,
+          "asciiMaxDraftVerifierBytes": 39991,
+          "ordinaryReplyVerifierBytes": 35946,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 0
+            }
+          ]
+        },
+        {
+          "stage": "AFTER_PENDING_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 13101,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 52455,
+          "verifierError": "VERIFIER_INPUT_BOUND",
+          "currentAdmission": false,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 65710,
+          "previousPromptReservedBytes": 64925,
+          "asciiMaxDraftVerifierBytes": 41134,
+          "ordinaryReplyVerifierBytes": 37089,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 1
+            }
+          ]
+        },
+        {
+          "pendingCharged": 1,
+          "statePending": {
+            "lines": [
+              {
+                "color": null,
+                "missing": "COLOR",
+                "offerType": "AO",
+                "productId": "SV2447",
+                "quantity": 1,
+                "size": "M"
+              }
+            ],
+            "recordedAt": "2026-11-19T00:48:03.376Z"
+          },
+          "scopeBinding": "commerce:9:6d970e2b2eadee0d5cc549b13c948e97ae16059ba067512b0c79f22a1102e589",
+          "baseBinding": "commerce:9:6d970e2b2eadee0d5cc549b13c948e97ae16059ba067512b0c79f22a1102e589",
+          "permission": true,
+          "recipient": "6d970e2b2eadee0d5cc549b13c948e97ae16059ba067512b0c79f22a1102e589",
+          "scopeRecipient": "6d970e2b2eadee0d5cc549b13c948e97ae16059ba067512b0c79f22a1102e589"
+        }
+      ],
+      "error": null
+    },
+    {
+      "repetition": 4,
+      "stages": [
+        {
+          "stage": "AFTER_READ_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 12077,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 51326,
+          "verifierBytes": 64590,
+          "currentAdmission": true,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 64590,
+          "previousPromptReservedBytes": 63805,
+          "asciiMaxDraftVerifierBytes": 40014,
+          "ordinaryReplyVerifierBytes": 35969,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 0
+            }
+          ]
+        },
+        {
+          "stage": "AFTER_PENDING_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 13106,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 52473,
+          "verifierError": "VERIFIER_INPUT_BOUND",
+          "currentAdmission": false,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 65733,
+          "previousPromptReservedBytes": 64948,
+          "asciiMaxDraftVerifierBytes": 41157,
+          "ordinaryReplyVerifierBytes": 37112,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 1
+            }
+          ]
+        },
+        {
+          "pendingCharged": 1,
+          "statePending": {
+            "lines": [
+              {
+                "color": null,
+                "missing": "COLOR",
+                "offerType": "AO",
+                "productId": "SV2447",
+                "quantity": 1,
+                "size": "M"
+              }
+            ],
+            "recordedAt": "2026-11-19T00:49:31.678Z"
+          },
+          "scopeBinding": "commerce:12:ee8b53dc7fe48878ae603259dcb975b69d9cf4e144a2e0f5df208e7d1960edf2",
+          "baseBinding": "commerce:12:ee8b53dc7fe48878ae603259dcb975b69d9cf4e144a2e0f5df208e7d1960edf2",
+          "permission": true,
+          "recipient": "ee8b53dc7fe48878ae603259dcb975b69d9cf4e144a2e0f5df208e7d1960edf2",
+          "scopeRecipient": "ee8b53dc7fe48878ae603259dcb975b69d9cf4e144a2e0f5df208e7d1960edf2"
+        }
+      ],
+      "error": null
+    },
+    {
+      "repetition": 5,
+      "stages": [
+        {
+          "stage": "AFTER_READ_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 12077,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 51423,
+          "verifierBytes": 64687,
+          "currentAdmission": true,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 64687,
+          "previousPromptReservedBytes": 63902,
+          "asciiMaxDraftVerifierBytes": 40111,
+          "ordinaryReplyVerifierBytes": 36066,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 0
+            }
+          ]
+        },
+        {
+          "stage": "AFTER_PENDING_PREPARE",
+          "hardPrecheck": null,
+          "contextBytes": 13106,
+          "subjects": 4,
+          "claims": 6,
+          "ownerBytes": 52570,
+          "verifierError": "VERIFIER_INPUT_BOUND",
+          "currentAdmission": false,
+          "previousPromptAdmission": true,
+          "reservedVerifierBytes": 65830,
+          "previousPromptReservedBytes": 65045,
+          "asciiMaxDraftVerifierBytes": 41254,
+          "ordinaryReplyVerifierBytes": 37209,
+          "productSelectionObservations": [
+            {
+              "subjectRef": "SV2447",
+              "observations": 1
+            }
+          ]
+        },
+        {
+          "pendingCharged": 1,
+          "statePending": {
+            "lines": [
+              {
+                "color": null,
+                "missing": "COLOR",
+                "offerType": "AO",
+                "productId": "SV2447",
+                "quantity": 1,
+                "size": "M"
+              }
+            ],
+            "recordedAt": "2026-11-19T00:50:57.656Z"
+          },
+          "scopeBinding": "commerce:15:7841a601d68d124f5209c62538633104a0a676b6b0ee26370efc3c06756ad434",
+          "baseBinding": "commerce:15:7841a601d68d124f5209c62538633104a0a676b6b0ee26370efc3c06756ad434",
+          "permission": true,
+          "recipient": "7841a601d68d124f5209c62538633104a0a676b6b0ee26370efc3c06756ad434",
+          "scopeRecipient": "7841a601d68d124f5209c62538633104a0a676b6b0ee26370efc3c06756ad434"
+        }
+      ],
+      "error": null
+    }
+  ]
+}

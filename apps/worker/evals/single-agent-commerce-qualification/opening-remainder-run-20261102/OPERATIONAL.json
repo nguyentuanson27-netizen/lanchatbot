@@ -1,0 +1,89 @@
+{
+  "runSourceSha": "1f6a358bc7f26865ca28caa1021614f3b61184a0",
+  "startedAt": "2026-11-02T11:25:19.124132+00:00",
+  "completedAt": "2026-11-02T11:32:32.426957+00:00",
+  "generationRecords": 21,
+  "generationHttp": 20,
+  "requestsPerGenerationMaximum": 1,
+  "generationStatus": {
+    "OK": 19,
+    "MALFORMED": 1,
+    "PROVIDER_ERROR": 1
+  },
+  "verifierVerdicts": {
+    "PASS": 1,
+    "FAIL": 1
+  },
+  "verifierLatencyMs": {
+    "n": 2,
+    "p50": 9934.345899999957,
+    "p95": 21056.957600000023
+  },
+  "ownerLatencyMs": {
+    "n": 19,
+    "p50": 6841.234200000006,
+    "p95": 10913.271999999997
+  },
+  "nativeVerificationAndReadbackMs": {
+    "n": 2,
+    "p50": 12336.078099999984,
+    "p95": 26436.60269999999
+  },
+  "providerTransportErrors": 0,
+  "malformedOwner": 1,
+  "verifierTimeoutOrError": 0,
+  "tokenUsage": {
+    "inputObserved": 213896,
+    "outputObserved": 27273,
+    "usageRows": 20,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "observedModelVersions": {
+    "gemini-3.5-flash-lite": 18,
+    "None": 1,
+    "gpt-6.1-sol": 2
+  },
+  "auxiliaryHttp": [
+    {
+      "slotId": "25b8ed28e211e2c67211420b37c9b02e03aaceac42f37aff231289c62677bfad",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "OAUTH",
+      "ordinal": 1,
+      "status": 200,
+      "error": null,
+      "latencyMs": 306.35340000000724,
+      "requestHash": null,
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "25b8ed28e211e2c67211420b37c9b02e03aaceac42f37aff231289c62677bfad",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "EMBEDDING",
+      "ordinal": 2,
+      "status": 200,
+      "error": null,
+      "latencyMs": 713.5429000000004,
+      "requestHash": "1fbbbbfca95878a06d82dc717fce0cf67a91eb811f1eebf1da6410ee38358182",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    }
+  ],
+  "acceptedText": 1,
+  "acceptedImages": 2,
+  "terminalCounts": {
+    "HANDOFF": 12,
+    "NO_SEND": 7,
+    "SEND_ELIGIBLE": 1
+  },
+  "handoffNoSendRateOnExecutedTurns": 0.95,
+  "nativeTurns": 20,
+  "registeredCases": 12,
+  "registeredTurns": 20,
+  "liveSend": false,
+  "sourceWrites": 0,
+  "databaseDropped": true,
+  "note": "Harness measurements only; not production SLO or causal overhead estimate."
+}

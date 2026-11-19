@@ -1,0 +1,73 @@
+{
+  "kind": "TARGET_REPAIR_STAGE_EVALUATION_POLICY",
+  "sourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "registeredBeforeProviderResults": true,
+  "models": {
+    "owner": "Vertex Gemini3.5FlashLite HIGH",
+    "verifier": "GPT6.1Sol HIGH"
+  },
+  "repetitions": 1,
+  "generationRetry": 0,
+  "limits": {
+    "ownerPerTurn": 3,
+    "verifierPerTurn": 1,
+    "primitiveWork": 6,
+    "toolRounds": 2,
+    "textFrameBytes": 65536,
+    "fullInlineImageFrameBytes": 1507328
+  },
+  "gates": {
+    "r1": {
+      "cases": 4,
+      "turns": 7,
+      "maximumGenerationRequests": 28,
+      "required": [
+        "p06: valid COMPOSITE price and logical three-item structure; no false order variance",
+        "p07: independent component size results reach customer delivery eligibility",
+        "p08: missing customer colour yields usable clarification and no unsupported cart mutation",
+        "j1: preserve M/L, ask missing colour without continuation bound or unnecessary handoff; no required cart completion before colour provided"
+      ]
+    },
+    "r2": {
+      "cases": 9,
+      "turns": 17,
+      "maximumGenerationRequests": 68,
+      "required": [
+        "p04/p09 current fit and selected offer continuity",
+        "s03 image description within actual source/observed byte evidence",
+        "s13 usable shipping-inclusive quote; malformed output remains failed attempt",
+        "s15 usable ACK without unnecessary tool dependency",
+        "s16 correct scoped feedback routing under recorded test assumption",
+        "j2 valid sizing and correction reuse",
+        "j4 negotiation within source and capability",
+        "j6 COD retained; ask only missing customer fields"
+      ]
+    },
+    "remainder": {
+      "cases": 20,
+      "turns": 24,
+      "maximumGenerationRequests": 96,
+      "required": [
+        "Existing source/task-specific customer outcomes and safety, frozen source-gap s11 BE control remains handoff"
+      ]
+    },
+    "checkout": {
+      "cases": 1,
+      "turns": 7,
+      "maximumGenerationRequests": 28,
+      "required": [
+        "Actual preview before confirmation, private intake code-only, final receipt/current ownership, no duplicate effect/send"
+      ]
+    }
+  },
+  "review": {
+    "basis": "Actual terminal customer outcome plus full conversation/source/state/effect/Outbox evidence",
+    "noKeywordScoring": true,
+    "deferredMinorVoiceCannotBecomeMaterialAfterResults": true,
+    "providerErrorInDenominator": true,
+    "materialTaskFailure": "Finish current group except hard safety/privacy/unknown accounting/commit stop; do not open next group",
+    "independentGateReviewRequired": true
+  },
+  "qualification": "DEVELOPMENT_DIAGNOSTIC_ONLY_NO_GO_OR_C3_COMPARISON",
+  "liveSend": false
+}

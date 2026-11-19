@@ -1,0 +1,23 @@
+{
+  "kind": "INDEPENDENT_REVIEW_STATUS",
+  "inputReview": "APPROVED",
+  "dispatchReview": "APPROVED",
+  "reviewer": "/root/phase_c_options_plan_review",
+  "postRunAudit": "INCOMPLETE",
+  "blindJudge": "/root/purchase_blind_judge",
+  "blindJudgeModel": "gpt-6.1-sol",
+  "effort": "high",
+  "gradeStatus": "NOT_AVAILABLE",
+  "gradedItems": 0,
+  "blocker": "Both sub-agent turns failed: Your workspace is out of credits. Add credits to continue.",
+  "packetHash": "b485b2265c563ef2c8c9d0a9f10b1f5de8509425e82ab92c07e76de146708930",
+  "gradeFileExists": false,
+  "gradeLockExists": false,
+  "partialIndependentObservations": [
+    "18turns/37generationrecords/36HTTP confirmed before reviewer failure.",
+    "s09 original STALE CURRENT_SNAPSHOT and6later NOT_RUN confirmed.",
+    "Initial accounting falsely used absent raw capture field; corrected V2 maps actual terminal texts to accepted Outbox hashes.",
+    "p07 source-unavailable control sent a reply; do not report all source controls PASS."
+  ],
+  "limits": "Partial reviewer observations are not final audit approval; no scores fabricated or replacement judge substituted."
+}

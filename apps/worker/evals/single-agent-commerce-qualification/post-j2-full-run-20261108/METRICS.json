@@ -1,0 +1,66 @@
+{
+  "sourceSha": "eb134d5d8ba5f3f4099929ba67ee019cad2ba0f4",
+  "worldHash": "878a8091ae59cec41ba0a6d7f1543fd4588ebf30edaa4b0fa48478270a9af236",
+  "cases": 34,
+  "turns": 55,
+  "generationAttempts": 128,
+  "generationHttp": 128,
+  "roles": {
+    "OWNER": 89,
+    "VERIFIER": 39
+  },
+  "generationStatuses": {
+    "OK": 127,
+    "PROVIDER_ERROR": 1
+  },
+  "verifierProviderLatencyMs": {
+    "n": 39,
+    "p50": 9600,
+    "p95": 23866
+  },
+  "verifierAdapterWindowMs": {
+    "n": 39,
+    "p50": 10415.559600000008,
+    "p95": 24648.55489999999
+  },
+  "tokenUsage": {
+    "inputObserved": 1230196,
+    "outputObserved": 95593,
+    "usageRows": 127,
+    "totalRows": 128,
+    "cost": "NOT_EXPOSED"
+  },
+  "ownerOAuthHttp": 4,
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 33,
+    "HANDOFF": 12,
+    "NO_SEND": 3,
+    "CODE_OWNED_SEND": 7
+  },
+  "caseStatusCounts": {
+    "TASK_OK": 22,
+    "MATERIAL_FAIL": 7,
+    "EXPECTED_HANDOFF": 5
+  },
+  "providerErrorRate": 0.0078125,
+  "verifierErrorRate": 0.02564102564102564,
+  "timeoutRate": 0,
+  "retry": 0,
+  "modelDbDropped": 4,
+  "initialDbDropped": true,
+  "runtimeChanges": 0,
+  "semanticRoles": [
+    "OWNER",
+    "VERIFIER"
+  ],
+  "formalBlindQuality": "NOT_GRADED",
+  "cost": "NOT_EXPOSED",
+  "liveSends": 0,
+  "sourceShopWrites": 0,
+  "auxiliaryHttp": {
+    "ownerOAuth": 4,
+    "embeddingOAuth": 1,
+    "embeddingInference": 2,
+    "generationHttpCountExcludesThese": true
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "kind": "CONTEXT_PUBLICATION_IMPLEMENTATION_VERIFICATION",
+  "sourceSha": "1427d2f17028e007df442c73a8d555990a3dc6ee",
+  "sourceDirty": false,
+  "worker": {
+    "passed": 512,
+    "files": 15
+  },
+  "node": {
+    "passed": 781,
+    "skipped": 2,
+    "failed": 0
+  },
+  "nativeFocused": {
+    "passed": 85
+  },
+  "build": "PASS",
+  "typecheck": "PASS",
+  "lint": "PASS",
+  "actualPostgres": {
+    "cases": 76,
+    "status": "PASS",
+    "sourceSha": "1427d2f17028e007df442c73a8d555990a3dc6ee",
+    "testDatabaseDropped": true,
+    "providerGenerations": 0,
+    "sendEnabled": false,
+    "checks": [
+      {
+        "name": "stale_revision",
+        "status": "PASS",
+        "artifactHash": "ea284bb0aba1111fd08a44eb88cac4200d224f8912d8cf5097ee6b7c79e097cf",
+        "caseName": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox"
+      },
+      {
+        "name": "duplicate_source",
+        "status": "PASS",
+        "artifactHash": "ea284bb0aba1111fd08a44eb88cac4200d224f8912d8cf5097ee6b7c79e097cf",
+        "caseName": "B3 native cart commits once; duplicate does not repeat database transaction"
+      },
+      {
+        "name": "crash_after_commit",
+        "status": "PASS",
+        "artifactHash": "ea284bb0aba1111fd08a44eb88cac4200d224f8912d8cf5097ee6b7c79e097cf",
+        "caseName": "B composed recovery accounting commit-response-lost"
+      },
+      {
+        "name": "ambiguous_reconciliation",
+        "status": "PASS",
+        "artifactHash": "ea284bb0aba1111fd08a44eb88cac4200d224f8912d8cf5097ee6b7c79e097cf",
+        "caseName": "B3 native quantity change persists, unknown commit reconciles without replay"
+      },
+      {
+        "name": "operation_idempotency",
+        "status": "PASS",
+        "artifactHash": "ea284bb0aba1111fd08a44eb88cac4200d224f8912d8cf5097ee6b7c79e097cf",
+        "caseName": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once"
+      },
+      {
+        "name": "history_outbox_recovery",
+        "status": "PASS",
+        "artifactHash": "ea284bb0aba1111fd08a44eb88cac4200d224f8912d8cf5097ee6b7c79e097cf",
+        "caseName": "B composed two native mutations retain one source and next owner receives accepted history and current cart"
+      },
+      {
+        "name": "no_duplicate_effect",
+        "status": "PASS",
+        "artifactHash": "ea284bb0aba1111fd08a44eb88cac4200d224f8912d8cf5097ee6b7c79e097cf",
+        "caseName": "B composed N4 sends exact text and selected image in one response group without replay duplicates"
+      }
+    ]
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only-tools.ts",
+      "sha256": "0db1490e0376fd540306a115c7d59921f06df45bac1feaed8be19d31b352d211"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-state.ts",
+      "sha256": "730463039dff0b1dd2dedcb1c32ddd4cfa2236f138c9d432084aa3705a6f13cb"
+    },
+    {
+      "path": "apps/worker/dist/single-agent-commerce-read-only-tools.js",
+      "sha256": "5e7b6980aaf6fe056862d0ec30bcfe1a52211127ed298b9e8b3d4c962b952ef2"
+    },
+    {
+      "path": "apps/worker/dist/single-agent-commerce-state.js",
+      "sha256": "5abe5d13a92a69278f95380fc32944bc25ae3ab57977212e6aa44cb9e2b99771"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../c3-context-publication-pg-20261101-01/integration.json",
+      "sha256": "183a4d1390554baea8451d720210e7195f97b49a0b27986ff0e942fd25d80d93",
+      "bytes": 35977
+    },
+    {
+      "path": "../c3-context-publication-pg-20261101-01.log",
+      "sha256": "4aece7139aa8e87ba52bf5c387c6c1e83c85ed57372d3d7978251dcd53a0d593",
+      "bytes": 6650
+    },
+    {
+      "path": "../c3-context-publication-worker-focused-20261101.log",
+      "sha256": "936920848a728538cdee46f4b7f651ff262d97694d314405876b7ba14757fd67",
+      "bytes": 1859
+    },
+    {
+      "path": "../c3-context-publication-all-node-20261101.log",
+      "sha256": "187a5c131a937c8dec92621c69e06404b70e3d1bdd21ed457b5834f9349f5397",
+      "bytes": 86616
+    },
+    {
+      "path": "../c3-context-publication-build-20261101.log",
+      "sha256": "6779f53a6a414085478764611c75dbe5c70eafbf1dc835153e0d6ff5b712c8db",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-context-publication-typecheck-20261101.log",
+      "sha256": "2bc6a5ab4e549aad9b509ef80d8300c5356f17a859c0174770a9f3dec5e7e538",
+      "bytes": 5266
+    },
+    {
+      "path": "../c3-context-publication-lint-20261101.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "path": "../c3-context-publication-native-tests-20261101.log",
+      "sha256": "b9bb1d9b552f8f3aab34c3e94da1a5c4ebf24cf1c8790efa1746321ad758b62c",
+      "bytes": 9335
+    },
+    {
+      "path": "../c3-context-continuation-replay-20261101.mjs",
+      "sha256": "f57a6cad988f8d3eefdddef6258f366edd371ea26a959d449a8b4ffbf1cb3f55",
+      "bytes": 7157
+    },
+    {
+      "path": "../c3-context-continuation-replay-20261101.json",
+      "sha256": "fbbc0c4e80e48877d1f1f7140b1c245e6a0bb08074b70361a8902e24ced3ddcd",
+      "bytes": 2162
+    }
+  ],
+  "observedRed": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-preparation.test.ts src/single-agent-commerce-state.test.ts",
+      "passed": 55,
+      "failed": 4
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-preparation.test.ts",
+      "passed": 19,
+      "failed": 2,
+      "stage": "MULTI_TARGET"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-preparation.test.ts",
+      "passed": 23,
+      "failed": 2,
+      "stage": "POLICY_CONCURRENCY"
+    }
+  ],
+  "priorFailure": "Initial typecheck TS2542 in test readonly mutation; fixed test fixture with Object.assign. First preparation command used ambiguous inline Node module syntax; initial-state attempt01 failed before DB/generation; corrected ESM prep and initial02 succeeded.",
+  "modelQuality": "NOT_RUN_FOR_REPAIR",
+  "sourceWrites": 0,
+  "liveSends": 0
+}

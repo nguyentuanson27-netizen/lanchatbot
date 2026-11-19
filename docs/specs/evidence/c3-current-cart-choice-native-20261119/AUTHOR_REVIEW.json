@@ -1,0 +1,79 @@
+{
+  "source": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "allConversationsRead": 10,
+  "allTurnsRead": 30,
+  "reviews": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "finding": "Hai lượt đầu trả lời đúng và hỏi màu; lượt hỏi tổng handoff trước model. Không thể đánh giá khả năng owner trả lời lượt cuối.",
+      "taskObserved": "LAST_TURN_PREPARATION_HANDOFF",
+      "modelQualityClaim": false
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "finding": "Hai lượt đầu trả lời đúng và hỏi màu; lượt hỏi tổng handoff trước model. Không thể đánh giá khả năng owner trả lời lượt cuối.",
+      "taskObserved": "LAST_TURN_PREPARATION_HANDOFF",
+      "modelQualityClaim": false
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "finding": "Hai lượt đầu trả lời đúng và hỏi màu; lượt hỏi tổng handoff trước model. Không thể đánh giá khả năng owner trả lời lượt cuối.",
+      "taskObserved": "LAST_TURN_PREPARATION_HANDOFF",
+      "modelQualityClaim": false
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "finding": "Hai lượt đầu trả lời đúng và hỏi màu; lượt hỏi tổng handoff trước model. Không thể đánh giá khả năng owner trả lời lượt cuối.",
+      "taskObserved": "LAST_TURN_PREPARATION_HANDOFF",
+      "modelQualityClaim": false
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "finding": "Hai lượt đầu trả lời đúng và hỏi màu; lượt hỏi tổng handoff trước model. Không thể đánh giá khả năng owner trả lời lượt cuối.",
+      "taskObserved": "LAST_TURN_PREPARATION_HANDOFF",
+      "modelQualityClaim": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "finding": "Giá/giỏ/miễn ship đúng. Lượt đầu không hỏi màu; script sau tự cho trắng nên không dùng hoàn thành giỏ làm bằng chứng bước dẫn mua tốt.",
+      "taskObserved": "ALL_THREE_TURNS_SENT_AND_CART_CORRECT",
+      "modelQualityClaim": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "finding": "Giá/giỏ đúng, hỏi màu đúng và trả tổng gọn; đủ việc, dùng được.",
+      "taskObserved": "ALL_THREE_TURNS_SENT_AND_CART_CORRECT",
+      "modelQualityClaim": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "finding": "Giá/giỏ đúng, hỏi màu đúng. Vẫn nói hệ thống đang áp dụng, hỏi chốt sau khi thêm giỏ và dùng ngoặc khi trả tổng; còn giọng quy trình, dù judge chấp nhận.",
+      "taskObserved": "ALL_THREE_TURNS_SENT_AND_CART_CORRECT",
+      "modelQualityClaim": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "finding": "Giá/giỏ đúng nhưng lượt đầu thiếu câu hỏi màu. Lượt hai tự xin thông tin nhận hàng; intake đáng lẽ do code hỏi khi khách chốt, chưa có tool confirm_purchase.",
+      "taskObserved": "ALL_THREE_TURNS_SENT_AND_CART_CORRECT",
+      "modelQualityClaim": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "finding": "Giá/giỏ đúng, hỏi màu đúng; owner gọi record_negotiation thừa khi khách chọn trắng, bị guard từ chối rồi thêm giỏ thành công. Judge lỗi provider, không có điểm.",
+      "taskObserved": "ALL_THREE_TURNS_SENT_AND_CART_CORRECT",
+      "modelQualityClaim": false
+    }
+  ],
+  "doNotConflateHandoffWithGeneratedVoiceFailure": true,
+  "judgeLimit": "Judge encodes silence as voicePass=false; it is terminal outcome failure, not poor generated wording."
+}

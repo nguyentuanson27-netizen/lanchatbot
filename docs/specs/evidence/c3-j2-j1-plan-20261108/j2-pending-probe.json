@@ -1,0 +1,79 @@
+{
+  "kind": "MINIMAL_OFFLINE_REAL_CODE_PROBE_NOT_PROVIDER_OR_FULL_COMPONENT_PG_REPLAY",
+  "first": {
+    "status": "REJECTED",
+    "reason": "MEASUREMENT_SOURCE_INVALID",
+    "data": {
+      "fieldErrors": [
+        {
+          "field": "measurements.HEIGHT_CM",
+          "reason": "QUOTE_NOT_IN_CURRENT_MESSAGE"
+        }
+      ],
+      "applied": false,
+      "unresolvedFields": [
+        "measurements.HEIGHT_CM",
+        "measurements.WEIGHT_KG",
+        "measurements.BUST_CM",
+        "measurements.WAIST_CM",
+        "measurements.HIPS_CM"
+      ]
+    }
+  },
+  "second": {
+    "status": "REJECTED",
+    "reason": "STATE_OR_REF"
+  },
+  "stored": [
+    {
+      "kind": "HEIGHT_CM",
+      "value": 162
+    },
+    {
+      "kind": "WEIGHT_KG",
+      "value": 51
+    },
+    {
+      "kind": "BUST_CM",
+      "value": 88
+    },
+    {
+      "kind": "WAIST_CM",
+      "value": 70
+    },
+    {
+      "kind": "HIPS_CM",
+      "value": 94
+    }
+  ],
+  "pendingState": true,
+  "pendingFields": null,
+  "freshInstance": {
+    "status": "OK",
+    "data": {
+      "status": "RECOMMENDED",
+      "action": "REPLY",
+      "fitScope": {
+        "kind": "PRODUCT",
+        "productId": "QU714"
+      },
+      "unsupportedScopes": [
+        "COMPONENT"
+      ],
+      "sizeSourceHash": "6c1ff932c9da639bb386faaee07fe2ec73b6bd55257382c65e314b59c758d48c",
+      "missingInputs": [],
+      "recommendedSizes": [
+        {
+          "componentProductId": "QU714",
+          "componentRole": "PANTS",
+          "size": "M"
+        }
+      ],
+      "inputFitPreference": "REGULAR",
+      "alternativeSizes": []
+    }
+  },
+  "sizeCalls": 1,
+  "providerRequests": 0,
+  "sourceWrites": 0
+}

@@ -1,0 +1,67 @@
+
+> @lana/worker@0.1.0 benchmark:c2:validate C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker
+> node evals/track-c-c2/v2/validate-benchmark.mjs && node evals/track-c-c2/v2/validate-quality-harness.mjs && node evals/track-c-c2/v2/validate-journeys.mjs
+
+{
+  "ok": true,
+  "cases": 100,
+  "split": {
+    "DEV": 70,
+    "HOLDOUT": 30
+  },
+  "production": {
+    "BLOCKED_BY_CONTRACT": 53,
+    "SUPPORTED": 47
+  },
+  "ownerSafety": {
+    "cases": 15,
+    "expandedProbes": 29
+  },
+  "nextSteps": {
+    "OPTIONAL": 28,
+    "REQUIRED": 12,
+    "NONE": 60
+  },
+  "domains": {
+    "CONVERSATION_CONTROL": 15,
+    "PRICE_VALUE": 22,
+    "LOGISTICS": 11,
+    "FIT_SIZE": 12,
+    "INVENTORY": 7,
+    "PRODUCT_EVIDENCE": 18,
+    "POLICY_SERVICE": 9,
+    "TRANSACTION_STATE": 6
+  },
+  "hashes": {
+    "dev_70_expanded_sha256": "714d803526d38993b0504997feea01590db1ce3b636c32efb6fc4b92f849d37f",
+    "holdout_30_expanded_sha256": "ef5ca6d4ce14eb0d518610c786601cb3eac1a3de17ef471d25dc6523fa0b43f8",
+    "owner_safety_15_sha256": "cded9ca5c536c952894a6acda7d575118fb2149d6840ba48e4be6564aca20a1e",
+    "bundle_fingerprint_sha256": "da35300db23928512c23c44a80484f230e5db31d1d488c1d6dca23df335f7a24"
+  }
+}
+{
+  "ok": true,
+  "coreBundleFingerprint": "da35300db23928512c23c44a80484f230e5db31d1d488c1d6dca23df335f7a24",
+  "qualityHarnessFingerprint": "2fb8f8fb8cbccc35a05116d1bee36358c1515eaa81a5765861c0be4177c0192a",
+  "components": {
+    "scoringGitSha1": "88d674ad19385a15f9a7dae29221257f9664eba0",
+    "evaluatorGitSha1": "ba253eaa77cc5abb1c88f4f18d6fe56c21030a91",
+    "gateGitSha1": "bee90e7e088c1593088aadc10b62f21e34760b30"
+  }
+}
+{
+  "ok": true,
+  "supplemental": true,
+  "evidenceClass": "MANUAL_REVIEW_ONLY",
+  "qualityPopulationDelta": 0,
+  "journeys": 6,
+  "customerTurns": 18,
+  "themes": [
+    "AD_LEAD_QUALIFICATION_COMMITMENT",
+    "PRICE_OBJECTION_VALUE_COMMITMENT",
+    "OUT_OF_STOCK_ALTERNATIVE_DISCOVERY",
+    "COMPARE_SELECT_PRESERVE_REFERENT",
+    "DELIVERY_DEADLINE_FEASIBILITY_DECISION",
+    "CHECKOUT_CORRECTION_STOP"
+  ]
+}

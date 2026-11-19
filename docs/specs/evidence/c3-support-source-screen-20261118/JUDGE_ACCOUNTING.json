@@ -1,0 +1,354 @@
+[
+  {
+    "packetId": "cf42ccf1f736ab1e9e91129c6d0134165e49c0b33a9737b5c1657bef7efabeda",
+    "status": "OK",
+    "providerRequests": 1,
+    "modelVersion": "gpt-6.1-sol",
+    "usage": {
+      "input_tokens": 8782,
+      "output_tokens": 291,
+      "total_tokens": 9073,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_write_tokens_details": {
+          "ttl_30m_tokens": 0,
+          "ttl_12h_tokens": 0
+        }
+      },
+      "output_tokens_details": {
+        "reasoning_tokens": 98
+      }
+    },
+    "latencyMs": 11744,
+    "httpStatus": 200,
+    "providerErrorCode": null,
+    "rating": {
+      "preferred": "B",
+      "replies": [
+        {
+          "voicePass": false,
+          "factsComplete": false,
+          "materialRegression": true,
+          "controlPass": true,
+          "reason": "Giá và tình trạng màu đúng, nhưng kể cơ chế hệ thống và hứa tự động áp dụng “mức hỗ trợ tốt nhất” khi hỗ trợ chưa được xét, chưa có quyền lợi nào được cấp."
+        },
+        {
+          "voicePass": true,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": true,
+          "reason": "Báo đúng giá 499.000đ, chỉ nói shop sẽ xem xét hỗ trợ chứ không hứa được giảm. Hỏi màu là đúng lựa chọn còn thiếu của món khách đã đồng ý mua."
+        }
+      ]
+    }
+  },
+  {
+    "packetId": "d17599ab06f004d638c6b6da1de4acd12a593e004469d0af4c9a5a2e6f98c950",
+    "status": "OK",
+    "providerRequests": 1,
+    "modelVersion": "gpt-6.1-sol",
+    "usage": {
+      "input_tokens": 8784,
+      "output_tokens": 485,
+      "total_tokens": 9269,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_write_tokens_details": {
+          "ttl_30m_tokens": 0,
+          "ttl_12h_tokens": 0
+        }
+      },
+      "output_tokens_details": {
+        "reasoning_tokens": 277
+      }
+    },
+    "latencyMs": 14955,
+    "httpStatus": 200,
+    "providerErrorCode": null,
+    "rating": {
+      "preferred": "A",
+      "replies": [
+        {
+          "voicePass": false,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": true,
+          "reason": "Báo đúng giá 499.000đ, thể hiện hỗ trợ còn chờ xét và hỏi đúng màu còn thiếu, không hứa ưu đãi. Tuy nhiên, kể việc ghi nhận rồi hệ thống tự kiểm tra khi lên giỏ khiến câu nặng quy trình nội bộ."
+        },
+        {
+          "voicePass": false,
+          "factsComplete": false,
+          "materialRegression": false,
+          "controlPass": true,
+          "reason": "Giá và tình trạng hai màu đều đúng, hỏi màu giúp tiếp tục mua. Nhưng khách đang xin hỗ trợ thêm mà câu chỉ báo giá và chốt màu, bỏ qua việc hỗ trợ riêng chưa được xét."
+        }
+      ]
+    }
+  },
+  {
+    "packetId": "e5def5eeb6d1e579f5c258ed5122a2e00fbebab90b2bcb9d737eb3e552424536",
+    "status": "OK",
+    "providerRequests": 1,
+    "modelVersion": "gpt-6.1-sol",
+    "usage": {
+      "input_tokens": 9475,
+      "output_tokens": 545,
+      "total_tokens": 10020,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_write_tokens_details": {
+          "ttl_30m_tokens": 0,
+          "ttl_12h_tokens": 0
+        }
+      },
+      "output_tokens_details": {
+        "reasoning_tokens": 302
+      }
+    },
+    "latencyMs": 22006,
+    "httpStatus": 200,
+    "providerErrorCode": null,
+    "rating": {
+      "preferred": "B",
+      "replies": [
+        {
+          "voicePass": false,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": false,
+          "reason": "Báo đúng giá, giảm 5% và tổng 978.100đ; không khẳng định đã được hỗ trợ thêm. Tuy nhiên, khách đã nói lấy hai áo mà lại hướng dẫn thêm giỏ để hệ thống kiểm tra, thay vì hỏi màu còn thiếu. Báo giá mở đầu thiếu dòng size theo nguồn và ảnh."
+        },
+        {
+          "voicePass": false,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": false,
+          "reason": "Giá và tổng sau ưu đãi đúng; diễn đạt việc hỗ trợ thêm còn chờ xem xét, không hứa cấp. Tự nhiên hơn A nhưng vẫn đẩy khách sang thao tác thêm giỏ dù đã nói mua, chưa hỏi màu để tiếp tục. Không giữ đầy đủ form báo giá mở đầu và thiếu ảnh."
+        }
+      ]
+    }
+  },
+  {
+    "packetId": "3bad40964c64c85412901b98663918edb5b9d58bd774bf1edf173a74157ef524",
+    "status": "OK",
+    "providerRequests": 1,
+    "modelVersion": "gpt-6.1-sol",
+    "usage": {
+      "input_tokens": 9050,
+      "output_tokens": 751,
+      "total_tokens": 9801,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_write_tokens_details": {
+          "ttl_30m_tokens": 0,
+          "ttl_12h_tokens": 0
+        }
+      },
+      "output_tokens_details": {
+        "reasoning_tokens": 500
+      }
+    },
+    "latencyMs": 29949,
+    "httpStatus": 200,
+    "providerErrorCode": null,
+    "rating": {
+      "preferred": "A",
+      "replies": [
+        {
+          "voicePass": false,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": false,
+          "reason": "Giá, giảm 5% và tổng gồm ship đều đúng; không khẳng định đã được hỗ trợ thêm. Tuy nhiên, khách đã nói lấy hai áo mà vẫn hỏi có muốn thêm giỏ, thay vì hỏi màu còn thiếu. Không giữ form báo giá mở đầu, thiếu dòng size và ảnh theo nguồn."
+        },
+        {
+          "voicePass": false,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": false,
+          "reason": "Tính đúng tiền hàng, ưu đãi chung và phí ship, chưa hứa mức giảm thêm. Nhưng đẩy khách tự cho hàng vào giỏ để hệ thống kiểm tra, không hỏi màu để tiếp tục mua; cách nói “ưu đãi tốt nhất” cũng kém rõ hơn A về hỗ trợ chưa xét. Thiếu form báo giá mở đầu, dòng size và ảnh theo nguồn."
+        }
+      ]
+    }
+  },
+  {
+    "packetId": "749f8a1a060d813639a62d36e0021cdf7a5bbb1603174ee66645f26e693d938d",
+    "status": "OK",
+    "providerRequests": 1,
+    "modelVersion": "gpt-6.1-sol",
+    "usage": {
+      "input_tokens": 6638,
+      "output_tokens": 319,
+      "total_tokens": 6957,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_write_tokens_details": {
+          "ttl_30m_tokens": 0,
+          "ttl_12h_tokens": 0
+        }
+      },
+      "output_tokens_details": {
+        "reasoning_tokens": 122
+      }
+    },
+    "latencyMs": 10461,
+    "httpStatus": 200,
+    "providerErrorCode": null,
+    "rating": {
+      "preferred": "B",
+      "replies": [
+        {
+          "voicePass": false,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": true,
+          "reason": "Xác nhận đúng 2 áo trắng size M và tổng 948.100đ sau giảm 5%, miễn phí vận chuyển. Tuy nhiên, hỏi lại có muốn chốt đơn không là thừa khi khách đã nói lấy hàng và chọn màu."
+        },
+        {
+          "voicePass": true,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": true,
+          "reason": "Xác nhận ngắn gọn thao tác thêm giỏ đã có bằng chứng, đúng số lượng, màu, size và tổng tiền cùng ưu đãi hiện tại; không hỏi lại ý định mua."
+        }
+      ]
+    }
+  },
+  {
+    "packetId": "1ddc84e98c2ee1a4eb90e9e02812f70cb939d8b148a84d101e3938999f106d72",
+    "status": "OK",
+    "providerRequests": 1,
+    "modelVersion": "gpt-6.1-sol",
+    "usage": {
+      "input_tokens": 4222,
+      "output_tokens": 429,
+      "total_tokens": 4651,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_write_tokens_details": {
+          "ttl_30m_tokens": 0,
+          "ttl_12h_tokens": 0
+        }
+      },
+      "output_tokens_details": {
+        "reasoning_tokens": 234
+      }
+    },
+    "latencyMs": 14556,
+    "httpStatus": 200,
+    "providerErrorCode": null,
+    "rating": {
+      "preferred": "TIE",
+      "replies": [
+        {
+          "voicePass": false,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": true,
+          "reason": "Báo đúng tổng 948.100đ đã miễn phí ship. Tuy nhiên, lại hỏi có muốn chốt đơn dù chị đã nói lấy hai áo trắng size M và shop đã hỏi chốt ở lượt trước."
+        },
+        {
+          "voicePass": false,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": true,
+          "reason": "Tổng 948.100đ, giảm 5% và miễn phí ship đều đúng nguồn. Câu hỏi chốt đơn lặp lại không cần thiết khi chị đã chọn mua và chỉ đang hỏi tổng tiền."
+        }
+      ]
+    }
+  },
+  {
+    "packetId": "8ccf2f44e65243b698102ad9efcc15e91e327d03984bf84038f97fc81abcad63",
+    "status": "OK",
+    "providerRequests": 1,
+    "modelVersion": "gpt-6.1-sol",
+    "usage": {
+      "input_tokens": 3204,
+      "output_tokens": 454,
+      "total_tokens": 3658,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_write_tokens_details": {
+          "ttl_30m_tokens": 0,
+          "ttl_12h_tokens": 0
+        }
+      },
+      "output_tokens_details": {
+        "reasoning_tokens": 287
+      }
+    },
+    "latencyMs": 16048,
+    "httpStatus": 200,
+    "providerErrorCode": null,
+    "rating": {
+      "preferred": "TIE",
+      "replies": [
+        {
+          "voicePass": true,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": false,
+          "reason": "Trả lời tự nhiên, đúng giá 799.000đ, chất liệu và các size có sẵn; hỏi size giúp khách chọn mua. Tuy nhiên, báo giá mở đầu thiếu mã SV2447 và ảnh sản phẩm theo nguồn."
+        },
+        {
+          "voicePass": true,
+          "factsComplete": true,
+          "materialRegression": false,
+          "controlPass": false,
+          "reason": "Giọng bán hàng tự nhiên, báo đúng giá, chất liệu và size; câu hỏi chọn size phù hợp với lượt hỏi giá. Tuy nhiên, báo giá mở đầu cũng thiếu mã SV2447 và ảnh sản phẩm theo nguồn."
+        }
+      ]
+    }
+  },
+  {
+    "packetId": "6f1b975675add6bc5cef287f265b62ac33741afae56b978c83e11c14e7ccf291",
+    "status": "OK",
+    "providerRequests": 1,
+    "modelVersion": "gpt-6.1-sol",
+    "usage": {
+      "input_tokens": 4012,
+      "output_tokens": 989,
+      "total_tokens": 5001,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_write_tokens_details": {
+          "ttl_30m_tokens": 0,
+          "ttl_12h_tokens": 0
+        }
+      },
+      "output_tokens_details": {
+        "reasoning_tokens": 803
+      }
+    },
+    "latencyMs": 25064,
+    "httpStatus": 200,
+    "providerErrorCode": null,
+    "rating": {
+      "preferred": "TIE",
+      "replies": [
+        {
+          "voicePass": true,
+          "factsComplete": true,
+          "materialRegression": true,
+          "controlPass": false,
+          "reason": "Đáp tự nhiên, dùng đúng kết quả size M cho áo theo số đo đã sửa; hỏi chốt mua không lặp ý khách đã xác nhận. Tuy nhiên, “vừa đẹp” khẳng định thêm hiệu quả mặc mà kết quả tư vấn size chưa xác minh."
+        },
+        {
+          "voicePass": true,
+          "factsComplete": true,
+          "materialRegression": true,
+          "controlPass": false,
+          "reason": "Đáp đúng nhu cầu chọn size áo và giữ size M theo kết quả hiện hành. Tuy nhiên, “vừa vặn nhất” biến size đề xuất thành khẳng định độ vừa khi mặc, vượt thông tin được xác minh; không có ưu thế đáng kể so với A."
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,260 @@
+{
+  "runSourceSha": "a8c7ebee18e883770379f6fea665b8ab1cd31839",
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-finalize-inputs-20261102-01.mjs",
+      "sha256": "ea7b0a5951d9d32628e2d6476f6df96a4f09f8cb05f3cb844da6910782d894dc",
+      "bytes": 2079
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-initial-20261102-01\\INITIAL_STATE.json",
+      "sha256": "36a093b85c86d0bba6c16042a3dba84019a7b2a82a378750984a59e5c84e81d1",
+      "bytes": 700
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-initial-20261102-01\\integration.json",
+      "sha256": "223dc2df5bd4568bf13b8d80d6d69f075ba6b0b959635567a0e1843d7d104d91",
+      "bytes": 7576
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-initial-20261102-01.log",
+      "sha256": "9836ebc8db3db372b1cec6eacaed6a16b02bc0972f3d4915c2be685f745e29da",
+      "bytes": 74
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-launch-20261102-01.log",
+      "sha256": "ab701afaa1fe02b7a220655709369f1df213d135a790ecce2546229a77ec8d8c",
+      "bytes": 191
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-launch-20261102-01.py",
+      "sha256": "3e7b795807d2b009206a93bb1445da450a0368a58732429c99f29ef78e580832",
+      "bytes": 2876
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-preflight-20261102-01.log",
+      "sha256": "cb8265cc67ad7ffe2c8604134b6d0735e3b6f30a506ed3fb9cbf9d671f511c8b",
+      "bytes": 1593
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-prepare-20261102-01.log",
+      "sha256": "0eb6032af8c99d17bf3dbe6a3f800fc632098a37e788c64b92ece56e95192e0b",
+      "bytes": 749
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-prepare-20261102-01.mjs",
+      "sha256": "2ee155f36c54df5f075a13ed572f536d0211f2b4bdb5a3d05e8fe2892cc67255",
+      "bytes": 8669
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-accounting-20261102-01.mjs",
+      "sha256": "e06a0edfcd7a3e8a4ea14b9b0776fca89469e9fc43032c1d28b1288e296977e4",
+      "bytes": 4322
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-run-20261102-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-accounting-20261102-01.json",
+      "sha256": "3f274deab5ccb018f6dfbbbdb2ce1fd1e4a34950fbb6045a0b2b2a24db02407a",
+      "bytes": 63716
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-accounting-20261102-01.mjs",
+      "sha256": "2eb6f067ea047781ec948c7c607243a4eb6389d218e21f44dd47a6d2b449120f",
+      "bytes": 4324
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-command-20261102-01.json",
+      "sha256": "403ac4cb771687c3431d767265f105e3af9202dad73d3f258be6122b01f5b03d",
+      "bytes": 1002
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-command-started-20261102-01.json",
+      "sha256": "a01ee408727b03360107da323c9b7d6f62d6e322d2e9bdb7f51521a12bdcf8f0",
+      "bytes": 930
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "c1eff0e946225219bc7caf53364dd23459425f5aef64b73d3aab5767853a1272",
+      "bytes": 4141580
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\integration.json",
+      "sha256": "7dab970c2a8296fb5350b5a4eb4de761fcf52378a273dbb2ef7fd62896d1f82c",
+      "bytes": 7824
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-24c7d9d24ea9e3d66069a2388d3f51c88cb2a27d67350d881cd18d8f7aeaac6c-turn-0.json",
+      "sha256": "b05a3dfbbda880dc8f9ff7f8bed7ac96c1f8da040bfc6399e1ce0de82fd07da6",
+      "bytes": 152781
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-2a4ff27eba41f631d11a421eee1db45f04278128266596e4bce06e2f78c9bd1f-turn-0.json",
+      "sha256": "1e4cd886b363e5c3f699e748d3a322e17c40b27fc25e9fefe3cb7f49f1701cb1",
+      "bytes": 73377
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-2a4ff27eba41f631d11a421eee1db45f04278128266596e4bce06e2f78c9bd1f-turn-1.json",
+      "sha256": "0932ad257223c0a0f3ec5f397171d395a038af1470c570c484942bb9af31f159",
+      "bytes": 6695
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-2a4ff27eba41f631d11a421eee1db45f04278128266596e4bce06e2f78c9bd1f-turn-2.json",
+      "sha256": "5e0a1d80024313517a10d6b542e5632a919143b058ff1cee6f14f634a4a0fc11",
+      "bytes": 7797
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-351535e140a749e6afd712ebc6b35e21389975e33a4394f9f2a4fcb6e8027820-turn-0.json",
+      "sha256": "7a83a94ea7a700d4585ac74a4c80d1e53fa8c1a71fe4920b49ef37ef44418122",
+      "bytes": 258532
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-36a444c327b5fd4cc540c247a0a750d85362cc3d1a276f345f725a30d62a6945-turn-0.json",
+      "sha256": "bcc95e5d31dce3d94ca524044bd230b978da036679cb0a6a58c0442bed6019ef",
+      "bytes": 361278
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-4cdaec4296119f1c9126557f27f4c91deac235ae36798d9f883b6030c66854bb-turn-0.json",
+      "sha256": "2386235885458ff80eea4dd56c372672468863fb765eadbb9c02df58511168d1",
+      "bytes": 177460
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-693f386f4b69cc4471470971f100b7edaf20b8e6c18ee2a54253b9499e6d36fd-turn-0.json",
+      "sha256": "aa907516f452d07149575a01ed9da11b649707e574758e8fd118f5b4e0bbdc02",
+      "bytes": 458438
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-693f386f4b69cc4471470971f100b7edaf20b8e6c18ee2a54253b9499e6d36fd-turn-1.json",
+      "sha256": "2f0fb6163fe5eb92032fae70742c61b73cce071b0175608df22e57f8e0e10914",
+      "bytes": 251550
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-693f386f4b69cc4471470971f100b7edaf20b8e6c18ee2a54253b9499e6d36fd-turn-2.json",
+      "sha256": "8d6e8039223018fbc49022b53d2d39e6adce9e5a9e0b4bf406e6b47300e937e2",
+      "bytes": 31991
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-69fdaea3dc2be532d8b0abc6a07ddbc63f02b8f77f3191311ccf0b61738edc5a-turn-0.json",
+      "sha256": "969c12108b92a079161597efe5b68d7854b65eb406b56d0c5edff2c96ab433f7",
+      "bytes": 178455
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-7dbf467834755bb7ae034d20fc51f41a7fb115d7e39c0c73272f2b6acab2e624-turn-0.json",
+      "sha256": "2e1a2b2b67da30d1d9b861182b94a7926a60acf152e6a46c6413e38cccfe94be",
+      "bytes": 135263
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-7dbf467834755bb7ae034d20fc51f41a7fb115d7e39c0c73272f2b6acab2e624-turn-1.json",
+      "sha256": "f83a677c7f924fbfc118bdbeee60c609895ffad2bcd1bd6ba9a5aa1e8ad8157c",
+      "bytes": 6707
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-7dbf467834755bb7ae034d20fc51f41a7fb115d7e39c0c73272f2b6acab2e624-turn-2.json",
+      "sha256": "5b8921aa561be64097a3e5c33a8f67aa9a6781d0690f3745f4a349d4128d5b42",
+      "bytes": 7937
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-964388ad91b6b9b675d20936d8e13ae19140f1b1f95e23705c0ee9a77d6e92c4-turn-0.json",
+      "sha256": "3e5ed722741aa64f3b3c73d3507f1367f24ee9d5780508a4fbd590ab5820eaaf",
+      "bytes": 99549
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-c364beee37c67187ba51b94667c668028e85386f5a91d3690edf7b3622810e15-turn-0.json",
+      "sha256": "cb20cf7be9d99262508717667d0c8d4e6bad06883ff324217e414e2ccffaff91",
+      "bytes": 212831
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-e202560977f60112c2b507f8b3b9b8922fcfff0f705bb643742bef02976d1fc0-turn-0.json",
+      "sha256": "1fa81ec078c4474f9eefe9acd32917844882d38947ac34b82eb7a53729bbb21b",
+      "bytes": 460506
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-e202560977f60112c2b507f8b3b9b8922fcfff0f705bb643742bef02976d1fc0-turn-1.json",
+      "sha256": "d3329603a3ddf262475341f93e6d63d573fe16c89e73a008921f95a03beef14c",
+      "bytes": 6895
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-e202560977f60112c2b507f8b3b9b8922fcfff0f705bb643742bef02976d1fc0-turn-2.json",
+      "sha256": "4ac846d40f97d785aa15cba7b1a479cdc5c3e3d5facc7bd405c506016ee1ac7d",
+      "bytes": 8065
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\native-f990ba490ee55d298dc8d9996ac816dadcba2453d0efad12572d31636243f88a-turn-0.json",
+      "sha256": "cdebec6dd2ae8393a48bb6ce4e0aae3558b3518c9fa3a199b8cc26ec0c3d0f25",
+      "bytes": 214891
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01\\NATIVE_REQUESTS.jsonl",
+      "sha256": "ddff06edfa55ea60d2cb971ecad06f640f639262684eed6d6c502e8adc8a6337",
+      "bytes": 2837347
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-run-20261102-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-sealed-20261102-01\\DIAGNOSTIC_DISPATCH.json",
+      "sha256": "431074c4c023e6f5941eee407eb8c69f6d60f3306464ef86b3f6c0b4fe5c19a6",
+      "bytes": 162
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-sealed-20261102-01\\INPUT_APPROVAL.json",
+      "sha256": "2c5269c8ac19ddbcb2adb0c1076561e4a602b3f2ef8acfcac90f620310d41a5b",
+      "bytes": 4461
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-sealed-20261102-01\\PREFLIGHT.json",
+      "sha256": "41727d060956326c51d3b383a37751127138b62cddb6027dacc42a080ea1fbb5",
+      "bytes": 867
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-sealed-20261102-01\\REGISTRATION.json",
+      "sha256": "6385b60fa7c96e2d9091435d19ad6aa921aabaa9ede2b01bc41cf85408d7f6dc",
+      "bytes": 1187914
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-sealed-20261102-01\\REGISTRATION.pending.json",
+      "sha256": "85566bb9b80291cde74f8d5f922751785de0f24faaa307aae24ab79e6f833993",
+      "bytes": 1187489
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-sealed-20261102-01\\SOURCE_READINESS_REVIEW.json",
+      "sha256": "820f3ac2c59bb767f1a5aaaddfb02b240bdeeeb4de4c0798a7892703f99cd0fe",
+      "bytes": 19407
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-report-20261102-01.py",
+      "sha256": "39d70cd4d815a96423ed48c196eccea63f224065186b226bcf8b2b0c4386527b",
+      "bytes": 10537
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-resolve-world-20261102-01.mjs",
+      "sha256": "5c35d0b24086d2911833c6f123ab0c52fd8c5d0657452b856b10648838ca78bc",
+      "bytes": 1557
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-world-20261102-01\\SUMMARY.json",
+      "sha256": "6bdd073352fb528f65d71f51fdc2fa2276a34807a1e7d8f58939e1ee330302d3",
+      "bytes": 208
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-world-20261102-01\\WORLD.json",
+      "sha256": "0235b1e6ebc6bec88666f902c8b7330bda79456e688b1f82242eb9287fea7c21",
+      "bytes": 42770534
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-world-capture-20261102-01.log",
+      "sha256": "f648d0d842e875b6d7dbf4b023c7b61a1adea27b2361c235b5cb0ad580b00f9e",
+      "bytes": 138
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-world-resolved-20261102-01.json",
+      "sha256": "63353717c58b128d29be5a19e9b7aec63ef3e1e39b7ab3f2dffa6f2ddf0786e0",
+      "bytes": 42778387
+    }
+  ]
+}

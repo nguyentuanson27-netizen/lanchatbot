@@ -1,0 +1,20 @@
+{
+  "allActualProviderRequests": 30,
+  "sourceInvalidRegistrationRequests": 4,
+  "sourceBoundSafetyRequests": 26,
+  "ownerRequests": 0,
+  "retry": 0,
+  "providerTimeouts": 0,
+  "providerErrors": 0,
+  "inputTokens": 284921,
+  "outputTokens": 1940,
+  "usageRows": 30,
+  "verifierAdapterLatencyMs": {
+    "p50": 4187.707799999989,
+    "p95": 6105.381999999998
+  },
+  "latencyPopulation": "All 30 actual verifier calls, including the 4 calls in the source-invalid registration",
+  "cost": "PROVIDER_NOT_EXPOSED",
+  "wholeConversationQuality": "NOT_MEASURED",
+  "nativeCompletion": "0/65 slots, 0/135 turns"
+}

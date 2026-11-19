@@ -1,0 +1,77 @@
+{
+  "kind": "WHITE_SHIRT_TEST_SOURCE_REPLAY",
+  "approvalRef": "owner-white-shirt-test-assumption-20261104",
+  "publicSourceWorldHash": "658e571d533c11f02d8d9d79aa4d653544c69324c0cb09e7fc8817d4c305a1a7",
+  "testWorldHash": "efda5ab09fcf290cad6f6405f98a7769bf00c203d46f046263dbf1bd5b35fc6b",
+  "checkedAt": "2026-11-04T02:46:34.672Z",
+  "clockPolicy": "Original capture clock; source timestamps unchanged",
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "rawWorldUnchanged": true,
+  "checks": {
+    "nativeFrozenCatalogParity": 2,
+    "whiteAoSelections": 8,
+    "readProduct": 2,
+    "colorBoundMediaAndOpeningGate": 2,
+    "exactReadback": 2
+  },
+  "rows": [
+    {
+      "productId": "SQ2447",
+      "size": "S",
+      "color": "TRẮNG",
+      "stock": 32,
+      "price": 499000
+    },
+    {
+      "productId": "SQ2447",
+      "size": "M",
+      "color": "TRẮNG",
+      "stock": 9,
+      "price": 499000
+    },
+    {
+      "productId": "SQ2447",
+      "size": "L",
+      "color": "TRẮNG",
+      "stock": 3,
+      "price": 499000
+    },
+    {
+      "productId": "SQ2447",
+      "size": "XL",
+      "color": "TRẮNG",
+      "stock": 12,
+      "price": 499000
+    },
+    {
+      "productId": "SV2447",
+      "size": "S",
+      "color": "TRẮNG",
+      "stock": 32,
+      "price": 499000
+    },
+    {
+      "productId": "SV2447",
+      "size": "M",
+      "color": "TRẮNG",
+      "stock": 9,
+      "price": 499000
+    },
+    {
+      "productId": "SV2447",
+      "size": "L",
+      "color": "TRẮNG",
+      "stock": 3,
+      "price": 499000
+    },
+    {
+      "productId": "SV2447",
+      "size": "XL",
+      "color": "TRẮNG",
+      "stock": 12,
+      "price": 499000
+    }
+  ],
+  "worldPath": "../c3-white-shirt-test-world-20261104-01/WORLD.json"
+}

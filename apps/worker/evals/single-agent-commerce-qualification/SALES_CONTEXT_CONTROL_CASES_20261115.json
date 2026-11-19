@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "origin": "TARGET_CAPABILITIES",
+  "status": "DRAFT_REQUIRES_FRESH_SOURCE_BINDING",
+  "provenance": {
+    "developmentOnly": true,
+    "diagnosticScope": "SALES_CONTEXT_CONTROLS_20261115",
+    "sourceBindingsPending": true
+  },
+  "scenarios": [
+    {
+      "id": "c-context-thanks",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Ừ, chị cảm ơn em nhé.",
+          "history": [],
+          "initialProductCodes": []
+        }
+      ],
+      "family": "CONTEXT_CONTROL",
+      "initialStateRef": "context-control-0",
+      "nativeCodeOwnedTurns": [],
+      "evaluator": {
+        "requiredCustomerOutcomes": [
+          "Đáp lời cảm ơn đúng mức, kết thúc gọn khi không còn việc mua."
+        ],
+        "allowedTerminalKinds": [
+          "SEND_ELIGIBLE"
+        ],
+        "noExactProseRequired": true
+      }
+    },
+    {
+      "id": "c-context-preorder",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Đặt trước cũng được em. Váy Diệp An bao nhiêu?",
+          "history": [],
+          "initialProductCodes": [
+            "V168"
+          ]
+        }
+      ],
+      "family": "CONTEXT_CONTROL",
+      "initialStateRef": "context-control-1",
+      "nativeCodeOwnedTurns": [],
+      "evaluator": {
+        "requiredCustomerOutcomes": [
+          "Báo giá hiện hành, dùng việc khách đã biết hàng đặt trước để tránh nhắc thừa; vẫn giữ đúng tình trạng nguồn."
+        ],
+        "allowedTerminalKinds": [
+          "SEND_ELIGIBLE"
+        ],
+        "noExactProseRequired": true
+      }
+    },
+    {
+      "id": "c-context-two-units",
+      "mode": "JOURNEY",
+      "turns": [
+        {
+          "latest": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        },
+        {
+          "latest": "Lấy trắng em nhé.",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        },
+        {
+          "latest": "Cả ship hết bao nhiêu em?",
+          "history": [],
+          "initialProductCodes": [
+            "SV2447"
+          ]
+        }
+      ],
+      "customerPolicy": {
+        "kind": "FROZEN_SCRIPTED_BRANCHES",
+        "selector": "HUMAN_RECORDED_FROM_ACTUAL_REPLY",
+        "branches": [],
+        "hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "family": "CONTEXT_CONTROL",
+      "initialStateRef": "context-control-2",
+      "nativeCodeOwnedTurns": [],
+      "evaluator": {
+        "requiredCustomerOutcomes": [
+          "Lưu yêu cầu hỗ trợ trước giỏ mà chưa cấp giảm; khi khách chọn màu, tạo giỏ đúng hai áo và áp dụng pending một lần theo receipt.",
+          "Báo tổng hiện hành theo giỏ sau hỗ trợ; không nhân ưu đãi của một set thành hai đơn vị."
+        ],
+        "allowedTerminalKinds": [
+          "SEND_ELIGIBLE"
+        ],
+        "noExactProseRequired": true
+      }
+    },
+    {
+      "id": "c-context-opening",
+      "mode": "SINGLE",
+      "turns": [
+        {
+          "latest": "Bộ này bao nhiêu em?",
+          "history": [],
+          "initialProductCodes": [
+            "SD023"
+          ]
+        }
+      ],
+      "family": "CONTEXT_CONTROL",
+      "initialStateRef": "context-control-3",
+      "nativeCodeOwnedTurns": [],
+      "evaluator": {
+        "requiredCustomerOutcomes": [
+          "Giữ form báo giá mở đầu cho sản phẩm đã xác định và ảnh được code chấp nhận."
+        ],
+        "allowedTerminalKinds": [
+          "SEND_ELIGIBLE"
+        ],
+        "noExactProseRequired": true
+      }
+    }
+  ]
+}

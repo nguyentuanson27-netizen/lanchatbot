@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {runCodexModel} from './codex-inference.mjs';
+import {resolve} from 'node:path';
+import {codexBinary,runCodexModel} from './codex-inference.mjs';
 import {projectRuntime,buildRequest} from './protocol.mjs';
 const m=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)));
 const a=JSON.parse(readFileSync(new URL('./corpus-a2.json',import.meta.url)));
@@ -13,6 +14,13 @@ const client=(count=1,auth=true)=>async base=>{
   for(let i=0;i<count;i++)await fetch(base+'/responses',{method:'POST',headers:auth?{authorization:'synthetic-auth-not-for-evidence'}:{},
     body:JSON.stringify({tools:[{name:'shell'}],input:'EVALUATOR_SENTINEL',model:'wrong-model'})});
 };
+
+test('an explicit absolute Codex binary supports a pinned Linux transport',()=>{
+  const binary=resolve('pinned-codex');
+  assert.equal(codexBinary({C3_CODEX_BINARY:binary},'linux'),binary);
+  assert.throws(()=>codexBinary({C3_CODEX_BINARY:'codex'},'linux'),/CODEX_CLIENT_BINARY_PATH/);
+  assert.throws(()=>codexBinary({},'linux'),/CODEX_CLIENT_BINARY_REQUIRED/);
+});
 
 test('read-only commerce owner receives native calls once; verifier retains its no-tool contract',async()=>{
   const owner={readOnlyCommerce:true,models:{conversation:{...m.models.verifier,effort:'low',

@@ -11,8 +11,8 @@
   "ownerFinalRequest": "TEXT_WITH_COMPLETED_TOOL_DATA",
   "toolResultAccounting": "BATCH_EXCLUDING_EXACT_CURRENT_PRODUCT_DUPLICATES",
   "requestBounds": {
-    "ownerWireBytes": 65536,
-    "verifierWireBytes": 65536
+    "ownerWireBytes": 70000,
+    "verifierWireBytes": 70000
   },
   "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
   "candidateFoundationSha": "dd5c9d46f41f1514982210034f551a95cd356f68",
@@ -39,37 +39,34 @@
       }
     },
     "verifier": {
-      "provider": "OPENAI",
-      "model": "gpt-6.1-sol",
-      "version": "gpt-6.1-sol",
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
       "effort": "high",
-      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
       "generationConfig": {
-        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
-        "cliVersion": "0.159.2",
-        "wireApi": "responses",
-        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
-        "tools": [],
-        "tool_choice": "none",
-        "parallel_tool_calls": false,
-        "store": false,
-        "stream": true,
-        "reasoningEffort": "high",
+        "transport": "VERTEX_GENERATE_CONTENT",
+        "candidateCount": 1,
+        "responseMimeType": "application/json",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
         "temperature": "OMITTED_PROVIDER_DEFAULT",
         "topP": "OMITTED_PROVIDER_DEFAULT",
-        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
         "timeoutMs": 90000,
         "maxResponseBytes": 1048576,
-        "relayUpstreamRequestsPerAttempt": 1,
-        "retry": 0,
-        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
-        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        "tools": "NONE",
+        "requestsPerAttempt": 1,
+        "retry": 0
       }
     }
   },
   "promptHashes": {
-    "owner": "9887885e8cfa284a8a8fa45e4df28c7550684f1228a3c3e1995072ba26d8c392",
-    "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+    "owner": "7ae59e51fd64d823da0af393d6ea01026e04a9f2bbd3ea815addd301b941a23a",
+    "verifier": "fa3ab818444aedd06a25a5a4f7956bc25e3162125e109d845430011e2635909c"
   },
   "verdictSchema": {
     "type": "object",
@@ -142,9 +139,9 @@
   },
   "terminalMap": {
     "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
-    "FAIL": "SILENT_HANDOFF_OR_NO_SEND",
-    "UNCERTAIN": "SILENT_HANDOFF_OR_NO_SEND",
-    "MALFORMED": "SILENT_HANDOFF_OR_NO_SEND",
+    "FAIL": "VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND",
+    "UNCERTAIN": "VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND",
+    "MALFORMED": "VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND",
     "TIMEOUT": "SILENT_HANDOFF_OR_NO_SEND",
     "PROVIDER_ERROR": "SILENT_HANDOFF_OR_NO_SEND",
     "STALE": "SILENT_HANDOFF_OR_NO_SEND",
@@ -185,11 +182,11 @@
     "customerMessagePolicy": "SILENT_HANDOFF"
   },
   "quoteTask": {
-    "version": "EXPLICIT_QUOTE_V1",
+    "version": "EXPLICIT_QUOTE_V3",
     "toolWorkAccounting": "PRIMITIVE_WORK_V2",
-    "normalUnits": 2,
-    "standalone": true,
-    "maxPerTurn": 1
+    "normalUnits": 1,
+    "readOnlyBatch": false,
+    "maxPerTurn": 2
   },
   "fallbackDelivery": {
     "mode": "SILENT_HANDOFF",
@@ -197,5 +194,13 @@
     "customerText": false,
     "images": false,
     "effectReplay": false
+  },
+  "verifiedQuoteReply": {
+    "kind": "PRE_CART_QUOTE_V1",
+    "afterVerdicts": ["FAIL", "UNCERTAIN", "MALFORMED"],
+    "source": "SINGLE_CURRENT_PRE_CART_TOTAL_PROOF",
+    "modelText": false,
+    "reverification": "DETERMINISTIC_PRECHECK_ONLY",
+    "withCartOrPreparedHandoff": "SILENT_HANDOFF"
   }
 }

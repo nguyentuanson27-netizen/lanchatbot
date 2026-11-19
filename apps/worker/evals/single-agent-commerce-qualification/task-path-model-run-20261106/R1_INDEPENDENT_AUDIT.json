@@ -1,0 +1,168 @@
+{
+  "status": "AUDITED_INTEGRITY_PASS_FUNCTIONAL_GATE_FAIL",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-06T08:22:25.329292+00:00",
+  "sourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "registrationHash": "b4eab27d1768cab1a3efe8af7ac70c278422936d8aa9aff619857378cf0f4384",
+  "worldHash": "436a5be7095ec64c2eaa851b1fcdf7c0a6a6ee5b381a049c3a84978be1159b4f",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-r1-run-20261106-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "c94f63ed3dc235afcc846f5bdd8505275720e6b5f7b703c2edc14b564312e600",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-r1-run-20261106-02\\integration.json",
+  "integrationSha256": "4505bee6497e50e55b4e1749ef761306c0523fbd5dfb5a484d0c70eaee73c3d0",
+  "accountingSha256": "db20ec8d483585048eab1316966b83753e7da56b497b186963c6d4ffcccd7bb1",
+  "evaluationPolicySha256": "087d104970f663276d3fdc7cc094f80160b3971d5bf21d05bcff5beed3547321",
+  "casesRegistered": 4,
+  "casesExecuted": 4,
+  "capturedTurns": 7,
+  "generations": {
+    "registeredMaximum": 28,
+    "records": 22,
+    "generationHttpRequests": 22,
+    "owner": 15,
+    "verifier": 7,
+    "statusOK": 22,
+    "automaticGenerationRetries": 0,
+    "authRequestsSeparate": 1
+  },
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 6,
+    "HANDOFF": 1
+  },
+  "capturedTexts": 6,
+  "capturedImages": 3,
+  "acceptedOutbox": 9,
+  "verifierVerdicts": {
+    "PASS": 6,
+    "FAIL": 1
+  },
+  "testDatabaseDropped": true,
+  "sourceDirty": false,
+  "liveSend": false,
+  "materialTaskFailures": 1,
+  "materialFailures": [
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "category": "OWNER_UNSUPPORTED_COMPONENT_SIZE_RECOMMENDATION",
+      "customerTask": "Choose size independently for top and pants.",
+      "observed": "Code returned current COMPONENT recommended M for TOP and M for PANTS, with no alternatives. Owner suggested pants L based on customer usual size/possible loose preference; verifier rejected correctly. Actual customer outcome was silent handoff, zero text/image/Outbox.",
+      "blockedDraft": "Với chiều cao 1m60 và cân nặng 55kg, hệ thống gợi ý chị mặc size M cho cả áo và quần của set này. Tuy nhiên, nếu chị quen mặc quần rộng rãi hơn thì có thể chọn áo size M và quần size L nhé ạ.",
+      "notCause": [
+        "No provider transport or malformed failure observed.",
+        "No continuation bound failure observed.",
+        "Relevant source, profile update and separate component fit outputs were available.",
+        "Verifier rejection was supported by frozen size-advice boundary."
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, set cả bộ gồm 3 món có giá 989.000đ, hiện shop có sẵn các size S, M, L chị nhé."
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "nativeArtifact": "native-98f6c3f597def68c4e260a32ee990474b0474fe30c5aaf0120364cb02beb8ab7-turn-0.json",
+      "nativeRawSha256": "c6acfb8b4f3a55ecab909397115133500ca0a812ee7c22209693cd45c867ad7c"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": "FAIL",
+      "nativeArtifact": "native-34048a3ccac4c6ee3b816fe7b064c8be4885a4f11e24abfd1b7c2e229b1957ab-turn-0.json",
+      "nativeRawSha256": "130cb0d078e10c58e8147f8025fc5776329ce4d57fd3079183d6f63dca81ece3"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Em thêm set váy Thạch Thảo size M vào giỏ cho chị rồi ạ. Tổng đơn của mình là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển)."
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "nativeArtifact": "native-c2a01e94d91df460aa77199b5ae0a578d8387e00778baa88000cfc56f5d28274-turn-0.json",
+      "nativeRawSha256": "2cfd183bad92e22d0d7dcb1dba46207d21604d650f94a88d8d79acd3497a700d"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo lẻ mẫu này có hai màu Trắng (có sẵn) và Be (hàng đặt trước). Chị lấy áo màu nào ạ?"
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "nativeArtifact": "native-c2a01e94d91df460aa77199b5ae0a578d8387e00778baa88000cfc56f5d28274-turn-1.json",
+      "nativeRawSha256": "10d252dd382ff3346062b2e622e917874b590399f1cb94ee991d135121b596d2"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo lẻ Set Thạch Thảo size L có hai màu là trắng (có sẵn) và be (đặt trước). Chị lấy màu nào ạ?"
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "nativeArtifact": "native-0be39df55a13ed78ddf3dcc9be0f06c58489f593b836b1af95816c27df0a9e12-turn-0.json",
+      "nativeRawSha256": "5cc3b792108a2920b670343b07116dde8ea617cb567afa5461ceb93a017620a0"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo lẻ Thạch Thảo có hai màu TRẮNG và BE. Chị lấy màu nào cho áo size M và size L ạ?"
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "nativeArtifact": "native-0be39df55a13ed78ddf3dcc9be0f06c58489f593b836b1af95816c27df0a9e12-turn-1.json",
+      "nativeRawSha256": "6f464f832264c57cf0ea9f1e015c696f56724498d7475f275e76d7abeb455eb4"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, 2 chiếc áo lẻ Thạch Thảo (size M và size L) có tổng tiền hàng là 998.000đ, phí ship 30.000đ và được ưu đãi giảm 49.900đ, tổng thanh toán là 978.100đ chị nhé."
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "nativeArtifact": "native-0be39df55a13ed78ddf3dcc9be0f06c58489f593b836b1af95816c27df0a9e12-turn-2.json",
+      "nativeRawSha256": "29514b7559934c23d1073eceb91fd898152aebbce206fa8151b60df3ec554c33"
+    }
+  ],
+  "integrityChecks": [
+    "All four registered attempts EXECUTED, all seven native artifact digests match evidence; no safetyFindings or hard stop recorded.",
+    "All22 requestBody digests match requestHash, runtime/evaluator firewall assertion passes and generation IDs unique. Each generation has one HTTP request; per-turn owner<=3 and verifier=1.",
+    "All exact drafts and serialized trusted snapshots match their hashes; bound verifier hashes match input; final native witness expected equals currentBinding on all7.",
+    "All six captured messages match accepted text Outbox SHA256, image count3, handoff contains no customer text/image/Outbox.",
+    "p08 initial cart receipt/current total829000 valid; failed replacement attempts leave original cart unchanged and actual reply asks missing colour.",
+    "j1 retains missing colour/M+L, no unsupported cart mutation; final returning quote_product quantity2 returns998000-49900+30000=978100, no added image or cart effect.",
+    "Current group fully completed and native PostgreSQL cleanup true; no provider calls or source edits by reviewer."
+  ],
+  "secondaryFindings": [
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "finding": "Repeated failed REPLACE_LINE with technical __NO_COLOR__ before null-colour clarification consumes tool work. Actual outcome usable and original cart unchanged; retained as nonmaterial finding under frozen policy."
+    }
+  ],
+  "comparison": {
+    "previousR1": "followup-model-r1 20261105:7SEND_ELIGIBLE; current6SEND_ELIGIBLE+1HANDOFF. Different fresh world and N1, no causal attribution to description shortening.",
+    "targetedRepairsUnobserved": "R2 p09/s15 bound, p04/j4 malformed and s13 planning were not executed this campaign; cannot claim model evidence for those repairs."
+  },
+  "remaining": {
+    "cases": 30,
+    "turns": 48,
+    "status": "NOT_RUN_AFTER_R1_FAIL"
+  },
+  "qualification": "No whole-reply quality score, safety proof, Phase C GO or promotion recommendation."
+}

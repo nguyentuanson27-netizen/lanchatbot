@@ -1,0 +1,42 @@
+{
+  "status": "APPROVED_REPORT_ACCURACY_R1_FAIL_STOP",
+  "reviewer": "/root/quote_pg_run_review",
+  "reviewedAt": "2026-11-07T17:39:08.718556+00:00",
+  "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "reportDirectory": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-qualification\\quote-batch-run-20261108",
+  "reviewedFileSha256": {
+    ".gitattributes": "2686fd582cf9cdeed8a097cf92e6b7e349652e3f9f544a941555eff0c9c8a71d",
+    "ACCOUNTING.json": "27a289474ce7d49257452b6299e49cc0b9f375f58b17718911fed2e242918040",
+    "CONVERSATIONS.md": "cea0829238425b193adac4062b6968c028055c53912ee010071e60d45f623ece",
+    "EVALUATION_POLICY.json": "6ebd313fc65b5890de87712590f4bbd39ac804a5d2e5e69985a5976e67538bc6",
+    "GATE.json": "686b1e5937b6eb282127f6efa07691a1c3a2ad304e172dc63e57a7e9f5df71b6",
+    "INDEPENDENT_AUDIT.json": "660f912e81681e0ba062f251c50eb3ef72fb30ed0a2e892897cd0a12b555a6a6",
+    "INPUT_REVIEW.json": "7f338b3239c7c6dc85ef02e2d8c5c0f16476268ef64f691202028b4a8279f8e5",
+    "INTEGRATION.json": "5c6c8e1f969ade83e34e75046c81e2659d2afecbda0e1813d9ab4ccce79d8156",
+    "PG_ACCEPTANCE.json": "11d249b73d3c57610ab3f2d85c8eacb1cdc8e6e9f01b8c7fddb2652389873e74",
+    "PG_REVIEW.json": "b995f6cc4447ca2f25e21260d4c5e335a2f1947a8a9ab66dea9f2e453b1bb7d2",
+    "PROVENANCE.json": "ebc6296d04afedf2e50be31b6bb4278623e2dc1f5506acb1ba6c7363f9837d5a",
+    "REPORT.md": "06c4806256e27e6c8517ab8fa20a6fcd2114dc5c59ca3e6b7ca3d8ef8c113c14"
+  },
+  "findings": [],
+  "checks": [
+    "Eight published evidence copies exactly match independently inspected local originals byte-for-byte.",
+    "PROVENANCE raw hashes match all listed artifacts; source/model/config/prompt/schema/corpus identity matches frozen run.",
+    "All7 transcript blocks and customer turns exactly match captured evidence in order.",
+    "Executed4/7 and all23request denominator,7sent/4images,token and latency figures match accounting.",
+    "R1taskFAIL1 at j1T3, remaining30/48NOT_RUN, legitimate earlier colour clarifications distinguished.",
+    "p07 rejected combined-sourceQuote arguments and successful component results; p08 unavailable change attempt then source read/clarification accurately disclosed.",
+    "All11 packaged files inspected and checked for credential/private-key/connection-string/phone indicators; no PII or secrets found.",
+    "Prior944/870/build/typecheck/lint evidence explicitly attributed to07Nov, not claimed rerun; new focused16 and realPG exactsource disclosed.",
+    "No mixed-batch/continuation/shared-choice model success claim, no blinded quality/stability/C3comparison/PhaseCGO claim.",
+    "Scoped .gitattributes disables text normalization only for evidence-directory JSON; eight copied original evidence hashes remain unchanged. REPORT/CONVERSATIONS LF publication hashes refreshed; provider generation HTTP vs separate OAuth1 clarified.",
+    "Publication revision3 retains JSON -text and actual trailing-whitespace guards while allowing preserved CRLF via cr-at-eol; conversation EOF has one newline. Other reviewed files unchanged; no semantic/model change."
+  ],
+  "limits": [
+    "Report accuracy review only; task gate remains FAIL.",
+    "N1/fresh snapshot cannot establish causal improvement or stability.",
+    "No merge/deploy/live send authorized by review."
+  ],
+  "publicationRevision": 3,
+  "previousApprovalSha256": "4dd1bd9cf88fa89aafbddce9fdb9c8c2d406153b51f938a10a22b8cfe32e3678"
+}

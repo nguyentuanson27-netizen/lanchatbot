@@ -1,0 +1,93 @@
+{
+  "status": "STOP",
+  "registrationHash": "0d51cd36f6e726d4e4659902db3586c9df16e67749f32dc03d16868b021af85d",
+  "voicePass": 1,
+  "voiceDenominator": 6,
+  "netWins": -3,
+  "rows": [
+    {
+      "label": "CANDIDATE:1:1",
+      "control": false,
+      "voicePass": false,
+      "factsComplete": false,
+      "materialRegression": true,
+      "controlPass": true,
+      "reason": "Giá và tình trạng màu đúng, nhưng kể cơ chế hệ thống và hứa tự động áp dụng “mức hỗ trợ tốt nhất” khi hỗ trợ chưa được xét, chưa có quyền lợi nào được cấp.",
+      "netWin": -1
+    },
+    {
+      "label": "CANDIDATE:3:1",
+      "control": false,
+      "voicePass": false,
+      "factsComplete": false,
+      "materialRegression": false,
+      "controlPass": true,
+      "reason": "Giá và tình trạng hai màu đều đúng, hỏi màu giúp tiếp tục mua. Nhưng khách đang xin hỗ trợ thêm mà câu chỉ báo giá và chốt màu, bỏ qua việc hỗ trợ riêng chưa được xét.",
+      "netWin": -1
+    },
+    {
+      "label": "CONTROLS:3:0",
+      "control": false,
+      "voicePass": false,
+      "factsComplete": true,
+      "materialRegression": false,
+      "controlPass": false,
+      "reason": "Báo đúng giá, giảm 5% và tổng 978.100đ; không khẳng định đã được hỗ trợ thêm. Tuy nhiên, khách đã nói lấy hai áo mà lại hướng dẫn thêm giỏ để hệ thống kiểm tra, thay vì hỏi màu còn thiếu. Báo giá mở đầu thiếu dòng size theo nguồn và ảnh.",
+      "netWin": -1
+    },
+    {
+      "label": "CONTROLS:4:0",
+      "control": false,
+      "voicePass": false,
+      "factsComplete": true,
+      "materialRegression": false,
+      "controlPass": false,
+      "reason": "Tính đúng tiền hàng, ưu đãi chung và phí ship, chưa hứa mức giảm thêm. Nhưng đẩy khách tự cho hàng vào giỏ để hệ thống kiểm tra, không hỏi màu để tiếp tục mua; cách nói “ưu đãi tốt nhất” cũng kém rõ hơn A về hỗ trợ chưa xét. Thiếu form báo giá mở đầu, dòng size và ảnh theo nguồn.",
+      "netWin": -1
+    },
+    {
+      "label": "CONTROLS:3:1",
+      "control": false,
+      "voicePass": true,
+      "factsComplete": true,
+      "materialRegression": false,
+      "controlPass": true,
+      "reason": "Xác nhận ngắn gọn thao tác thêm giỏ đã có bằng chứng, đúng số lượng, màu, size và tổng tiền cùng ưu đãi hiện tại; không hỏi lại ý định mua.",
+      "netWin": 1
+    },
+    {
+      "label": "CONTROLS:3:2",
+      "control": false,
+      "voicePass": false,
+      "factsComplete": true,
+      "materialRegression": false,
+      "controlPass": true,
+      "reason": "Báo đúng tổng 948.100đ đã miễn phí ship. Tuy nhiên, lại hỏi có muốn chốt đơn dù chị đã nói lấy hai áo trắng size M và shop đã hỏi chốt ở lượt trước.",
+      "netWin": 0
+    },
+    {
+      "label": "OPENING_AD_QUOTE",
+      "control": true,
+      "voicePass": true,
+      "factsComplete": true,
+      "materialRegression": false,
+      "controlPass": false,
+      "reason": "Giọng bán hàng tự nhiên, báo đúng giá, chất liệu và size; câu hỏi chọn size phù hợp với lượt hỏi giá. Tuy nhiên, báo giá mở đầu cũng thiếu mã SV2447 và ảnh sản phẩm theo nguồn.",
+      "netWin": 0
+    },
+    {
+      "label": "MEASUREMENT_CORRECTION",
+      "control": true,
+      "voicePass": true,
+      "factsComplete": true,
+      "materialRegression": true,
+      "controlPass": false,
+      "reason": "Đáp tự nhiên, dùng đúng kết quả size M cho áo theo số đo đã sửa; hỏi chốt mua không lặp ý khách đã xác nhận. Tuy nhiên, “vừa đẹp” khẳng định thêm hiệu quả mặc mà kết quả tư vấn size chưa xác minh.",
+      "netWin": 0
+    }
+  ],
+  "providerRequests": 16,
+  "native": "NOT_RUN_SCREEN_STOP",
+  "toolsExecuted": 0,
+  "sendEnabled": false
+}

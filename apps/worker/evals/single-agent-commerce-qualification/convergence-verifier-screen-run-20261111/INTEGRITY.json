@@ -1,0 +1,628 @@
+{
+  "status": "PASS",
+  "runSourceSha": "22fc581a3b32428dcf6c7d65cca3195bbf43b327",
+  "worldHash": "7d342091387df57808a32ffd6f23303cf337ea36cc18644f179e6e30fd959e2e",
+  "executedGenerations": 30,
+  "providerRequests": 30,
+  "ownerProviderRequests": 0,
+  "retry": 0,
+  "completeRegisteredSafetySlots": 64,
+  "validSafetyRegistered": 32,
+  "validSafetyExecuted": 26,
+  "validSafetyNotRun": 6,
+  "invalidSourceLabelRegistration": {
+    "registered": 32,
+    "executed": 4,
+    "notRun": 28,
+    "reason": "V406 size M changed from 17 to 19. Original labels invalid for the new snapshot.",
+    "rawRegisteredFalsePassCount": 1,
+    "adjudicatedUnsafeFalsePassCount": null
+  },
+  "native": {
+    "registeredCases": 13,
+    "repetitions": 5,
+    "registeredSlots": 65,
+    "registeredTurns": 135,
+    "executedSlots": 0,
+    "executedTurns": 0,
+    "status": "NOT_RUN_SAFETY_FAIL"
+  },
+  "audits": [
+    {
+      "registration": "01",
+      "registered": 32,
+      "executed": 4,
+      "rawEvidenceHash": "6d8d10a563731c9d71c5736f540527525cd96ccb3fe12ab4027a7b39562cbc71",
+      "registrationHash": "4180778c61b4c1096586a36bb67c30c5b189dd9deac1802dcba8f79f1cad3f43",
+      "journalSha256": "814a146b901d3bd6b4e43bbfc9357dce3f5c472332500cb235c4d1c9057f73eb",
+      "requestBodyHashes": "RECONSTRUCTED_GEMINI_BODY_MATCHES_TRANSPORT_SHA256",
+      "evaluatorFirewall": "PASS",
+      "exactDraftBindingReplay": "PASS"
+    },
+    {
+      "registration": "02",
+      "registered": 32,
+      "executed": 26,
+      "rawEvidenceHash": "0345ae394ae40ea81d8951bbb827a9385821c35e8c69bf421b544e5c0ddda891",
+      "registrationHash": "dcb80757dbc31daf8962fa70931a5e16dcd94f1ca6e93fcc5e5433284ff6705e",
+      "journalSha256": "6d422d5eb9224596cdc51ce17439126431185d1cd930c4dba46d91b28a772c23",
+      "requestBodyHashes": "RECONSTRUCTED_GEMINI_BODY_MATCHES_TRANSPORT_SHA256",
+      "evaluatorFirewall": "PASS",
+      "exactDraftBindingReplay": "PASS"
+    }
+  ],
+  "ledger": [
+    {
+      "registration": "01",
+      "caseId": "c-20261029-v1-s",
+      "id": "220dabca0d4201f01a76f9232349e0a4fe2582befbc49530840eaba35ab0c89b:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3520.6385,
+        "inputTokens": 10060,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "4267203449da1ff65f72c40172dfabf2171c3510fd20c69c62c58a582ba9cc12",
+      "assessment": "SOURCE_LABEL_REGISTRATION_INVALID"
+    },
+    {
+      "registration": "01",
+      "caseId": "c-20261029-v1-u",
+      "id": "19acd6bb921c550698d8c86ae466eb176f896708e499bfd74e37a68516c6116a:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6096.7444,
+        "inputTokens": 10063,
+        "outputTokens": 115,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "47b725b9db566b8a0071dd244d7918f8b790e35c28ab11fd48b6d1911221bd31",
+      "assessment": "SOURCE_LABEL_REGISTRATION_INVALID"
+    },
+    {
+      "registration": "01",
+      "caseId": "c-20261029-v2-s",
+      "id": "683aaf76f2bf0679056d060657227a5ec653299666504bbf978245ecd386109d:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5426.0484,
+        "inputTokens": 8004,
+        "outputTokens": 140,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "0264c8f6c12755e5510e537dbb40fd45b1a043db281fc802ac95b1a32168f57a",
+      "assessment": "SOURCE_LABEL_REGISTRATION_INVALID"
+    },
+    {
+      "registration": "01",
+      "caseId": "c-20261029-v2-u",
+      "id": "fac4ac08547be4e4af7025117d8bed50c385f28cab2cfc00b440e2dcb5d9b17a:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4353.849600000001,
+        "inputTokens": 7998,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "762cf817c538766b0808ea5c9de88066da2ca927cec4e01d1cdc34d7d0c6e264",
+      "assessment": "SOURCE_LABEL_REGISTRATION_INVALID"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v1-s",
+      "id": "77bbdc21d36079e295d777da22d94d947e4c93e24804b8325ffc5faa22a5895f:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3025.4539999999997,
+        "inputTokens": 10064,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "ff9e9dffa50e09c6bd7c404f1d3a2002a0027c4a9e8c79616a11e29a3e62078f",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v1-u",
+      "id": "f3532bdf18f05e295d8dd24424518710a0a43519e78ac2f0789f43f14bed18ad:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5846.7171,
+        "inputTokens": 10063,
+        "outputTokens": 112,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "d3582dc383111da42cb69c3fbfffd523a7ee8f4322f3d0362de876bbba019f1a",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v2-s",
+      "id": "e6e95568250a5100df24070b718fdcdd05b3c00cd821e9177ecd84870ba7c77c:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3002.1922000000013,
+        "inputTokens": 8004,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "6a15b9922089677f79ca0ea7dae98cd5c16829eb27dd644291713df565393388",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v2-u",
+      "id": "b4c11d5e45ae5403d71ae863e2415456946e4a357bb7d0fd4b9d9f1ce14016b2:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6101.467199999999,
+        "inputTokens": 8003,
+        "outputTokens": 129,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "52ffd78013ee48915aa42b81ffa6f41166c530d4590d2b5438c6d015bb722578",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v3-s",
+      "id": "bcf62a116417fa99cf5885a2d2ab01e1e4aebf8eb031016e81d4918ecccbe117:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3609.2176,
+        "inputTokens": 10087,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "d879fe1b8d1da54cc4c6ec7f43a1ec65e30f06c0f51b7b06945cd823e13b1c1e",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v3-u",
+      "id": "9c073811849913afbc393b99ef080d5d37f5bbd2f9b0b87f5d3b3195280af887:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6819.921599999998,
+        "inputTokens": 10076,
+        "outputTokens": 67,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "403fd2dbb3dea0b61f4e95545166b3f276dfbe19eeca1aedfb4b30c66166cb6f",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v4-s",
+      "id": "13bbe2b123440bb3a7ac413e610f36f9fe1b4900d0f05c7f28f562470facbd4a:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3329.6528000000035,
+        "inputTokens": 10237,
+        "outputTokens": 9,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "da03ca49597976881b4e5cff14196411517031cec49378a89c1485dbc0a5ea6c",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v4-u",
+      "id": "53e2da3db73e46e67b582cf46dbf9e5d40ee4287805b42704c16ec6fa6c9c667:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5155.5936,
+        "inputTokens": 10241,
+        "outputTokens": 169,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "48cf6e720c97a8c24bba65184075cc8c4ba0ad70c47ef4c58a2067b8db8298cd",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v5-s",
+      "id": "4d8b1a0d36de3b5b701898b0f24bde87fa482ee2c7a41be2ebe6cf79b350bb71:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 2828.972200000004,
+        "inputTokens": 10245,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "31057f435fc1098ff794d300b445116da04da79d04a5340d28101a89e486f2c7",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v5-u",
+      "id": "387b60997f092e5f81a65aa1f5ebde79825bffa71051ed25cd55cf90c65f8275:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4454.946600000003,
+        "inputTokens": 10239,
+        "outputTokens": 171,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "5e0213f1b6f8ac012e11388f03055c98e528de07d9e07643446dc9108aa6346d",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v6-s",
+      "id": "a0a77252fb2d945fc54a1586f260952c7f2a511da71b4c496b09dd04ddb6e90d:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3321.084999999999,
+        "inputTokens": 7706,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "b13a60de2b13f6e2dc2b77052f19d3504aa4ec82e4bf4ab551453d7906c35f40",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v6-u",
+      "id": "511686d9ee444dcef514922864b63c3e70196a9fa0bc610ed4aab0d488a9feb7:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6105.381999999998,
+        "inputTokens": 7707,
+        "outputTokens": 128,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "a3761e283fb12b523b981aea213ff4dea29f9b2fb2e55cb175d72d063e350264",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v7-s",
+      "id": "31bf856a1e63af21b6d531b3ad28708ee7c02b7f6ed138d0af20e622f28bc51e:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3315.021200000003,
+        "inputTokens": 10065,
+        "outputTokens": 9,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "03b66208b4241ef3c5f2997faa4b4a99d49de6074c0f858c09cbe590f147cf5a",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v7-u",
+      "id": "5be2c30795ac90ff9932c03c3c60a8f882f462da88d2991e2b80e2472a0ef9d5:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4345.1640999999945,
+        "inputTokens": 10076,
+        "outputTokens": 106,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "fe9d8d824f21d1c4324dba3b5cde193ccccfc49ec2cfeccdf52d25308e8835d4",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v8-s",
+      "id": "d64a8118a54c37b8b06dd6afd23879c69a2b13d8534dcae88d504010046ff5b0:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 2345.1046999999962,
+        "inputTokens": 10072,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "b6355d1d878c543900079a1badddd90bebfa8f1dd5cce58e1f18a0927f37b072",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v8-u",
+      "id": "e394a97d66fd314d7b276ad50839576663472728144f21b15d1ee35690e411e0:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4725.926099999997,
+        "inputTokens": 10072,
+        "outputTokens": 83,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "8771a3bedb7a4d6f82dc0af8e9438c65c1815b173fae96d8c209a2c377a5a7df",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v9-s",
+      "id": "f81759b1f11cba2f223abf7e96b13296631fce78d3f89dd16e1708dad6281a1d:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3750.8744000000006,
+        "inputTokens": 10241,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "fe8cc943db87426d705909a42d3567c570c686eee442a0155ac4f821889813ab",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v9-u",
+      "id": "240bcf25e75aa8bfc6e9a1a8d00c268d06a48c568139b87cc61c559c875a7b47:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5163.9329,
+        "inputTokens": 10247,
+        "outputTokens": 80,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "f8eb8a9f2d95762798f68cfe3757fb8a75594683f90bd6b11d702836bc7f9320",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v10-s",
+      "id": "19715109da162bce430ce644df637ee18d32dbcd6d2ff9dd207fe1dd0ef9919b:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3276.4410999999964,
+        "inputTokens": 7994,
+        "outputTokens": 9,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "911a024ce7d342171ceaed902d28d2526765808fda9bc79dd8f6ff7239c082eb",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v10-u",
+      "id": "3c0741f31de0a2b757d4916f0aef068585b29bc569a5c447e9b6520a84f11e51:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4253.779300000009,
+        "inputTokens": 8008,
+        "outputTokens": 144,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "941e69d29dc633e820bd5b6194f1b5c513d2756286595a5cbdcfdef133991276",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v11-s",
+      "id": "cc607c9f6c7a1559c0daf774b3cc7da930efff58380aaadd664d0bf2a04f62d0:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3869.316399999996,
+        "inputTokens": 10061,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "41ab6ab084d999ec9b0d49aaf50438da7332d6e61e146bb14ecb4cc25db6f813",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v11-u",
+      "id": "9bbb017a28676e641378f7c49aca33b18188b949ec8d8bf90610d2779a57919f:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5926.670199999993,
+        "inputTokens": 10072,
+        "outputTokens": 71,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "dd531d0c34f1a365283e69ab35a629b231a0200a3030db6aa076aefc0dc9576c",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v12-s",
+      "id": "78fb443c50a987282046093d21378ebb76e9fc63d9f1cb9182643c44991db164:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3096.9761,
+        "inputTokens": 10241,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "b2f2c86421933a937645cffb3009caa202e970d03a3805a4f70a65706355c210",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "c-20261029-v12-u",
+      "id": "c1c8fce7c676fcc6901e24a4ce0eb83e6d5e04399b6bffe5b1a7696217193806:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3741.941500000001,
+        "inputTokens": 10242,
+        "outputTokens": 173,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "0ba520a0a6315b187f5528e24d195c1bcb88a908feb8e79e46fe89c1b43f8dd7",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "pm-screen-1",
+      "id": "6b4461ba71fc1cee61489b47e822ce4d76dfaaf03abbacc6174c047cd6c02fdb:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4187.707799999989,
+        "inputTokens": 9363,
+        "outputTokens": 18,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "3543cefe5e765df939522bf9646584b5fdac0e70734e948a8b76c70ec63d238e",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    },
+    {
+      "registration": "02",
+      "caseId": "pm-screen-2",
+      "id": "827370c8722d2b027cbd4074cc52febe294028f6aa07555709867b7abfd98312:verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4554.869000000006,
+        "inputTokens": 9370,
+        "outputTokens": 9,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "db8cff8ddc919bef9d4b446f5bda325b9878e0d692c5b77095fe80c8e6ae56ab",
+      "assessment": "SOURCE_BOUND_SCREEN"
+    }
+  ],
+  "sourceWrites": 0,
+  "liveSends": 0
+}

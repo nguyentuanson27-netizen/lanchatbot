@@ -1,0 +1,54 @@
+{
+  "status": "CODE_REVIEW_APPROVED_REQUIRED_PG_ACCEPTANCE_BLOCKED",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-07T03:54:38.121103+00:00",
+  "sourceSha": "d9f4e55f0ba19aa46fcc66468b2749668b4a8c40",
+  "sourceHashes": {
+    "apps/worker/src/single-agent-commerce-quote.ts": "96c92c697091dc599e3239b14120da4234ddfdf31f40d3dfce9b2c0c3ebf5586",
+    "apps/worker/src/single-agent-commerce-read-only.ts": "95ba0084cfdfa1860b5cc6d5bd791fdc4dcce5c4f9f3e86c918f785a2c841c02",
+    "apps/worker/evals/single-agent-commerce-read-only/owner-product-tables.mjs": "4437c61f796ae3510d6a3dc4b5be94d704f36c83fac6993a489b8ed3f7a3c8f6",
+    "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs": "e4aad9f8f20711b5cf2c8395f3a32b3af6d3a314efa15728dba4a852665366ed",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt": "75e29844627f136512f5dd427df4592b57f33598b03eff8118fc495fb9d1e109",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs": "3ae6a0f9a162b2448314669af0267235061acb6bc55f803b688222d601abac32"
+  },
+  "materialCodeFindings": [],
+  "requiredUnverifiedAcceptance": [
+    {
+      "item": "Actual PostgreSQL C quote batch V2 acceptance",
+      "status": "BLOCKED_BY_TRANSPORT",
+      "evidence": "Two credential-launcher failures show SSH22 timeout before integration/DB creation; Docker alternative unavailable per author. No PostgreSQLPASS inferred.",
+      "reason": "This change alters native runtime quote batch execution, budget and readback proof handling. The accepted direction/plan requires actual native persisted egress/delivery acceptance."
+    }
+  ],
+  "verified": [
+    "Read exact quoteV2 runtime, consumer adapter/presentation/prompt diffs and plan. Whole-batch mutation/customerSelected/overlap rejection, per-target proof maps, ordered native responses and sibling stop are present.",
+    "Reviewer ran quote worker41PASS and local-compaction/adapter17PASS. No providers or source writes by reviewer.",
+    "Read final Node log872total870PASS2existingSKIP0FAIL; source files identical during run reported, commit happened during run. Read focusedworker943PASS evidence and successful build/typecheck/lint completion per author.",
+    "Read reconstruction p04 raw62769/presented62946, exactreadresults and preservednative signed content; no exact historical failed body/persistedmutation claim. Legacy s13 remains oversized67821 and blocked."
+  ],
+  "evidenceHashes": {
+    "c3-quote-batch-evals-final-20261107.log": "addd39de3d023798d631fa9e8f72e519ccb969ea771f2b5b295a3fb3324b96eb",
+    "c3-quote-batch-pg-20261107-01.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-quote-batch-pg-20261107-02.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-quote-batch-reconstruction-20261107.json": "8a9762e2802445ff4b30c9fc0c5c757bb65f9953989f0de247afcbf839d41efe"
+  },
+  "limits": [
+    "This is not unconditional implementation/acceptance approval. Required nativePG acceptance remains open; do not proceed to a provider campaign as if acceptance complete.",
+    "No new model result or quality/PhaseC/promotionGO. Historical failures and denominators unchanged.",
+    "Code review approval binds exact source hashes; later code or test changes require followup review as appropriate."
+  ],
+  "testOnlyWorktreeHash": "055501f6cf188eaee7b88a60e84fb7ba4ec484ed37e120cb129bac2d8f622d5d",
+  "followupVerified": [
+    "Cross-parent regression added only to quote test fixture/test, with no executable source changes; all six executable/source hashes match previously reviewed d9f4e55f.",
+    "Reviewer actually ran pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-quote.test.ts after cross-parent addition:42PASS.",
+    "Cross-parent test asserts separate subject/subtotal proofs and rejects readback after one parent stock source changes, with no effect receipts.",
+    "Read final worker log944PASS/33files including42quote; fullNode870PASS2SKIP run before test-only addition remains accurately attributed.",
+    "Verified all13verification.json rawlog hashes against external original logs; prompt19991bytes, no secret pattern in compact copied evidence."
+  ],
+  "reportReview": {
+    "status": "PENDING_ONE_ATTRIBUTION_CLARIFICATION",
+    "path": "docs/specs/c3-phase-c-quote-batch-implementation-20261107.md",
+    "sha256": "9e460a841b8c4a48bb176196b0c2a2546be9ecc94e1a73e78bf2015a13caa4be",
+    "finding": "Size-envelope counterfactual is called old-adapter/old-prompt but its schemaBytes14374 differs from actual failed schemaBytes14208. Need exact old adapter identity or disclose hybrid constituents (e.g. old prompt with current V2 tool description). Counterfactual66361 versus recorded66195 already distinguished; never claim exact historical wire."
+  }
+}

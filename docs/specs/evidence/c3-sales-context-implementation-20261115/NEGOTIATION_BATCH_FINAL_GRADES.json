@@ -1,0 +1,295 @@
+{
+  "identity": {
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "version": "gpt-6.1-sol",
+    "cliVersion": "0.159.2",
+    "rubricHash": "95f8bb5e0e436fa5fc7d6286fb34028e6d631f54e4549b4f1984db8a24c01d88",
+    "schemaHash": "79b1d3bac15af9cf8355a8dd65320befddb775d5ef055a6cd3d34e5162139b29",
+    "retry": 0,
+    "maximumJudgeRequests": 6,
+    "packetBytesLimit": 262144
+  },
+  "packetHash": "32d8fa47b82f8cc98bafca2c6f408644e0925ba975eafb2e5ec559e9117ace3f",
+  "rows": [
+    {
+      "id": "4c18b744fb50dc727f8153a08d231a436289bb1d7a5feca8df57f86a8425c00a",
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu hỏi màu gọn, đúng nguồn: áo M trắng sẵn hàng, be đặt trước. Yêu cầu hỗ trợ chỉ được ghi nhận pending, chưa có receipt áp dụng ưu đãi; không tự giảm tiền hay freeship. Tuy nhiên handoff ở lượt 2 làm ngắt việc mua khi vẫn có thể hỏi tiếp màu; lượt cuối im lặng đúng quyền HUMAN nhưng khách chưa được báo tổng cơ bản 529.000đ (499.000đ áo + 30.000đ ship Cần Thơ), chưa tính hỗ trợ nào được duyệt. Không có claim thanh toán hay báo giá đã gửi giả."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 25972,
+        "output_tokens": 700,
+        "total_tokens": 26672,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 492
+        }
+      },
+      "latencyMs": 30453,
+      "error": null
+    },
+    {
+      "id": "b2d94c102d39c80e430c8c437d69a53501bedf2546dd61f36032b41674abc67c",
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "order": [
+        0
+      ],
+      "rating": null,
+      "status": "PROVIDER_ERROR",
+      "providerRequests": 1,
+      "usage": null,
+      "latencyMs": 49662,
+      "error": "UPSTREAM_TRANSPORT"
+    },
+    {
+      "id": "ca567eefcd4c7e91d85184861e017c6fc97ebe1d3ed783e924458e967924d02c",
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu hỏi màu tự nhiên, đúng lựa chọn áo M trắng có sẵn/be đặt trước từ tool. Tuy nhiên, sau khi ghi nhận xin hỗ trợ, hội thoại chuyển người thật rồi im lặng, nên chưa giải quyết yêu cầu báo tổng về Cần Thơ dù có nguồn giá và phí ship: tổng cơ sở 529.000đ (499.000đ + 30.000đ). Receipt chỉ ghi nhận hỗ trợ đang chờ, chưa áp dụng ưu đãi. Không có thông tin sai, tự giảm tiền, freeship hay xác nhận thanh toán; lỗi chính là chưa hoàn thành nhu cầu khách."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 26964,
+        "output_tokens": 872,
+        "total_tokens": 27836,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 620
+        }
+      },
+      "latencyMs": 32409,
+      "error": null
+    },
+    {
+      "id": "47c9f4db41fc04e2edea1c9f020f7ead343182ff41f2123703ed56b1dd8af927",
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Hỏi đúng màu còn thiếu, phân biệt Trắng sẵn hàng và Be đặt trước theo tool. Yêu cầu hỗ trợ giá đã được ghi nhận bằng receipt, không bị biến thành giảm giá hay freeship khi chưa được duyệt. Báo đúng một áo AO 499.000đ + ship Cần Thơ 30.000đ = 529.000đ theo quote hiện tại; không nhận đã chốt đơn hay thanh toán. Lời thoại gọn, tiếp tục hỏi màu hợp lý vì khách chưa chọn."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 40427,
+        "output_tokens": 298,
+        "total_tokens": 40725,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 112
+        }
+      },
+      "latencyMs": 20167,
+      "error": null
+    },
+    {
+      "id": "98e99a7310ee3e6a6caba11fc0d308be4e731bea8d3f62ab46e5cfc288d251bb",
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu hỏi màu gọn, tự nhiên, đúng lựa chọn Trắng có sẵn/Be đặt trước từ tool. Yêu cầu hỗ trợ mới được ghi nhận chờ xử lý, chưa có receipt cấp giảm; không tự giảm tiền, freeship hay nhận đã thanh toán. Tuy nhiên handoff làm đứt mạch bán dù đủ nguồn, nên khách chưa được trả lời tổng một áo gửi Cần Thơ là 499.000 + 30.000 = 529.000đ trước hỗ trợ. Lượt cuối im lặng đúng quyền HUMAN nhưng nhu cầu báo tổng vẫn chưa hoàn thành."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 26113,
+        "output_tokens": 720,
+        "total_tokens": 26833,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 516
+        }
+      },
+      "latencyMs": 28195,
+      "error": null
+    },
+    {
+      "id": "6fa7815f90a74e658a3bc2bb5ca6cbbdc8dbd53bc5a1cd2d21985e253a80b256",
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": true,
+            "factsPass": false,
+            "materialIssue": true,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": false
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Giọng lịch sự, dễ hiểu. Lượt đầu lưu pending đúng, báo 978.100đ theo ưu đãi số lượng 5%, không nhận là đã cấp hỗ trợ thêm. Khi khách chọn trắng, giỏ đúng hai áo M nhưng thao tác hỗ trợ bị từ chối và pending vẫn PENDING; chưa hoàn tất yêu cầu hỗ trợ ngay lượt này, khiến khách được báo mức cao hơn 30.000đ. Lượt cuối đã kích hoạt yêu cầu cũ đúng một lần, giỏ revision 2 và tổng 948.100đ khớp receipt; không coi các lần tool bị từ chối trước đó là thất bại cuối cùng. Nên nói rõ đã được miễn ship thay vì tiếp tục nhấn phí 30.000đ."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 44781,
+        "output_tokens": 1016,
+        "total_tokens": 45797,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 780
+        }
+      },
+      "latencyMs": 47269,
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,1508 @@
+{
+  "kind": "C3_SALES_COMPLETION_SOURCE_INVENTORY_NOT_PUBLICATION",
+  "sourceWrites": 0,
+  "providerRequests": 0,
+  "status": "BLOCKED_AT_SOURCE",
+  "captureWorldHash": "062a7769b6e98c011d3ee3823d064761075abc42956ba19812ac99fb4af528d1",
+  "sourceFiles": {
+    "points.json": "de60d9c27bed264a17ec4a50c652e0b1e3833118ef5b127fecebafefccbf04cb",
+    "registry.json": "3609aaf3bcd9a78ef0cc72e9680e13a5b0a56cf5391f33f3bbc693b767d5b566"
+  },
+  "policyChartGap": "NO_APPROVED_TOP_PANTS_SKIRT_APPLICABILITY",
+  "colourGap": "SHARED_AO_UNRECORDED_COLOUR_IS_NOT_PHYSICAL_COLOUR",
+  "canonicalRoute": "EXISTING_DEPLOYED_FFMPEG_PREPARE_READ_ONLY_NOT_STRICT_REVALIDATION_PROOF",
+  "strictRouteAttempt": "51_CHECKS_FAILED_COMPATIBILITY_NOT_ESTABLISHED",
+  "assets": [
+    {
+      "productId": "SQ2447",
+      "pointId": "302d8616-b984-5be5-ab73-a43f63d0b1e4",
+      "imageType": "DETAIL",
+      "intents": [
+        "DETAIL",
+        "MATERIAL_CLOSEUP"
+      ],
+      "partsVisible": [
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "9d8a1cc4cfdaaaa3a9695da3404275b5302860af14b7b93e5de1419c7ac6a513",
+      "publishedImageSha256": "069381798b0f7c9f3249998bbc44aab2c22d86d764d6374b451b2f47c1c6dffd",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "302d8616-b984-5be5-ab73-a43f63d0b1e4",
+        "checkedAt": "2026-11-03T15:12:57.611Z",
+        "canonicalSha256": "069381798b0f7c9f3249998bbc44aab2c22d86d764d6374b451b2f47c1c6dffd",
+        "reviewedSha256": "069381798b0f7c9f3249998bbc44aab2c22d86d764d6374b451b2f47c1c6dffd",
+        "bytes": 75117,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SQ2447",
+      "pointId": "42e42d5a-c407-5927-af69-0fe8ab21a8e4",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE"
+      ],
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "c860ecea284fccb54104453f7132bcd206bb8207ba4d0f7307ebd4b0025ed009",
+      "publishedImageSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "42e42d5a-c407-5927-af69-0fe8ab21a8e4",
+        "checkedAt": "2026-11-03T15:12:57.945Z",
+        "canonicalSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+        "reviewedSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+        "bytes": 73869,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SQ2447",
+      "pointId": "4a899a7d-8651-5f4a-a202-37595710ce0a",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "AO",
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "fd65010856add2bff2778b180d2613d5e553e900c1953d6c2dd0e2c9abe1a915",
+      "publishedImageSha256": "0acf48ac2b435872a9e6dec3f4fd98d63c7759ccf3d02c401f8ff0b7285a3ee4",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "4a899a7d-8651-5f4a-a202-37595710ce0a",
+        "checkedAt": "2026-11-03T15:12:58.598Z",
+        "canonicalSha256": "0acf48ac2b435872a9e6dec3f4fd98d63c7759ccf3d02c401f8ff0b7285a3ee4",
+        "reviewedSha256": "0acf48ac2b435872a9e6dec3f4fd98d63c7759ccf3d02c401f8ff0b7285a3ee4",
+        "bytes": 65705,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SQ2447",
+      "pointId": "76eaeb12-894c-54fa-85b5-5802e67af329",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "5171d2a2514fa52869d654f35a1f0d91599e5e28c987d57cdd3a196e56ae1242",
+      "publishedImageSha256": "1863cc870690930bb4b5598c201d4c2bc85648d9176e09e30f8d1317e988ba42",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "76eaeb12-894c-54fa-85b5-5802e67af329",
+        "checkedAt": "2026-11-03T15:12:59.385Z",
+        "canonicalSha256": "1863cc870690930bb4b5598c201d4c2bc85648d9176e09e30f8d1317e988ba42",
+        "reviewedSha256": "1863cc870690930bb4b5598c201d4c2bc85648d9176e09e30f8d1317e988ba42",
+        "bytes": 106860,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SQ2447",
+      "pointId": "7820e7cc-a472-516b-b19e-805b78569599",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "b5034ab602dfe1c01f1a9a0a806a122a7db32707873a1a9f618d6c61164effca",
+      "publishedImageSha256": "84acb9f5f97fb0d737433f8b822849ec614c6d71097d7156dd935f3b178a9b80",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "7820e7cc-a472-516b-b19e-805b78569599",
+        "checkedAt": "2026-11-03T15:12:59.975Z",
+        "canonicalSha256": "84acb9f5f97fb0d737433f8b822849ec614c6d71097d7156dd935f3b178a9b80",
+        "reviewedSha256": "84acb9f5f97fb0d737433f8b822849ec614c6d71097d7156dd935f3b178a9b80",
+        "bytes": 95618,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SQ2447",
+      "pointId": "858d183a-3388-5ad4-8c0c-900ea5daf887",
+      "imageType": "DETAIL",
+      "intents": [
+        "DETAIL",
+        "MATERIAL_CLOSEUP"
+      ],
+      "partsVisible": [
+        "AO"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "c058d50b7d4d4f6fc9be1bce1da590d5a304cf85261a9e8a0d98570b2d5d0861",
+      "publishedImageSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "858d183a-3388-5ad4-8c0c-900ea5daf887",
+        "checkedAt": "2026-11-03T15:13:00.631Z",
+        "canonicalSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+        "reviewedSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+        "bytes": 67202,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SQ2447",
+      "pointId": "8852c011-e22a-5cba-a8fb-5c212c720299",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "FULL_SET",
+        "AO",
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "fdb5c31d8c73566f58867b92ac1b0a51e16996c5c4163a25704f46393a299af3",
+      "publishedImageSha256": "cce4ab435f8a217821ddf4f543cb640eb467e3e123397ced6da158a56d97b852",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "8852c011-e22a-5cba-a8fb-5c212c720299",
+        "checkedAt": "2026-11-03T15:13:01.420Z",
+        "canonicalSha256": "cce4ab435f8a217821ddf4f543cb640eb467e3e123397ced6da158a56d97b852",
+        "reviewedSha256": "cce4ab435f8a217821ddf4f543cb640eb467e3e123397ced6da158a56d97b852",
+        "bytes": 149896,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SQ2447",
+      "pointId": "bc40168e-5e03-5a75-a308-214a6d04489c",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "FULL_SET",
+        "AO",
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "657783ecd7a27d5e3ec123f9f7b9ce8ebf7d1b1c3ae0dff0dc43064d05cf6d85",
+      "publishedImageSha256": "fae11ef2bda362e620a34b5ebb475259366f0f905a6f5eb7cae8d0f1156cb36a",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "bc40168e-5e03-5a75-a308-214a6d04489c",
+        "checkedAt": "2026-11-03T15:13:02.169Z",
+        "canonicalSha256": "fae11ef2bda362e620a34b5ebb475259366f0f905a6f5eb7cae8d0f1156cb36a",
+        "reviewedSha256": "fae11ef2bda362e620a34b5ebb475259366f0f905a6f5eb7cae8d0f1156cb36a",
+        "bytes": 83257,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SQ2447",
+      "pointId": "c3e8d78d-afdb-5666-a877-c720166643f5",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": false,
+      "registrySourceHash": null,
+      "publishedImageSha256": "3a321ad8b6b888fa470bdda8b83ae24c19238ca5132a56fbeab3dabe3ef7c2fc",
+      "oldProof": null,
+      "byteCheck": {
+        "status": "NO_APPROVED_REGISTRY_ROW"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SQ2447",
+      "pointId": "feab258c-7b59-5386-afec-bfb736acf18a",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "379e6731bbe98f12e22dad47df7a0bf0487391e9dc4cbd3e68e3ae06c487a447",
+      "publishedImageSha256": "5e733134c4e0ed6031dd1af396872b86893fe5398d6c7e33a3cf0ce1159161e0",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "feab258c-7b59-5386-afec-bfb736acf18a",
+        "checkedAt": "2026-11-03T15:13:02.992Z",
+        "canonicalSha256": "5e733134c4e0ed6031dd1af396872b86893fe5398d6c7e33a3cf0ce1159161e0",
+        "reviewedSha256": "5e733134c4e0ed6031dd1af396872b86893fe5398d6c7e33a3cf0ce1159161e0",
+        "bytes": 167121,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "25b89c2e-8cb3-5fae-a16d-c7e64583e9d2",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "FULL_SET",
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "252344d1f9bcb28d99d8725619a980ce6558beb7640445201d7d627f492cddbf",
+      "publishedImageSha256": "5c60a666daf1e6e431b5bab6a520d41e8fb24d831f7df91c90275ef5eed488c9",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "25b89c2e-8cb3-5fae-a16d-c7e64583e9d2",
+        "checkedAt": "2026-11-03T15:13:03.970Z",
+        "canonicalSha256": "26b745bf50c46406a1a2b223030edf440613c00ff26919600a470291e9780627",
+        "reviewedSha256": "5c60a666daf1e6e431b5bab6a520d41e8fb24d831f7df91c90275ef5eed488c9",
+        "bytes": 87065,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "8b273733-c549-58f5-a58f-73852bffe72a",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE",
+        "LOOKBOOK"
+      ],
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "4d5315a3c0cf07149983b6ce04872f79a72a685ad0bd94a46b5d6f51b4bf9d66",
+      "publishedImageSha256": "ba474b495d3f46f61195d7b022eb8c0e6078c0d22c0cf0ba8f11cde37865deb7",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "8b273733-c549-58f5-a58f-73852bffe72a",
+        "checkedAt": "2026-11-03T15:13:04.233Z",
+        "canonicalSha256": "2abc19e4ce33cbc4aeaec7af4285feba65f44e7ffa30b817c855644c4dc39c98",
+        "reviewedSha256": "ba474b495d3f46f61195d7b022eb8c0e6078c0d22c0cf0ba8f11cde37865deb7",
+        "bytes": 61642,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "97ee4094-a1c5-59bc-928b-db3f4ad1f91d",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "91dcedadf7a2806b6805dcec29c22e7604ff34d9723dcf8fbaae02718c569644",
+      "publishedImageSha256": "89a51d43eb7241fffb1c28d1cd34105e7438042a349bf2d2780bd4340a6f008a",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "97ee4094-a1c5-59bc-928b-db3f4ad1f91d",
+        "checkedAt": "2026-11-03T15:13:04.756Z",
+        "canonicalSha256": "b7912f5e125b4914faa64f12c5f97f873b032409e58cf0c2fc8538890e6a464b",
+        "reviewedSha256": "89a51d43eb7241fffb1c28d1cd34105e7438042a349bf2d2780bd4340a6f008a",
+        "bytes": 88709,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "9b24647b-2d4e-54b7-9d80-4a08b008a299",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "7b47a1678d5f9ae13a64c28f4a3578a7b69224d076b1b0391ed1444c369d67a6",
+      "publishedImageSha256": "7baa6fb5e936f57fd483887cbcfddf554fe607054389f969207c2b6d5ed52c29",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "9b24647b-2d4e-54b7-9d80-4a08b008a299",
+        "checkedAt": "2026-11-03T15:13:05.494Z",
+        "canonicalSha256": "053ca4ad7eeee9d8f543514c821ae1b296cb139166e24bcf1b42100b0d5b2366",
+        "reviewedSha256": "7baa6fb5e936f57fd483887cbcfddf554fe607054389f969207c2b6d5ed52c29",
+        "bytes": 87509,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "a4014879-482b-53ea-8eed-a1dbce8aad45",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "074afe455b243ded56b350731078e0034aaf5d8c99215b9f08b98ba489008713",
+      "publishedImageSha256": "585b9aa44699306f1934ab13eae9bee981ea1f2eac25937f9ec9a90a9948dfd3",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "a4014879-482b-53ea-8eed-a1dbce8aad45",
+        "checkedAt": "2026-11-03T15:13:06.252Z",
+        "canonicalSha256": "3ad22455835d413aaf0cdaa75feaba6f384b3e9f3fd6d63435a6381649868af8",
+        "reviewedSha256": "585b9aa44699306f1934ab13eae9bee981ea1f2eac25937f9ec9a90a9948dfd3",
+        "bytes": 63301,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "b45ecae8-fc07-55ca-a084-6011d3a443a0",
+      "imageType": "FLATLAY",
+      "intents": [
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "5a4f2a3111850a9069fbbacb1b0ec35039b2c6501413640e3a2d13130fe8a29c",
+      "publishedImageSha256": "7d80dc5c82a9c3963a279ba0d3789c475ebeb088dc2e400d6f3de0c963cfbdc7",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "b45ecae8-fc07-55ca-a084-6011d3a443a0",
+        "checkedAt": "2026-11-03T15:13:06.853Z",
+        "canonicalSha256": "0d05d3b4ebd41d8e8b081e64773ab7fb34010c62e380fa3e5715df56cdfd6ce9",
+        "reviewedSha256": "7d80dc5c82a9c3963a279ba0d3789c475ebeb088dc2e400d6f3de0c963cfbdc7",
+        "bytes": 113375,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "d364bfac-75d0-5a67-9a9e-a1f784573871",
+      "imageType": "PRODUCT_ONLY",
+      "intents": [
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "983ba8cf6b92e5cd814bf38381c9d6f5dda3109b531b7eb4da127cdaec8db462",
+      "publishedImageSha256": "6799602baef7a1fa986e5cafafbbeea94cb78c9102b98dc9ea81120c03b532f0",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "d364bfac-75d0-5a67-9a9e-a1f784573871",
+        "checkedAt": "2026-11-03T15:13:07.510Z",
+        "canonicalSha256": "309cd72953a8985c86567b44e61a85d70442b0a33e4ba8dad00c12b17a110592",
+        "reviewedSha256": "6799602baef7a1fa986e5cafafbbeea94cb78c9102b98dc9ea81120c03b532f0",
+        "bytes": 50114,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "d7783924-bf51-5091-8648-4968f7e4229c",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "0ba653b30103d5440c814bc9b6d5e5a314efe5b3788470251eb48ce4ab7b6bfd",
+      "publishedImageSha256": "b94e07bfdcac4939594c07ae2ffa98ed4f127eade0acb086422dd06530464706",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "d7783924-bf51-5091-8648-4968f7e4229c",
+        "checkedAt": "2026-11-03T15:13:08.187Z",
+        "canonicalSha256": "4b7e51f38ba7e3424f849cf82fa742db797a25b22c79e58a0915f17604176cab",
+        "reviewedSha256": "b94e07bfdcac4939594c07ae2ffa98ed4f127eade0acb086422dd06530464706",
+        "bytes": 87303,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "d84b7735-db2b-5634-a3c9-888c010c1da7",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE"
+      ],
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "3264c37e7a6d9c70bdf1d062ea84eebab7b29ca804ba88958bbd6ca183b14c0b",
+      "publishedImageSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "d84b7735-db2b-5634-a3c9-888c010c1da7",
+        "checkedAt": "2026-11-03T15:13:08.392Z",
+        "canonicalSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+        "reviewedSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+        "bytes": 73869,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "dfc62c62-6b2a-550c-b44a-d781d7d25bc9",
+      "imageType": "PRODUCT_ONLY",
+      "intents": [
+        "PRODUCT_OVERVIEW",
+        "MATERIAL_CLOSEUP"
+      ],
+      "partsVisible": [
+        "AO"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "b77d7d04107da9c16ce138afee1ffe82d632d9fab80cf971c8298ef8588d04f1",
+      "publishedImageSha256": "e023f161e23ca0bca7dd5d8169c2a1574a59fdb01e83bded73451f23daa77944",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "dfc62c62-6b2a-550c-b44a-d781d7d25bc9",
+        "checkedAt": "2026-11-03T15:13:09.164Z",
+        "canonicalSha256": "462322d5c467ccfa367f7a4897aec8987a7d0a2222c423a5b010311b82fd413d",
+        "reviewedSha256": "e023f161e23ca0bca7dd5d8169c2a1574a59fdb01e83bded73451f23daa77944",
+        "bytes": 94749,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV1561",
+      "pointId": "fdbe5e23-5774-5337-904a-b8d45e257632",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "aac0462f7c4a8649374c64858ce8c8352a2005438fe1f4473ee77899ba6dd8ee",
+      "publishedImageSha256": "780b1dcc57c26682fe337a6b0a94d87c67c5964a589156dff818288ddab8ba15",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "fdbe5e23-5774-5337-904a-b8d45e257632",
+        "checkedAt": "2026-11-03T15:13:09.901Z",
+        "canonicalSha256": "491212da91868cfc7401c8ac64bd4a1720cf06c84bade5deaae9fa606680b55e",
+        "reviewedSha256": "780b1dcc57c26682fe337a6b0a94d87c67c5964a589156dff818288ddab8ba15",
+        "bytes": 88728,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "0b97b76d-7405-5079-a354-8769d78ddeea",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE"
+      ],
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "4fae47605152c4c0cd5af2347a01f1bc78b3926f4d565dee55956db1c6b42f83",
+      "publishedImageSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "0b97b76d-7405-5079-a354-8769d78ddeea",
+        "checkedAt": "2026-11-03T15:13:10.095Z",
+        "canonicalSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+        "reviewedSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+        "bytes": 73869,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "340c8e50-31a6-58a8-94d9-400cc495b064",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "3b9d5e168293c1a0bc683728336e6b15c18ca599738fb09a4c126f06c450ccc9",
+      "publishedImageSha256": "10a7ca50a7f58ab56227b4ac21c6a8a0e61498cb9b6dfbb91f41578458569171",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "340c8e50-31a6-58a8-94d9-400cc495b064",
+        "checkedAt": "2026-11-03T15:13:10.627Z",
+        "canonicalSha256": "a00f67ab0d2c9931b6f47288cd5c0e90011c4cefd00ec2c94bd478348d905bac",
+        "reviewedSha256": "10a7ca50a7f58ab56227b4ac21c6a8a0e61498cb9b6dfbb91f41578458569171",
+        "bytes": 60282,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "67b5c9c5-1928-5750-93c6-b788c847badb",
+      "imageType": "PRODUCT_ONLY",
+      "intents": [
+        "PRODUCT_OVERVIEW",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "VAY",
+        "PHU_KIEN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "87c68f2657c721af27b1be3a6d54a41dd949d696bdfcc941a3a2f95fe150249f",
+      "publishedImageSha256": "e18e06d37005094ff2f22d091cbfbf581d0455ccc41e5dc831e032d22bded30a",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "67b5c9c5-1928-5750-93c6-b788c847badb",
+        "checkedAt": "2026-11-03T15:13:10.982Z",
+        "canonicalSha256": "af494da8d4eb6c42d492f4733206b115cc4aab56aa898921ed03fccd0f424f67",
+        "reviewedSha256": "e18e06d37005094ff2f22d091cbfbf581d0455ccc41e5dc831e032d22bded30a",
+        "bytes": 52600,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "6f4b765a-692c-55f6-9212-975a5b4d671e",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "VAY",
+        "PHU_KIEN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "481ba960207ac8f70f0ab01bb9e2683c8cdd903980d4b2b2b417cdb664665631",
+      "publishedImageSha256": "7f3ed2c61b52e189680f6f3b196ee2643e618200350422218a2287ea032e9730",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "6f4b765a-692c-55f6-9212-975a5b4d671e",
+        "checkedAt": "2026-11-03T15:13:11.599Z",
+        "canonicalSha256": "b4bd41b28ff44b1bf48e476ce82752c8d90886fe5dfaecd4eeec4cac29cf5a53",
+        "reviewedSha256": "7f3ed2c61b52e189680f6f3b196ee2643e618200350422218a2287ea032e9730",
+        "bytes": 74236,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "98d185ba-64da-5985-ae9d-945e1f7e69ae",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "VAY",
+        "PHU_KIEN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "46710c609527f593e6193c864662d863f92b9929b0cc5aa0ed37cf295e856d36",
+      "publishedImageSha256": "292ed40f91409a2d9c4ecc204fab0b473f5b90e77d321177a363bfc27ec9c888",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "98d185ba-64da-5985-ae9d-945e1f7e69ae",
+        "checkedAt": "2026-11-03T15:13:12.282Z",
+        "canonicalSha256": "a066cf48eee0e18a06cfaa6c0680bbe7a8c854c26ed35d645360c0a1b042784a",
+        "reviewedSha256": "292ed40f91409a2d9c4ecc204fab0b473f5b90e77d321177a363bfc27ec9c888",
+        "bytes": 77531,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "ab26f202-4ca2-5264-b1e0-6e8c75b33956",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE"
+      ],
+      "partsVisible": [
+        "VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "0c8b41b180583686fddebedcbdb926c2260a33e6c1b241bf56b530b667d2aea7",
+      "publishedImageSha256": "5ae59e1db61e3827e2e249b0625f959f8b2669c5f6b9d4f158badd165402127c",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "ab26f202-4ca2-5264-b1e0-6e8c75b33956",
+        "checkedAt": "2026-11-03T15:13:12.500Z",
+        "canonicalSha256": "8467736f879c5a7d529fe3e48b89d1701e2bf024e515c456e5f119f23bcf55dc",
+        "reviewedSha256": "5ae59e1db61e3827e2e249b0625f959f8b2669c5f6b9d4f158badd165402127c",
+        "bytes": 40573,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "b99cea5a-a328-5a63-93c3-3e1f69295601",
+      "imageType": "DETAIL",
+      "intents": [
+        "DETAIL",
+        "MATERIAL_CLOSEUP"
+      ],
+      "partsVisible": [
+        "VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "e3dfc0bb8a3a9a64ecba4bdf8189de4405bc5d7a3e7007afc7ecd618efc5c7d7",
+      "publishedImageSha256": "6ae945ca9ab1d23e964e288b2036c9c222c42f86888cc418e42f0238b9f50eb2",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "b99cea5a-a328-5a63-93c3-3e1f69295601",
+        "checkedAt": "2026-11-03T15:13:12.982Z",
+        "canonicalSha256": "cf5cf61944beb516c5bf529255d12d26f0a7803a8c427e5d97e5e90d856a11cb",
+        "reviewedSha256": "6ae945ca9ab1d23e964e288b2036c9c222c42f86888cc418e42f0238b9f50eb2",
+        "bytes": 95079,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "c567d7f9-f8d2-5170-9097-f7a1834e8326",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "29e89adcda3f36f5efd823e1f6bff78d8429de5effee2431bb66a97a349dfb55",
+      "publishedImageSha256": "cda860f6737a66b2d4c1b34c02d7e6d3252e997b11560425c31be76544f2a52a",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "c567d7f9-f8d2-5170-9097-f7a1834e8326",
+        "checkedAt": "2026-11-03T15:13:13.628Z",
+        "canonicalSha256": "d26c3f7038d712e8ee361b90655cc0753fccc0052d018f87f32b16694b37eb95",
+        "reviewedSha256": "cda860f6737a66b2d4c1b34c02d7e6d3252e997b11560425c31be76544f2a52a",
+        "bytes": 54228,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "cd1ac7c7-cfe6-5029-8ac1-a99fa695a799",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "VAY",
+        "PHU_KIEN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "150aa2718a401664d7885a4691baa39077f19c85e4ce5cf9c4d54ecf4c911fe5",
+      "publishedImageSha256": "e112f50fd86e52ddc86622180faef2a24ed4f337249a838e466873878edfada7",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "cd1ac7c7-cfe6-5029-8ac1-a99fa695a799",
+        "checkedAt": "2026-11-03T15:13:14.341Z",
+        "canonicalSha256": "a14043b83fbd03ecd60e90e85d9a5f5f8ec83a62c234935bb3eeedf3de1c4230",
+        "reviewedSha256": "e112f50fd86e52ddc86622180faef2a24ed4f337249a838e466873878edfada7",
+        "bytes": 63080,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "cef6a817-f12c-5ce0-ae9b-a512aac00da7",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "VAY",
+        "PHU_KIEN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "1d14d4fc3ec7dd59d5e6a7fabca7bb4d58ab09f62794120834ac95b44f995a18",
+      "publishedImageSha256": "9ec32971b2ba16651068e7bd7cc6557660c8d540b30c1a2981ef9cb097a2df53",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "cef6a817-f12c-5ce0-ae9b-a512aac00da7",
+        "checkedAt": "2026-11-03T15:13:14.830Z",
+        "canonicalSha256": "3409928d673dc0f7205356a7c411fde4aa3c1018745c4c4cde12969ae3523c3e",
+        "reviewedSha256": "9ec32971b2ba16651068e7bd7cc6557660c8d540b30c1a2981ef9cb097a2df53",
+        "bytes": 86186,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "V406",
+      "pointId": "f4d54c47-2309-5d92-bfc1-594ccb15d032",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "VAY",
+        "PHU_KIEN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "104a3d2503228c69ec4e58f2393dde3c69c8d8212adfbb404726fc0cb26a520b",
+      "publishedImageSha256": "978fecadebec811aa0eba395bee2856162e382fa30bdd27c11498c99fc792068",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "f4d54c47-2309-5d92-bfc1-594ccb15d032",
+        "checkedAt": "2026-11-03T15:13:15.554Z",
+        "canonicalSha256": "832da52a012a04f3471301520d599ee2104f6ea2107c52fdc4c4b13a397b579e",
+        "reviewedSha256": "978fecadebec811aa0eba395bee2856162e382fa30bdd27c11498c99fc792068",
+        "bytes": 53272,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "0ca18204-e613-57f0-ae03-0558db6c1ed4",
+      "imageType": "PRODUCT_ONLY",
+      "intents": [
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "54cdd18a5858d3d1ea6429a8ad2ce52ff1f33fb415524400739c9ac659eb0fe2",
+      "publishedImageSha256": "5d2fb906a92558fda7ac2b4713a66bc27f18253d6252fd476ea97902b875983a",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "0ca18204-e613-57f0-ae03-0558db6c1ed4",
+        "checkedAt": "2026-11-03T15:13:16.032Z",
+        "canonicalSha256": "fc547d13d6fb71aa732d3705a54b4efca0d467369cf5455fd3c3664b8a11e259",
+        "reviewedSha256": "5d2fb906a92558fda7ac2b4713a66bc27f18253d6252fd476ea97902b875983a",
+        "bytes": 210379,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "105ad24f-06b2-51e1-82c0-e9b5c23cc975",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "AO"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "22bfdd0983d9e9226af49835975b109f08496c61495d2483bc3821f545fe6b6c",
+      "publishedImageSha256": "43eeb47ee7b298ad303cd45c63ad878b776f8525266f02dc50f1336f847b297b",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "105ad24f-06b2-51e1-82c0-e9b5c23cc975",
+        "checkedAt": "2026-11-03T15:13:16.474Z",
+        "canonicalSha256": "f6acebc8d3680c36a063c463afb7beec016161662d7a1b9c86eb25e6f58784ad",
+        "reviewedSha256": "43eeb47ee7b298ad303cd45c63ad878b776f8525266f02dc50f1336f847b297b",
+        "bytes": 168527,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "3c9703ae-3a1a-5b27-a37d-6f9f6ca30943",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "057504094a5eb524db93674f70193436b505d58aa92b6871de991148c3f24a4e",
+      "publishedImageSha256": "e3f327b3998a59d5574712569d84c7d404be794bea11eedad44678f159844208",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "3c9703ae-3a1a-5b27-a37d-6f9f6ca30943",
+        "checkedAt": "2026-11-03T15:13:16.928Z",
+        "canonicalSha256": "71a0c27f66a7dd68fdca83e4a61ab56b2c031f65984078ddf32d65784ac78402",
+        "reviewedSha256": "e3f327b3998a59d5574712569d84c7d404be794bea11eedad44678f159844208",
+        "bytes": 194421,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "5b9f14b5-46ec-5e84-9903-eb6d87a805c4",
+      "imageType": "PRODUCT_ONLY",
+      "intents": [
+        "PRODUCT_OVERVIEW",
+        "DETAIL"
+      ],
+      "partsVisible": [
+        "AO"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "e1c1bd91e2c2ca2bdd78998a02d2b604b8b6d2e233f5c3418cbd4d8a50a78403",
+      "publishedImageSha256": "afe65905587a48157e58b98afe5306caeba00a9e4f5dd21c9c5d70e238dab06f",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "5b9f14b5-46ec-5e84-9903-eb6d87a805c4",
+        "checkedAt": "2026-11-03T15:13:17.901Z",
+        "canonicalSha256": "2ff7d8b2c1a86a8e824f2dc63921990195772f10e29640b3d0afd98ff7af2b76",
+        "reviewedSha256": "afe65905587a48157e58b98afe5306caeba00a9e4f5dd21c9c5d70e238dab06f",
+        "bytes": 225153,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "5ed194f2-7997-5704-b098-c8354acd10d3",
+      "imageType": "PRODUCT_ONLY",
+      "intents": [
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "44420ed0a8aad7322c48368436edb7d8ba139ab6396b1f283545fa8c58084051",
+      "publishedImageSha256": "65d2d668b709e57510a6db59846de5c30d4687aaed695f9a922e60ebbb3a2a92",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "5ed194f2-7997-5704-b098-c8354acd10d3",
+        "checkedAt": "2026-11-03T15:13:19.263Z",
+        "canonicalSha256": "c13da1d12ea04695f75396abd56dceb740ebb904702004b480974e2f0c0770d6",
+        "reviewedSha256": "65d2d668b709e57510a6db59846de5c30d4687aaed695f9a922e60ebbb3a2a92",
+        "bytes": 220309,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "7c504a3e-bdb3-5118-b1a5-f9d6f93c77b9",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "bf6e107a402403cf7f62868b282d348ac0236de3028c6b3eaaafb20a26758d07",
+      "publishedImageSha256": "8d9686975aad25cb36efe6dedb64d359d0613fa6ce110587e5e09dcaa834f06e",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "7c504a3e-bdb3-5118-b1a5-f9d6f93c77b9",
+        "checkedAt": "2026-11-03T15:13:19.674Z",
+        "canonicalSha256": "2a1952f913e4af8e2d2db4efad4ed950d2d3588ce38920167e28a3c33e0cc324",
+        "reviewedSha256": "8d9686975aad25cb36efe6dedb64d359d0613fa6ce110587e5e09dcaa834f06e",
+        "bytes": 181802,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "9e5e5b46-5ae6-583e-bdde-4574a79c75eb",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE"
+      ],
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "ddda7ba2c430620ac08a82b2ab3b78f286bbbef731e4e9da34a6dde84c5a2c7c",
+      "publishedImageSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "9e5e5b46-5ae6-583e-bdde-4574a79c75eb",
+        "checkedAt": "2026-11-03T15:13:20.025Z",
+        "canonicalSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd",
+        "reviewedSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd",
+        "bytes": 139516,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "b0931cb7-dfe9-51ea-a987-3b410fd8a8e7",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "QUAN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "0f9dcde91688d1983f25adbd2e235001b9420c2df5979055c93351cc327f6a20",
+      "publishedImageSha256": "f6cbe9a71dd2b22b97567de962204a6c3ce9ad6e4cf0dccc76da8a0476892186",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "b0931cb7-dfe9-51ea-a987-3b410fd8a8e7",
+        "checkedAt": "2026-11-03T15:13:20.535Z",
+        "canonicalSha256": "9ef3e949a6e701b89abb7361958f8717771598664751a27726ca4b4f62b0f74d",
+        "reviewedSha256": "f6cbe9a71dd2b22b97567de962204a6c3ce9ad6e4cf0dccc76da8a0476892186",
+        "bytes": 200851,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "d16c6283-197f-5548-a22e-eb77b4b434a6",
+      "imageType": "PRODUCT_ONLY",
+      "intents": [
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "950db3c0cd7359b0082a81644e398332bb8c76f099c087f12732ab359522d591",
+      "publishedImageSha256": "80017d382c15372334d5a52ec97c243fdf0c5f2c31157c48dcf578e2b167bf69",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "d16c6283-197f-5548-a22e-eb77b4b434a6",
+        "checkedAt": "2026-11-03T15:13:21.727Z",
+        "canonicalSha256": "792e63299b91e527e5bb1a218e42f49caf61a61101cff0b9e53090bb5a404de2",
+        "reviewedSha256": "80017d382c15372334d5a52ec97c243fdf0c5f2c31157c48dcf578e2b167bf69",
+        "bytes": 223559,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SD023",
+      "pointId": "fafea37b-ff2d-5af6-89a3-4573c5df4daa",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE"
+      ],
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "77c390eee374c5dc8b651d1f4c5907e48d969ecdead74bc8513a4abb722c4bd3",
+      "publishedImageSha256": "29a52fcf4c0f8253ab812643ef7dfe56448842be09b34d70809eb26514fb42fc",
+      "oldProof": null,
+      "byteCheck": {
+        "pointId": "fafea37b-ff2d-5af6-89a3-4573c5df4daa",
+        "checkedAt": "2026-11-03T15:13:21.867Z",
+        "canonicalSha256": "c33f5bc7393362d063b635b52d4a6e5896ca3cf53a57e5430f75c145513298ba",
+        "reviewedSha256": "29a52fcf4c0f8253ab812643ef7dfe56448842be09b34d70809eb26514fb42fc",
+        "bytes": 18192,
+        "status": "MISMATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "01322724-71e3-5876-ba5d-2498efb5a67d",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE"
+      ],
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "0aead111194ddf5db39bf700f511319f61ed06e58da0c52ef866d36587bce468",
+      "publishedImageSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:25.509Z",
+        "metadataSha256": "63707e9b469cbc0053205129d56763c1ac143cb0fbc06d88d09d9659c130d664"
+      },
+      "byteCheck": {
+        "pointId": "01322724-71e3-5876-ba5d-2498efb5a67d",
+        "checkedAt": "2026-11-03T15:13:22.011Z",
+        "canonicalSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+        "reviewedSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+        "bytes": 73869,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "09e5b6fd-8df1-5f96-8ed2-f6ef185af774",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "338cc8cf829266eb948ee97b9b66a59d53017a18582d973e8547a1bd192bf622",
+      "publishedImageSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:28.240Z",
+        "metadataSha256": "7a4f790b777e937357826b54c53c08c48336358f96405c0ea30f46f77db10cf8"
+      },
+      "byteCheck": {
+        "pointId": "09e5b6fd-8df1-5f96-8ed2-f6ef185af774",
+        "checkedAt": "2026-11-03T15:13:22.801Z",
+        "canonicalSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+        "reviewedSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+        "bytes": 59661,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "2b04d7e6-0dea-5791-b457-a31e99f9d1f4",
+      "imageType": "SIZE_GUIDE",
+      "intents": [
+        "SIZE_GUIDE",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": false,
+      "registrySourceHash": null,
+      "publishedImageSha256": "3a321ad8b6b888fa470bdda8b83ae24c19238ca5132a56fbeab3dabe3ef7c2fc",
+      "oldProof": {
+        "version": 1,
+        "status": "INVALID",
+        "checkedAt": "2026-10-28T07:28:30.396Z",
+        "metadataSha256": "cf9770f2313ba9f82b10320cc21177cf6892fbb753ea203f9aa3f816c0f6dd15"
+      },
+      "byteCheck": {
+        "status": "NO_APPROVED_REGISTRY_ROW"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "2dbf7b1d-222e-530c-b7d7-fe7896bdbcd4",
+      "imageType": "DETAIL",
+      "intents": [
+        "MATERIAL_CLOSEUP",
+        "DETAIL"
+      ],
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "937c650f6d49faefb071a0c04b1dacc72077cef224952248cfbfbc3d0bc601d5",
+      "publishedImageSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:33.482Z",
+        "metadataSha256": "2e9b4813a41558f362ab576d279cf2aa4cf6e121292265e80398125b0f703947"
+      },
+      "byteCheck": {
+        "pointId": "2dbf7b1d-222e-530c-b7d7-fe7896bdbcd4",
+        "checkedAt": "2026-11-03T15:13:23.790Z",
+        "canonicalSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+        "reviewedSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+        "bytes": 59191,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "4f82b664-91b4-532b-9879-34b53fa2e4e0",
+      "imageType": "DETAIL",
+      "intents": [
+        "DETAIL",
+        "MATERIAL_CLOSEUP"
+      ],
+      "partsVisible": [
+        "AO"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "4594f95e4df2d9d75fa2bada55d778141afd20514cbd8a4a0baf764a243ef168",
+      "publishedImageSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:36.566Z",
+        "metadataSha256": "6057985d7b716c0737e6672491f97cc83e6d2cf747f1ec7f44c51d3be7137e90"
+      },
+      "byteCheck": {
+        "pointId": "4f82b664-91b4-532b-9879-34b53fa2e4e0",
+        "checkedAt": "2026-11-03T15:13:24.176Z",
+        "canonicalSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+        "reviewedSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+        "bytes": 67202,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "67822a93-e439-5680-be98-b4b7d01c18b5",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "50c7fa07a572664f884b7bc5fd2f63e5efb5a217f2c7fc128b93653a910c72cf",
+      "publishedImageSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:39.399Z",
+        "metadataSha256": "1a47238c53ab0132828392dda07e4fd015f8654208127a2b4712f44b9b1ef44f"
+      },
+      "byteCheck": {
+        "pointId": "67822a93-e439-5680-be98-b4b7d01c18b5",
+        "checkedAt": "2026-11-03T15:13:25.115Z",
+        "canonicalSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+        "reviewedSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+        "bytes": 168961,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "99aee371-bc23-5cb6-bee7-62b28b303e66",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "53e0dca818e207119bd1434d15595997b4ef76461909b7210c22278285d0fdf6",
+      "publishedImageSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:42.186Z",
+        "metadataSha256": "c051ed4a85b7f78c358ea346097f20dd1106c2afd43f107b1f40f9514e3c14b8"
+      },
+      "byteCheck": {
+        "pointId": "99aee371-bc23-5cb6-bee7-62b28b303e66",
+        "checkedAt": "2026-11-03T15:13:25.969Z",
+        "canonicalSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+        "reviewedSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+        "bytes": 75102,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "ab43da3b-70d7-516a-a808-2dccba185cde",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "859675d0cc5e4898350eb2f4740a6a1ecbe3c7fb4038bf3143c773cf5f868754",
+      "publishedImageSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:44.650Z",
+        "metadataSha256": "7d6e701f78e4e062af3356c6044caccd8bd6a72a1fd94429489c1886e1154238"
+      },
+      "byteCheck": {
+        "pointId": "ab43da3b-70d7-516a-a808-2dccba185cde",
+        "checkedAt": "2026-11-03T15:13:26.857Z",
+        "canonicalSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+        "reviewedSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+        "bytes": 155317,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "c08e1198-518e-52d6-94ac-0e9e24b7c84b",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "STYLE_REFERENCE"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "2d238c3a4d1dffa4101bff1bd37688c304d39e4f7fe4abcb06671e3387efa62a",
+      "publishedImageSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:46.917Z",
+        "metadataSha256": "f1a8742c72d8f314de15f66f960be54651d002365cb49f47784691c4833946ed"
+      },
+      "byteCheck": {
+        "pointId": "c08e1198-518e-52d6-94ac-0e9e24b7c84b",
+        "checkedAt": "2026-11-03T15:13:27.877Z",
+        "canonicalSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+        "reviewedSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+        "bytes": 180321,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "c841808c-fa26-55da-9d25-7fdf3d5a4f1f",
+      "imageType": "MODEL",
+      "intents": [
+        "LOOKBOOK",
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "c623447b85350199decacf1a0e5527dc360977db7389d2c98e07173a81f94fe5",
+      "publishedImageSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:49.384Z",
+        "metadataSha256": "afc8c6f62695a5fa301084350adc9e5e61a3669e22663e2770cd2e14f2fb89f5"
+      },
+      "byteCheck": {
+        "pointId": "c841808c-fa26-55da-9d25-7fdf3d5a4f1f",
+        "checkedAt": "2026-11-03T15:13:28.540Z",
+        "canonicalSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+        "reviewedSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+        "bytes": 86346,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    },
+    {
+      "productId": "SV2447",
+      "pointId": "ec064329-be93-54ca-b891-b8343d5010ec",
+      "imageType": "PRODUCT_ONLY",
+      "intents": [
+        "PRODUCT_OVERVIEW"
+      ],
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "feedback": false,
+      "approvedRegistryRow": true,
+      "registrySourceHash": "34f35a982c65d49d75747a56259fdf14dc85a0e895f0dc5557c4ef4f509fa09e",
+      "publishedImageSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+      "oldProof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:52.064Z",
+        "metadataSha256": "40a52963721343b3060b17d95192dc89e6d29d89aa5fe836ce77b3ab58192a4c"
+      },
+      "byteCheck": {
+        "pointId": "ec064329-be93-54ca-b891-b8343d5010ec",
+        "checkedAt": "2026-11-03T15:13:29.195Z",
+        "canonicalSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+        "reviewedSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+        "bytes": 90155,
+        "status": "MATCH"
+      },
+      "proposedProof": null,
+      "publicationEligible": false
+    }
+  ]
+}

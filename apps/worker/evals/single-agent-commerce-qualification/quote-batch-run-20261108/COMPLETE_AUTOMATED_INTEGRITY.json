@@ -1,0 +1,262 @@
+{
+  "status": "PASS_AUTOMATED_INTEGRITY_NOT_SEMANTIC_OR_QUALITY_REVIEW",
+  "cases": 34,
+  "turns": 55,
+  "groups": [
+    {
+      "label": "r1",
+      "kind": "CONTEXT_PUBLICATION_MODEL_ACCOUNTING_V1",
+      "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
+      "casesRegistered": 4,
+      "turnsRegistered": 7,
+      "casesStatus": {
+        "EXECUTED": 4
+      },
+      "frames": 7,
+      "terminalCounts": {
+        "SEND_ELIGIBLE": 7
+      },
+      "actualTerminalCounts": {
+        "SEND_ELIGIBLE": 7
+      },
+      "generationCount": 23,
+      "roles": {
+        "OWNER": 16,
+        "VERIFIER": 7
+      },
+      "generationStatuses": {
+        "OK": 23
+      },
+      "providerRequests": 23,
+      "verifierLatencyMs": {
+        "p50": 8934.737800000003,
+        "p95": 11870.75960000002
+      },
+      "tokenUsage": {
+        "inputObserved": 231654,
+        "outputObserved": 16979,
+        "usageRows": 23,
+        "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+      },
+      "rawJournalSha256": "e8988b414b261a90fbdb67a407192a497b35b95a59ce7b66f81e8d2d7bae0ea4",
+      "journalRows": 100,
+      "sourceWrites": 0,
+      "liveSends": 0,
+      "semanticRoles": [
+        "OWNER",
+        "VERIFIER"
+      ],
+      "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r1-run-20261108-01\\CANDIDATE_EVIDENCE.partial.json",
+      "evidenceRawSha256": "927d16029047e27d5a74d10daa47f67f67eb9beefb56da8a3d4a91a60dcbc8dd",
+      "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r1-run-20261108-01\\integration.json",
+      "integrationRawSha256": "5c6c8e1f969ade83e34e75046c81e2659d2afecbda0e1813d9ab4ccce79d8156",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "registrationHash": "4feda53c5e72737df2ba681261990ca0f481b620d6a5cc9ede304f3954aecd5c",
+      "authRequestsSeparate": 1
+    },
+    {
+      "label": "r2",
+      "kind": "CONTEXT_PUBLICATION_MODEL_ACCOUNTING_V1",
+      "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
+      "casesRegistered": 9,
+      "turnsRegistered": 17,
+      "casesStatus": {
+        "EXECUTED": 9
+      },
+      "frames": 17,
+      "terminalCounts": {
+        "HANDOFF": 5,
+        "NO_SEND": 5,
+        "SEND_ELIGIBLE": 7
+      },
+      "actualTerminalCounts": {
+        "HANDOFF": 5,
+        "NO_SEND": 3,
+        "SEND_ELIGIBLE": 7,
+        "CODE_OWNED_SEND": 2
+      },
+      "generationCount": 33,
+      "roles": {
+        "OWNER": 24,
+        "VERIFIER": 9
+      },
+      "generationStatuses": {
+        "MALFORMED": 1,
+        "OK": 32
+      },
+      "providerRequests": 33,
+      "verifierLatencyMs": {
+        "p50": 7645.938300000009,
+        "p95": 12981.161899999948
+      },
+      "tokenUsage": {
+        "inputObserved": 320816,
+        "outputObserved": 25896,
+        "usageRows": 33,
+        "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+      },
+      "rawJournalSha256": "d016a9bf727864c7093827a695fff06b0109fafac9d6041f2add9493450a47b1",
+      "journalRows": 142,
+      "sourceWrites": 0,
+      "liveSends": 0,
+      "semanticRoles": [
+        "OWNER",
+        "VERIFIER"
+      ],
+      "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\CANDIDATE_EVIDENCE.partial.json",
+      "evidenceRawSha256": "cfd2fb5705e1f0617b9052f65e7960f19c6fc7ce94a9460cabc14aa108ee1d61",
+      "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r2-run-20261108-01\\integration.json",
+      "integrationRawSha256": "4a3b0370c57e97e5568ffb6ba25d406c6bff9615747bb96b9adc8a1f5090a3d1",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "registrationHash": "069073a24ef7853c5fa7af8607aa1ae76a44536cfadcee0ab28f2475e4833b9c",
+      "authRequestsSeparate": 1
+    },
+    {
+      "label": "remainder",
+      "kind": "CONTEXT_PUBLICATION_MODEL_ACCOUNTING_V1",
+      "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
+      "casesRegistered": 20,
+      "turnsRegistered": 24,
+      "casesStatus": {
+        "EXECUTED": 20
+      },
+      "frames": 24,
+      "terminalCounts": {
+        "SEND_ELIGIBLE": 18,
+        "HANDOFF": 4,
+        "NO_SEND": 2
+      },
+      "actualTerminalCounts": {
+        "SEND_ELIGIBLE": 18,
+        "HANDOFF": 4,
+        "NO_SEND": 2
+      },
+      "generationCount": 59,
+      "roles": {
+        "OWNER": 40,
+        "VERIFIER": 19
+      },
+      "generationStatuses": {
+        "OK": 59
+      },
+      "providerRequests": 59,
+      "verifierLatencyMs": {
+        "p50": 6458.395000000019,
+        "p95": 24826.55409999995
+      },
+      "tokenUsage": {
+        "inputObserved": 575073,
+        "outputObserved": 54016,
+        "usageRows": 59,
+        "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+      },
+      "rawJournalSha256": "382208a114a511b2946b0a227fb49fb7bf528d2ea10f1a6443ae7a142166860f",
+      "journalRows": 266,
+      "sourceWrites": 0,
+      "liveSends": 0,
+      "semanticRoles": [
+        "OWNER",
+        "VERIFIER"
+      ],
+      "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-remainder-run-20261108-01\\CANDIDATE_EVIDENCE.partial.json",
+      "evidenceRawSha256": "460f0f1875407c6839506956a746cb20f6af9fb833ea01cc52b15b782b8fe1fe",
+      "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-remainder-run-20261108-01\\integration.json",
+      "integrationRawSha256": "eb868221d1e482efa229c3d76835bc48c638ecfb479dffa9f39645c9e9bafd73",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "registrationHash": "72f069a4c703c53c4bc1db354b9fd1f31782d8e6fe0d5618ea7b2f2c2353b53d",
+      "authRequestsSeparate": 1
+    },
+    {
+      "label": "checkout",
+      "kind": "CONTEXT_PUBLICATION_MODEL_ACCOUNTING_V1",
+      "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
+      "casesRegistered": 1,
+      "turnsRegistered": 7,
+      "casesStatus": {
+        "EXECUTED": 1
+      },
+      "frames": 7,
+      "terminalCounts": {
+        "SEND_ELIGIBLE": 1,
+        "NO_SEND": 5,
+        "HANDOFF": 1
+      },
+      "actualTerminalCounts": {
+        "SEND_ELIGIBLE": 1,
+        "CODE_OWNED_SEND": 5,
+        "HANDOFF": 1
+      },
+      "generationCount": 5,
+      "roles": {
+        "OWNER": 4,
+        "VERIFIER": 1
+      },
+      "generationStatuses": {
+        "OK": 5
+      },
+      "providerRequests": 5,
+      "verifierLatencyMs": {
+        "p50": 6677.661,
+        "p95": 6677.661
+      },
+      "tokenUsage": {
+        "inputObserved": 48866,
+        "outputObserved": 1850,
+        "usageRows": 5,
+        "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+      },
+      "rawJournalSha256": "4b93ac1602768538d6975260dd53ca80cfded6994764b01262d8b22d1bdd9b2f",
+      "journalRows": 22,
+      "sourceWrites": 0,
+      "liveSends": 0,
+      "semanticRoles": [
+        "OWNER",
+        "VERIFIER"
+      ],
+      "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-checkout-run-20261108-01\\CANDIDATE_EVIDENCE.partial.json",
+      "evidenceRawSha256": "7863bac3385e9d6a2a979a1b4075e272565b423092be969ad690acb6accb5049",
+      "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-checkout-run-20261108-01\\integration.json",
+      "integrationRawSha256": "ad91f24b121d50453a9f50c456652fd6664a47a05fe7fd3a2ad9372d799f80b9",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "registrationHash": "84c1d612486b2aefa659c36ba645c8d8281daf019d857f156249ff4eed0311eb",
+      "authRequestsSeparate": 1
+    }
+  ],
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 33,
+    "HANDOFF": 10,
+    "NO_SEND": 5,
+    "CODE_OWNED_SEND": 7
+  },
+  "generations": 120,
+  "roles": {
+    "OWNER": 84,
+    "VERIFIER": 36
+  },
+  "statuses": {
+    "OK": 119,
+    "MALFORMED": 1
+  },
+  "generationHttpRequests": 120,
+  "tokens": {
+    "input": 1176409,
+    "output": 98741
+  },
+  "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "generationRetry": 0,
+  "notRun": 0,
+  "checks": [
+    "Original source, frozen config/corpora, clean source and DB cleanup for all4groups.",
+    "All120 request accounting/hash/firewall/runtime-history bindings, caps and one-request dispatch.",
+    "All55 native hashes and accepted text/image Outbox counts/hash/order.",
+    "Allmodel-send exactdraft/snapshot binding and final gate replay at recorded check time; silent HANDOFF/NO_SEND."
+  ],
+  "privacy": "Synthetic contact names/addresses/phone patterns redacted in publication packet. Original raw artifacts/hashes remain outside repo."
+}

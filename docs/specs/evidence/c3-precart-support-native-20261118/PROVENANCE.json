@@ -1,0 +1,315 @@
+{
+  "kind": "OWNER_REQUESTED_NATIVE_J4_AND_TWO_SHIRTS_N5",
+  "registeredAt": "2026-11-18T09:07:54.230Z",
+  "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+  "worldHash": "4c84080583bf34204156718464c52a1fb33b868d0c48c6b52a96527730cccfbf",
+  "models": {
+    "sourceSha": "98bff18b1941663c62120a044d71f45b430e2e47",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "d8056c7aa10481b40902e910238245c16d223aadf4c33c758c76a7bc92a44d28",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "27afc634be5ccde496e1613ad80c659f00911135fb24c60ea645d3481ef2f97a",
+    "toolContractHash": "a508463e7afe545c9d6b2109e75227d8193dd2aa937f5a0ade401ac6e823a595",
+    "assemblyHash": "3f183d7c6cd3f730adcbf9e61a413a4611c7a93c9bfa3365258b2ed7696e533c",
+    "runtimeHash": "efe16e4edb5078b799f05f8296ccd8dd1305e8db38d63d44849a01b967d31ba3",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "660780392f367824c7b6bc574a786e461671d7261d1d08b93a6db7c5e4e685c7",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "8ea6aa4f2122e8d7bca1153a5057799bd87b3d7b8d307ce5e4f7647749c76661",
+      "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+      "boundsHash": "977a2cbd7041737b8de264bb0737d9bc6070fdac42348213f9236fff052b3953"
+    }
+  },
+  "ownerRequest": "Owner 2026-11-18: run current pre-cart support quote implementation, J4 x5 and two-shirt control x5, from the first turn; all terminal outcomes retained",
+  "repetitions": {
+    "c-20261028-j4": 5,
+    "c-context-two-units": 5
+  },
+  "maximumNativeGenerationRequests": 120,
+  "maximumJudgeGenerationRequests": 10,
+  "controlRepetitionAccounting": "FIVE_DISTINCT_REGISTRATIONS_EACH_EXISTING_CONTROL_N1",
+  "providerRequests": 0,
+  "worldCapture": {
+    "status": "CAPTURED",
+    "worldHash": "4c84080583bf34204156718464c52a1fb33b868d0c48c6b52a96527730cccfbf",
+    "products": 107,
+    "sourceSha": "98bff18b1941663c62120a044d71f45b430e2e47",
+    "testSourceSupplement": {
+      "kind": "OWNER_APPROVED_ISOLATED_COLOR_V1",
+      "configurationHash": "379b0b825749e59132e63388a254357375d62fd11add4c15aa258925942422ef",
+      "publicSourceWorldHash": "ac70d644ead86e8522c650e052409c0814cae8048f72dd637b29f4d69624bf74",
+      "approvalRefs": [
+        "owner-white-shirt-test-assumption-20261104"
+      ],
+      "changedRows": [
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        }
+      ],
+      "meaning": "Owner-approved test assumption; not verified physical stock colour or source publication."
+    },
+    "testSupportSupplement": {
+      "kind": "OWNER_APPROVED_TEST_FEEDBACK_HANDOFF_V1",
+      "configurationHash": "d4eee9dc3bd07ad198b3a28cb0416bba03c70f5e8b8d997c81e4f31fdd09fedf",
+      "approvalRef": "owner-feedback-handoff-test-supplement-20261104",
+      "baseWorldHash": "f0530fb7977d10a76dc5f6809a694bdd70486fc40605f29af8e0a8e44510bf46",
+      "handoffContentHash": "sha256:5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+      "handoffVersionId": "ee92f932-91ea-5490-a2a9-8e6338ae26f2",
+      "meaning": "Owner-approved isolated test feedback; not verified customer provenance. Handoff policy is active only in the test clone."
+    },
+    "testMediaSupplement": {
+      "kind": "OWNER_APPROVED_NEW_TEST_MEDIA_V1",
+      "configurationHash": "c07b0e453200180fab37ebcc3e42aa950326c8631f286bec48484a2f4a46f67d",
+      "approvalRef": "owner-new-test-media-SD023-20261104",
+      "baseWorldHash": "e10e6ac4d3d01e1853d733f5e4a424d6f25dd31fa1579b6c1d24505621f6b42f",
+      "assets": [
+        {
+          "productId": "SD023",
+          "url": "https://content.pancake.vn/1/s3000x3000/f8/01/35/62/552cb23c4c117004dcb3ac97565a0dec3ed2a2f5371555e7f4ea0001-w:4000-h:6000-l:4576023-t:image/jpeg.jpeg",
+          "sha256": "4a4a5aba84f6bda6b3c392c401beea862877df16c81c6ba3af39e1b6bab7d3bc",
+          "checkedAt": "2026-11-11T09:23:57.805Z"
+        }
+      ],
+      "meaning": "New isolated test assets from actual canonical bytes; not a successful old-hash revalidation or live publication.",
+      "proofReuse": {
+        "previousWorldHash": "1c72f3156501c801e6720df0bc232f03639d235b29256f7b518d270535bd1902",
+        "policy": "REUSE_OWNER_APPROVED_TEST_ASSET_ORIGINAL_CHECK_TIME"
+      }
+    },
+    "providerRequests": 0,
+    "sourceWrites": 0
+  },
+  "jobs": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "externalRepetition": null,
+      "registrationHash": "d41e9f0e87dd0799abce64e70e160236a0022e489b4d30a2ade847c1917fa975",
+      "seal": "c2e58c76b436aea6714d57033a59a6c458dce8f291174ac4124d1428b207aa28",
+      "selectedSlots": [
+        "295d828172e43d1b6f88a4534e6290646a71e82c295cd3a5c64088ee73b9b330",
+        "3f7f9f872b44e59eb3723f495e7bb422d0fc24d4af0c7225bddc21e6f4582bff",
+        "da2dba68d108b687834dd494d01922ed6bd0e9b6df2a1e483fa398731c5cb401",
+        "a971461c7ba5ad01d12b8199ef2b652dfed331f90a4c4b4cbd09a06c23cef839",
+        "d025ea789bbdbf0476f324c0743b255262b6f3b1ef321e78a75c10f851cbb8ba"
+      ],
+      "turns": 15,
+      "maximumGenerationRequests": 60,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47"
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "externalRepetition": 1,
+      "registrationHash": "7e9a62e50416beabd7e691932b57b90f194699bfa335f0b71b658da34ee39785",
+      "seal": "c2e58c76b436aea6714d57033a59a6c458dce8f291174ac4124d1428b207aa28",
+      "selectedSlots": [
+        "d67eb52434accec9a7e2222d76365cb794b616b88233b8e74e739dd079f688d0"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47"
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "externalRepetition": 2,
+      "registrationHash": "afc31c6677c0fa97b8a078613a6698bae31fc7eeda9c7d478ba3d7ef78277435",
+      "seal": "6a8f29e5a4e76083e8708f3339dd1de20310fbac68a9960077301ca304d38b3c",
+      "selectedSlots": [
+        "d67eb52434accec9a7e2222d76365cb794b616b88233b8e74e739dd079f688d0"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47"
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "externalRepetition": 3,
+      "registrationHash": "e0003ef88dbac1eb73da5407d9495a25925c94a7c0a49b615ce3ea836d2021c1",
+      "seal": "f3e712019830e7edfb7f064a038423572e89336c04857696755d5f60606c3dd5",
+      "selectedSlots": [
+        "d67eb52434accec9a7e2222d76365cb794b616b88233b8e74e739dd079f688d0"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47"
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "externalRepetition": 4,
+      "registrationHash": "588582c490088bd7cea4512e1838bbaedd6b84475937938a3f7b7b6a4d39fd4b",
+      "seal": "a3fd6a59dd237edcd710a9bd6a4314c62b50c289d4acc1714f1077ecfdf83440",
+      "selectedSlots": [
+        "d67eb52434accec9a7e2222d76365cb794b616b88233b8e74e739dd079f688d0"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47"
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "externalRepetition": 5,
+      "registrationHash": "09a0c45f6ce5b264ca9a5dd61631fcff18a441cd53ed26875bc13a2c1a61bb27",
+      "seal": "eb68293e04506d3eb4d1a6939f786f6388dceea511611f2d03fce48ef6bc2f92",
+      "selectedSlots": [
+        "d67eb52434accec9a7e2222d76365cb794b616b88233b8e74e739dd079f688d0"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47"
+    }
+  ],
+  "helperIdentity": {
+    "frozenBeforeGeneration": true,
+    "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+    "files": [
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-native-98bff18b-20261118-160005\\seal.mjs",
+        "sha256": "8174082d58c8db1218c27f3eebbd01d5363424f0b69611cf3fa77543672dbe35"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-native-98bff18b-20261118-160005\\audit.mjs",
+        "sha256": "8b2d4217d06b622b1981c4a60dc76ea7d720dba67b20611a3e97e9100879e5fb"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-native-98bff18b-20261118-160005\\judge.mjs",
+        "sha256": "a2e5257627de441788acc6e761511742f888c20abf116bf1e3950d2efe751ee9"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-native-98bff18b-20261118-160005\\summarize.py",
+        "sha256": "2f5e419a0f26a762c2c0d2f871a4d6e1ce690dd5d7a787a8f2afdb316bf3d389"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-native-98bff18b-20261118-160005\\publish.py",
+        "sha256": "8f723c6bf0bbd2b4b801f673ff62fe489ab9f7450f2460aa19c2e386d5487ba6"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-native-98bff18b-20261118-160005\\MEASUREMENT_CONTRACT.json",
+        "sha256": "033283ae56573be7b86c5363da75ca6562e1433b514946af114f44f0dc23814d"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-native-98bff18b-20261118-160005\\CANDIDATE-DRAFT.json",
+        "sha256": "64387a758be1ab5167a7f6afc9b248b8d047b1c76ce69cd224c49a31c5e966d2"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-native-98bff18b-20261118-160005\\CONTROLS-DRAFT.json",
+        "sha256": "0ed9c5fd6f0c033f3bf222c4d1254b36078ea636715b2a78f24b685376af68d8"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-session-20261118.py",
+        "sha256": "e5ff7c8d6fbfedb69b0e1186feb8af7a0f49d80496528f876027fafb2b3483eb"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-precart-support-launch-20261118.py",
+        "sha256": "d51851151a90235b978b4736fd77f92deaeb52e85f558fd8cb944df0f73e8d86"
+      }
+    ]
+  }
+}

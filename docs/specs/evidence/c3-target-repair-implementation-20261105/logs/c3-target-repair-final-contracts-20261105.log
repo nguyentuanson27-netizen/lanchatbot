@@ -1,0 +1,4 @@
+
+> @lana/contracts@0.4.0 typecheck C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+> tsc -p tsconfig.json --noEmit
+

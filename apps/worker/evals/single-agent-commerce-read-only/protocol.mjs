@@ -2,9 +2,12 @@ import {createHash} from 'node:crypto';
 import {readFileSync,existsSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {runCodexModel} from '../single-agent-semantic-verifier/codex-inference.mjs';
-import {OWNER_REQUEST_MAX_BYTES,publicTurnTime,publicCommunicationHistoryMetadata} from './gemini-inference.mjs';
+import {OWNER_REQUEST_MAX_BYTES} from './gemini-inference.mjs';
 import {terminalFallback} from '../../dist/single-agent-semantic-verifier-boundary.js';
+import {createGeminiVerifierModel,GEMINI_VERIFIER_MODEL} from './gemini-verifier.mjs';
 const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
+export {buildVerifierRequest,VERIFIER_REQUEST_MAX_BYTES} from './commerce-verifier-wire.mjs';
+import {buildVerifierRequest,VERIFIER_REQUEST_MAX_BYTES} from './commerce-verifier-wire.mjs';
 export const sha256=value=>createHash('sha256').update(value).digest('hex');
 // Eval-only explicit B1 selection. Stateful callers keep the shared full prompt.
 export function readB1OwnerPrompt(registrationPath){
@@ -39,16 +42,20 @@ export function validateToolWorkAccounting(r){
  check(r.toolWorkAccounting==='PRIMITIVE_WORK_V2','TOOL_WORK_ACCOUNTING');
  for(const k of ['normalToolCalls','terminalHandoffCalls','toolCalls','executedNormalToolInvocations','executedToolInvocations'])check(Number.isInteger(r[k])&&r[k]>=0,'TOOL_WORK_COUNTER');
  check(r.normalToolCalls<=6&&r.terminalHandoffCalls<=1&&r.toolCalls===r.normalToolCalls+r.terminalHandoffCalls&&r.executedNormalToolInvocations<=r.normalToolCalls&&r.executedToolInvocations===r.executedNormalToolInvocations+r.terminalHandoffCalls&&r.executedToolInvocations<=7,'TOOL_WORK_COUNTER');
- check(Array.isArray(r.quoteTaskWork)&&r.quoteTaskWork.length<=1,'QUOTE_WORK_TRACE');
- for(const w of r.quoteTaskWork)check(w.reservedUnits===2&&[0,1].includes(w.readInvocations)&&[0,1].includes(w.selectionInvocations)&&w.selectionInvocations<=w.readInvocations&&w.readInvocations+w.selectionInvocations<=r.executedNormalToolInvocations,'QUOTE_WORK_TRACE');
+ check(Array.isArray(r.quoteTaskWork)&&r.quoteTaskWork.length<=2,'QUOTE_WORK_TRACE');
+ for(const w of r.quoteTaskWork)check(w.reservedUnits===1&&[0,1].includes(w.readInvocations)&&[0,1].includes(w.selectionInvocations)&&w.selectionInvocations<=w.readInvocations&&w.readInvocations+w.selectionInvocations<=r.executedNormalToolInvocations,'QUOTE_WORK_TRACE');
 }
 export function validateProtocol(m){
  check(m.fallbackDelivery?.mode==='SILENT_HANDOFF'&&m.fallbackDelivery.unavailable==='NO_SEND'&&
   m.fallbackDelivery.customerText===false&&m.fallbackDelivery.images===false&&m.fallbackDelivery.effectReplay===false,'FALLBACK_DELIVERY_POLICY');
- check(JSON.stringify(m.terminalMap)===JSON.stringify({PASS:'SEND_ELIGIBLE_SEND_DISABLED',FAIL:'SILENT_HANDOFF_OR_NO_SEND',
-  UNCERTAIN:'SILENT_HANDOFF_OR_NO_SEND',MALFORMED:'SILENT_HANDOFF_OR_NO_SEND',TIMEOUT:'SILENT_HANDOFF_OR_NO_SEND',
+ // Owner decision 2026-11-16: a verdict against the draft may still send the code-built pre-cart total. The static
+ // fallback text stays undeliverable; verifier errors and stale worlds keep the silent handoff.
+ check(JSON.stringify(m.verifiedQuoteReply)===JSON.stringify({kind:'PRE_CART_QUOTE_V1',afterVerdicts:['FAIL','UNCERTAIN','MALFORMED'],
+  source:'SINGLE_CURRENT_PRE_CART_TOTAL_PROOF',modelText:false,reverification:'DETERMINISTIC_PRECHECK_ONLY',withCartOrPreparedHandoff:'SILENT_HANDOFF'}),'VERIFIED_QUOTE_REPLY_POLICY');
+ check(JSON.stringify(m.terminalMap)===JSON.stringify({PASS:'SEND_ELIGIBLE_SEND_DISABLED',FAIL:'VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND',
+  UNCERTAIN:'VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND',MALFORMED:'VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND',TIMEOUT:'SILENT_HANDOFF_OR_NO_SEND',
   PROVIDER_ERROR:'SILENT_HANDOFF_OR_NO_SEND',STALE:'SILENT_HANDOFF_OR_NO_SEND',PERMISSION:'NO_SEND',PRIVACY:'NO_SEND',RECIPIENT:'NO_SEND'}),'TERMINAL_DISPOSITION_MAP');
- if(m.quoteTask!==undefined)check(JSON.stringify(Object.entries(m.quoteTask).sort())===JSON.stringify(Object.entries({version:'EXPLICIT_QUOTE_V1',toolWorkAccounting:'PRIMITIVE_WORK_V2',normalUnits:2,standalone:true,maxPerTurn:1}).sort()),'QUOTE_TASK_CONFIG');
+ if(m.quoteTask!==undefined)check(JSON.stringify(Object.entries(m.quoteTask).sort())===JSON.stringify(Object.entries({version:'EXPLICIT_QUOTE_V3',toolWorkAccounting:'PRIMITIVE_WORK_V2',normalUnits:1,readOnlyBatch:false,maxPerTurn:2}).sort()),'QUOTE_TASK_CONFIG');
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');
  check(m.terminalHandoffAttempts===1&&m.maximumExecutedToolInvocations===7,'TERMINAL_HANDOFF_BUDGET');
  check(JSON.stringify(m.handoffReply?.sourceCheckKinds)===JSON.stringify(['PRODUCT','PROFILE','SIZE_SOURCE','CART_SELECTION','SALES_STATE','RECEIPT']),'HANDOFF_SOURCE_KINDS');
@@ -56,16 +63,21 @@ export function validateProtocol(m){
   m.handoffReply.customerMessagePolicy==='SILENT_HANDOFF'&&Array.isArray(m.handoffReply.approvedHoldingHashes)&&
   m.handoffReply.approvedHoldingHashes.length===0,'HANDOFF_REPLY_CONTRACT');
  check(m.ownerFinalRequest==='TEXT_WITH_COMPLETED_TOOL_DATA'&&m.toolResultAccounting==='BATCH_EXCLUDING_EXACT_CURRENT_PRODUCT_DUPLICATES','OWNER_EXECUTION_CONTRACT');
- check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===65536,'REQUEST_BOUNDS');
+ check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===VERIFIER_REQUEST_MAX_BYTES,'REQUEST_BOUNDS');
  check(m.models.conversation.provider==='VERTEX_AI'&&['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(m.models.conversation.model)&&m.models.conversation.effort==='high'&&
-  m.models.verifier.provider==='OPENAI'&&m.models.verifier.model==='gpt-6.1-sol'&&m.models.verifier.effort==='high'&&
-  m.models.verifier.generationConfig.reasoningEffort==='high'&&m.models.verifier.generationConfig.retry===0,'MODEL_IDENTITY');
+  m.models.verifier.effort==='high'&&m.models.verifier.generationConfig.retry===0&&
+  // Owner decision 2026-11-10: the verifier runs on the owner's Vertex route. The earlier Codex route stays readable for retained evidence.
+  (geminiVerifier(m)?m.models.verifier.model===GEMINI_VERIFIER_MODEL.model&&m.models.verifier.location===GEMINI_VERIFIER_MODEL.location&&
+    m.models.verifier.credentialRoute===GEMINI_VERIFIER_MODEL.credentialRoute
+   :m.models.verifier.provider==='OPENAI'&&m.models.verifier.model==='gpt-6.1-sol'&&m.models.verifier.generationConfig.reasoningEffort==='high'),'MODEL_IDENTITY');
  const owner=m.models.conversation.generationConfig,v=m.models.verifier.generationConfig;
  check(m.models.conversation.version===m.models.conversation.model&&m.models.conversation.location==='global'&&
   (m.models.conversation.model==='gemini-3.8-flash'?!Object.hasOwn(owner,'candidateCount'):owner.candidateCount===1)&&owner.responseMimeType==='text/plain'&&owner.maxOutputTokens===8192&&owner.thinkingConfig.thinkingLevel==='HIGH'&&
   owner.thinkingConfig.includeThoughts===false&&owner.retry===0&&owner.timeoutMs===90000&&
   m.models.verifier.version===m.models.verifier.model&&v.timeoutMs===90000&&v.maxResponseBytes===1048576&&
-  v.relayUpstreamRequestsPerAttempt===1&&v.endpoint==='https://chatgpt.com/backend-api/codex/responses'&&v.cliVersion==='0.159.2','GENERATION_CONFIG');
+  (geminiVerifier(m)?v.candidateCount===1&&v.responseMimeType==='application/json'&&v.maxOutputTokens===8192&&v.thinkingConfig?.thinkingLevel==='HIGH'&&
+    v.thinkingConfig.includeThoughts===false&&v.tools==='NONE'&&v.requestsPerAttempt===1
+   :v.relayUpstreamRequestsPerAttempt===1&&v.endpoint==='https://chatgpt.com/backend-api/codex/responses'&&v.cliVersion==='0.159.2'),'GENERATION_CONFIG');
  check(m.providerBatch.scenarios===REGISTERED_CASE_COUNT&&m.providerBatch.repetitions===1&&
   m.providerBatch.maximumGenerationRequests===MAXIMUM_GENERATION_REQUESTS,'PROVIDER_BATCH');
  for(const role of ['owner','verifier'])check(sha256(readFileSync(new URL('./prompts/'+role+'.vi.txt',import.meta.url)))===m.promptHashes[role],'PROMPT_HASH');
@@ -92,22 +104,26 @@ export function readRegisteredCases(path){
  check(samples.every(c=>['LIVE','POS_UNAVAILABLE'].includes(c.sourceMode??'LIVE')),'SOURCE_MODE');
  return {samples,inputs:samples.map(runtimeCase),hash:sha256(source)};
 }
-export function buildVerifierRequest(m,r){
- check(typeof r.finalDraft==='string'&&bytes(r.finalDraft)<=4096,'DRAFT_BOUND');
- const request={model:m.models.verifier.model,reasoning:{effort:m.models.verifier.effort},instructions:r.instructions,
-  input:[{type:'message',role:'user',content:[{type:'input_text',text:JSON.stringify({requestIdentity:r.binding,turnTime:publicTurnTime(r.turnTime),trusted:r.trusted,
-    untrusted:{latestCustomerMessage:r.latest,recentAcceptedDialogue:r.history,finalDraft:r.finalDraft,
-      ...(r.historyMetadata?.publicCartEvents.length?{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(r.historyMetadata)}:{})}})}]}],
-  tools:[],tool_choice:'none',parallel_tool_calls:false,store:false,stream:true,
-  text:{format:{type:'json_schema',name:'semantic_egress_verdict',strict:true,schema:m.verdictSchema}}};
- check(bytes(request)<=65536,'VERIFIER_INPUT_BOUND');return request;
+export const geminiVerifier=m=>m.models?.verifier?.provider===GEMINI_VERIFIER_MODEL.provider;
+// The registered verifier identity selects its transport; a caller may still inject one for a test or a controlled comparison.
+function registeredVerifierModel(m){
+ if(!geminiVerifier(m))return runCodexModel;
+ // The credential is read at the first verification, not at wiring: building a provider must not need a secret.
+ let run=null;
+ return (...call)=>{
+  if(!run){
+   const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));
+   run=createGeminiVerifierModel({projectId:credential.project_id,timeoutMs:m.models.verifier.generationConfig.timeoutMs},{credential});
+  }
+  return run(...call);
+ };
 }
-export function createCommerceVerifier(m,runModel=runCodexModel,onCheckpoint){
- validateProtocol(m);
+export function createCommerceVerifier(m,runModel,onCheckpoint){
+ validateProtocol(m);runModel??=registeredVerifierModel(m);
  return async r=>{
   if(r.signal.aborted)throw new Error('PROVIDER_TIMEOUT');
   const wire=buildVerifierRequest(m,r);
-  const telemetry=await runModel(m,'verifier',wire,{onCheckpoint: value=>onCheckpoint?.(r.generationId,value)});
+  const telemetry=await runModel(m,'verifier',wire,{signal:r.signal,onCheckpoint: value=>onCheckpoint?.(r.generationId,value)});
   if(telemetry.status!=='OK')throw Object.assign(new Error(telemetry.status==='TIMEOUT'?'PROVIDER_TIMEOUT':'PROVIDER_ERROR'),{telemetry});
   return {result:telemetry.answer,telemetry};
  };

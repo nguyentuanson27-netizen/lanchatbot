@@ -1,0 +1,295 @@
+{
+  "status": "APPROVED_SCOPED_ENGINEERING_IMPLEMENTATION",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T12:43:43.716308+00:00",
+  "implementationBaseSha": "1c2ef10e0a3a83eb80074585b92802ebdd3d142d",
+  "approvedSourceSha": "639aff103898ad9e6cad5119d27c08f4809f9896",
+  "sourceDirty": false,
+  "scope": "Approved target/composition/continuation repair plan S1-S4 engineering only; no provider campaign",
+  "closedReviewFindings": [
+    {
+      "id": "IMPL_S3_DANGLING_REFERENCE",
+      "resolution": "Reject reserved selection-reference fields before missing-evidence earlyreturn; actual inference control fails before auth/generationHTTP."
+    },
+    {
+      "id": "IMPL_S2_MALFORMED_COMPONENT_CONTAINER",
+      "resolution": "Explicit nonarray components cannot fall back to legacySKU; null/string/object controls cover false AVAILABLE."
+    },
+    {
+      "id": "SELFREVIEW_S3_CONFLICTING_DICTIONARY",
+      "resolution": "Hash-index candidate must be unique and exact canonical equal, otherwise reject; finalHEAD4wiretests independentlyPASS."
+    }
+  ],
+  "unresolvedMaterialFindings": [],
+  "verificationObserved": {
+    "workerFull": {
+      "pass": 2659,
+      "files": 154,
+      "basis": "Inspected completed fullworker02log; TS/runtime unchanged by later eval-only strictdictionary follow-up."
+    },
+    "finalExactSourceEvals": {
+      "tests": 858,
+      "pass": 856,
+      "skip": 2,
+      "fail": 0
+    },
+    "sharedFocused": {
+      "contracts": 75,
+      "businessTools": 42,
+      "database": 56
+    },
+    "sixBuildTypecheckLintCommands": "exit0 in retained finalcommands/logs",
+    "C2BenchmarkValidation": "exit0 retained artifact",
+    "realPostgresFinal": {
+      "sourceSha": "639aff103898ad9e6cad5119d27c08f4809f9896",
+      "cases": 3,
+      "pass": 3,
+      "sourceDirty": false,
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false
+    },
+    "BPreservingPg": {
+      "sourceSha": "c7b485b097c1b84098b3ba86b1170a9d0614cb93",
+      "cases": 2,
+      "pass": 2,
+      "testDatabaseDropped": true,
+      "limit": "Beforeeval-onlystrictdictionaryfollowup; runtime/PGharnessbytesunchanged atfinalsource."
+    }
+  },
+  "independentCommandsActuallyRun": [
+    {
+      "command": "pnpm --filter @lana/contracts exec vitest run src/v2/canonical-evidence-readiness.test.ts",
+      "result": "63PASS"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-tools.test.ts",
+      "result": "101PASS"
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-commerce-read-only/selection-result-wire.test.mjs",
+      "result": "4PASS onfinalHEAD"
+    }
+  ],
+  "engineeringConclusions": [
+    "DistinctcomponentSIZE_FIT target identities survive sharedreadiness/durableegress; sametargetcontradiction blocked by actualPGguard withzeroOutbox.",
+    "LogicalBOM composition stableunderordering andduplicatequantities without changing exactvariant/stock authority; invalidquantity/container failclosed.",
+    "Missingcolour results remain nonmutating and can resume bothsizes after explicit customercolour; no sentinel substitution.",
+    "Narrow samebodylossless wirefactor preserves options/query/source and native signedcontent; dictionaryambiguity/danglinginput rejected beforeHTTP.",
+    "Media metadata does not certify unseenlace; decoder telemetry bounded without raw unknown names/values; no speculative schema/repair or promptweakening."
+  ],
+  "structuralDelta": {
+    "files": 15,
+    "insertions": 278,
+    "deletions": 27,
+    "onlineSemanticRolesAdded": 0,
+    "newSemanticParsers": 0,
+    "repairOrGenerationRetryLoops": 0
+  },
+  "limitations": [
+    "No new model campaign executed; historical prefixFAIL remains, remaining21cases31turnsNOT_RUN.",
+    "Engineeringapproval does not imply R1/R2 taskPASS, salesvoicequality, stability, verifieraccuracy or PhaseCGO.",
+    "J1wire60636 is offline reconstructed currentcontext/results with13actualcallabledeclarations; failed historicalbody was notcaptured and no model path improvement measured.",
+    "p06source replay uses captured clock, notcurrentauthorization; QD001 roleOTHER retained rather than inventing garmenttype.",
+    "s03 owner behavior and malformed s13/s15/j4 remain unmeasured; diagnostics/regression guards do not prove provider defectsfixed.",
+    "Future providerdispatch requires separately authorized cleanseal/currentworld/inputreview; none authorized by thisengineeringapproval."
+  ],
+  "sourceManifest": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "worktreeSha256": "3d22ea551064d177d5dc64e455a27845825e86cb0f8acf35a6f026f87c06ab30",
+      "gitBlobSha256": "3d22ea551064d177d5dc64e455a27845825e86cb0f8acf35a6f026f87c06ab30",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+      "worktreeSha256": "33e669fa7dcedd2071ef7a4269d8f3e3f3c59d600a359b4eb6485781ad8912d4",
+      "gitBlobSha256": "33e669fa7dcedd2071ef7a4269d8f3e3f3c59d600a359b4eb6485781ad8912d4",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "worktreeSha256": "42aa8dba630696d249394720bab8b8c23b16c45002c5e8ca6bfe127b8af62b8b",
+      "gitBlobSha256": "42aa8dba630696d249394720bab8b8c23b16c45002c5e8ca6bfe127b8af62b8b",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/owner-product-tables.mjs",
+      "worktreeSha256": "af40acc862484012975e5fef63c5a426327a3b52509a04600e5005e53cffa63f",
+      "gitBlobSha256": "af40acc862484012975e5fef63c5a426327a3b52509a04600e5005e53cffa63f",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs",
+      "worktreeSha256": "af77e6a96da6cc39a9c492fbaa3108acaffd8a16446080a2ed5492c304921d80",
+      "gitBlobSha256": "af77e6a96da6cc39a9c492fbaa3108acaffd8a16446080a2ed5492c304921d80",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/selection-result-wire.test.mjs",
+      "worktreeSha256": "d2cb98beff8023fe12c40b3d8755630fe5dc8e50d18f03aec80290b0c27c0409",
+      "gitBlobSha256": "d2cb98beff8023fe12c40b3d8755630fe5dc8e50d18f03aec80290b0c27c0409",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/tool-output-diagnostic.test.mjs",
+      "worktreeSha256": "72b64c4197340f149c1affff31d584a4e70e872cd93911199fdb702c50a54c87",
+      "gitBlobSha256": "72b64c4197340f149c1affff31d584a4e70e872cd93911199fdb702c50a54c87",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.test.ts",
+      "worktreeSha256": "3ac3afd48d5771396666f422b031dac219edf07677a522c6f4ae9d826e36a53f",
+      "gitBlobSha256": "3ac3afd48d5771396666f422b031dac219edf07677a522c6f4ae9d826e36a53f",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.ts",
+      "worktreeSha256": "bc936319cf472b3b5a8c46d85760d14918564007c0c3bbf7ace700657c069b94",
+      "gitBlobSha256": "bc936319cf472b3b5a8c46d85760d14918564007c0c3bbf7ace700657c069b94",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-media.test.ts",
+      "worktreeSha256": "982a1942387ca0b34506cb8878d6a81972fb78d4d2e39d6ca4e6658c8030f325",
+      "gitBlobSha256": "982a1942387ca0b34506cb8878d6a81972fb78d4d2e39d6ca4e6658c8030f325",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-preparation.test.ts",
+      "worktreeSha256": "4b9a79f9cf3b4947d58eb576f8f3ec172237409fc0617c79a992959c14528ac1",
+      "gitBlobSha256": "4b9a79f9cf3b4947d58eb576f8f3ec172237409fc0617c79a992959c14528ac1",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only-tools.test.ts",
+      "worktreeSha256": "06f9432fdcd7133aa5ada4e6946159a995eb2c17d3a9300e249e00eaf3f0e10f",
+      "gitBlobSha256": "06f9432fdcd7133aa5ada4e6946159a995eb2c17d3a9300e249e00eaf3f0e10f",
+      "normalizedParity": true
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only-tools.ts",
+      "worktreeSha256": "5be06b44e7ea7f1d993d3563b27281e0a644d783e775e050d56c6204ca4212c9",
+      "gitBlobSha256": "5be06b44e7ea7f1d993d3563b27281e0a644d783e775e050d56c6204ca4212c9",
+      "normalizedParity": true
+    },
+    {
+      "path": "packages/contracts/src/v2/canonical-evidence-readiness.test.ts",
+      "worktreeSha256": "1e5b4fd38f85df1702bedf4ac5f706a202d2c65b29c9b1587b6d01c448de2849",
+      "gitBlobSha256": "1e5b4fd38f85df1702bedf4ac5f706a202d2c65b29c9b1587b6d01c448de2849",
+      "normalizedParity": true
+    },
+    {
+      "path": "packages/contracts/src/v2/canonical-evidence-readiness.ts",
+      "worktreeSha256": "853bbd3e4cf4a28861e5d8924b24b84a3619688794f69a0eb70206c8d9d60dd1",
+      "gitBlobSha256": "853bbd3e4cf4a28861e5d8924b24b84a3619688794f69a0eb70206c8d9d60dd1",
+      "normalizedParity": true
+    }
+  ],
+  "evidenceManifest": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-s1-red-20261105.log",
+      "sha256": "176e57e348b23178d3129457d55d3b085babacceb23a0d839118edd9eca3aab1"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-s1-green-20261105.log",
+      "sha256": "a06b4f88c6d8c611f75b5652fd4cb10fb006e175574efd01bd03b62912ce552b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-s2-red-20261105.log",
+      "sha256": "b8a8294d87d8192d0d53b5352f96e20a158ac0f9c94adcf01c9b85ce38a84d82"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-s2-green-20261105.log",
+      "sha256": "63b9c4e1f4caf39c08b57dfd53ee38d97ca8e8929e6e353177a3a1d87dce2a90"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-s3-red-20261105.log",
+      "sha256": "2fffd5fc1cd1df3c85ec0bf69270bc713b29b77cf041a3417b2c5d9990a55618"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-s3-green-20261105.log",
+      "sha256": "2d0681a4db1fc537f36fcec432292605bdf6aa49fa96f1abf05e1b5e30f91072"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-dangling-red-20261105.log",
+      "sha256": "4795eaf17b700f94266200f543e03f4332745b6bb557ab5e501b9c652bf569bc"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-dangling-green-20261105-02.log",
+      "sha256": "3eed77b74efea92a5865ebb50c991c27aafda424f44465a5c424636ac1a660ba"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-dictionary-red-20261105.log",
+      "sha256": "744d95ae4f6b6ccd077173c83c6653618f7347832a25cd846a80d8677acdf37b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-dictionary-green-20261105.log",
+      "sha256": "b9647a25e271ae2c8dc8081dff617ba8a878f8acc49684d78e60e8879e0da123"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-worker-full-20261105-02.log",
+      "sha256": "51019cd9c0045eacaa473ce0cb6b2cf9db91d778ef95e53cb2a689ac2545317d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-evals-final-20261105.log",
+      "sha256": "af2cfdca2949f417c8138ea3efafe87390250329c60dc848613558edc7719bc3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-business-focused-20261105.log",
+      "sha256": "6d5ea4701719f45abe739b91f22f17ac7f8aed65eb8104db212087e76bfd8019"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-database-focused-20261105.log",
+      "sha256": "fa7893a343c94a6a02ebc447840300c37dd9dacfa091c0d80ef9cd89cf34aa71"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-final-commands-20261105.json",
+      "sha256": "dc93ad981114d30ac141a990ff1c7c3b859db68db6143697f2a31dd6b94f6ec9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-final-build-20261105.log",
+      "sha256": "2e2a7477d537b26a68ab3128a8c2a948c8fcc9c1201ee5f47cd9f59183f458a7"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-final-typecheck-20261105.log",
+      "sha256": "660b288930cd706bd031439efe7920e08301cf041e8dd18afcaba58c083306b5"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-final-lint-20261105.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-final-contracts-20261105.log",
+      "sha256": "1b7113c9a1e3ca485b1878418e0237fc26beddeea42b4f5d0205fe6510e7d7e8"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-final-business-20261105.log",
+      "sha256": "3333868def9afe9b4c5ecc6803cd7da86599de45e5774ed721cb470e8e77ad5d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-final-database-20261105.log",
+      "sha256": "fb22438eff46a7796dc43c7bb69c6b11a0bae5be99ce4c1ab983f268a38e560d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-pg-final-20261105-01\\integration.json",
+      "sha256": "898cad6f1bddfae07fcc4a66669cb3954808a23326faeee6071875196f8bab6c"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-pg-b-preserving-20261105-01\\integration.json",
+      "sha256": "1db6775cc19343fa55970dcdb403991ef05ff1cd12d20853dbea2cf01ea9123f"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-composition-replay-20261105.json",
+      "sha256": "dfbfacfc48999b195abd52136661b8048b41edfecc42c8d32d0aa82583f6818d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-j1-wire-20261105.json",
+      "sha256": "c04d85111c3ab2a433d7dbfcaa12ec4a3469c6564348de0cb82dbfc17ef98691"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-repair-benchmark-20261105.log",
+      "sha256": "cd0720d3e6ea05e3770bb2c1355ecf6e53912dacbdb087b56e25ea74cf5a1e53"
+    }
+  ]
+}

@@ -1,0 +1,296 @@
+{
+  "runSourceSha": "22fc581a3b32428dcf6c7d65cca3195bbf43b327",
+  "priorReportedSourceSha": "6ef2be81c4e3f4c6ae7f90fee9afe3fbf26304a2",
+  "worldHash": "7d342091387df57808a32ffd6f23303cf337ea36cc18644f179e6e30fd959e2e",
+  "config": {
+    "version": 1,
+    "qualificationStage": "ABSOLUTE",
+    "nativeCodecs": {
+      "OWNER": "NATIVE_B_OWNER_V1",
+      "VERIFIER": "NATIVE_B_VERIFIER_V1",
+      "STRATEGIST": "MAIN_C3_V1",
+      "RESPONDER": "MAIN_C3_V1"
+    },
+    "sendEnabled": false,
+    "retry": 0,
+    "repetitions": 5,
+    "implementationBaseSha": "f160dfa4f7e0c8b3e29232570710d99d4f5ed012",
+    "candidate": {
+      "sourceSha": "22fc581a3b32428dcf6c7d65cca3195bbf43b327",
+      "model": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "promptHash": "78522a4f4982c93ca1f513e168800fe3e34e7e764c50a1a11c9ad739b9159170",
+      "openingMediaRule": {
+        "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+      },
+      "contextPolicyHash": "ac8ed513e98debd19bbe3b904543df1ae49684cfeafe894b7c8c25ad194f1693",
+      "toolContractHash": "fd891c0ec49f14ff6ca619586b2a8594706348591a469deb0e4fa7c3b8f3f273",
+      "assemblyHash": "2851ed1430f3f9048d5ce414fe79df9d718a29fdc4a4004b79179afb3cbd8f2c",
+      "runtimeHash": "20185069b27f53360b385996fa364059909e8705d8eece70a56a73c20a86471b",
+      "verifier": {
+        "model": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "transport": "VERTEX_GENERATE_CONTENT_NO_RETRY",
+            "candidateCount": 1,
+            "responseMimeType": "application/json",
+            "responseSchema": "VERDICT_SCHEMA_AS_RESPONSE_JSON_SCHEMA",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "tools": "NONE",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "requestsPerAttempt": 1,
+            "retry": 0,
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        },
+        "promptHash": "ef4a060ce221fe0374ec94b96e23aef8ed8b807cb1eb09ed4c6afd3489f6373f",
+        "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+        "serializationHash": "be6d02ed3d0106cb995626769e47d37b417b6655d43c8bfb2b2f4b80f3f8e6d7",
+        "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+        "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+      }
+    },
+    "measurementPolicy": {
+      "latency": "MONOTONIC_MS_EVERY_GENERATION",
+      "percentiles": "NEAREST_RANK",
+      "tokens": "PROVIDER_OR_EXPLICIT_UNAVAILABLE",
+      "cost": "PROVIDER_OR_EXPLICIT_UNAVAILABLE",
+      "toolCalls": "EVERY_ATTEMPT",
+      "terminalReasons": "EVERY_NON_SEND",
+      "embedding": {
+        "kind": "NATIVE_VERTEX_EMBED_TEXT_V1",
+        "maximumPredictHttpPerInvocation": 2,
+        "retry": "ONE_REFRESH_AND_RETRY_ONLY_AFTER_FIRST_PREDICT_401",
+        "oauth": "NATIVE_TOKEN_CACHE_SINGLE_REFRESH_NO_OAUTH_RETRY",
+        "generationRequests": 0,
+        "requestEvidence": "PREDICT_BODY_HASH_ONLY_OAUTH_BODY_NEVER_RETAINED",
+        "usage": "NOT_EXPOSED_BY_NATIVE_EMBED_PORT"
+      }
+    },
+    "onlineRoles": [
+      "OWNER",
+      "VERIFIER"
+    ],
+    "maximumOwnerGenerations": 3,
+    "maximumVerifierGenerations": 1,
+    "ownerDecision": {
+      "status": "APPROVED",
+      "evidenceRef": "owner-reply:call_c242e38f43fc43008382efd4abff8c46:2026-10-28",
+      "decisionHash": "0505b43f33cd4db692804030e3d8d179b483a15e1ab6799a1df7f89595e132a9"
+    },
+    "thresholds": {
+      "singleQuality": 0.9,
+      "journeyQuality": 0.9,
+      "safeUsability": 0.9,
+      "singleNetWin": 0.1,
+      "journeyNetWin": 0.1
+    },
+    "judge": {
+      "kind": "OFFLINE_MODEL",
+      "identity": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "approvalRef": "owner-reply:call_bd286ceab8db4f4780bc1a76537484da:2026-10-28",
+      "promptHash": "80843a39c70548e8709a5cbd42628927b0c34515cd3d2d55e7667212355d6bff",
+      "rubricHash": "a652669b2ea5d788eaba897bfd24f0bbf8fe3fbe3a6ab6e64ecdc4cb51984fad",
+      "blind": true,
+      "disagreement": "REQUIRE_ADJUDICATION"
+    },
+    "baseline": {
+      "sourceSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+      "capabilityPath": "apps/worker/src/track-c-c3-two-pass-candidate.ts",
+      "model": null,
+      "capabilityStatus": "UNVERIFIED_MATCHED_MODEL_AND_STATEFUL_PARITY"
+    },
+    "blinding": {
+      "scheme": "HMAC_SHA256_ORDER_V1",
+      "seedCommitment": "f9502ab83753cd597b5ba0bf131f2c174fa9056a4b0c06dd6e360238f3c4e573"
+    }
+  },
+  "identity": {
+    "verifier": "2beb5b40cff18e863e769d456abd3f2088fee07506a2b5c05035c0a864080b4c",
+    "candidate": "873b9e3b4b6d78321d130a9ef762b0e126cba7722b6e985809ca2ce8ef9a12d7",
+    "protocol": "0ba03fce222ce6b7b619b84a1a7ee57d3cd2f15f41b220e340b5f6c0aae06180"
+  },
+  "sourceProducts": 107,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "nativeClockPolicy": "ACTUAL_WALL_CLOCK_CURRENT_SOURCE_READBACK",
+  "comparisonLimitation": "Fresh capture, no pinned-clock baseline run. The native batch was never launched.",
+  "commandsActuallyRun": [
+    [
+      "pnpm",
+      "--filter",
+      "@lana/worker",
+      "build"
+    ],
+    [
+      "node",
+      "--test",
+      "apps/worker/evals/single-agent-commerce-read-only/gemini-verifier.test.mjs",
+      "apps/worker/evals/single-agent-commerce-qualification/repetition-summary.test.mjs"
+    ],
+    [
+      "pnpm",
+      "--filter",
+      "@lana/worker",
+      "exec",
+      "vitest",
+      "run",
+      "src/single-agent-commerce-owner-view.test.ts",
+      "src/single-agent-commerce-selection-evidence.test.ts",
+      "src/single-agent-commerce-selection-compact.test.ts",
+      "src/single-agent-commerce-read-only.test.ts",
+      "src/single-agent-commerce-effects.test.ts"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "../c3-convergence-model-world-20261111-01",
+      "../c3-media-context-model-codes-20261103-02.json"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "../c3-convergence-model-initial-20261111-01",
+      "COD",
+      "--phase-c-initial-world",
+      "../c3-convergence-model-world-20261111-01/WORLD.json"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-prepare-20261111-01.mjs"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-seal-20261111-01.mjs"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-safety-20261111-01.mjs",
+      "prepare"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "../c3-convergence-model-safety-20261111-01.mjs",
+      "run"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-safety-20261111-02.mjs",
+      "prepare"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "../c3-convergence-model-safety-20261111-02.mjs",
+      "run"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-audit-20261111-01.mjs"
+    ],
+    [
+      "pnpm",
+      "check:dataset-boundary"
+    ]
+  ],
+  "commandResults": {
+    "workerBuild": "PASS",
+    "focusedNodeTests": "7/7 PASS",
+    "focusedWorkerTests": "199/199 PASS",
+    "sourceCapture": "PASS",
+    "realInitialStateCapture": "PASS, disposable database dropped",
+    "nativePreflight": "PASS",
+    "safety01": "SOURCE_LABEL_REGISTRATION_INVALID",
+    "safety02": "FAIL, 26/32 EXECUTED, 6 NOT_RUN",
+    "nativeLaunch": "NOT_RUN_SAFETY_FAIL",
+    "audit": "PASS"
+  },
+  "retainedSetupFailures": [
+    "Initial focused tests and source capture started before the new worker build completed. Import failed for the newly added owner-view dist module. Both succeeded after build. Provider requests for those failures were zero.",
+    "The first safety registration reused the stock threshold 17/18 with current source stock=19. It stopped after four requests. All four requests and all original labels are retained.",
+    "The audit initially expected a journal phase OBSERVED instead of RESULT and an unprojected final-gate disposition. The audit was corrected to compare the recorded RESULT and actual send eligibility. No provider rerun occurred for audit corrections."
+  ],
+  "helperAndArtifactSha256": {
+    "c3-convergence-model-prepare-20261111-01.mjs": "6a81997a1b5ebe7d702ef0a8123a2c8127959e7f23a135ca715f4148e7f7b809",
+    "c3-convergence-model-seal-20261111-01.mjs": "3ca8ded578ac4e849694bc58734a0a4fd918b32ae2f74c72e105a299f8418cf1",
+    "c3-convergence-model-safety-20261111-01.mjs": "029a7ede2ed3b4dd0c72bb9de10f846301e6e86acd559cb1d0e098b911f6d5e5",
+    "c3-convergence-model-safety-20261111-02.mjs": "c399414a611828e18223bb0db75a7560e12a63c8da0ca8e805dd76d5e82c28a4",
+    "c3-convergence-model-launch-20261111-01.py": "e7ca570adf62997f657e53b47b5b3b5092f21ad487d61e504d8e305aaa4b91da",
+    "c3-convergence-model-audit-20261111-01.mjs": "c9370922245cff426e5d2d41739397587cbd2f592e26e9bddc283a7231429060",
+    "c3-convergence-model-world-20261111-01\\WORLD.json": "83806f571765dc9a87bef5d70dbaf63ae935e1f69ee8d20792a8dc4fa77be7a7",
+    "c3-convergence-model-initial-20261111-01\\INITIAL_STATE.json": "d6cc70c20f64623b3b547a345d7149a887c090f75aa6b0805dfb1346401481ec",
+    "c3-convergence-model-sealed-20261111-01\\REGISTRATION.json": "f332db169dd431262d7ac83b3d9ae3857a4896c751d29cbcb1b108a669d8aa23",
+    "c3-convergence-model-safety-sealed-20261111-01\\REGISTRATION.json": "7c1ac0c9bdd152979cfba5df2778c200f5b6e325809f40170158b2e9ff83a850",
+    "c3-convergence-model-safety-sealed-20261111-02\\REGISTRATION.json": "539bbfe97b30ed66ad85b17e77d81d8c95d25d6c6ee7f44b85ef641ef6851a6e",
+    "c3-convergence-model-safety-run-20261111-01\\SAFETY_EVIDENCE.json": "38389bf78ffce84f84dd7fcf13070c0180bca19a1206bbac78978197642dcf7c",
+    "c3-convergence-model-safety-run-20261111-01\\NATIVE_REQUESTS.jsonl": "814a146b901d3bd6b4e43bbfc9357dce3f5c472332500cb235c4d1c9057f73eb",
+    "c3-convergence-model-safety-run-20261111-02\\SAFETY_EVIDENCE.json": "4bebf834fb1c5a78053d97752596606f9418c4b2c425003a507a1fb2cbdc44e5",
+    "c3-convergence-model-safety-run-20261111-02\\NATIVE_REQUESTS.jsonl": "6d422d5eb9224596cdc51ce17439126431185d1cd930c4dba46d91b28a772c23"
+  },
+  "logSha256": {
+    "c3-convergence-model-build-20261111-01.log": "783bb2c8582cdd427834e1cca2499e560e0c3ace4cd23afe9bda339d948b312d",
+    "c3-convergence-model-focused-20261111-01.log": "942c5704098ea7967b5a45ce7567065d129ab63fc11bc0da951204da77a32871",
+    "c3-convergence-model-focused-built-20261111-01.log": "8cea3790fb280ab51e5db95fbd10cf486864955833679ae52db219acd06acedb",
+    "c3-convergence-model-contract-checks-20261111-01.log": "86623d4ecffdd61cf17aeb34630eb66efa6c3c7427667ada81a8ca41a69be745",
+    "c3-convergence-model-world-20261111-01.log": "34b8358ac0f9baec75661ffe4a3c5884eaadeeb9a6b0fb5f7fa06fe23ed67a9c",
+    "c3-convergence-model-world-ready-20261111-01.log": "e186e7e0b798c1c58ccb623cb5ef4761db1e372b05591e7c7ac0e002a5545ca6",
+    "c3-convergence-model-initial-20261111-01.log": "9836ebc8db3db372b1cec6eacaed6a16b02bc0972f3d4915c2be685f745e29da",
+    "c3-convergence-model-prepare-20261111-01.log": "bf65749ec728c07a4f7ca4dedf7d89e6099def93e8d1e7bbd7d78767e34a3a6e",
+    "c3-convergence-model-seal-20261111-01.log": "49ab93a9c04140c4bbc9d2e0bd805a8198deda4e09e7b192b14113edca0591d6",
+    "c3-convergence-model-safety-run-20261111-01.log": "08ae07a9761c6872b6fe6e16cfbbfe12e6f2ef7abeeb85fad4bd173b82acfcb9",
+    "c3-convergence-model-safety-run-20261111-02.log": "edc0a52a85cb0d55d9c1a14eac50a826542d680865a2995d4a4b2911dba55365",
+    "c3-convergence-model-publication-guard-20261111-01.log": "745c52b41d3303a69e6595df2e22f28f9fc5f1f0b5392d560db215ff5a6e14ca"
+  },
+  "independentOutcomeReview": "NOT_REQUESTED_THIS_RUN",
+  "publicationChecks": {
+    "datasetBoundary": "PASS",
+    "jsonParse": "PASS",
+    "relativeReportLinks": "PASS",
+    "credentialPatternCheck": "PASS",
+    "gitDiffCheck": "PASS"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "sourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "registeredCases": 7,
+  "registeredTurns": 11,
+  "executedTurns": 11,
+  "generationRecords": 16,
+  "generationHttp": 15,
+  "maxRequestsPerGeneration": 1,
+  "generationStatuses": {
+    "OK": 15,
+    "PROVIDER_ERROR": 1
+  },
+  "verifierVerdicts": {
+    "PASS": 3
+  },
+  "verifierLatencyMs": {
+    "n": 3,
+    "p50": 7038.6033000000025,
+    "p95": 8909.77469999998
+  },
+  "nativeVerificationAndReadbackMs": {
+    "n": 3,
+    "p50": 10241.486799999999,
+    "p95": 11852.315699999977
+  },
+  "providerTransportErrors": 0,
+  "preDispatchFailures": 1,
+  "tokenUsage": {
+    "inputObserved": 139617,
+    "outputObserved": 12012,
+    "usageRows": 15,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "acceptedTexts": 5,
+  "acceptedImages": 1,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 3,
+    "HANDOFF": 4,
+    "NO_SEND": 2,
+    "CODE_OWNED_SEND": 2
+  },
+  "handoffNoSendRate": 0.5454545454545454,
+  "databaseDropped": true,
+  "providerGenerationRetry": 0,
+  "liveSend": false,
+  "auxiliaryHttp": [],
+  "note": "Harness measurements only, not production SLO or causal latency/quality improvement. Auxiliary OAuth/embedding HTTP retained separately from generation attempts; unexposed token/cost is unavailable.",
+  "authHttpRequests": 1
+}

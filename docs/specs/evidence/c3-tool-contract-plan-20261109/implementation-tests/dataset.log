@@ -1,0 +1,6 @@
+
+> lana-chatbot-app@0.1.0 check:dataset-boundary C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005
+> node deploy/runtime-state/dataset-boundary-guard.mjs --self-test
+
+DATASET_BOUNDARY_GUARD_SELF_TEST_PASS
+DATASET_BOUNDARY_GUARD_PASS lanchatbot-c3-semantic-verifier-checkpoint-a-20261005

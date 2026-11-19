@@ -29,6 +29,90 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it.each(["full","details","batch","prepare"])("rejects older deferred %s when search has admitted a different source",async mode=>{
+    const old=fixtureProduct(),fresh=structuredClone(old);fresh.snapshot.release_id="new-pos-release";
+    fresh.snapshot.offers.NEW=structuredClone(fresh.snapshot.offers.DIRECT!);
+    let release!:(f:typeof old)=>void,started!:()=>void;
+    const waiting=new Promise<void>(r=>{started=r;});let calls=0;
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[old.product],catalog:{
+      readProduct:async()=>++calls===1?new Promise<typeof old>(r=>{release=r;started();}):fresh,
+      searchText:async()=>({status:"MATCHED",matchKind:"EXACT_CODE",product:fresh.product,score:1,gap:null})}});
+    const call={name:"read_product",args:{subjectRef:old.product.productId,...(mode==="details"?{detailsOnly:true}:{offerType:"DIRECT"})}};
+    const pending=mode==="prepare"?tools.prepare():mode==="batch"?tools.invokeBatch([call]):tools.invoke(call);
+    await waiting;expect((await tools.invoke({name:"search_products",args:{query:"áo"}})).status).toBe("OK");
+    const before=tools.snapshot();release(old);
+    if(mode==="prepare")await expect(pending).rejects.toThrow("SOURCE_EVIDENCE_CONFLICT");
+    else expect(mode==="batch"?(await pending as unknown[])[0]:await pending).toEqual({status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"});
+    expect(tools.snapshot()).toEqual(before);await expect(tools.readback()).resolves.toEqual(before);
+  });
+  it("preserves current offer expiry on a same-identity concurrent full read",async()=>{
+    const old=fixtureProduct(),fresh=structuredClone(old);old.snapshot.synced_at=new Date(commerceNow.getTime()-1000).toISOString();
+    let release!:(f:typeof old)=>void,started!:()=>void;
+    const waiting=new Promise<void>(r=>{started=r;});let calls=0;
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[old.product],catalog:{
+      readProduct:async()=>++calls===1?new Promise<typeof old>(r=>{release=r;started();}):fresh,
+      searchText:async()=>({status:"MATCHED",matchKind:"EXACT_CODE",product:fresh.product,score:1,gap:null})}});
+    const pending=tools.invoke({name:"read_product",args:{subjectRef:old.product.productId,offerType:"DIRECT"}});await waiting;
+    expect((await tools.invoke({name:"search_products",args:{query:"áo"}})).status).toBe("OK");
+    const before=tools.snapshot().policyLiterals.find(p=>p.ref===`offers:${old.product.productId}`);release(old);
+    expect((await pending).status).toBe("OK");expect(tools.snapshot().policyLiterals.find(p=>p.ref===before!.ref)).toEqual(before);
+  });
+  it.each(["details","full","mismatched-source"])("preserves admitted evidence when later preparation has %s failure",async mode=>{
+    const f=fixtureProduct(),other=fixtureProduct("OTHER");let failed=false;
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],catalog:{
+      readProduct:async()=>{if(failed){if(mode==="mismatched-source")return other;throw Error("catalog unavailable");}return f;},
+      searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+    expect((await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,...(mode==="full"?{offerType:"DIRECT"}:{detailsOnly:true})}})).status).toBe("OK");
+    const before=tools.snapshot();failed=true;
+    expect(await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,detailsOnly:true}})).toEqual({status:"UNAVAILABLE",reason:"SOURCE_ERROR"});
+    expect(tools.snapshot()).toEqual(before);await expect(tools.readback()).rejects.toThrow();
+  });
+  it("cannot overwrite a full read with older deferred search metadata",async()=>{
+    const old=fixtureProduct(),fresh=structuredClone(old);fresh.snapshot.release_id="new-pos-release";
+    fresh.snapshot.offers.NEW=structuredClone(fresh.snapshot.offers.DIRECT!);
+    let release!:(f:typeof old)=>void,started!:()=>void;
+    const waiting=new Promise<void>(r=>{started=r;});let calls=0;
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[old.product],catalog:{
+      readProduct:async()=>++calls===1?new Promise<typeof old>(r=>{release=r;started();}):fresh,
+      searchText:async()=>({status:"MATCHED",matchKind:"EXACT_CODE",product:old.product,score:1,gap:null})}});
+    const pending=tools.invoke({name:"search_products",args:{query:"áo"}});await waiting;
+    expect((await tools.invoke({name:"read_product",args:{subjectRef:old.product.productId,offerType:"DIRECT"}})).status).toBe("OK");
+    const before=tools.snapshot();release(old);
+    expect(await pending).toEqual({status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"});
+    expect(tools.snapshot()).toEqual(before);
+  });
+  it("admits one concurrent search atomically and preserves initial target capacity", async () => {
+    const records=["SQ2447","SV2447","A101","B202","C303"].map(id=>fixtureProduct(id));
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:records.slice(0,2).map(f=>f.product),catalog:{
+      readProduct:async id=>{await new Promise(resolve=>setTimeout(resolve,id==="C303"?20:1));return structuredClone(records.find(f=>f.product.productId===id)!);},
+      searchText:async query=>({status:"AMBIGUOUS",candidates:(query==="first"?records.slice(2,4):records.slice(4)).map(f=>({document:f.product,score:1}))} as never)}});
+    const [first,second]=await Promise.all([tools.invoke({name:"search_products",args:{query:"first"}}),tools.invoke({name:"search_products",args:{query:"second"}})]);
+    expect(first.status).toBe("OK");expect(second).toEqual({status:"REJECTED",reason:"PRODUCT_BOUND"});
+    expect(tools.snapshot().boundSubjects.some(s=>s.ref==="C303")).toBe(false);
+    expect(tools.snapshot().policyLiterals.some(p=>p.ref==="offers:C303")).toBe(false);
+    for(const id of ["SQ2447","SV2447"])expect(await tools.invoke({name:"read_product",args:{subjectRef:id,detailsOnly:true}})).toMatchObject({status:"OK"});
+    expect(tools.snapshot().runtimeProducts).toHaveLength(4);
+  });
+  it("does not publish malformed catalog evidence or its offer pins",async()=>{
+    const f=fixtureProduct();f.product.descriptionXml="x".repeat(8200);
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,catalog:{readProduct:async()=>f,
+      searchText:async()=>({status:"MATCHED",matchKind:"EXACT_CODE",product:f.product,score:1,gap:null})}});
+    const before=tools.snapshot();expect(await tools.invoke({name:"search_products",args:{query:"áo"}})).toMatchObject({status:"UNAVAILABLE",reason:"SOURCE_ERROR"});
+    expect(tools.snapshot()).toEqual(before);
+  });
+
+  it("reserves unhydrated initial targets before admitting unrelated search evidence", async () => {
+    const records = ["SQ2447", "SV2447", "V406", "SQ748", "V168"].map(id => fixtureProduct(id));
+    const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: fixturePolicy,
+      initialProducts: records.slice(0,2).map(f => f.product), catalog: {
+        readProduct: async id => structuredClone(records.find(f => f.product.productId === id)!),
+        searchText: async () => ({ status: "AMBIGUOUS", candidates: records.slice(2).map(f => ({ document: f.product, score: 1 })) } as never),
+      } });
+    const before = tools.snapshot();
+    expect(await tools.invoke({ name: "search_products", args: { query: "Thạch Thảo" } })).toEqual({ status: "REJECTED", reason: "PRODUCT_BOUND" });
+    expect(tools.snapshot()).toEqual(before);
+    for (const id of ["SQ2447", "SV2447"]) expect(await tools.invoke({ name: "read_product", args: { subjectRef: id, detailsOnly: true } })).toMatchObject({ status: "OK" });
+  });
   it.each(["permission","privacy","owner","arguments"])("does not prefetch catalog before rejecting batch %s",async mode=>{
     const f=fixtureProduct(),scope=commerceScope(),readProduct=vi.fn(async()=>structuredClone(f));
     if(mode==="permission")scope.permission=false;
@@ -143,7 +227,7 @@ describe("read-only domain tools", () => {
     expect(discovered.boundSubjects).toHaveLength(3);
     expect(discovered.protectedClaims).toHaveLength(0);
     for (const f of records) expect(discovered.policyLiterals.map(p => JSON.parse(p.text)))
-      .toContainEqual({ productId: f.product.productId, availableOffers: ["AO", "QUAN", "SET_QUAN"] });
+      .toContainEqual(expect.objectContaining({ productId: f.product.productId, availableOffers: ["AO", "QUAN", "SET_QUAN"] }));
     expect(readProduct).toHaveBeenCalledTimes(3);
     const reads = await tools.invokeBatch(records.slice(0, 2).map(f => ({ name: "read_product",
       args: { subjectRef: f.product.productId, offerType: "SET_QUAN" } })));
@@ -218,15 +302,14 @@ describe("read-only domain tools", () => {
     expect((await tools.invoke({ name: "search_products", args: { query: "SM613" } })).status).toBe("UNAVAILABLE");
     expect(tools.snapshot()).toEqual(before);
   });
-  it("rejects a fifth product read without dropping earlier source or claims", async () => {
+  it("rejects an initial target scope exceeding product capacity without dropping targets", async () => {
     const records = Array.from({ length: 5 }, (_, i) => fixtureProduct(`READ${i}`));
     const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: () => fixturePolicy(),
       initialProducts: records.map(f => f.product), catalog: {
         searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }),
         readProduct: async id => ({ product: records.find(f => f.product.productId === id)!.product, snapshot: null }) } });
-    for (const f of records.slice(0, 4)) expect((await tools.invoke({ name: "read_product", args: { subjectRef: f.product.productId } })).status).toBe("OK");
     const before = tools.snapshot();
-    expect(await tools.invoke({ name: "read_product", args: { subjectRef: "READ4" } })).toEqual({ status: "REJECTED", reason: "PRODUCT_BOUND" });
+    for (const f of records) expect(await tools.invoke({ name: "read_product", args: { subjectRef: f.product.productId } })).toEqual({ status: "REJECTED", reason: "PRODUCT_BOUND" });
     expect(tools.snapshot()).toEqual(before);
   });
   it("uses the supplied product code for lookup even when a garment query accompanies it", async () => {
@@ -390,7 +473,7 @@ describe("read-only domain tools", () => {
       initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => structuredClone(f) } });
     const first = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } });
     expect(first.data).toMatchObject({ availableOffers: ["DIRECT"] });
-    expect(tools.snapshot().policyLiterals.map(p => JSON.parse(p.text))).toContainEqual({ productId: "SM613", availableOffers: ["DIRECT"] });
+    expect(tools.snapshot().policyLiterals.map(p => JSON.parse(p.text))).toContainEqual(expect.objectContaining({ productId: "SM613", availableOffers: ["DIRECT"] }));
     const before = makeBinding("turn", "Có bán riêng áo.", tools.snapshot());
     expect(makeBinding("turn", "Có bán riêng áo.", await tools.readback())).toEqual(before);
     f.snapshot.offers.AO = { ...structuredClone(f.snapshot.offers.DIRECT!),
@@ -847,4 +930,51 @@ it.each(["empty", "unknown", "size-filter", "stale"])("does not expand confirmed
     expect(data.sizeAvailability).toMatchObject({ confirmedInStockSizes: mode === "size-filter" ? ["M"] : [], unlistedSizeMeaning: "NOT_CONFIRMED" });
     if (mode !== "size-filter") expect(data.openingQuote?.text).not.toContain("Size:");
   }
+});
+
+
+describe("logical purchase composition",()=>{
+ const composition=async(rows:unknown[])=>{
+  const f=fixtureProduct();f.snapshot.offers.DIRECT!.rows=rows as NonNullable<typeof f.snapshot.offers.DIRECT>["rows"];
+  const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,initialProducts:[f.product],policy:fixturePolicy,
+   catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+  await tools.prepare();const literal=tools.snapshot().policyLiterals.find(p=>p.ref==="offers:SM613")!;
+  return JSON.parse(literal.text).purchaseOptions[0].componentSource;
+ };
+ const row=()=>structuredClone(fixtureProduct().snapshot.offers.DIRECT!.rows[0]!);
+ const c=(sku:string,quantity:unknown=1)=>({product_sku:sku,quantity});
+ it("compares order-independent quantities without dropping duplicate SKUs",async()=>{
+  const a={...row(),components:[c("A-AO"),c("B-QUAN"),c("B-QUAN")]};
+  const b={...row(),size:"L",components:[c("B-QUAN",2),c("A-AO")]};
+  const r=await composition([a,b]);expect(r.status).toBe("AVAILABLE");
+  expect(r.components).toEqual([{componentRef:"A-AO",role:"TOP",quantity:1,label:null,labelSource:null},{componentRef:"B-QUAN",role:"PANTS",quantity:2,label:null,labelSource:null}]);
+  expect((await composition([a,{...b,components:[c("B-QUAN"),c("A-AO")]}])).status).toBe("VARIANT_DEPENDENT");
+ });
+ it.each([undefined,0,-1,1.5,Number.MAX_SAFE_INTEGER+1])("does not invent a component quantity for %s",async quantity=>{
+  const r=await composition([{...row(),components:[{product_sku:"A-AO",...(quantity===undefined?{}:{quantity})}]}]);
+  expect(r.status).toBe("INCOMPLETE_SOURCE");expect(r.components).toEqual([]);
+ });
+ it("rejects overbound source rather than expanding quantity",async()=>{
+  expect((await composition([{...row(),components:[c("A-AO",21)]}])).status).toBe("BOUND_EXCEEDED");
+ });
+});
+
+
+it.each([null,"invalid",{product_sku:"A-AO",quantity:1}])("explicit malformed BOM does not become a legacy one-item composition (%j)",async components=>{
+ const f=fixtureProduct();f.snapshot.offers.DIRECT!.rows[0]!.components=components;
+ f.snapshot.offers.DIRECT!.rows[0]!.component_1_sku="A-AO";
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,initialProducts:[f.product],policy:fixturePolicy,catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ await tools.prepare();const literal=tools.snapshot().policyLiterals.find(p=>p.ref==="offers:SM613")!;
+ expect(JSON.parse(literal.text).purchaseOptions[0].componentSource).toMatchObject({status:"INCOMPLETE_SOURCE",components:[]});
+});
+
+
+it('does not publish component labels that exceed the aggregate product byte bound',async()=>{
+ const parent=fixtureProduct(),children=['child-a','child-b','child-c'].map(id=>fixtureProduct(id));
+ for(const c of children){c.product.title='á'.repeat(64);c.product.catalogVersion='v'.repeat(128);}
+ parent.snapshot.offers.DIRECT!.rows[0]!.components=children.map(c=>({product_sku:c.product.productId,quantity:1}));
+ const data=new Map([parent,...children].map(f=>[f.product.productId,f]));
+ const t=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[parent.product,...children.map(c=>c.product)],catalog:{readProduct:async id=>data.get(id)!,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}});
+ await expect(t.prepare()).rejects.toThrow('PRODUCT_EVIDENCE_BOUND');
+ expect(t.snapshot().policyLiterals.some(p=>p.ref==='offers:SM613')).toBe(false);
 });

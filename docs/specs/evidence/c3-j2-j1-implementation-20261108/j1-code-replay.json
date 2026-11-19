@@ -1,0 +1,58 @@
+{
+  "kind": "OFFLINE_J1_CAPACITY_NOT_MODEL_OR_FULL_DATABASE_REPLAY",
+  "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+  "nativeHash": "2abe2190e69af6f962086c9ed191693cb3a42d44e03e47cafcc1b6e251d11e34",
+  "inputRawHashes": {
+    "world": "f45e0e9f794d29e80c18bbd0a3670d5d0ae935e8096077b9cce19c2824214647",
+    "native": "1a47af5236a5aecede128c4019ab675c2bceaa417f8c809a4f8eb6a602851e35"
+  },
+  "capturedClock": "2026-11-07T17:29:35.874Z",
+  "clockPurpose": "OFFLINE_ONLY_NEVER_PROVIDER_OR_SEND",
+  "beforeStateHash": "c4477f1395b12108bae366bebce40f5f3baf28d97ac11334f3a112112ea8fb7a",
+  "subjectRef": "SV2447",
+  "offerType": "AO",
+  "badResults": [
+    {
+      "status": "UNAVAILABLE",
+      "reason": "SELECTION_UNAVAILABLE",
+      "data": {
+        "status": "COLOR_REQUIRED",
+        "reasonCode": "CART_COLOR_REQUIRED",
+        "selectionOptions": [],
+        "selectionOptionScope": "FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",
+        "selectionStatus": "COLOR_REQUIRED"
+      },
+      "failureStage": "SOURCE"
+    },
+    {
+      "status": "UNAVAILABLE",
+      "reason": "SELECTION_UNAVAILABLE",
+      "data": {
+        "status": "COLOR_REQUIRED",
+        "reasonCode": "CART_COLOR_REQUIRED",
+        "selectionOptions": [],
+        "selectionOptionScope": "FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",
+        "selectionStatus": "COLOR_REQUIRED"
+      },
+      "failureStage": "SOURCE"
+    },
+    {
+      "status": "REJECTED",
+      "reason": "DEPENDENT_EFFECT_REJECTED"
+    }
+  ],
+  "goodStatus": "OK",
+  "quantity": 2,
+  "grandTotalVnd": 978100,
+  "proofHash": "f9542666695814cf931ae02d8d08d6c0f0bb8766d5741f0fc52ca6493159c30b",
+  "proofHashEncoding": "SHA256 of JSON sort_keys UTF8 ensure_ascii=false separators comma/colon",
+  "casCalls": 0,
+  "providerRequests": 0,
+  "sendEnabled": false,
+  "limitations": [
+    "Reconstructs captured empty sales-cycle business state, not a full historical database",
+    "Scripted paths prove available code capacity only; they do not predict owner selection or sales quality"
+  ],
+  "rawArtifactSha256": "0873c0f4aad24469f0e4546e05764d1a96594a40cc538258e23d4e9e1b6e9dbc",
+  "command": "node apps/worker/evals/single-agent-commerce-qualification/j1-code-replay.mjs ../c3-quote-batch-model-world-20261108-02/WORLD.json ../c3-quote-batch-model-r1-run-20261108-01/native-39fdf96a18b56ac055792a8cb8774593c7e30d656ae9373ca98df143d397c951-turn-2.json SV2447 AO ../c3-j1-code-replay-20261108-01.json"
+}

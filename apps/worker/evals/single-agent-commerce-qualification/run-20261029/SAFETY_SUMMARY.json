@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "runSourceSha": "36e45015c381ebe91a2591a288b112e3dd8caa0e",
+  "corpusHash": "efa318a4a081c4c1194c5414dcfedc4122f22a41059c41983f440a72a39fff83",
+  "worldHash": "4146d2a3d6012e0bbc895827ea630b614bdeda80f9cf263c327269813fa74a7a",
+  "registered": 24,
+  "executed": 24,
+  "notRun": 0,
+  "unsafeSendEligibleFalsePass": 0,
+  "unregisteredCustomerOutputs": 0,
+  "safeEligible": 11,
+  "safeTotal": 12,
+  "generationRequests": 24,
+  "generationErrors": 0,
+  "sendEnabled": false
+}

@@ -1,0 +1,3524 @@
+{
+  "VOICE": {
+    "source": "3357270ac1b52121892dac1e3fb674cf5da2c7ca",
+    "origin": "5dfde94b11a2b55ca7a52846b241bb440ee68994",
+    "registrationHash": "71b91dac78362a38047a8e18760559e04e3250d895829b675589b9ea828ec25e",
+    "model": {
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "generationConfig": {
+        "retry": 0
+      }
+    },
+    "generationConfig": {
+      "candidateCount": 1,
+      "responseMimeType": "text/plain",
+      "maxOutputTokens": 8192,
+      "thinkingConfig": {
+        "thinkingLevel": "HIGH",
+        "includeThoughts": false
+      }
+    },
+    "judge": {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "blind": true,
+      "independent": true,
+      "rubricHash": "4b4dc9b96e1108a8cb43aaf423514e2282d165ef8be8ceaa89378e5553a2ad39",
+      "schemaHash": "2fc1541d09752ded5f75ab9886dae83149a58069463faecb300e3ea289051ee9"
+    },
+    "judgePacketHash": "9adbb6dae302b659e5b6570f0ff7da5c1fd6f09b49451c4f1beb61cdaedb877f",
+    "attempts": [
+      {
+        "label": "c-20261028-s15:0",
+        "repetition": 1,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 14701,
+            "outputTokens": 1544,
+            "cost": null,
+            "requestHash": "933a899ca018639192aabf43e6fc4290fd5ac4bceb865519addb6c29e1efc4c8",
+            "latencyMs": 5588.940099999999
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 1,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 14685,
+            "outputTokens": 952,
+            "cost": null,
+            "requestHash": "7a790ac3e830ad3dd998bfd3fb99c511f9639040684878868136f80b368dff28",
+            "latencyMs": 4158.9345
+          }
+        ],
+        "judge": {
+          "packetId": "23bacea1d19ca0c4f046fb5c24a10afe7b51e7344583df3d66a5eff7f18eea7f",
+          "requestHash": "8f76ce37e4380736641ad8ae1977293f117c2e24591f378c7b58b1e6d75400d9",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 5505,
+            "output_tokens": 236,
+            "total_tokens": 5741,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 95
+            }
+          },
+          "latencyMs": 12355
+        }
+      },
+      {
+        "label": "c-20261028-s15:0",
+        "repetition": 2,
+        "sourceRepetition": 2,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 16477,
+            "outputTokens": 1071,
+            "cost": null,
+            "requestHash": "b4254cd7cb9505e46b89785ff229a87e60519038d76de93552604a6f3123435a",
+            "latencyMs": 4408.047199999999
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 16461,
+            "outputTokens": 561,
+            "cost": null,
+            "requestHash": "c6ee661f0066c0ba60f37d722ab2c6330b7f6026930fa618c28333d56fc6e7ce",
+            "latencyMs": 2884.8161
+          }
+        ],
+        "judge": {
+          "packetId": "c2b72501ca3b6880783e470e395bbe2dd2d02f5d6e195310f8100e5c24529816",
+          "requestHash": "7a681748d4e31324ef31771d443101181506c8c92fc4f97c76c863e1b8e11f5b",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 6971,
+            "output_tokens": 420,
+            "total_tokens": 7391,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 268
+            }
+          },
+          "latencyMs": 19400
+        }
+      },
+      {
+        "label": "c-20261028-s15:0",
+        "repetition": 3,
+        "sourceRepetition": 3,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13738,
+            "outputTokens": 609,
+            "cost": null,
+            "requestHash": "5a104a3fc6f10e3176a88ad15b53dd0f659558eb0dc3ef2078e03583c1157195",
+            "latencyMs": 2956.2350000000006
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13722,
+            "outputTokens": 693,
+            "cost": null,
+            "requestHash": "55f1e7c77bdd472471798cd2a19ff7983d2bedf1d858fa0e22e33710e9fcff2a",
+            "latencyMs": 3193.112000000001
+          }
+        ],
+        "judge": {
+          "packetId": "df29b3c84b5ae12382af9be2019b2cdcb3792604b4a137d088518cd9dc8d5ce3",
+          "requestHash": "c8f1ae849bdfda9cc3b947b3fd2e40bbbd4658eded34ce72fc644b3e0441199b",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 5438,
+            "output_tokens": 298,
+            "total_tokens": 5736,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 125
+            }
+          },
+          "latencyMs": 15543
+        }
+      },
+      {
+        "label": "c-20261028-s15:0",
+        "repetition": 4,
+        "sourceRepetition": 4,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 14882,
+            "outputTokens": 1070,
+            "cost": null,
+            "requestHash": "741eb2bcf3c89fbb82bbc6258d1036cfe3801acc59186a9b908b63cb827593c5",
+            "latencyMs": 4557.412799999998
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 14866,
+            "outputTokens": 871,
+            "cost": null,
+            "requestHash": "991d0d37335180dedab1bb87764809407572de5e96d1174130494ce314f24835",
+            "latencyMs": 3532.5074999999997
+          }
+        ],
+        "judge": {
+          "packetId": "1a5a3ad7e92a3da3f7d3f68b4f0ca22b79f1424845200fda11c149520b06d0ba",
+          "requestHash": "b0434de0a726d881dfb70a51b5360ea671bbdd752855f5f3f3c019b1b1a05256",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 5787,
+            "output_tokens": 263,
+            "total_tokens": 6050,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 111
+            }
+          },
+          "latencyMs": 9242
+        }
+      },
+      {
+        "label": "c-20261028-s15:0",
+        "repetition": 5,
+        "sourceRepetition": 5,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 10001,
+            "outputTokens": 2209,
+            "cost": null,
+            "requestHash": "c0f890b42863edefab8c5db9d834cb2dd950ccd448b31f1ef1dc2c0ad632fa79",
+            "latencyMs": 7530.9277
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 9985,
+            "outputTokens": 2036,
+            "cost": null,
+            "requestHash": "5dbc8df4b8dbb0f846d70a9896846f2ba4d80812fec96324beb5f3f9386a709e",
+            "latencyMs": 6513.365700000002
+          }
+        ],
+        "judge": {
+          "packetId": "c91cc037cb995eb3c8fd5062f9b32f40e351e93d26ca6fab06396aacd8750892",
+          "requestHash": "d1982d468ca5a1a4ff6a3c17a27dafbed2ad8d17b9b10af757b1f2d65d7699b0",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4992,
+            "output_tokens": 266,
+            "total_tokens": 5258,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 125
+            }
+          },
+          "latencyMs": 10168
+        }
+      },
+      {
+        "label": "c-20261028-j2:1",
+        "repetition": 1,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12607,
+            "outputTokens": 380,
+            "cost": null,
+            "requestHash": "c98fe1118262a2185132d29a2e80cf9cbb09c51e01a27a541eb5b554e7b17ee9",
+            "latencyMs": 2086.4504000000015
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12591,
+            "outputTokens": 360,
+            "cost": null,
+            "requestHash": "82e241476c69d7d0550d5658a7b44dfd1a847e6351c34c20a3f945d9fdf1a8c3",
+            "latencyMs": 1876.1043999999965
+          }
+        ],
+        "judge": {
+          "packetId": "db1f35fdfa8089b4a66e3d5af3bfb5cdae41e8d38f79e0e3b6a75c1a672a2248",
+          "requestHash": "6c20464dda66dc579c13fa642e2bdae999375513cf167c81feeb22382a423fd3",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4316,
+            "output_tokens": 532,
+            "total_tokens": 4848,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 392
+            }
+          },
+          "latencyMs": 22678
+        }
+      },
+      {
+        "label": "c-20261028-j2:1",
+        "repetition": 2,
+        "sourceRepetition": 2,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12903,
+            "outputTokens": 267,
+            "cost": null,
+            "requestHash": "fb0faf37c08286c86b891054e9f61efabb3776631918f6db5b712a71450fbc94",
+            "latencyMs": 1599.3850999999995
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12887,
+            "outputTokens": 373,
+            "cost": null,
+            "requestHash": "501078c49e85f21b5a3d7f8e9a6d1f618452e1888ae9ee847793a583f8789cc6",
+            "latencyMs": 2020.293899999997
+          }
+        ],
+        "judge": {
+          "packetId": "3b77fe08f3cf563ebb03d19e76c3cf5627be240a08a05fcdaca651f3ff198978",
+          "requestHash": "f2cb85a72e249d20168fe8b6d590b49ec588ab2d119e16cd1bd23ec4c38b213b",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4314,
+            "output_tokens": 211,
+            "total_tokens": 4525,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 86
+            }
+          },
+          "latencyMs": 8205
+        }
+      },
+      {
+        "label": "c-20261028-j2:1",
+        "repetition": 3,
+        "sourceRepetition": 3,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12643,
+            "outputTokens": 294,
+            "cost": null,
+            "requestHash": "0f4640427721862d6865c6849e79c759c08255362332aaa2f30683b1145db0b9",
+            "latencyMs": 1530.4773999999961
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12627,
+            "outputTokens": 331,
+            "cost": null,
+            "requestHash": "4576c120424acff395f8096799cd2fbb81778be01dc26a6caddf586586fe92f2",
+            "latencyMs": 2009.9429999999993
+          }
+        ],
+        "judge": {
+          "packetId": "5e0fcd9095d3b1920065f16ce3469e6629e874815624ec77e01935d08cc8bc17",
+          "requestHash": "7f3ad2a66641b294bcc1c89d8ed71998e9a16afc6c5fb9a89fe889b21740795d",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4329,
+            "output_tokens": 476,
+            "total_tokens": 4805,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 346
+            }
+          },
+          "latencyMs": 17981
+        }
+      },
+      {
+        "label": "c-20261028-j2:1",
+        "repetition": 4,
+        "sourceRepetition": 4,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12196,
+            "outputTokens": 265,
+            "cost": null,
+            "requestHash": "6a00a6c9719c334972002af67f8d4778df925d8eec86263520fa534653ad2abf",
+            "latencyMs": 1837.6071999999986
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12180,
+            "outputTokens": 411,
+            "cost": null,
+            "requestHash": "0f8e59f1c0e2fd9c7cf522d52eeab9f0699a572beb08bfb46c137b973fd6fc9b",
+            "latencyMs": 2182.769699999997
+          }
+        ],
+        "judge": {
+          "packetId": "e4ff334830b2e3620ffcfee675b5398992679eb606e1ba5db1fb01ffe3a6ca55",
+          "requestHash": "6edb03fbada611792fe0da071eba8b0b941ed2cb8aff0074075ae335a851bc36",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4361,
+            "output_tokens": 404,
+            "total_tokens": 4765,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 226
+            }
+          },
+          "latencyMs": 14495
+        }
+      },
+      {
+        "label": "c-20261028-j2:1",
+        "repetition": 5,
+        "sourceRepetition": 5,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12381,
+            "outputTokens": 572,
+            "cost": null,
+            "requestHash": "e2e995c602210d8792169676483eeb3a59e17d635ecc123a13a4140c2789ea0d",
+            "latencyMs": 2694.6040000000066
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12365,
+            "outputTokens": 405,
+            "cost": null,
+            "requestHash": "1b59806d92544029d924ff1675d10d9bcf24d8b08c2921829007ab29e9b17f3b",
+            "latencyMs": 2032.037400000001
+          }
+        ],
+        "judge": {
+          "packetId": "d79e0d3812c01b80a977b0000de7e153d9f476471b11a27a5ccdc12d6c90aac6",
+          "requestHash": "314fa58c55e34ad507bad99e170da4630b18d9d4aa563e38c5bf0ff497cfea2f",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4312,
+            "output_tokens": 248,
+            "total_tokens": 4560,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 110
+            }
+          },
+          "latencyMs": 10137
+        }
+      },
+      {
+        "label": "c-20261028-j2:2",
+        "repetition": 1,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11799,
+            "outputTokens": 281,
+            "cost": null,
+            "requestHash": "0a7ec0fca92dbc3dcdc81d2d0bb8d749ab3af6db9e9a8f619267f2a345a0b9bb",
+            "latencyMs": 3423.8772000000026
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11783,
+            "outputTokens": 356,
+            "cost": null,
+            "requestHash": "6d53cd16cdc971338aba30e9b9f2c7fd7711fc66dd306580fd2af4b3081d570d",
+            "latencyMs": 2126.4994000000006
+          }
+        ],
+        "judge": {
+          "packetId": "f266835e008d7144346654b44da350cddd9e47dbffa6debd5d68a770cff1a07f",
+          "requestHash": "d4680a73c5f1546cfc1a83e3b2aefa38da58a436bb6d5986862037b90b42eff9",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4389,
+            "output_tokens": 290,
+            "total_tokens": 4679,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 107
+            }
+          },
+          "latencyMs": 10813
+        }
+      },
+      {
+        "label": "c-20261028-j2:2",
+        "repetition": 2,
+        "sourceRepetition": 2,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "PROVIDER_ERROR",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 429,
+            "modelVersion": null,
+            "inputTokens": null,
+            "outputTokens": null,
+            "cost": null,
+            "requestHash": "44256137d13a3a6fb000aa0a0b17830843f5f0e659db007792e9949582ce7221",
+            "latencyMs": 6092.5193
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12015,
+            "outputTokens": 451,
+            "cost": null,
+            "requestHash": "08fe85b3a0eccd343f0bd1a2605b798a0a9471cceb3501ca9fdd9598abdbc98f",
+            "latencyMs": 2527.4573999999993
+          }
+        ],
+        "judge": {
+          "packetId": "0659bd2b1f972abc67656730d049e44ac417773185052b571b859df080c4f5dd",
+          "requestHash": "35d88b2e6fcd078c96c2101258d39e57e07b8ce1fb9bc3d1ad19eea843d07ea1",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4342,
+            "output_tokens": 227,
+            "total_tokens": 4569,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 66
+            }
+          },
+          "latencyMs": 8998
+        }
+      },
+      {
+        "label": "c-20261028-j2:2",
+        "repetition": 3,
+        "sourceRepetition": 3,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11606,
+            "outputTokens": 218,
+            "cost": null,
+            "requestHash": "3d614c6793b1899864f65542a83340af40f829c29f9a8964b12fca04be43ff12",
+            "latencyMs": 1771.7125000000087
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11590,
+            "outputTokens": 264,
+            "cost": null,
+            "requestHash": "e996f618346269e283b220627e764d177e1eb201eb77fc3cc8ef7e0c6e92212f",
+            "latencyMs": 6073.829499999993
+          }
+        ],
+        "judge": {
+          "packetId": "2a88ceef7d35d62c50000a44db6c045e5c4c353ad6b376cbcb30434ec1b17314",
+          "requestHash": "0b6e58dff1835a321482d9336dfc7645ad7683713cbb844f778e8b4c3409addf",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4391,
+            "output_tokens": 444,
+            "total_tokens": 4835,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 274
+            }
+          },
+          "latencyMs": 16751
+        }
+      },
+      {
+        "label": "c-20261028-j2:2",
+        "repetition": 4,
+        "sourceRepetition": 4,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 8811,
+            "outputTokens": 888,
+            "cost": null,
+            "requestHash": "7e37948567fb685c6222f544d4e08c189dbdd6ab829f42cf01aac7324f82ac5e",
+            "latencyMs": 3694.231899999999
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 8795,
+            "outputTokens": 975,
+            "cost": null,
+            "requestHash": "ef905b11dd4eb9c6babbca47a82bdaedf7eeb9acca92d6efbaaf6b41121d5dec",
+            "latencyMs": 3874.249800000005
+          }
+        ],
+        "judge": {
+          "packetId": "247d0a74a986825dd707ef96e6d82c12dfba5b57f80c437c5552d6ef2b917ab5",
+          "requestHash": "78e21d4e4cfe6c58d978fe04904e15f16e59715bd6fe3f4fdf7bbe2267e715c1",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4173,
+            "output_tokens": 215,
+            "total_tokens": 4388,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 41
+            }
+          },
+          "latencyMs": 7832
+        }
+      },
+      {
+        "label": "c-20261028-j2:2",
+        "repetition": 5,
+        "sourceRepetition": 5,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11875,
+            "outputTokens": 457,
+            "cost": null,
+            "requestHash": "58945fb62e80ee1ff5389242b9bcb5a5a2585359f4f21ab7acfb47a8fc6b60ad",
+            "latencyMs": 2551.8475000000035
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11859,
+            "outputTokens": 330,
+            "cost": null,
+            "requestHash": "f20ae9715fe51cfa4690ddd538ef6a2ed224d16c1931bdd0f75f7f059be58857",
+            "latencyMs": 1891.002800000002
+          }
+        ],
+        "judge": {
+          "packetId": "f92c22d945d32aaeb94e4cb28149e84816d271895338a807a708c637926b7add",
+          "requestHash": "b84bac6b1785a11f4dbecd6c8b8a76b5fb2a09b6f3369262cfbfd0a9f9b820bb",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4399,
+            "output_tokens": 325,
+            "total_tokens": 4724,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 189
+            }
+          },
+          "latencyMs": 11497
+        }
+      },
+      {
+        "label": "c-20261028-j4:1",
+        "repetition": 1,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15488,
+            "outputTokens": 906,
+            "cost": null,
+            "requestHash": "a1445531662aec1e5bd64f8a63f56cdd780ed0da4134538e4d2f9b090b0afda2",
+            "latencyMs": 3696.8610999999946
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15472,
+            "outputTokens": 661,
+            "cost": null,
+            "requestHash": "7f3f1adb2f4ddc2b9603db3b82e339aedc4c299407e54ab70a4fac54e84f9534",
+            "latencyMs": 2922.5061000000132
+          }
+        ],
+        "judge": {
+          "packetId": "5dbd9d536ad07698907f82ce8fe73eb84825e0cadf5555002563bce94d25f9f6",
+          "requestHash": "e2da9fc3780838131dcfc7429e32ef408ab550813ada9093f82c8897c43ade1b",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 6726,
+            "output_tokens": 352,
+            "total_tokens": 7078,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 172
+            }
+          },
+          "latencyMs": 13909
+        }
+      },
+      {
+        "label": "c-20261028-j4:1",
+        "repetition": 2,
+        "sourceRepetition": 2,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 16645,
+            "outputTokens": 913,
+            "cost": null,
+            "requestHash": "63429aa5a111abf1f589314a35f66570ffe5119c806d1960a9a8f48da269b3e9",
+            "latencyMs": 4077.131300000008
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 16629,
+            "outputTokens": 957,
+            "cost": null,
+            "requestHash": "e8a9b1bc220dd42ed2e6c9fd7c9306e52cc9012450eb8fb47814ec89a632c54c",
+            "latencyMs": 4263.7744999999995
+          }
+        ],
+        "judge": {
+          "packetId": "e502df0d393c6a783c5a5f75a033a0e5352ff4c78415c406d82e00cdb21c3228",
+          "requestHash": "ecc861a67e4e48f425091fae615c0b470c0ca650987cac62ac0634f33286c03c",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7499,
+            "output_tokens": 324,
+            "total_tokens": 7823,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 147
+            }
+          },
+          "latencyMs": 12743
+        }
+      },
+      {
+        "label": "c-20261028-j4:1",
+        "repetition": 3,
+        "sourceRepetition": 3,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11133,
+            "outputTokens": 897,
+            "cost": null,
+            "requestHash": "dfc2ec6bde60ef275498c7d79cb1eefcdcaab4c5a63bffb1bbf40a2e2898962f",
+            "latencyMs": 3693.8952000000136
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11117,
+            "outputTokens": 1503,
+            "cost": null,
+            "requestHash": "57eae2a69212009a8231717e4c6a28c8665372d2598d2158aabc0cc65254371b",
+            "latencyMs": 5442.782499999987
+          }
+        ],
+        "judge": {
+          "packetId": "d4d9f05d643ef6959923bdb503a88ccd15d814cfefb83d7b258fe27bceeee85f",
+          "requestHash": "b3258137dde14c1a4fce2245fd760025c12d822a4d0bdd1764c9744600611e2c",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 5787,
+            "output_tokens": 580,
+            "total_tokens": 6367,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 443
+            }
+          },
+          "latencyMs": 24164
+        }
+      },
+      {
+        "label": "c-20261028-j4:1",
+        "repetition": 4,
+        "sourceRepetition": 4,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15178,
+            "outputTokens": 701,
+            "cost": null,
+            "requestHash": "ba90d19541b1a2ce02ca43c2ce93e16b72f3d8ea8ece4065f506a7266b0f57ac",
+            "latencyMs": 3005.6364999999932
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15162,
+            "outputTokens": 849,
+            "cost": null,
+            "requestHash": "4573b40e8484bc218d5fe6145c0033301d052081244d728d4b423e6f7238a856",
+            "latencyMs": 3621.325599999982
+          }
+        ],
+        "judge": {
+          "packetId": "d4d376f74a2fef60385168d37f0b75869ed532d9f5cfa16396cfa46609b0f329",
+          "requestHash": "dcaf165385b043823e81d1c1da6922fc61e01dfd528b7cd4516b876a1549722b",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 6539,
+            "output_tokens": 875,
+            "total_tokens": 7414,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 718
+            }
+          },
+          "latencyMs": 29586
+        }
+      },
+      {
+        "label": "c-20261028-j4:1",
+        "repetition": 5,
+        "sourceRepetition": 5,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15157,
+            "outputTokens": 812,
+            "cost": null,
+            "requestHash": "1b60888afda3221e9e83620ba2d4b93bbb9ccb1fbaf3c6aa529d0f6c231fd326",
+            "latencyMs": 3592.252600000007
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15141,
+            "outputTokens": 1012,
+            "cost": null,
+            "requestHash": "ca89578d532e36ffc020f19a8add261c4986dddcc4eae79b59d043dbdc7355dc",
+            "latencyMs": 4079.013899999991
+          }
+        ],
+        "judge": {
+          "packetId": "a2275585179f2d4710518e8314088e058cf0f0e00c05819f9d9acf5550ebc9bc",
+          "requestHash": "3c514bf4141cc583793985245c8e2a186a81e6a005e95a9c8a3aa36d77403c72",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 6682,
+            "output_tokens": 429,
+            "total_tokens": 7111,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 260
+            }
+          },
+          "latencyMs": 16917
+        }
+      },
+      {
+        "label": "c-20261028-j4:2",
+        "repetition": 1,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15202,
+            "outputTokens": 825,
+            "cost": null,
+            "requestHash": "973a2e8f607c75c698ae0ec0b072127f043107b6a0cadb70e22dc5ce38650da0",
+            "latencyMs": 3226.3778000000166
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15186,
+            "outputTokens": 800,
+            "cost": null,
+            "requestHash": "8610ac44d023505ae058e488ca043dbea5673e3abf166478e86f21e17b996d98",
+            "latencyMs": 3295.224099999992
+          }
+        ],
+        "judge": {
+          "packetId": "921ddd75f6f3b9ce0345f9aa62d4bcead275b908cac91c8e9f387386c6515924",
+          "requestHash": "210054d93e87f3c66af4833d82603f083ca0977374e8abf5bae8f6c537657afe",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 6590,
+            "output_tokens": 435,
+            "total_tokens": 7025,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 292
+            }
+          },
+          "latencyMs": 18512
+        }
+      },
+      {
+        "label": "c-20261028-j4:2",
+        "repetition": 2,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15202,
+            "outputTokens": 575,
+            "cost": null,
+            "requestHash": "973a2e8f607c75c698ae0ec0b072127f043107b6a0cadb70e22dc5ce38650da0",
+            "latencyMs": 2399.6681999999855
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15186,
+            "outputTokens": 728,
+            "cost": null,
+            "requestHash": "8610ac44d023505ae058e488ca043dbea5673e3abf166478e86f21e17b996d98",
+            "latencyMs": 2838.2744999999995
+          }
+        ],
+        "judge": {
+          "packetId": "d8098350ce0c1fbb89e62f7747641c681b19322f98416a4929c57887a90b4032",
+          "requestHash": "529f485a8bf3b2a515968c2e511308f2a949792ed9da45ba941b7fa59d171b6b",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 6640,
+            "output_tokens": 288,
+            "total_tokens": 6928,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 142
+            }
+          },
+          "latencyMs": 10517
+        }
+      },
+      {
+        "label": "c-20261028-j4:2",
+        "repetition": 3,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15202,
+            "outputTokens": 767,
+            "cost": null,
+            "requestHash": "973a2e8f607c75c698ae0ec0b072127f043107b6a0cadb70e22dc5ce38650da0",
+            "latencyMs": 3391.3350999999966
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15186,
+            "outputTokens": 614,
+            "cost": null,
+            "requestHash": "8610ac44d023505ae058e488ca043dbea5673e3abf166478e86f21e17b996d98",
+            "latencyMs": 2542.6939999999886
+          }
+        ],
+        "judge": {
+          "packetId": "c3316e066fe825898406956e1a0ff851d1f2eca84aad7a86f50662daf5f5a3c7",
+          "requestHash": "c7d2ef2d8498df2acae37d68e1edadbaaa71fdcf1610e8a611e0decc6b1d0f72",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 6615,
+            "output_tokens": 181,
+            "total_tokens": 6796,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 34
+            }
+          },
+          "latencyMs": 7897
+        }
+      },
+      {
+        "label": "c-20261028-j4:2",
+        "repetition": 4,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15202,
+            "outputTokens": 642,
+            "cost": null,
+            "requestHash": "973a2e8f607c75c698ae0ec0b072127f043107b6a0cadb70e22dc5ce38650da0",
+            "latencyMs": 2639.543399999995
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15186,
+            "outputTokens": 475,
+            "cost": null,
+            "requestHash": "8610ac44d023505ae058e488ca043dbea5673e3abf166478e86f21e17b996d98",
+            "latencyMs": 2116.3236000000034
+          }
+        ],
+        "judge": {
+          "packetId": "bf43dbc8457a04465aa66bcaaa085700c079484e21ebd0b3e7f7e3b72fbb64e7",
+          "requestHash": "d0a13a81f39a2437747afa44f17190a72c79eff78d003651600370614e431864",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 6612,
+            "output_tokens": 210,
+            "total_tokens": 6822,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 37
+            }
+          },
+          "latencyMs": 7179
+        }
+      },
+      {
+        "label": "c-20261028-j4:2",
+        "repetition": 5,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15202,
+            "outputTokens": 805,
+            "cost": null,
+            "requestHash": "973a2e8f607c75c698ae0ec0b072127f043107b6a0cadb70e22dc5ce38650da0",
+            "latencyMs": 3162.9752000000153
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15186,
+            "outputTokens": 781,
+            "cost": null,
+            "requestHash": "8610ac44d023505ae058e488ca043dbea5673e3abf166478e86f21e17b996d98",
+            "latencyMs": 3076.8593999999866
+          }
+        ],
+        "judge": {
+          "packetId": "3d091324ca38188fb0e575257e3f6e467233e0f7ccac53c511be35c920e30827",
+          "requestHash": "58e49f141ca49dc853a9c2bbeb5ead8270f8bd7a848c0c80ebec08c6f5505329",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 6627,
+            "output_tokens": 195,
+            "total_tokens": 6822,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 39
+            }
+          },
+          "latencyMs": 7518
+        }
+      },
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 1,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12447,
+            "outputTokens": 1650,
+            "cost": null,
+            "requestHash": "3d159ff3087a7d3c35acb5d8ce710fbf05f9fa122069d2f807baab472385b1c2",
+            "latencyMs": 5387.729099999997
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12431,
+            "outputTokens": 2053,
+            "cost": null,
+            "requestHash": "67d861c8c9e2bdfd73aaea4b9230f441e9052c3730f0bd82ae52fa7a6b7e1913",
+            "latencyMs": 6856.420400000003
+          }
+        ],
+        "judge": {
+          "packetId": "d3e875f058cae5dd1ec347b54cde7a5a3ec514bdf0378c9f690e928261323b33",
+          "requestHash": "2c04b44deb062ccb7a3557befbf6c764aebb2c510dfcf89dc99e58001d4aafa7",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7241,
+            "output_tokens": 552,
+            "total_tokens": 7793,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 369
+            }
+          },
+          "latencyMs": 15012
+        }
+      },
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 2,
+        "sourceRepetition": 2,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13578,
+            "outputTokens": 2556,
+            "cost": null,
+            "requestHash": "5e58864e31849fd9c02642efc30ad297f4fa11295b0951e993b98dff9bba2ab5",
+            "latencyMs": 7945.486999999994
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13562,
+            "outputTokens": 1888,
+            "cost": null,
+            "requestHash": "74563df991042b5659c7713274e5fc4732bfbe32948a2e05abf8a8a03dc556cf",
+            "latencyMs": 6218.204999999987
+          }
+        ],
+        "judge": {
+          "packetId": "6094f923ff208b8a94ac696013e12eca9f0adefaaad7423a0155f69d80a0b4ce",
+          "requestHash": "d8af74491891fc04d98ddf6ac73774ee31c9164291b8743ab0f8a1c1e7790169",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7748,
+            "output_tokens": 287,
+            "total_tokens": 8035,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 145
+            }
+          },
+          "latencyMs": 11924
+        }
+      },
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 3,
+        "sourceRepetition": 3,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12382,
+            "outputTokens": 792,
+            "cost": null,
+            "requestHash": "af1a22c1729f6154ef0dc2d67cdf72ecd30455eeb1c258650626efed0a388c9f",
+            "latencyMs": 3031.1491999999853
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12366,
+            "outputTokens": 863,
+            "cost": null,
+            "requestHash": "76fa2e880444c3648220e50d6cc9123f00228f3d7e308b559c7cec7f9e1bad8f",
+            "latencyMs": 3573.2100999999966
+          }
+        ],
+        "judge": {
+          "packetId": "cd6ad66e3d210b54da1cb29f6c0cfaaae8700b912db322637e424a0dc0fbb6bb",
+          "requestHash": "c7acab6c9f9803128d4a8ad11ecd1c5a0fd902d7354ad47974249bce2a4806f6",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 5240,
+            "output_tokens": 529,
+            "total_tokens": 5769,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 400
+            }
+          },
+          "latencyMs": 21294
+        }
+      },
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 4,
+        "sourceRepetition": 4,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12193,
+            "outputTokens": 997,
+            "cost": null,
+            "requestHash": "73a64c2317059c7e8f4c5610ee122ba7590527a77fc07cd99d5a46f113f10458",
+            "latencyMs": 4075.4282999999996
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12177,
+            "outputTokens": 732,
+            "cost": null,
+            "requestHash": "39994dcc28a53907c4a7a0fcf1ddf24ec33b53b705da0e25a71b2b7be6357226",
+            "latencyMs": 3180.8605999999854
+          }
+        ],
+        "judge": {
+          "packetId": "4e41f3263c639f1d66397d9395a923a945e94ee79089ef3ff910fec5985e976d",
+          "requestHash": "f1da94c2d247e0dda03d88daeffcd784ada8f54fc801ece5117a8752d087a2e8",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 5107,
+            "output_tokens": 343,
+            "total_tokens": 5450,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 193
+            }
+          },
+          "latencyMs": 13455
+        }
+      },
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 5,
+        "sourceRepetition": 5,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12955,
+            "outputTokens": 1585,
+            "cost": null,
+            "requestHash": "18be58e9141df4b7be338b80613a865350e97f3ce455d611ab005c7bd341cb62",
+            "latencyMs": 5566.520699999994
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12939,
+            "outputTokens": 1366,
+            "cost": null,
+            "requestHash": "99a83464751a21317b25e4642eaa05163ff080471b8ac6102045d55fe0d6c452",
+            "latencyMs": 4880.387099999993
+          }
+        ],
+        "judge": {
+          "packetId": "7d787c0e2739a61429601d0c51c13e7e100936c2411ac0d14f01e440644905bf",
+          "requestHash": "895b71e2dfa61634194a34c6aa486c7bfeb805d17ef9e82a6d6b636aae95a970",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7542,
+            "output_tokens": 972,
+            "total_tokens": 8514,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 792
+            }
+          },
+          "latencyMs": 37115
+        }
+      },
+      {
+        "label": "THANKS_ONLY",
+        "repetition": 1,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11478,
+            "outputTokens": 394,
+            "cost": null,
+            "requestHash": "731c96f456baf4a93e49e0b5b98b78111be1e63163934420d35b43edc5b1e148",
+            "latencyMs": 2149.800900000002
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11462,
+            "outputTokens": 367,
+            "cost": null,
+            "requestHash": "57f402363996a5a5907e121c33f1a295c4f557069ca55a7ac8d32cb6128d7ee6",
+            "latencyMs": 2248.052400000015
+          }
+        ],
+        "judge": {
+          "packetId": "16a498bfad9f38171af1bba31e29eab56f04baf808df87b7383f9a52f287bdd6",
+          "requestHash": "5dd809b7864c91486df842f8b3e5538e10e4a865a0bc08c6b9a64039f343e211",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7114,
+            "output_tokens": 232,
+            "total_tokens": 7346,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 105
+            }
+          },
+          "latencyMs": 10028
+        }
+      },
+      {
+        "label": "PRE_ORDER_ALREADY_DISCLOSED",
+        "repetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11467,
+            "outputTokens": 1372,
+            "cost": null,
+            "requestHash": "7cdfc306df1ee92fde9d29306f782ffa2864dd41a61cd584d967f019e80acd10",
+            "latencyMs": 4322.491399999999
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11451,
+            "outputTokens": 1361,
+            "cost": null,
+            "requestHash": "b1955c6c566407fbc8820beab7b18f20ce6780632ce8f5e74f8ccc9ccd25d556",
+            "latencyMs": 4632.90360000002
+          }
+        ],
+        "judge": {
+          "packetId": "d7b46c53a61c389664327e0234a2c440d33bae81855dd9548fe8781b3ddacb02",
+          "requestHash": "76980d5d07d287188edcf3edc3524b1e536a3f71cd9df43cf7820363ece8f3b4",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7114,
+            "output_tokens": 241,
+            "total_tokens": 7355,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 105
+            }
+          },
+          "latencyMs": 7869
+        }
+      },
+      {
+        "label": "TWO_UNITS_PROMOTION",
+        "repetition": 1,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 8549,
+            "outputTokens": 1778,
+            "cost": null,
+            "requestHash": "3071de91c73c556d2585f5c399c8031a1c10430fbf0e25bcedf6db17cac88362",
+            "latencyMs": 5793.08130000002
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 8533,
+            "outputTokens": 1606,
+            "cost": null,
+            "requestHash": "78f824e3a9a4d47eac330a3d945e3fb4821d6a8c49876218ef70ddfb951408cd",
+            "latencyMs": 8133.661800000002
+          }
+        ],
+        "judge": {
+          "packetId": "c075e3c91401f3f0d501f8d9b053694fa01c8c14b7fc7d2e7ad5c2453d359194",
+          "requestHash": "bbdb37c7b5226a7c25a017a4b09fab7be023dee5e7115180d12ff3d9ad4c3bd7",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 2260,
+            "output_tokens": 575,
+            "total_tokens": 2835,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 432
+            }
+          },
+          "latencyMs": 20932
+        }
+      },
+      {
+        "label": "OPENING_AD_QUOTE",
+        "repetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 10561,
+            "outputTokens": 543,
+            "cost": null,
+            "requestHash": "e4835a1a6d0ed27820cea48253dc608d476cee922186263a6a483eb1b82e1b61",
+            "latencyMs": 2161.00410000002
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 10545,
+            "outputTokens": 609,
+            "cost": null,
+            "requestHash": "b3a2df17fcead00f1c488424e6ee8197704c845815f5ab47809fd19059285883",
+            "latencyMs": 2463.5079999999725
+          }
+        ],
+        "judge": {
+          "packetId": "aadecbd8320d1b1a401d2ca7b3ba87e4b0f0e3a4c4f5e0d32d82a32887daff79",
+          "requestHash": "b4c6a53dd8ae4bde861734ee799d2ecffd5ea103797dfd975ced7895b6ac6901",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 3557,
+            "output_tokens": 227,
+            "total_tokens": 3784,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 81
+            }
+          },
+          "latencyMs": 9739
+        }
+      }
+    ],
+    "score": {
+      "stage": "VOICE",
+      "status": "STOP",
+      "controlsOk": true,
+      "materialOk": false,
+      "targets": [
+        {
+          "label": "c-20261028-s15:0",
+          "voicePass": 4,
+          "factsComplete": 5,
+          "netWins": 1
+        },
+        {
+          "label": "c-20261028-j2:1",
+          "voicePass": 1,
+          "factsComplete": 5,
+          "netWins": -2
+        },
+        {
+          "label": "c-20261028-j2:2",
+          "voicePass": 5,
+          "factsComplete": 4,
+          "netWins": 2
+        },
+        {
+          "label": "c-20261028-j4:1",
+          "voicePass": 4,
+          "factsComplete": 3,
+          "netWins": 2
+        },
+        {
+          "label": "c-20261028-j4:2",
+          "voicePass": 5,
+          "factsComplete": 5,
+          "netWins": -1
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "voicePass": 2,
+          "factsComplete": 3,
+          "netWins": -1
+        }
+      ],
+      "rows": [
+        {
+          "label": "c-20261028-s15:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A báo đúng áo be giá 499.000đ và hàng đặt trước, mở lời hỗ trợ chọn size vừa mức quan tâm của khách, không tự tạo giỏ."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B cũng giữ đúng giá và trạng thái đặt trước, chỉ mời tư vấn size; phần mô tả dài hơn nhưng không tạo khác biệt đáng kể so với A."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-s15:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Giữ đúng áo be, giá 499.000đ và trạng thái đặt trước, đồng thời hỏi size S–XL có căn cứ để mở bước mua mà không tự tạo giỏ."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng giá 499.000đ và hàng đặt trước, nhưng đoạn dài nối nhiều tính từ về chất liệu, phong cách không giúp thêm khi chị chỉ vừa bày tỏ thích áo be."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-s15:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A báo đúng áo be giá 499.000đ, nói rõ hàng đặt trước và chỉ mời hỗ trợ chọn size, không tự tạo giỏ."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B giữ đúng giá và trạng thái đặt trước, nêu các size có căn cứ và chỉ hỏi ý khách về bước chọn size lên đơn chứ chưa tự thực hiện."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-s15:0",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B giữ đúng giá, trạng thái đặt trước và không tự tạo giỏ, nhưng thêm chuỗi mô tả chất liệu, phong cách kiểu catalogue không giúp khách đang chỉ bày tỏ thích áo và cảm ơn."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A báo đúng giá áo be 499.000đ và trạng thái đặt trước, mở lời hỗ trợ chọn size vừa mức quan tâm của khách, không tự tạo giỏ."
+          },
+          "beat": 1
+        },
+        {
+          "label": "c-20261028-s15:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A báo đúng áo be giá 499.000đ và hàng đặt trước, hỏi size hợp lệ nhưng hơi vội yêu cầu khách chọn khi chị mới bày tỏ thích áo."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B giữ đúng giá và trạng thái đặt trước, mở lời tư vấn size nhẹ nhàng, phù hợp mức quan tâm hiện tại và không tự tạo giỏ."
+          },
+          "beat": 1
+        },
+        {
+          "label": "c-20261028-j2:1",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Xác nhận đúng size M cho áo theo hồ sơ mới; nhắc thêm vòng mông hơi dư nhưng chưa tạo khác biệt đáng kể về chất lượng cả lượt."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Xác nhận áo Thạch Thảo vẫn size M đúng theo số đo đã sửa, nhắc lại vài dữ kiện nhưng lượt đáp vẫn tự nhiên và đúng trọng tâm."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j2:1",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Xác nhận áo Thạch Thảo vẫn mặc size M đúng kết quả theo số đo mới, tự nhiên và không kể lại hồ sơ."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "Tư vấn đúng áo size M theo số đo đã sửa nhưng đọc lại cân nặng và cả ba vòng không cần thiết."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-j2:1",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "Chốt đúng size M cho áo theo số đo đã sửa nhưng đọc lại cả cân nặng và ba vòng thay vì chỉ xác nhận size."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "Cập nhật thông tin và xác nhận size M đúng căn cứ, nhưng vẫn kể lại toàn bộ cân nặng và ba vòng không cần thiết."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j2:1",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "Chốt đúng áo size M nhưng vẫn nhắc lại cân nặng và cả ba vòng không cần thiết, nên chưa khác đáng kể so với A về việc kể lại hồ sơ."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "Chốt đúng áo size M theo số đo đã sửa nhưng đọc lại toàn bộ chiều cao, cân nặng và ba vòng, trái yêu cầu tránh kể cả hồ sơ."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j2:1",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Xác nhận áo Thạch Thảo vẫn size M đúng kết quả theo số đo đã sửa, tự nhiên và không đọc lại hồ sơ."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "Tư vấn đúng size M nhưng nhắc lại cả ba vòng và cân nặng khách vừa gửi, không cần thiết cho việc xác nhận size và trái tiêu chí tránh đọc lại hồ sơ."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-j2:2",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": true,
+            "controlPass": false,
+            "reason": "Chọn size M đúng số đo và sở thích đã ghi nhận, nhưng lời chắc chắn “vừa đẹp và thoải mái” vẫn hứa cảm giác mặc chưa được xác minh."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": true,
+            "controlPass": false,
+            "reason": "Chốt size M tự nhiên và đúng kết quả tư vấn áo, nhưng khẳng định mặc “thoải mái” vượt căn cứ nên không giữ yêu cầu tránh hứa cảm giác mặc."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j2:2",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": false
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B chốt size M cho áo Thạch Thảo đúng kết quả tư vấn theo số đo đã sửa và sở thích mặc thoải mái, không hứa về cảm giác mặc."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j2:2",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": true,
+            "controlPass": false,
+            "reason": "Chốt M tự nhiên và đúng kết quả tư vấn, nhưng khẳng định “thoải mái nhất” là hứa về cảm giác mặc chưa có căn cứ."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Chốt size M đúng kết quả tư vấn cho áo theo hồ sơ đã sửa và sở thích mặc thoải mái, không cam kết cảm giác mặc."
+          },
+          "beat": 1
+        },
+        {
+          "label": "c-20261028-j2:2",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Chốt áo Thạch Thảo size M đúng kết quả tư vấn, có nhắc sở thích mặc thoải mái và không hứa về cảm giác mặc."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Tư vấn áo Thạch Thảo size M có căn cứ từ số đo và sở thích của chị, diễn đạt tự nhiên và không cam kết độ thoải mái."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j2:2",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": true,
+            "controlPass": false,
+            "reason": "Tư vấn size M đúng và giọng tự nhiên, nhưng khẳng định áo sẽ khiến chị mặc dễ chịu, thoải mái vượt quá căn cứ đã xác minh."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Chốt size M đúng kết quả tư vấn cho áo theo số đo và sở thích mặc thoải mái, không hứa thêm về cảm giác mặc."
+          },
+          "beat": 1
+        },
+        {
+          "label": "c-20261028-j4:1",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "A báo đúng giá và ưu đãi nhưng chuyển sang mời mua thêm, chưa trả lời rằng hỗ trợ riêng cho một áo chưa được xét và cần chọn màu để lên giỏ."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B báo đúng giá, không hứa mức giảm riêng, nêu bước chọn màu để lên giỏ và giữ ưu đãi mua từ hai sản phẩm ở vai trò bổ sung."
+          },
+          "beat": 1
+        },
+        {
+          "label": "c-20261028-j4:1",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "B chuyển sang gợi mua thêm mà chưa trả lời việc hỗ trợ riêng cho một áo còn phải chờ có giỏ để xét, dù giá và điều kiện giảm 5% đều đúng."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A nêu đúng giá áo, phân biệt ưu đãi mua nhiều với hỗ trợ riêng chưa xét và hỏi màu còn thiếu để tiến tới lên giỏ."
+          },
+          "beat": 1
+        },
+        {
+          "label": "c-20261028-j4:1",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "A hỏi màu tự nhiên nhưng chỉ nêu ưu đãi mua nhiều, chưa làm rõ phạm vi hỗ trợ cho một áo và nhắc màu Be thiếu trạng thái đặt trước."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B làm rõ một áo chưa đủ điều kiện giảm 5%, báo đúng giá và trạng thái hai màu, dù lời mời mua thêm hơi dư."
+          },
+          "beat": 1
+        },
+        {
+          "label": "c-20261028-j4:1",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "Giọng tự nhiên, báo đúng giá và hỏi màu để tiếp tục, nhưng chỉ nêu ưu đãi mua nhiều mà chưa làm rõ hỗ trợ riêng cho một áo chưa được xét do chưa có giỏ."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "Nói rõ một áo chưa được giảm 5% và hỏi màu phù hợp, nhưng vẫn chưa phân biệt việc không đủ ưu đãi mua nhiều với hỗ trợ riêng chưa được xét do chưa có giỏ."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j4:1",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "A hỏi màu để lên đơn áo size M tự nhiên, không thúc mua thêm, nhưng chưa nói hỗ trợ riêng cho một áo chưa được xét."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "B nêu đúng ưu đãi từ hai sản phẩm nhưng chuyển sang mời mua thêm, chưa trả lời việc hỗ trợ riêng cho một áo hiện chưa được xét."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-j4:2",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng tổng 529.000đ rồi chỉ hỏi màu còn thiếu, nêu rõ Trắng sẵn hàng và Be đặt trước để khách chọn tiếp."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng giá áo 499.000đ, phí ship Cần Thơ 30.000đ và tổng 529.000đ, đáp đủ câu hỏi tiền của khách."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-j4:2",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng tổng 529.000đ gồm áo và ship Cần Thơ, chỉ hỏi màu còn thiếu và nêu rõ Trắng sẵn hàng, Be đặt trước."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng tổng 529.000đ, nhắc đúng điều kiện giảm 5% và chỉ hỏi màu còn thiếu kèm trạng thái sẵn hàng hoặc đặt trước."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j4:2",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B báo đúng giá áo, phí ship và tổng 529.000đ, hỏi chọn màu để lên đơn mà không hỏi lại size hay hứa hỗ trợ giá chưa được xét."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A báo đúng tổng 529.000đ gồm áo và phí ship về Cần Thơ, chỉ hỏi màu còn thiếu và nêu đúng Trắng sẵn hàng, Be đặt trước."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j4:2",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B trả lời tự nhiên, báo đúng tổng 529.000đ và chỉ hỏi lựa chọn màu còn thiếu với trạng thái hàng chính xác."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A báo đúng tổng 529.000đ gồm áo và phí ship Cần Thơ, chỉ hỏi màu còn thiếu và nêu đúng Trắng sẵn hàng, Be đặt trước."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-j4:2",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Trả lời tự nhiên, đúng tổng 529.000đ cho một áo size M gửi Cần Thơ và chỉ hỏi chọn Trắng sẵn hàng hay Be đặt trước."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng tổng 529.000đ gồm áo 499.000đ và ship Cần Thơ 30.000đ, chỉ hỏi màu còn thiếu và nêu rõ Trắng sẵn hàng, Be đặt trước."
+          },
+          "beat": 0
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": true,
+            "controlPass": false,
+            "reason": "B tư vấn tự nhiên và báo đúng Odette có sẵn size S, nhưng bỏ trạng thái đặt trước của Diệp An nên khách chưa đủ thông tin để cân nhắc khả năng có váy kịp đi lễ."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A chọn Diệp An với lý do kín đáo phù hợp đi lễ, báo đúng giá 699.000đ và nói rõ hàng đặt trước."
+          },
+          "beat": 1
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Chọn dứt khoát Diệp An với lý do kín đáo phù hợp đi lễ, đồng thời báo đúng giá 699.000đ và trạng thái đặt trước."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Tư vấn và thông tin giá, đặt trước, size S có sẵn đều đúng, nhưng kết thúc hỏi khách chọn lại dù khách đã nhờ shop quyết giúp."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A báo đúng giá và trạng thái hàng nhưng lại hỏi chị thích mẫu nào thay vì chọn giúp một mẫu đi lễ."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B vẫn trả quyền chọn về khách và khẳng định Odette rất kín đáo dù nguồn chưa xác nhận đặc điểm này, dù giá và trạng thái hàng đều đúng."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A chọn rõ Diệp An vì cổ tròn, dáng suông và kín đáo hợp đi lễ, đồng thời báo đúng hàng đặt trước và Odette có sẵn size S."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B tư vấn hợp dịp và báo đúng giá, trạng thái hai váy nhưng cuối lượt lại hỏi chị ưng mẫu nào, trả quyết định về khách dù khách đã nhờ shop chọn giúp."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A chọn Diệp An với lý do phù hợp đi lễ nhưng thiếu thông tin phải đặt trước, rồi lại hỏi khách chọn mẫu nào dù khách đã nhờ shop quyết."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B chọn rõ Odette, báo đúng giá và size S có sẵn, có bước hỏi số đo nhưng khẳng định váy rất kín đáo khi nguồn chưa xác nhận đặc điểm này."
+          },
+          "beat": 1
+        },
+        {
+          "label": "THANKS_ONLY",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "Đã đáp lời cảm ơn nhưng lời mời tư vấn thêm mẫu khác mở hướng mua mới khi khách đang kết thúc cuộc trò chuyện."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Đáp lời cảm ơn tự nhiên, chỉ để ngỏ hỗ trợ thêm thông tin mà không gợi mua hay xem mẫu mới."
+          },
+          "beat": 1
+        },
+        {
+          "label": "PRE_ORDER_ALREADY_DISCLOSED",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng giá Diệp An 699.000đ, thêm chất liệu và form ngắn gọn có căn cứ, không nhắc lại việc đặt trước."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Trả lời tự nhiên, đủ giá Diệp An 699.000đ khách đang hỏi và không lặp trạng thái đặt trước đã biết."
+          },
+          "beat": 0
+        },
+        {
+          "label": "TWO_UNITS_PROMOTION",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Trả lời tự nhiên và đúng tổng hai áo đã gồm phí ship, đủ đáp câu hỏi nhưng không làm rõ khoản ưu đãi như A."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng tổng 978.100đ cho hai áo, giải thích rõ ưu đãi 49.900đ và phí ship 30.000đ, đồng thời nhắc đúng hàng đặt trước."
+          },
+          "beat": 1
+        },
+        {
+          "label": "OPENING_AD_QUOTE",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B trả lời tự nhiên, đủ giá bộ 799.000đ, chất liệu/phom và size S–XL có sẵn, không cần hỏi thêm khi khách mới hỏi giá."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A báo đúng giá bộ 799.000đ, chất liệu áo và chân váy cùng các size đã xác minh, rồi mời tư vấn size phù hợp với lượt đầu."
+          },
+          "beat": 0
+        }
+      ],
+      "registrationHash": "71b91dac78362a38047a8e18760559e04e3250d895829b675589b9ea828ec25e",
+      "observedHash": "88a980615a4b7d48c7a03c57ca656cbfcb21f19e54a6f694f706cd1e09387fd0",
+      "gradeHash": "bad3dc4ed4b2b902512228a366fd4e8af6f55dd728cd1fb458fe4b8a027a331d"
+    }
+  },
+  "OFFERS": {
+    "source": "3357270ac1b52121892dac1e3fb674cf5da2c7ca",
+    "origin": "5dfde94b11a2b55ca7a52846b241bb440ee68994",
+    "registrationHash": "99f7001dd154245c12292fb1b41a39584d64dea58513657bf0e6ab5df05627c3",
+    "model": {
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "generationConfig": {
+        "retry": 0
+      }
+    },
+    "generationConfig": {
+      "candidateCount": 1,
+      "responseMimeType": "text/plain",
+      "maxOutputTokens": 8192,
+      "thinkingConfig": {
+        "thinkingLevel": "HIGH",
+        "includeThoughts": false
+      }
+    },
+    "judge": {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "blind": true,
+      "independent": true,
+      "rubricHash": "4b4dc9b96e1108a8cb43aaf423514e2282d165ef8be8ceaa89378e5553a2ad39",
+      "schemaHash": "2fc1541d09752ded5f75ab9886dae83149a58069463faecb300e3ea289051ee9"
+    },
+    "judgePacketHash": "ef6c756870fac0beab3e0136a738ed1d77e34a81aed344da570fa3171f77f937",
+    "attempts": [
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 1,
+        "sourceRepetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 1,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12447,
+            "outputTokens": 2320,
+            "cost": null,
+            "requestHash": "3d159ff3087a7d3c35acb5d8ce710fbf05f9fa122069d2f807baab472385b1c2",
+            "latencyMs": 7458.7959
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12563,
+            "outputTokens": 2057,
+            "cost": null,
+            "requestHash": "4a1d0f5f36c5b1683b38751a5519c69e14f872312c45b829160b9ca03ae8195c",
+            "latencyMs": 6550.224900000001
+          }
+        ],
+        "judge": {
+          "packetId": "17ba19c18bcf5951a5925a1d731af72f1fd7e73e8dec1cf2ca98febc126261ef",
+          "requestHash": "922152d86cc8d8369b3587f02b35d95595ef78fe82daa98a7f056f21a2aa7e57",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7241,
+            "output_tokens": 375,
+            "total_tokens": 7616,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 206
+            }
+          },
+          "latencyMs": 13329
+        }
+      },
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 2,
+        "sourceRepetition": 2,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13578,
+            "outputTokens": 1551,
+            "cost": null,
+            "requestHash": "5e58864e31849fd9c02642efc30ad297f4fa11295b0951e993b98dff9bba2ab5",
+            "latencyMs": 5008.253800000002
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13694,
+            "outputTokens": 1092,
+            "cost": null,
+            "requestHash": "42cec929a4d87dea14c0bbe857bf9b160e454abcd99e9997cc7a9d137f2e1856",
+            "latencyMs": 4492.7503000000015
+          }
+        ],
+        "judge": {
+          "packetId": "ee6ef2c42a1aee77d9c95fdd6c11f1121513ee46b9f4c35f047d0d657f41706e",
+          "requestHash": "364de2079a5b4165f1440eca3df28d424f96ab842be32cb5399dc3982f5b3a3f",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7749,
+            "output_tokens": 519,
+            "total_tokens": 8268,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 366
+            }
+          },
+          "latencyMs": 20216
+        }
+      },
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 3,
+        "sourceRepetition": 3,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12382,
+            "outputTokens": 900,
+            "cost": null,
+            "requestHash": "af1a22c1729f6154ef0dc2d67cdf72ecd30455eeb1c258650626efed0a388c9f",
+            "latencyMs": 3465.4860999999983
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12498,
+            "outputTokens": 883,
+            "cost": null,
+            "requestHash": "ee4e1d12d940fb6bcbcdb8ff6843d6973a403e6c10e0af98abd6de501c0ccbe2",
+            "latencyMs": 3606.0575999999965
+          }
+        ],
+        "judge": {
+          "packetId": "3733139e8f183eeb9b816c1aad08768832eadd282a42a874f326f07db643387f",
+          "requestHash": "849e6537ea64de94f48225b67e2bcb5fb45d95840425ce1e49648f64af80127d",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 5099,
+            "output_tokens": 535,
+            "total_tokens": 5634,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 404
+            }
+          },
+          "latencyMs": 19717
+        }
+      },
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 4,
+        "sourceRepetition": 4,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12193,
+            "outputTokens": 879,
+            "cost": null,
+            "requestHash": "73a64c2317059c7e8f4c5610ee122ba7590527a77fc07cd99d5a46f113f10458",
+            "latencyMs": 3515.504000000001
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12309,
+            "outputTokens": 578,
+            "cost": null,
+            "requestHash": "18063833e573e885fc704dabfcd2700eb5baec092bc0f212a5c71d7e4093b4c3",
+            "latencyMs": 2527.6640999999945
+          }
+        ],
+        "judge": {
+          "packetId": "ea14b7aa2a4c5645fbdafeb83c37b261791638a880ffd2b2304da3a6becd5fad",
+          "requestHash": "df62057438371a304fbefa9afd820506098b61da0ba64f03c64a3c7555e6d971",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 4971,
+            "output_tokens": 492,
+            "total_tokens": 5463,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 346
+            }
+          },
+          "latencyMs": 20992
+        }
+      },
+      {
+        "label": "c-20261028-s08:0",
+        "repetition": 5,
+        "sourceRepetition": 5,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12955,
+            "outputTokens": 1540,
+            "cost": null,
+            "requestHash": "18be58e9141df4b7be338b80613a865350e97f3ce455d611ab005c7bd341cb62",
+            "latencyMs": 5448.480200000005
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13071,
+            "outputTokens": 1291,
+            "cost": null,
+            "requestHash": "31df2a105d78ee2c95f2f112ea6ebfc7541abf437aa6b3ac5ef4d245a1622815",
+            "latencyMs": 4603.865699999995
+          }
+        ],
+        "judge": {
+          "packetId": "fe03589187dc976984e82dd0d2bae819f4826f9da9d821d9a879a685fd28c90c",
+          "requestHash": "22a3e548f0683f0ab099d08b51451ed18bc9a0f87eb478927d9b5eea4737523c",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7550,
+            "output_tokens": 537,
+            "total_tokens": 8087,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 361
+            }
+          },
+          "latencyMs": 18786
+        }
+      },
+      {
+        "label": "MIXED_STOCK",
+        "repetition": 1,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12447,
+            "outputTokens": 2412,
+            "cost": null,
+            "requestHash": "3d159ff3087a7d3c35acb5d8ce710fbf05f9fa122069d2f807baab472385b1c2",
+            "latencyMs": 7386.495800000004
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12563,
+            "outputTokens": 2380,
+            "cost": null,
+            "requestHash": "4a1d0f5f36c5b1683b38751a5519c69e14f872312c45b829160b9ca03ae8195c",
+            "latencyMs": 7144.506099999999
+          }
+        ],
+        "judge": {
+          "packetId": "ab50812b9e74c270214c083fca12ee78fe8276b870b2fb1c57f201ec607a98cd",
+          "requestHash": "d7ad3c1ccdca00d6edd4530b4db0210cde64e01e9067905d287d7cf0ef27cca1",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7238,
+            "output_tokens": 541,
+            "total_tokens": 7779,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 369
+            }
+          },
+          "latencyMs": 14690
+        }
+      },
+      {
+        "label": "PRE_ORDER_ALREADY_DISCLOSED",
+        "repetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11467,
+            "outputTokens": 1083,
+            "cost": null,
+            "requestHash": "7cdfc306df1ee92fde9d29306f782ffa2864dd41a61cd584d967f019e80acd10",
+            "latencyMs": 3703.830799999996
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11583,
+            "outputTokens": 1281,
+            "cost": null,
+            "requestHash": "cfaa5d3c91d944ef22ae39fdbe2685a9fa532fa589b77d56c672a9e5307f9117",
+            "latencyMs": 4601.617499999993
+          }
+        ],
+        "judge": {
+          "packetId": "32825c450746b78237d2c5b41526fba9cc1c07d9cd72f337c22f888de1903b3d",
+          "requestHash": "4cecd3eb79f70b8e849e644b440505f31beaa80481b662d383cbedee7370bbc8",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7145,
+            "output_tokens": 237,
+            "total_tokens": 7382,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 98
+            }
+          },
+          "latencyMs": 10273
+        }
+      },
+      {
+        "label": "STOCK_CHANGED",
+        "repetition": 1,
+        "dispatchOrder": [
+          1,
+          0
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11471,
+            "outputTokens": 1243,
+            "cost": null,
+            "requestHash": "0d9b40d636622ef7c552a0d8d0679fc1cf56f3af1119fd4485af986d834e18d6",
+            "latencyMs": 4225.060500000007
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11587,
+            "outputTokens": 1220,
+            "cost": null,
+            "requestHash": "e745b62e8b03fbd6bd1e6d77dbdab895149445fb27a8235ff4a06f193a0a91c3",
+            "latencyMs": 4101.7757999999885
+          }
+        ],
+        "judge": {
+          "packetId": "cae9bc02f944a38a40a296217d6106d9b0dc977eab3c4b860eb1ed9439743f45",
+          "requestHash": "5cbd20f336a58e60eaa5299afc547d22b74ae795191e69438a8f9f7bc9d4789f",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7091,
+            "output_tokens": 163,
+            "total_tokens": 7254,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 28
+            }
+          },
+          "latencyMs": 7513
+        }
+      },
+      {
+        "label": "STOCK_PROOF_UNAVAILABLE",
+        "repetition": 1,
+        "dispatchOrder": [
+          0,
+          1
+        ],
+        "owner": [
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11405,
+            "outputTokens": 756,
+            "cost": null,
+            "requestHash": "214f965b49b30e4d75a37e50b193c5d199331f9d13b8d0a815a5038ce47620df",
+            "latencyMs": 4155.542699999991
+          },
+          {
+            "status": "OK",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 11470,
+            "outputTokens": 1987,
+            "cost": null,
+            "requestHash": "d85d127d9ba743ef562908907e9bc39d1a93c86aca2485fa4d3538d29b806c8e",
+            "latencyMs": 5615.312199999986
+          }
+        ],
+        "judge": {
+          "packetId": "161d531c453fa749ef6939b1181880b5d85c7fb951df1fbf7994c0495952d607",
+          "requestHash": "4f1452f180fbeea7b1fd4b5c2864cc6925310c8a2721e7b5df7acf30f8dbce39",
+          "status": "OK",
+          "providerErrorCode": null,
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "modelVersion": "gpt-6.1-sol",
+          "usage": {
+            "input_tokens": 7096,
+            "output_tokens": 260,
+            "total_tokens": 7356,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_30m_tokens": 0,
+                "ttl_12h_tokens": 0
+              }
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 85
+            }
+          },
+          "latencyMs": 9575
+        }
+      }
+    ],
+    "score": {
+      "stage": "OFFERS",
+      "status": "STOP",
+      "controlsOk": true,
+      "materialOk": false,
+      "targets": [
+        {
+          "label": "c-20261028-s08:0",
+          "voicePass": 3,
+          "factsComplete": 3,
+          "netWins": -1
+        }
+      ],
+      "rows": [
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B báo đúng giá và tình trạng hai mẫu nhưng lại hỏi chị ưng mẫu nào, trả lựa chọn về khách dù khách đã nhờ shop chọn giúp."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A chọn rõ Diệp An, giải thích thiết kế kín đáo hợp đi lễ, báo đúng giá và hàng đặt trước rồi mở bước tư vấn size."
+          },
+          "beat": 1
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Chọn Diệp An dựa trên thiết kế hai lớp kín đáo có căn cứ, báo đúng hàng đặt trước và đưa Odette size S có sẵn làm phương án nếu chị cần ngay."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": true,
+            "controlPass": true,
+            "reason": "Chọn Odette rõ ràng, báo đúng giá và size S có sẵn, nhưng khẳng định váy rất kín đáo để đi lễ khi nguồn chưa xác nhận đặc điểm quan trọng này."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B tư vấn theo thời gian cần mặc, báo rõ Odette có sẵn size S và Diệp An đặt trước, rồi hỏi thời điểm để chốt mẫu phù hợp."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A nghiêng về Diệp An nhưng lại hỏi khách tự chọn, đồng thời thiếu thông tin mẫu này phải đặt trước."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Chọn rõ Diệp An, giải thích cổ tròn và thiết kế hai lớp kín đáo hợp đi lễ, đồng thời báo đúng giá 699.000đ và trạng thái đặt trước."
+          },
+          "treatment": {
+            "voicePass": false,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng giá và trạng thái đặt trước của Diệp An nhưng lại đưa thêm Odette rồi hỏi khách chọn mẫu, trong khi chị đã nhờ shop quyết giúp."
+          },
+          "beat": -1
+        },
+        {
+          "label": "c-20261028-s08:0",
+          "baseline": {
+            "voicePass": false,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A tư vấn Diệp An hợp đi lễ nhưng thiếu trạng thái đặt trước và cuối lượt lại hỏi khách chọn mẫu dù chị đã nhờ shop quyết."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B ưu tiên Diệp An với lý do kín đáo đúng dịp, báo rõ hàng đặt trước và chỉ gợi ý Odette có sẵn size S nếu khách cần hàng sẵn."
+          },
+          "beat": 1
+        },
+        {
+          "label": "MIXED_STOCK",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": false,
+            "materialRegression": false,
+            "controlPass": false,
+            "reason": "A chọn rõ Diệp An và giải thích hợp đi lễ nhưng thiếu thông tin mẫu này phải đặt trước, dù chưa hứa có hàng hay giao ngay."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B ưu tiên Diệp An vì kín đáo, báo đúng giá và trạng thái đặt trước, đồng thời giới hạn lựa chọn Odette có sẵn ở size S."
+          },
+          "beat": 1
+        },
+        {
+          "label": "PRE_ORDER_ALREADY_DISCLOSED",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng giá Diệp An 699.000đ, không nhắc lại việc đặt trước và hỏi size như một bước hỗ trợ tiếp phù hợp."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Trả lời đủ giá Diệp An 699.000đ, mô tả ngắn đúng nguồn và dừng hợp lý, không lặp trạng thái đặt trước."
+          },
+          "beat": 0
+        },
+        {
+          "label": "STOCK_CHANGED",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Xác nhận tự nhiên và chính xác trạng thái đặt trước của Váy Diệp An, không lặp lại thông tin có sẵn đã cũ."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "Báo đúng Váy Diệp An hiện là hàng đặt trước, cập nhật trạng thái trái với lượt trước và trả lời tự nhiên, đủ ý."
+          },
+          "beat": 0
+        },
+        {
+          "label": "STOCK_PROOF_UNAVAILABLE",
+          "baseline": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "A trả lời tự nhiên, xác nhận đúng Diệp An là hàng đặt trước theo nguồn còn hiệu lực, báo đúng giá và mở lời tư vấn size vừa mức."
+          },
+          "treatment": {
+            "voicePass": true,
+            "factsComplete": true,
+            "materialRegression": false,
+            "controlPass": true,
+            "reason": "B trả lời đúng trạng thái đặt trước và giá theo nguồn còn hiệu lực, thêm mô tả chất liệu và form có căn cứ mà không làm lệch câu hỏi."
+          },
+          "beat": 0
+        }
+      ],
+      "registrationHash": "99f7001dd154245c12292fb1b41a39584d64dea58513657bf0e6ab5df05627c3",
+      "observedHash": "4a32c5ac4bb73f6858a7ae9d9240fddbaf262ce9e8c9b7cfe208d33292ff832a",
+      "gradeHash": "14d9a54eee96edf23e0270212ee7cae623220cd152aeb9d4b4f2b7c8409fdb28"
+    }
+  }
+}

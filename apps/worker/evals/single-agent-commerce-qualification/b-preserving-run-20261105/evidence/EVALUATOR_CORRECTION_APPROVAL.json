@@ -1,0 +1,44 @@
+{
+  "kind": "INDEPENDENT_EVALUATOR_PRECONDITION_CORRECTION_REVIEW_V1",
+  "status": "APPROVED_SCOPED_EVALUATOR_CHANGE",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T08:28:29.986933+00:00",
+  "sourceBaseSha": "7057960591ac39a481665befc58e508f9dfdbd02",
+  "files": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/opening-execution-readiness.mjs",
+      "sha256": "abb7c255ee258d5cced472be3205f4cbd11e3bc0021664be447bb83543d215ed"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs",
+      "sha256": "98f82b7c1c2775ad938c677587398c0132562bcfb992a71fbbd18fad16b8a0d0"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/CHECKOUT_COMPLETE_SCENARIO_20261104.json",
+      "sha256": "5ec965e108e57205e6a1b4cb634f55b762d2ba47a1d26d4b2f7e5b653d96c589"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/B_PRESERVING_CHECKOUT_SCOPE_20261104.json",
+      "sha256": "39022d99dd16cab2d5fc9c7e6e7c342ba3f267fd22c4fd576dbeea145777ee62"
+    }
+  ],
+  "changes": [
+    "OnlyPOST_CART may optinto explicit afterAcceptedReply:true conditional prerequisite; legacy immediatefirstcontactdefault unchanged; actualruntime/media/freshness authority untouched",
+    "Newsyntheticcheckout branch plainname/address resolve existing code intake; all4branches exact values verified; original33scripts notmodified"
+  ],
+  "checks": [
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs apps/worker/evals/single-agent-commerce-qualification/customer-branches.test.mjs apps/worker/evals/single-agent-commerce-qualification/native-terminal.test.mjs",
+      "result": "28PASS/exit0"
+    },
+    {
+      "command": "node existing checkoutDetails against frozen newscenario fourmissingfieldbranches",
+      "result": "FULL_NAME MaiAnh, PHONE0900000001, ADDRESS12duongSo3..., PAYMENTCOD allresolved;branchhashmatches"
+    }
+  ],
+  "limits": [
+    "No proofactualprioracceptedreply or customercolour supplied; condition not runtimepermission",
+    "Inputregistrations must be regenerated/reviewed againstnewHEAD and newinitialstate; capturedpublicworldsource identity retained",
+    "No provider or sourcewrites; no qualification/modelquality claim"
+  ]
+}

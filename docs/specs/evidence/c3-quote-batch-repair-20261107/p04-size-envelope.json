@@ -1,0 +1,37 @@
+{
+  "kind": "OBSERVED_SIZE_ENVELOPE_WITH_CAPTURED_SIGNED_MODEL_PARTS",
+  "originalObserved": {
+    "trustedFrameBytes": 9393,
+    "dialogueBytes": 20338,
+    "textFrameBytes": 66195
+  },
+  "before": {
+    "adapterSource": "5c623a20",
+    "promptSource": "5c623a20",
+    "error": "OWNER_REQUEST_BOUND",
+    "budget": {
+      "textFrameBytes": 66195,
+      "systemBytes": 21996,
+      "toolSchemaBytes": 14208,
+      "trustedFrameBytes": 9393,
+      "dialogueBytes": 20338,
+      "textLimitBytes": 65536
+    }
+  },
+  "after": {
+    "textFrameBytes": 64437,
+    "systemBytes": 20077,
+    "toolSchemaBytes": 14369,
+    "trustedFrameBytes": 9393,
+    "dialogueBytes": 20338,
+    "textLimitBytes": 65536,
+    "presentedTextFrameBytes": 64614,
+    "basePresentedFrameBytes": 64614,
+    "inlineImageBytes": 0,
+    "frameLimitBytes": 65536
+  },
+  "syntheticPadding": true,
+  "providerRequests": 0,
+  "effects": 0,
+  "limitation": "Extra context is synthetic padding to match recorded section size. Callable tools are recomputed with the unchanged runtime reachability rule for the observed remaining budget. Actual signed content and captured tool results retained; not exact failed historical body or a new model result."
+}

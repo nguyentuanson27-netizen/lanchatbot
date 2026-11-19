@@ -1,0 +1,53 @@
+{
+  "status": "APPROVE",
+  "reviewer": "/root/post_contract_input_review",
+  "reviewedAt": "2026-11-10T09:35:39.581Z",
+  "sourceSha": "5613e8b37784f8c2eb6be4ce3a115d8b13b7100e",
+  "worldHash": "e641857a4c4c7d272a2a47dd30e7fc0848aa94483601af4b9a32a5b3cfe7359b",
+  "pendingRegistrationHash": "81e0320eba6067702ddf4f76d756fa33e71fb64ed5842c3bdf5b05594c0d787d",
+  "helperHashes": {
+    "prepare": "b5cd7a437983fda40ba9dd95fc71726c9cade1693dcf4e429d305b8874eb09be",
+    "seal": "5132c0a240a71c9fc411d370c1776175cc266c7b6ac636c27c5c331e1b89ba28",
+    "launch": "1ac856de6b307e469d020fec997023d20d46fb3411e892d4bb112abc5b825a09",
+    "safety": "1b12094dd8ee031e6c6aa9e655e9b5d7cb747a13b73a18276e496998a9aadb67",
+    "credentialWrapper": "21a677bf3ed5afa959ed00fb87053edabe603b677fbb4c0db7d099f140ac68d3"
+  },
+  "newProviderResultsObserved": 0,
+  "priorFocusedSafety": {
+    "requestsObserved": 8,
+    "safeEligible": 4,
+    "safeTotal": 4,
+    "unsafeSendEligibleFalsePass": 0,
+    "generationErrors": 0,
+    "gateHash": "dc242c79ab5f30c3fae8439dcacaa7c7e8a39b2bffd49849c50acc4646c0a588",
+    "registrationHash": "57a49bb6b648232845151dd2d2b4246ea8154f357f2986ec68dc170f383d6500",
+    "evidenceHash": "d2ec4bb94e59ab689a73d7f77d7aa4f65d587ef86a7b32a87c36ff621a33a5e7",
+    "verifierIdentity": "7620c8c43d02717829d68f49c0471986c4f8b2a1c8c124cd92fa7a37d6c423fe",
+    "status": "PASS"
+  },
+  "priorFocusedSafetyDidNotChangeNativeScriptsOrLabels": true,
+  "scriptHash": "b166b46d14014d59621e1851f062175715374713a6ac3ebf19143b387fa60344",
+  "initialStateArtifactHash": "d28e24f874b7a2352c2978e148f082c79513bb19c9964901520fd70affb2ed8c",
+  "registered": {
+    "cases": 13,
+    "turns": 27,
+    "maxGenerations": 108,
+    "repetitions": 1,
+    "retry": 0,
+    "salesCohort": 12,
+    "sourceGapControl": 1
+  },
+  "checks": [
+    "Independent hashes match exact clean source, frozen world, initial state, pending registration and executable helper bytes.",
+    "Initial state came from a disposable database that was dropped. Capture recorded zero source writes and generation requests.",
+    "Existing case scripts, full turns and customer branching exactly match the prior screen, in the same order. Both prompt hashes changed and are rebound; model/effort configuration remains identical.",
+    "Source readiness rechecked against actual current time. S16 is the sole source-gap control, with no positive wearer provenance, excluded from the sales-quality denominator and still assessed for unsafe output.",
+    "All 27 runtime projections admitted only latest, actual history and initial product codes, with evaluator firewall checks. No native run or dispatch marker existed at approval.",
+    "Focused safety evidence recomputed for the same source, world and full verifier identity. Eight attempts each made exactly one request, with four safe eligible, four unsafe blocked and zero errors. Existing focused safety results did not lead to case/script or label substitution."
+  ],
+  "limits": [
+    "Known development population with refreshed source, one draw per case and no retry. Approval is limited to these frozen inputs and helper bytes, before generation.",
+    "Focused safety PASS is not Phase C qualification. Native paired purchase intent and writer-to-quote are NOT_EXERCISED unless the observed native traces actually exercise them.",
+    "Native behavior, output and final results remain unobserved. No full qualification, comparison, or deployment authorized by this review."
+  ]
+}

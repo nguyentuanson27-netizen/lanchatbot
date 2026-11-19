@@ -1,0 +1,16 @@
+{
+  "status": "FAIL",
+  "sourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "registrationHash": "2abaa2a14137da7391164857112cc14e0d62c462e15ab4bfd923bb949017ab85",
+  "reviewer": "/root/b_preserving_independent_review",
+  "capturedTurns": 7,
+  "materialTaskFailures": 1,
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "6a9381c48970f4a226487771053d43de358bb847af601d6d5d30ae161ffe5004",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-run-20261105-01\\integration.json",
+  "integrationSha256": "9928f148b1351d972f02b930112f36b42dad41b3e608692a3539157466362d66",
+  "auditPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-target-model-r1-independent-post-run-audit-20261105-01.json",
+  "auditSha256": "739203a5fa41805ea59d01566bc541e12ecfb396ba14b895e96f51b2b55ec27e",
+  "testDatabaseDropped": true,
+  "recommendation": "STOP_R2_REMAINDER_CHECKOUT_NOT_RUN"
+}

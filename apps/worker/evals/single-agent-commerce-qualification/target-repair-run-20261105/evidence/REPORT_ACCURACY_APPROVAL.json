@@ -1,0 +1,218 @@
+{
+  "status": "APPROVED_REPORT_ACCURACY_ONLY_R1_FUNCTIONAL_FAIL",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T14:22:13.998130+00:00",
+  "runSourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "packetDirectory": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-qualification\\target-repair-run-20261105",
+  "reportSha256": "425cdcc9967ca97668ee51cfa257fdaa2366ce3fa1028290a994e70c3142f694",
+  "transcriptSha256": "07fabe3b2b415e7b3294b0b6ebdfc53a543dfd435c84b0b5170cce5f70190ff9",
+  "closedFindings": [
+    {
+      "id": "REPORT_MISSING_TWO_SINGLE_TURN_TRANSCRIPTS",
+      "priority": "P2",
+      "resolution": "Export now derives all7frames from ACCOUNTING; p06/p07 exactcustomers/replies/images included and blocked j1draft clearly notsent."
+    }
+  ],
+  "unresolvedMaterialFindings": [],
+  "checks": {
+    "all7ActualCustomerTurnsAnd6Replies": true,
+    "all22ProviderRecordsAndOneSeparateAuth": true,
+    "latencyTokenCountsAndDenominators": true,
+    "4Image10AcceptedOutboxCounts": true,
+    "sevenNativeRawAndSourceLogHashes": true,
+    "originalIndependentAuditAndFailGateCopiesUnchanged": true,
+    "rootCauseSeparatesWorldDataFromCurrentQueryProof": true,
+    "N1FreshWorldComparisonNotCausalOrStableClaim": true,
+    "new30Cases48TurnsNotRunSeparateHistorical21Cases31Turns": true,
+    "failedSourceCaptureBeforeProviderRetained": true,
+    "noAdditionalRuntimeProviderOrQualificationClaim": true,
+    "knownSecretSignatureScanNoHits": true,
+    "stagedJsonBytesExactAndOtherFilesNormalizedParity": true,
+    "gitCachedDiffCheckPass": true
+  },
+  "qualification": "BLOCKED_UNCHANGED_NOT_QUALITY_OR_GO",
+  "functionalGate": "FAIL",
+  "limits": [
+    "Report/evidence review only, no newprovider calls.",
+    "Raw artifacts remain outside repo with exacthashreferences; copiedaudit/gate semanticparitychecked.",
+    "Future exactcopy of thisapproval is notself-included inmanifest.",
+    "StagedJSON exactbyteparity checked; text files normalizednewlineparity checked beforecommit."
+  ],
+  "manifest": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/CONVERSATIONS.md",
+      "sha256": "07fabe3b2b415e7b3294b0b6ebdfc53a543dfd435c84b0b5170cce5f70190ff9",
+      "bytes": 2797
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/.gitattributes",
+      "sha256": "7a0dcf4cf4eb96278b0f0b6882eeebc232235fa0581a9ce8450860a395675f36",
+      "bytes": 34
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/ACCOUNTING.json",
+      "sha256": "ab82fe4520c6ca9db12098823fe2055371cb580002afccc8f4a711cba7901ad1",
+      "bytes": 46760
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/CHECKOUT_INPUT_APPROVAL.json",
+      "sha256": "1b6397ae0d41daae45a5aee64f1767b5695c93cd9f1b71599211d660c6670ad3",
+      "bytes": 1762
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/CHECKOUT_PREFLIGHT.json",
+      "sha256": "d06e8ec49c6c5ce07fec8631ac89536754d233c6dd4d36dc06dc25bcae5770ae",
+      "bytes": 865
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/COMMANDS.json",
+      "sha256": "8debc512e3daf9eb8d6f9d6feedbd46b5dd61c4afe9824a50b9331c7f99876e3",
+      "bytes": 2345
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/COMPARISON.json",
+      "sha256": "c3d5f4a60fe93cb01246a7b6868141ab302e5650f1341f392a66d65e1c029903",
+      "bytes": 5450
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/EVALUATION_POLICY.json",
+      "sha256": "ac988a4eff8a3122ee7119c4b5e64edb4054b3491ef7554fb7c8b74c85564be3",
+      "bytes": 2817
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/FAILED_CAPTURE_SUMMARY.json",
+      "sha256": "ead41a2786c17b895eefbdc033b9f15b92cdd3400cb1a2588994b4664549dceb",
+      "bytes": 122
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/FROZEN_CONFIG.json",
+      "sha256": "01327aca3c61dea3c879eff88809be7a5978fc18175cea3f340670736c1b471a",
+      "bytes": 5266
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/FROZEN_CORPUS_HASHES.json",
+      "sha256": "b6de94637cea1c458c368a77217384ac4a1bf46f81e5a9dffe8effa4c59449f3",
+      "bytes": 1108
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/HELPER_INVENTORY.json",
+      "sha256": "18cf30b6f458cc4c029fed8368d088d5abb61f4eb5fe069f87ac532f2b96e28a",
+      "bytes": 1436
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/INITIAL_INTEGRATION.json",
+      "sha256": "57890b46714373e581c3b22ef1c46e4871bbf6e82cb66678634b8c0f6c3f2f2c",
+      "bytes": 8221
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/INITIAL_STATE.json",
+      "sha256": "d25987f2b8e52caf9e7b06c80c1dd4f34f8e883edf8bd4dd5c0737f8d659804d",
+      "bytes": 700
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/INPUT_REVIEW.json",
+      "sha256": "392aa34e86f3e257fcceb1042ea96a1c9313e3f93c3c607f0d961b9cb1a4ebe6",
+      "bytes": 1732
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/POST_RUN_AUDIT.json",
+      "sha256": "739203a5fa41805ea59d01566bc541e12ecfb396ba14b895e96f51b2b55ec27e",
+      "bytes": 22546
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/R1_DISPATCH_APPROVAL.json",
+      "sha256": "76d3e860f7493ed7d6bc391aeec9b671a1fde1f95c29029696cbae28573b3b1b",
+      "bytes": 900
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/R1_GATE.json",
+      "sha256": "9093b085d65b859cc5ae1ddc151026ae1bc3ba56ad34af2fa82a57c8510efb64",
+      "bytes": 1016
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/R1_INPUT_APPROVAL.json",
+      "sha256": "06e986faeead129ae941293b99d24e618115ad9e8c417972a348d81f8537b117",
+      "bytes": 1762
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/R1_PREFLIGHT.json",
+      "sha256": "a5fca0841a7e8f03703535690d215623e3ee5275d1446f925b0dc214cf55ebe3",
+      "bytes": 865
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/R2_INPUT_APPROVAL.json",
+      "sha256": "b7f6ce48ef48434bd115a05db2a189b8de29b5499cd0cc1df23447842da6d282",
+      "bytes": 1763
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/R2_PREFLIGHT.json",
+      "sha256": "05a483ac9157b1d57b8b75d5330995e59dd4a7dde3a6801499f3e65dd69d0b99",
+      "bytes": 866
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/REGISTRATION_INDEX.json",
+      "sha256": "f42364d694afb90aac9327352d5d89ca7aed018066f33517c32683acc91c4a12",
+      "bytes": 1656
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/REJECTED_DRAFTS.json",
+      "sha256": "461ce28a5f73287d3263aa08ff6724c773ef3fb66b283be86fe22e071f026941",
+      "bytes": 1024
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/REMAINDER_INPUT_APPROVAL.json",
+      "sha256": "4b016cb2c8c83b29c1d19a79e988f9eade98bbdfc22f333cd1a34a08185d6270",
+      "bytes": 1796
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/REMAINDER_PREFLIGHT.json",
+      "sha256": "a1d07d47bcbe504163d3d5b143d3d53239abfce22b4132356a7ec809c1a9c190",
+      "bytes": 867
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/RUN_COMMAND.json",
+      "sha256": "0a9d0b16dbf45380c8345f4dc06bcfc975b60a98ff0134ea1ee03a698d6104ef",
+      "bytes": 923
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/RUN_INTEGRATION.json",
+      "sha256": "9928f148b1351d972f02b930112f36b42dad41b3e608692a3539157466362d66",
+      "bytes": 7614
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/SOURCE_AND_ARTIFACT_HASHES.json",
+      "sha256": "2349d97e72ac7ea7ac4a96a67139e1d73f9db1c87d9cee0724adf6df8faf5881",
+      "bytes": 6110
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/STAGE_ADMISSION_REVIEW.json",
+      "sha256": "03e82cf08db8fb815e26598ce8d886f6e6757cf046c4a7ba8655982cd292d33d",
+      "bytes": 2383
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/evidence/WORLD_SUMMARY.json",
+      "sha256": "9174c811776be2f35d65c8c39187b11358ca845ca0168cd66d89b6026df6275e",
+      "bytes": 2736
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/REPORT.md",
+      "sha256": "425cdcc9967ca97668ee51cfa257fdaa2366ce3fa1028290a994e70c3142f694",
+      "bytes": 8585
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/SUMMARY.json",
+      "sha256": "7cbce7e605f3f2f9f9e44f1713fd6a7c3f420fa83629e23339401bc19d4e4843",
+      "bytes": 1386
+    },
+    {
+      "path": "tasks/plan.md",
+      "sha256": "063a42e3cc47da4595514ead0e878f332ecfad076d17f48fee9d2f7b246c87c9",
+      "bytes": 586542
+    },
+    {
+      "path": "tasks/todo.md",
+      "sha256": "9b31377a8a51f8e69b6f588f4777d3e742d6f689eac57d9580c31a397ea2011a",
+      "bytes": 544581
+    }
+  ]
+}

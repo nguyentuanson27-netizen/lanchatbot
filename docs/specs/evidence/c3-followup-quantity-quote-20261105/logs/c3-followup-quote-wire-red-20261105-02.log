@@ -1,0 +1,38 @@
+✔ quote strict declaration, native result projection and actual HTTP request match (52.5328ms)
+✔ final-only CompactV2 keeps projected quote trace but grants no new call (10.2814ms)
+✔ quote parse rejects extra fields/duplicate offers and preserves signed content (0.9429ms)
+✔ phase/budget and primitive accounting are bound; legacy configuration remains valid (10.3675ms)
+✔ registered tool schema includes quote only when enabled, and binds its exact schema (1.1962ms)
+✖ returning quote wire requires quantity for one offer and keeps the code total without media or evaluator labels (7.8313ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1633.0468
+
+✖ failing tests:
+
+test at apps\worker\evals\single-agent-commerce-read-only\quote-task.test.mjs:61:1
+✖ returning quote wire requires quantity for one offer and keeps the code total without media or evaluator labels (7.8313ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'subjectRef',
+      'offerTypes',
+  -   'quantity'
+    ]
+  
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs:68:86)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'subjectRef', 'offerTypes' ],
+    expected: [ 'subjectRef', 'offerTypes', 'quantity' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

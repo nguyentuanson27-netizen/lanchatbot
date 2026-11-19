@@ -1,0 +1,157 @@
+{
+  "kind": "DEVELOPMENT_DIAGNOSTIC_NOT_QUALIFICATION",
+  "sourceSha": "6c5023ab6e4609041fcc79e5a7f3f34b0ad7d251",
+  "sourceDirty": false,
+  "registrationHash": "4137f3fb3bb5b76202eee4b107c7c1726d976fec41ec91fb372671f98a39226b",
+  "configHash": "b02564f877bd64b343826272d8f00ae590b8c92a3d71712b754bb9a5b7f93796",
+  "corpusHash": "86400c4e1d1a213b2e74454761598a9e9620095081ef6820f023760a98204592",
+  "worldHash": "23991b5af33a160d070d8048a6a922204d4eb9305fa93fa6d5d3307489e4c746",
+  "registeredCases": 6,
+  "executedCases": 6,
+  "nativeCustomerTurns": 9,
+  "probeInputs": 1,
+  "maximumGenerationRequests": 37,
+  "generationRecords": 20,
+  "generationHttp": 20,
+  "generationErrors": 0,
+  "generationRetries": 0,
+  "dispatchEvents": 20,
+  "uniqueGenerationIds": 20,
+  "maximumRequestsPerGeneration": 1,
+  "metrics": {
+    "OWNER": {
+      "generations": 15,
+      "http": 15,
+      "latencyMs": {
+        "p50": 3265.801900000006,
+        "p95": 8446.659799999994
+      },
+      "inputTokens": 126956,
+      "outputTokens": 13591,
+      "unavailableUsage": 0
+    },
+    "VERIFIER_INCLUDING_PROBE": {
+      "generations": 5,
+      "http": 5,
+      "latencyMs": {
+        "p50": 8800.576899999985,
+        "p95": 11505.801299999992
+      },
+      "inputTokens": 28516,
+      "outputTokens": 461,
+      "unavailableUsage": 0
+    },
+    "nativeVerifierLatencies": [
+      10553.910600000003,
+      11505.801299999992,
+      8800.576899999985,
+      8300.839200000017
+    ],
+    "costUSD": null,
+    "costReason": "PROVIDER_NOT_EXPOSED",
+    "measurement": "Observed native harness/provider time, not production SLA"
+  },
+  "terminalTurns": {
+    "SEND_ELIGIBLE": 3,
+    "HANDOFF": 2,
+    "NO_SEND": 2,
+    "CODE_OWNED_SEND": 2
+  },
+  "fallbackTurns": 0,
+  "handoffRate": 0.2222222222222222,
+  "noSendRate": 0.2222222222222222,
+  "capturedMessages": 5,
+  "capturedImages": 0,
+  "auxiliaryHttp": {
+    "oauthRequests": 1,
+    "embeddingPredictRequests": 0,
+    "observedGenerationPlusOAuth": 21,
+    "credentialSourceRetrieval": "Not generation requests; existing source/credential route outside provider-generation ledger"
+  },
+  "testDatabaseDropped": true,
+  "liveSend": 0,
+  "diagnosticStop": null,
+  "probe": {
+    "status": "PASS",
+    "kind": "DEVELOPMENT_ONLY_NOT_SAFETY_GATE",
+    "generations": 1
+  },
+  "qualification": "BLOCKED",
+  "comparisonC3": "NOT_RUN",
+  "evaluatorLeakAudit": {
+    "reviewer": "/root/phase_c_independent_review",
+    "requestsChecked": 20,
+    "caseIdOrEvaluatorLabelLeaksObserved": 0,
+    "method": "Recursive parsed request fields and nested serialized JSON plus literal scenario IDs"
+  },
+  "artifacts": [
+    {
+      "path": "../c3-c-diagnostic-sealed-20261029-02/REGISTRATION.json",
+      "sha256": "da10704f4ad587d6e1c346db54d7e9044ce2d2f17775a51665b0795be6a7a4fe"
+    },
+    {
+      "path": "../c3-c-diagnostic-sealed-20261029-02/PREFLIGHT.json",
+      "sha256": "2d3c332b4319c6710fddb18a0d6730843cc238f247a6e197c86804b3355f12f0"
+    },
+    {
+      "path": "../c3-c-diagnostic-sealed-20261029-02/DIAGNOSTIC_DISPATCH.json",
+      "sha256": "aa909c6837e3d66a439e111699ff4d04d0efc0ecf05c59de6ed6e80ee43f5a97"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "f63c2985d673bc8ff5e7fa30237bfac9be491ceae0e6cfd7dfccb76b2c1337f4"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/NATIVE_REQUESTS.jsonl",
+      "sha256": "9bedafed63875d8d131d826c22337089230ea568c2691cd1a197580ab8cd6e1a"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/integration.json",
+      "sha256": "c15c4ec6e0f267076b434e39481e41483ab650d338f0b261af0693b0b7cdfa62"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/native-192f778ed906f29b2ae4ed704aa4e7131217f007be906fef4229b5a0cd0cbe06-turn-0.json",
+      "sha256": "3544f9039eb5bd7c8af02c0119891ca18055ed5c26b27ac4d221774595d1181f"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/native-7ff0f7255316bf23cdb0fd7fa2798843616a6aeda51742c24d624f7fd82231dd-turn-0.json",
+      "sha256": "a98958cc2f32661dffbb31a67825f027c99f4724514d55e182f818352bef635a"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/native-8517bccf090406f9383640f2808307237137a93692edcb7112bf6e238f2a4b8e-turn-0.json",
+      "sha256": "9228a9b81d31766e460a3c390ef8d3f52a9b30b6f391a20b9954b4de78b18904"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/native-8517bccf090406f9383640f2808307237137a93692edcb7112bf6e238f2a4b8e-turn-1.json",
+      "sha256": "74fd5f5cdaf5cc2c0861bf09bcd075922f0b8e2ba87bec30a0eed7e033135aa6"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/native-8517bccf090406f9383640f2808307237137a93692edcb7112bf6e238f2a4b8e-turn-2.json",
+      "sha256": "d10cd55a0cbdbbb6464c1af19eba4d2554af5c21bd4f5d26ac9a273eb4b9ca19"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/native-9bc10b43e03fcb2cb611c944d9e4fa30c6b4372fdfbd52f73b7a7f864fb2a64e-turn-0.json",
+      "sha256": "2e6b0d8f3d96b08d3a3309bf4ab8f46aa5b49e35699c2f4184fb840de67b972d"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/native-feb80401db02b6a5a041533b5f78d1cc117e789fbe694955e6045e47bc7bdc51-turn-0.json",
+      "sha256": "eba3a41a84278f02a71488506b3f27f7727af3ebe7932b0db619a1aa9f1ea006"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/native-feb80401db02b6a5a041533b5f78d1cc117e789fbe694955e6045e47bc7bdc51-turn-1.json",
+      "sha256": "d201350a2f8e6a9749ca2fc4e086ccf65bb77b95d76bdf62f3dc5a48e52adbf9"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/native-feb80401db02b6a5a041533b5f78d1cc117e789fbe694955e6045e47bc7bdc51-turn-2.json",
+      "sha256": "8ed5a77f7891ea861742a464c34056d4d3c417ec78a7cdc37cbae4bd6c81b497"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/diagnostic-probe/DIAGNOSTIC_PROBE_EVIDENCE.json",
+      "sha256": "dc4ce78c38e7bf36329277d6afe406d6690e1f0d858cfe59ad144a21f5664fe8"
+    },
+    {
+      "path": "../c3-c-diagnostic-run-20261029-02/diagnostic-probe/DIAGNOSTIC_PROBE_SUMMARY.json",
+      "sha256": "6cf8d25145a4e72269132b5b7bc625ea1939a83e2670e8644104cd83345a115e"
+    }
+  ]
+}

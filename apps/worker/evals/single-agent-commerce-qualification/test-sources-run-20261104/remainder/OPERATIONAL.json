@@ -1,0 +1,55 @@
+{
+  "sourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "registeredCases": 12,
+  "registeredTurns": 20,
+  "executedTurns": 20,
+  "generationRecords": 32,
+  "generationHttp": 31,
+  "maxRequestsPerGeneration": 1,
+  "generationStatuses": {
+    "OK": 29,
+    "PROVIDER_ERROR": 1,
+    "MALFORMED": 2
+  },
+  "verifierVerdicts": {
+    "PASS": 8,
+    "FAIL": 1
+  },
+  "verifierLatencyMs": {
+    "n": 9,
+    "p50": 9736.433099999966,
+    "p95": 23220.795299999998
+  },
+  "nativeVerificationAndReadbackMs": {
+    "n": 9,
+    "p50": 12153.349699999962,
+    "p95": 29841.09229999999
+  },
+  "providerTransportErrors": 0,
+  "preDispatchFailures": 1,
+  "tokenUsage": {
+    "inputObserved": 315802,
+    "outputObserved": 26734,
+    "usageRows": 31,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "acceptedTexts": 8,
+  "acceptedImages": 7,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 8,
+    "HANDOFF": 6,
+    "NO_SEND": 6
+  },
+  "cohortCounts": {
+    "SALES_READY": 9,
+    "SOURCE_UNAVAILABLE": 3
+  },
+  "diagnosticStop": null,
+  "databaseDropped": true,
+  "providerGenerationRetry": 0,
+  "liveSend": false,
+  "ownerAuthHttp": 1,
+  "auxiliaryHttp": [],
+  "networkAccountingNote": "Generation HTTP excludes owner token acquisition and auxiliary embedding/OAuth HTTP, listed separately. No total-all-network claim.",
+  "quality": "NOT_GRADED"
+}

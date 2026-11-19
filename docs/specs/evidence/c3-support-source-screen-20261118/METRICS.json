@@ -1,0 +1,23 @@
+{
+  "ownerAttempts": 16,
+  "ownerRequests": 16,
+  "ownerAuthRequests": 2,
+  "judgeAttempts": 8,
+  "judgeRequests": 8,
+  "ownerErrors": 0,
+  "judgeErrors": 0,
+  "ownerInputTokens": 236900,
+  "ownerOutputTokens": 12435,
+  "judgeInputTokens": 54167,
+  "judgeOutputTokens": 4263,
+  "ownerLatencyMs": {
+    "method": "nearest_rank",
+    "p50": 2909.3704,
+    "p95": 75580.9924
+  },
+  "cost": null,
+  "costEvidence": "NOT_EXPOSED",
+  "retry": 0,
+  "nativeVerifierRequests": 0,
+  "handoffFallbackNoSend": "NOT_APPLICABLE_ONE_STEP_DIAGNOSTIC"
+}

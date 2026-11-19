@@ -1,0 +1,94 @@
+{
+  "sourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "registeredCases": 21,
+  "registeredTurns": 28,
+  "executedTurns": 28,
+  "generationRecords": 68,
+  "generationHttp": 68,
+  "maxRequestsPerGeneration": 1,
+  "generationStatuses": {
+    "OK": 68
+  },
+  "verifierVerdicts": {
+    "PASS": 17,
+    "FAIL": 2
+  },
+  "verifierLatencyMs": {
+    "n": 19,
+    "p50": 7929.1967,
+    "p95": 21156.073799999984
+  },
+  "nativeVerificationAndReadbackMs": {
+    "n": 19,
+    "p50": 10606.248699999996,
+    "p95": 27490.532999999996
+  },
+  "providerTransportErrors": 0,
+  "preDispatchFailures": 0,
+  "tokenUsage": {
+    "inputObserved": 686088,
+    "outputObserved": 53823,
+    "usageRows": 68,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "acceptedTexts": 19,
+  "acceptedImages": 14,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 17,
+    "HANDOFF": 8,
+    "NO_SEND": 1,
+    "CODE_OWNED_SEND": 2
+  },
+  "cohortCounts": {
+    "SALES_READY": 18,
+    "SOURCE_UNAVAILABLE": 3
+  },
+  "diagnosticStop": null,
+  "databaseDropped": true,
+  "providerGenerationRetry": 0,
+  "liveSend": false,
+  "ownerAuthHttp": 1,
+  "auxiliaryHttp": [
+    {
+      "slotId": "45636206380229faf706cfa6680639ca718adfff10d1dcd359951855c73c8713",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "OAUTH",
+      "ordinal": 1,
+      "status": 200,
+      "error": null,
+      "latencyMs": 244.59880000003614,
+      "requestHash": null,
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "45636206380229faf706cfa6680639ca718adfff10d1dcd359951855c73c8713",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "EMBEDDING",
+      "ordinal": 2,
+      "status": 200,
+      "error": null,
+      "latencyMs": 1704.2770000000019,
+      "requestHash": "06fd1ec68a142b1426023ec062599711a5cf4886715903364747068b2b46ba5e",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "83879c08d4409dc8688f7f26636ad40a1861d4501ff79022b608c189fec2187e",
+      "turnIndex": 0,
+      "invocation": 2,
+      "kind": "EMBEDDING",
+      "ordinal": 3,
+      "status": 200,
+      "error": null,
+      "latencyMs": 1829.7972999999765,
+      "requestHash": "4a57cd5c66a975c54d918097a5e1fc88a2ad820a817aa946aa375b41c03566b3",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    }
+  ],
+  "networkAccountingNote": "Generation HTTP excludes owner token acquisition and auxiliary embedding/OAuth HTTP, listed separately. No total-all-network claim.",
+  "quality": "NOT_GRADED"
+}

@@ -1,0 +1,39 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+············································x·········································································
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-effects.test.ts > code-owned commerce effects and recovery > uses ledger readback after a successful persisted mutation (receipt=false)
+AssertionError: expected null to match object { disposition: 'HANDOFF', …(2) }
+
+- Expected: 
+{
+  "disposition": "HANDOFF",
+  "reason": "UNKNOWN_COMMIT",
+  "text": null,
+}
+
++ Received: 
+null
+
+ ❯ src/single-agent-commerce-effects.test.ts:329:46
+
+    327|     if(available)expect(tools.snapshot().effectReceipts).toEqual([awai…
+    328|     if(!available){
+    329|       expect(await tools.terminalOutcome!()).toMatchObject({dispositio…
+       |                                              ^
+    330|       const owner=vi.fn(async()=>({kind:'FINAL' as const,text:'Dạ chị.…
+    331|       const r=await runCommerceTurn({scope:s.scope,tools,clock:()=>com…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 117 passed (118)
+   Start at  13:10:25
+   Duration  7.51s (transform 2.76s, setup 0ms, collect 3.76s, tests 2.07s, environment 0ms, prepare 772ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-effects.test.ts --reporter=dot

@@ -1,0 +1,131 @@
+{
+  "rows": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "toolMode": "AUTO",
+      "keys": [
+        "offerType",
+        "subjectRef",
+        "sourceQuote",
+        "action",
+        "intent"
+      ],
+      "actualBatch": null,
+      "diagnosticLegacyShape": {
+        "units": 2,
+        "targets": [
+          "[\"SV2447\",\"AO\"]"
+        ],
+        "quotes": 1
+      }
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "toolMode": "AUTO",
+      "keys": [
+        "subjectRef",
+        "offerType",
+        "action",
+        "sourceQuote",
+        "intent"
+      ],
+      "actualBatch": null,
+      "diagnosticLegacyShape": {
+        "units": 2,
+        "targets": [
+          "[\"SV2447\",\"AO\"]"
+        ],
+        "quotes": 1
+      }
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "toolMode": "AUTO",
+      "keys": [
+        "intent",
+        "offerType",
+        "subjectRef",
+        "sourceQuote",
+        "action"
+      ],
+      "actualBatch": null,
+      "diagnosticLegacyShape": {
+        "units": 2,
+        "targets": [
+          "[\"SV2447\",\"AO\"]"
+        ],
+        "quotes": 1
+      }
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "toolMode": "AUTO",
+      "keys": [
+        "subjectRef",
+        "action",
+        "offerType",
+        "sourceQuote",
+        "intent"
+      ],
+      "actualBatch": null,
+      "diagnosticLegacyShape": {
+        "units": 2,
+        "targets": [
+          "[\"SV2447\",\"AO\"]"
+        ],
+        "quotes": 1
+      }
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "toolMode": "AUTO",
+      "keys": [
+        "subjectRef",
+        "offerType",
+        "sourceQuote",
+        "intent",
+        "action"
+      ],
+      "actualBatch": null,
+      "diagnosticLegacyShape": {
+        "units": 2,
+        "targets": [
+          "[\"SV2447\",\"AO\"]"
+        ],
+        "quotes": 1
+      }
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "toolMode": "AUTO",
+      "keys": [
+        "sourceQuote",
+        "subjectRef",
+        "intent",
+        "action",
+        "offerType"
+      ],
+      "actualBatch": null,
+      "diagnosticLegacyShape": {
+        "units": 2,
+        "targets": [
+          "[\"SV2447\",\"AO\"]"
+        ],
+        "quotes": 1
+      }
+    }
+  ],
+  "providerRequests": 0
+}

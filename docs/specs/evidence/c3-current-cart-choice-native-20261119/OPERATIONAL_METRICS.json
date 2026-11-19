@@ -1,0 +1,40 @@
+{
+  "owner": {
+    "providerRequests": 47,
+    "latencyP50Ms": 4985.616399999995,
+    "latencyP95Ms": 8643.803800000009,
+    "inputTokens": 636875,
+    "outputTokens": 44004,
+    "errorCount": 0,
+    "timeoutCount": 0,
+    "cost": "NOT_EXPOSED"
+  },
+  "verifier": {
+    "providerRequests": 25,
+    "latencyP50Ms": 6722.357700000008,
+    "latencyP95Ms": 8130.122199999998,
+    "inputTokens": 274122,
+    "outputTokens": 2419,
+    "errorCount": 0,
+    "timeoutCount": 0,
+    "cost": "NOT_EXPOSED"
+  },
+  "judge": {
+    "registered": 10,
+    "resolved": 9,
+    "unresolved": 1,
+    "providerRequests": 10,
+    "errorCount": 1,
+    "inputTokens": 342919,
+    "outputTokens": 4065,
+    "cost": "NOT_EXPOSED"
+  },
+  "verificationRuntimeLatency": {
+    "count": 25,
+    "p50Ms": 8703.663099999947,
+    "p95Ms": 10514.903599999998
+  },
+  "handoffRate": 0.16666666666666666,
+  "fallbackCount": 0,
+  "noSendCount": 0
+}

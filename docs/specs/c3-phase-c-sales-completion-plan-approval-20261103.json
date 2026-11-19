@@ -1,0 +1,26 @@
+{
+  "status": "APPROVE_PLAN",
+  "reviewer": "/root/sales_completion_plan_review",
+  "reviewedSourceSha": "7c1dd5ebaaebad6f2b558cbd0c26e0138b307f65",
+  "reviewedPlanPath": "docs/specs/c3-phase-c-sales-completion-fix-plan-20261103.md",
+  "reviewedPlanGitBlobSha256": "a13b24d5d1b641aedb6c6d9416050d09d3bfd3ae8aaf652415be53df880a8972",
+  "reviewRounds": 3,
+  "initialBlockers": 2,
+  "newBlockersAtReview2": 1,
+  "remainingPlanBlockers": [],
+  "approvalScope": "CONDITIONAL_ENGINEERING_PLAN_ONLY",
+  "sourceAndS5AcceptanceRemainBlockedUntilPrerequisitesProven": true,
+  "implementationTests": "NOT_RUN",
+  "realPostgres": "NOT_RUN",
+  "modelRun": "NOT_RUN",
+  "providerRequestsByReviewer": 0,
+  "deliveryChange": "STATUS_ONLY_PLAN_CONTRACT_UNCHANGED",
+  "doesNotAuthorize": [
+    "SOURCE_PUBLICATION",
+    "PROVIDER_RUN",
+    "MERGE",
+    "DEPLOY",
+    "LIVE_SEND",
+    "PHASE_C_GO"
+  ]
+}

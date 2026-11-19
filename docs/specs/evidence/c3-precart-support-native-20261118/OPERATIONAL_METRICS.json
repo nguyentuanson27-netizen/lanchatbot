@@ -1,0 +1,24 @@
+{
+  "addedVerificationLatencyMs": {
+    "samples": 30,
+    "p50": 11029.6201,
+    "p95": 15533.2733
+  },
+  "judgeTokens": {
+    "input": 461448,
+    "output": 3468
+  },
+  "cost": null,
+  "costEvidence": "NOT_EXPOSED",
+  "nativeProviderHttpErrors": 0,
+  "nativeProviderTimeouts": 0,
+  "malformedCompletions": 1,
+  "verifierProviderErrors": 0,
+  "verifierTimeouts": 0,
+  "handoffRate": 0.03333333333333333,
+  "fallbackRate": 0,
+  "noSendRate": 0,
+  "verifierFailCount": 1,
+  "verifierPassCount": 29,
+  "completeScriptedTurnDenominator": 30
+}

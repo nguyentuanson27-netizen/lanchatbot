@@ -1,0 +1,55 @@
+{
+  "stage": "BLOCKED_INITIAL_SOURCE_CONNECTION",
+  "startedAt": "2026-11-11T11:29:01.550452+00:00",
+  "bootstrapAttempts": [
+    {
+      "number": 1,
+      "exitCode": 1,
+      "providerRequests": 0,
+      "finishedAt": "2026-11-11T11:29:17.200180+00:00"
+    },
+    {
+      "number": 2,
+      "exitCode": 1,
+      "providerRequests": 0,
+      "finishedAt": "2026-11-11T11:30:32.765217+00:00"
+    },
+    {
+      "number": 3,
+      "exitCode": 1,
+      "providerRequests": 0,
+      "finishedAt": "2026-11-11T11:31:48.395886+00:00"
+    },
+    {
+      "number": 4,
+      "exitCode": 1,
+      "providerRequests": 0,
+      "finishedAt": "2026-11-11T11:33:04.091586+00:00"
+    },
+    {
+      "number": 5,
+      "exitCode": 1,
+      "providerRequests": 0,
+      "finishedAt": "2026-11-11T11:34:19.701340+00:00"
+    },
+    {
+      "number": 6,
+      "exitCode": 1,
+      "providerRequests": 0,
+      "finishedAt": "2026-11-11T11:35:35.346687+00:00"
+    },
+    {
+      "number": 7,
+      "exitCode": 1,
+      "providerRequests": 0,
+      "finishedAt": "2026-11-11T11:36:50.960850+00:00"
+    },
+    {
+      "number": 8,
+      "exitCode": 1,
+      "providerRequests": 0,
+      "finishedAt": "2026-11-11T11:38:13.742243+00:00"
+    }
+  ],
+  "generationRetries": 0
+}

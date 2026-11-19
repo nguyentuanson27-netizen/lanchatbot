@@ -1,0 +1,327 @@
+{
+  "kind": "OWNER_REQUESTED_NATIVE_J4_AND_TWO_SHIRTS_N5",
+  "registeredAt": "2026-11-19T00:43:45.691Z",
+  "source": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "worldHash": "5025411cef9782e97173b9bee63bf68bd900bea6dd31c2a8e445a0507c2cfd1a",
+  "models": {
+    "sourceSha": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "7f87a56de66eb9e313a7c29642e0f7233645c33d9417a057d8e343070d15bdd5",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "27afc634be5ccde496e1613ad80c659f00911135fb24c60ea645d3481ef2f97a",
+    "toolContractHash": "a508463e7afe545c9d6b2109e75227d8193dd2aa937f5a0ade401ac6e823a595",
+    "assemblyHash": "3f183d7c6cd3f730adcbf9e61a413a4611c7a93c9bfa3365258b2ed7696e533c",
+    "runtimeHash": "c024828b5d00068dc0eb998d17bf95606917e6f4b900282ca84c02db6116d369",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "fa3ab818444aedd06a25a5a4f7956bc25e3162125e109d845430011e2635909c",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "8ea6aa4f2122e8d7bca1153a5057799bd87b3d7b8d307ce5e4f7647749c76661",
+      "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+      "boundsHash": "977a2cbd7041737b8de264bb0737d9bc6070fdac42348213f9236fff052b3953"
+    }
+  },
+  "ownerRequest": "Owner 2026-11-19: run independently approved current-cart benefit and purchase-choice repair; J4 x5 and two-shirt control x5 from first turn; all terminal outcomes retained; one review after completion",
+  "repetitions": {
+    "c-20261028-j4": 5,
+    "c-context-two-units": 5
+  },
+  "maximumNativeGenerationRequests": 120,
+  "maximumJudgeGenerationRequests": 10,
+  "controlRepetitionAccounting": "FIVE_DISTINCT_REGISTRATIONS_EACH_EXISTING_CONTROL_N1",
+  "providerRequests": 0,
+  "worldCapture": {
+    "status": "CAPTURED",
+    "worldHash": "5025411cef9782e97173b9bee63bf68bd900bea6dd31c2a8e445a0507c2cfd1a",
+    "products": 107,
+    "sourceSha": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+    "testSourceSupplement": {
+      "kind": "OWNER_APPROVED_ISOLATED_COLOR_V1",
+      "configurationHash": "379b0b825749e59132e63388a254357375d62fd11add4c15aa258925942422ef",
+      "publicSourceWorldHash": "ed861f510422e64ab4ac5c396b6499f92e408cdbd46776cfb019b52e23e07099",
+      "approvalRefs": [
+        "owner-white-shirt-test-assumption-20261104"
+      ],
+      "changedRows": [
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        }
+      ],
+      "meaning": "Owner-approved test assumption; not verified physical stock colour or source publication."
+    },
+    "testSupportSupplement": {
+      "kind": "OWNER_APPROVED_TEST_FEEDBACK_HANDOFF_V1",
+      "configurationHash": "d4eee9dc3bd07ad198b3a28cb0416bba03c70f5e8b8d997c81e4f31fdd09fedf",
+      "approvalRef": "owner-feedback-handoff-test-supplement-20261104",
+      "baseWorldHash": "a66033b95670fe93c9043258faaf0c03e2c896433fd99233d5a25f230bb32bb0",
+      "handoffContentHash": "sha256:5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+      "handoffVersionId": "ee92f932-91ea-5490-a2a9-8e6338ae26f2",
+      "meaning": "Owner-approved isolated test feedback; not verified customer provenance. Handoff policy is active only in the test clone."
+    },
+    "testMediaSupplement": {
+      "kind": "OWNER_APPROVED_NEW_TEST_MEDIA_V1",
+      "configurationHash": "c07b0e453200180fab37ebcc3e42aa950326c8631f286bec48484a2f4a46f67d",
+      "approvalRef": "owner-new-test-media-SD023-20261104",
+      "baseWorldHash": "52d13ecfedee924905ae652fc3c4dabf31baf74e4ba30abbdab0b5ca3d933cf3",
+      "assets": [
+        {
+          "productId": "SD023",
+          "url": "https://content.pancake.vn/1/s3000x3000/f8/01/35/62/552cb23c4c117004dcb3ac97565a0dec3ed2a2f5371555e7f4ea0001-w:4000-h:6000-l:4576023-t:image/jpeg.jpeg",
+          "sha256": "4a4a5aba84f6bda6b3c392c401beea862877df16c81c6ba3af39e1b6bab7d3bc",
+          "checkedAt": "2026-11-11T09:23:57.805Z"
+        }
+      ],
+      "meaning": "New isolated test assets from actual canonical bytes; not a successful old-hash revalidation or live publication.",
+      "proofReuse": {
+        "previousWorldHash": "1c72f3156501c801e6720df0bc232f03639d235b29256f7b518d270535bd1902",
+        "policy": "REUSE_OWNER_APPROVED_TEST_ASSET_ORIGINAL_CHECK_TIME"
+      }
+    },
+    "providerRequests": 0,
+    "sourceWrites": 0
+  },
+  "jobs": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "externalRepetition": null,
+      "registrationHash": "2f310e7b93a6d17245bcea33447968d0610ad506a488698aac1c6eb7df0f4550",
+      "seal": "b70d877b0bf01f475738ebc81dd864863c4f8bfd470a5b38ab1dc38db10828f2",
+      "selectedSlots": [
+        "a6d22169d5e7579817ea3d872743c819d764e98e4b2c6915a2371ee9171f7f3d",
+        "d950d09dbe29e58c7589e5a1d564d860b44e788fce1465335f015dc36f68e111",
+        "9c16bc79143c04eccfa5d004862971a80092be4a7e3c8dfa1dfe729dcbaf5a6a",
+        "07ce28a6759b4e9a28e744c9acfd03f7941ea066bb13aeb87497249051dea8f2",
+        "691fc296c18070969451259f692da31468c34992bc9cf71623806b8c226af0f1"
+      ],
+      "turns": 15,
+      "maximumGenerationRequests": 60,
+      "source": "48a27a1b39e8976face273a57983f91c8ad74cc2"
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "externalRepetition": 1,
+      "registrationHash": "06022e83e416d0bbb38cbcd2974fb5272d51243abe12c8e8824a1224ccb57b41",
+      "seal": "b70d877b0bf01f475738ebc81dd864863c4f8bfd470a5b38ab1dc38db10828f2",
+      "selectedSlots": [
+        "5799b1acf3a7413698e2c56301d26f51431a1d2a0f02efa36ee0650eac66f590"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "48a27a1b39e8976face273a57983f91c8ad74cc2"
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "externalRepetition": 2,
+      "registrationHash": "56fa8fcf4fd101db216974e89f31535c1ecda00750d0a3e5708904e361f7aad6",
+      "seal": "9ec8e11df92c051f1c49f7866f0de2cdd79a429e3f5f9b7a13328d294683ecd2",
+      "selectedSlots": [
+        "5799b1acf3a7413698e2c56301d26f51431a1d2a0f02efa36ee0650eac66f590"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "48a27a1b39e8976face273a57983f91c8ad74cc2"
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "externalRepetition": 3,
+      "registrationHash": "1f8e777574344b1fea419517d62db7f490e937d7e2d99c34cb78293c1c174786",
+      "seal": "078b137e5318ff3b5bb2790b77efcbb2586625ed5efff061fd66f740b7acda70",
+      "selectedSlots": [
+        "5799b1acf3a7413698e2c56301d26f51431a1d2a0f02efa36ee0650eac66f590"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "48a27a1b39e8976face273a57983f91c8ad74cc2"
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "externalRepetition": 4,
+      "registrationHash": "04b9ab53c24c7922c3c72778bc4954d02dc0d49a5a59898a80030054528bf2d9",
+      "seal": "6b161aff3cebb0640228306c2f321b6899023e80fbdd6fac528b3e95be2cec43",
+      "selectedSlots": [
+        "5799b1acf3a7413698e2c56301d26f51431a1d2a0f02efa36ee0650eac66f590"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "48a27a1b39e8976face273a57983f91c8ad74cc2"
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "externalRepetition": 5,
+      "registrationHash": "ebdc23e400bcd40c0dd83840d81faefbfc37f305edfa64e6c00d46424e4506f4",
+      "seal": "e595be6c8efa40ba8bc316b608abf2156bb436f85f382673f685d36f57e27acc",
+      "selectedSlots": [
+        "5799b1acf3a7413698e2c56301d26f51431a1d2a0f02efa36ee0650eac66f590"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "48a27a1b39e8976face273a57983f91c8ad74cc2"
+    }
+  ],
+  "helperIdentity": {
+    "frozenBeforeGeneration": true,
+    "source": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+    "files": [
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-native-48a27a1b-20261119-073643\\seal.mjs",
+        "sha256": "1084a44676d0afca95a06c7a622d0282ef228bca7648e86a49dc1a049360b3a2"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-native-48a27a1b-20261119-073643\\audit.mjs",
+        "sha256": "8b2d4217d06b622b1981c4a60dc76ea7d720dba67b20611a3e97e9100879e5fb"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-native-48a27a1b-20261119-073643\\judge.mjs",
+        "sha256": "a9161f95348b7a8b396d32386287f72238284ec872d12a89a8eaa4f57732550f"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-native-48a27a1b-20261119-073643\\summarize.py",
+        "sha256": "d21aead2c9e33c51dba4a040b80effa4f0c895cb1fae03f8d0f25871e918d7ec"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-native-48a27a1b-20261119-073643\\publish.py",
+        "sha256": "078124e16c708f47281bd40a5625b9086f720a2e605f3019f8fdba70a227e4ee"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-native-48a27a1b-20261119-073643\\support-audit.mjs",
+        "sha256": "572d961570542597283671c9f9d3532213951fc951fa1c1bac8b5625f7094e97"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-native-48a27a1b-20261119-073643\\MEASUREMENT_CONTRACT.json",
+        "sha256": "6a312d36ed04f19b2f124479497c66e79560d4e9a48b806272d83854fb575a0b"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-native-48a27a1b-20261119-073643\\CANDIDATE-DRAFT.json",
+        "sha256": "ab0cc69da12e3313a0b1e8e86de4132b8f0ae42d805ad26049450796b5154c95"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-native-48a27a1b-20261119-073643\\CONTROLS-DRAFT.json",
+        "sha256": "96e4f9f97a6d3bd5c1ca99f787e39850c59e2b584bd08934b9f27f8dee7ab52e"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-session-20261119.py",
+        "sha256": "c78ebb0760ea48ec1b79f87b85641285556e9cf4b37da988f768d3a816449066"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-launch-20261119.py",
+        "sha256": "c9877e6ee9c72f6141473d302c2ba5651b91d763baaba68d9fd65ec6fa95a286"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-session.py",
+        "sha256": "94b6cac60dff03506badc1751ba4e8ea54cce278ec82ff448eeb0e8a6a44294d"
+      },
+      {
+        "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+        "sha256": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3"
+      }
+    ]
+  }
+}

@@ -1,0 +1,497 @@
+{
+  "kind": "HISTORICAL_ACTUAL_KEY_COMPARISON_DIFFERENT_FRESH_WORLD_N1_NOT_CAUSAL",
+  "r1VersusImmediatePrior": {
+    "oldSource": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+    "newSource": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+    "previousTerminals": {
+      "SEND_ELIGIBLE": 6,
+      "HANDOFF": 1
+    },
+    "currentTerminals": {
+      "SEND_ELIGIBLE": 7
+    }
+  },
+  "fullPrefixVersusLastFullPrefix": {
+    "oldSource": "69bd122100f51584acd6d2ac97dde9254b3e562c",
+    "newSource": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+    "previousTerminals": {
+      "SEND_ELIGIBLE": 12,
+      "HANDOFF": 6,
+      "NO_SEND": 4,
+      "CODE_OWNED_SEND": 2
+    },
+    "currentTerminals": {
+      "SEND_ELIGIBLE": 13,
+      "HANDOFF": 6,
+      "NO_SEND": 3,
+      "CODE_OWNED_SEND": 2
+    }
+  },
+  "rows": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "PRODUCT_AMBIGUOUS"
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Cả bộ SD023 gồm 3 món có giá 989.000đ, hiện có sẵn các size S, M, L chị nhé."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/f8/01/35/62/552cb23c4c117004dcb3ac97565a0dec3ed2a2f5371555e7f4ea0001-w:4000-h:6000-l:4576023-t:image/jpeg.jpeg"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "EGRESS_READINESS"
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với chiều cao 1m60 và nặng 55kg, set Thạch Thảo này em tư vấn chị mặc **size M** cho cả áo và quần nhé ạ. Form set được thiết kế cân đối nên mặc size M sẽ vừa vặn, thoải mái và gọn gàng nhất cho mình ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/67/8a/4f/3a/0cf58588fcd21f80a5ff8a11bd57c62f820bb105802782ca2350f85f-w:3658-h:5487-l:1151930-t:image/jpeg.jpeg"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. \n\nTổng đơn hàng của chị là 799.000đ (chưa gồm phí ship 30.000đ), tổng thanh toán là 829.000đ. Chị cần em hỗ trợ chốt đơn hay xem thêm thông tin gì không ạ?"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M (cả bộ) vào giỏ hàng cho chị rồi ạ. Tổng giỏ hàng hiện tại của chị là 829.000đ ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, mẫu áo thêu size M có hai màu là Trắng (sẵn hàng) và Be (đặt trước). Chị lấy áo màu nào ạ?"
+        ],
+        "images": []
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Áo lẻ Thạch Thảo size M hiện có màu trắng và be, chị thích lấy màu nào ạ?"
+        ],
+        "images": []
+      }
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ áo lẻ Thạch Thảo size L nhà em có hai màu Trắng (có sẵn) và Be (hàng đặt trước). Chị lấy màu nào ạ?"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Áo tơ thêu size L hiện có hai màu Trắng (sẵn hàng) và Be (hàng đặt trước). Chị thích lấy màu nào ạ?"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "previous": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ áo tơ thêu (cả size M và L) có hai màu: Trắng (sẵn hàng) và Be (hàng đặt trước). Chị lấy áo màu nào ạ?"
+        ],
+        "images": []
+      }
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "previous": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, 2 áo tơ thêu (size M và L) có giá 998.000đ, phí ship 30.000đ và ưu đãi giảm 49.900đ, tổng cộng là 978.100đ ạ. Chị chọn áo màu Trắng hay Be để em chuẩn bị đơn cho chị nhé?"
+        ],
+        "images": []
+      }
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với chiều cao 1m60, nặng 55kg và thích mặc thoải mái, Set váy Thạch Thảo này chị mặc size M là vừa đẹp ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "current": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      }
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, set váy Thạch Thảo (cả áo và chân váy) có giá 799.000đ, chị mặc size M là chuẩn đẹp ạ."
+        ],
+        "images": []
+      },
+      "current": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      }
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, set Thạch Thảo nhà em hiện có cả 2 phiên bản và đều còn size M chị nhé:\n\n- Set quần Thạch Thảo: 769.000đ\n- Set váy Thạch Thảo: 799.000đ\n\nChị muốn xem hoặc lấy set quần hay set váy ạ?"
+        ],
+        "images": []
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, cả hai set Thạch Thảo (set quần và set váy) đều còn size M chị nha:\n- Set quần Thạch Thảo: 769.000đ\n- Set váy Thạch Thảo: 799.000đ\n\nChị ưng mẫu set quần hay set váy hơn ạ?"
+        ],
+        "images": []
+      }
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set quần Thạch Thảo size M vào giỏ hàng cho mình rồi ạ. Tổng đơn hiện tại của chị là 799.000đ (gồm 769.000đ tiền sản phẩm và 30.000đ phí vận chuyển). Chị muốn chốt đơn luôn hay cần xem thêm gì nữa không ạ?"
+        ],
+        "images": []
+      },
+      "current": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      }
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE"
+      },
+      "current": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE"
+      }
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "current": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "PRODUCT_AMBIGUOUS"
+      }
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "current": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      }
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, em gửi chị xem ảnh khách mặc áo Thạch Thảo nhà em nhé ạ!"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, em gửi chị ảnh feedback áo Thạch Thảo ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với chiều cao 1m62 và cân nặng 56kg, chị mặc áo set Thạch Thảo size M là vừa đẹp ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình mặc áo Thạch Thảo size M nhé ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với số đo 88 - 70 - 94 và cân nặng 51kg, áo set Thạch Thảo chị mặc size M là chuẩn đẹp chị nhé."
+        ],
+        "images": []
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Với số đo ngực 88, eo 70 và cân nặng 51kg, áo Thạch Thảo em tư vấn mình mặc size M nhé ạ."
+        ],
+        "images": []
+      }
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 2,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với sở thích mặc thoải mái, áo set Thạch Thảo chị vẫn mặc size M là vừa đẹp và thoải mái chị nhé."
+        ],
+        "images": []
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ với dáng áo tơ Hàn form nhẹ và sở thích mặc thoải mái, em tư vấn chị chọn size M nhé ạ."
+        ],
+        "images": []
+      }
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "current": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      }
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 1,
+      "previous": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "current": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      }
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "previous": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "current": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      }
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "previous": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ cho chị rồi ạ. Tổng giỏ hàng của chị là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí ship). Chị cần em hỗ trợ thêm thông tin gì cứ nhắn em nhé!"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "current": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng đơn của mình là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển)."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "previous": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "current": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      }
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "previous": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "current": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      }
+    }
+  ]
+}

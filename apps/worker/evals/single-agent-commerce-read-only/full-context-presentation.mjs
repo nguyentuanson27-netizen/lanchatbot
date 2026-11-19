@@ -1,4 +1,5 @@
 // One frozen paired diagnostic; historical worlds, no native effects or current delivery.
+import {CODEX_SOL_VERIFIER} from '../single-agent-semantic-verifier/codex-sol-verifier.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,appendFileSync,mkdirSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -63,7 +64,9 @@ async function main(){
  const identity=readFeedbackRunIdentity();assertCleanFeedbackSource(identity);
  const frozen=JSON.parse(readFileSync(new URL('./quote-presentation-run-20261026/frozen-inputs.json',import.meta.url)));
  const ownerPrompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8'),verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');
- const bundle=prepareFullPresentation(frozen,ownerPrompt,presentation),manifest=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url))));
+ const bundle=prepareFullPresentation(frozen,ownerPrompt,presentation);
+ const current=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)));
+ const manifest=validateProtocol({...current,models:{...current.models,verifier:CODEX_SOL_VERIFIER}});
  assert.equal(manifest.models.conversation.model,'gemini-3.5-flash-lite');assert.equal(manifest.models.verifier.model,'gpt-6.1-sol');assert(Object.values(manifest.models).every(m=>m.effort==='high'));
  const registration={identity,inputHash:frozen.hash,bundleHash:sha256(JSON.stringify(bundle)),controlsHash:requirePassingControls(controls,identity),
   mode:'CAPTURED_WORLD_FULL_CONTEXT_PRESENTATION_NOT_LIVE_ELIGIBILITY',ownerContextPresentation:presentation,slots:bundle.slots,registeredOutcomes:16,maximumGenerationRequests:32,repetitions:1,retry:0,sendEnabled:false};

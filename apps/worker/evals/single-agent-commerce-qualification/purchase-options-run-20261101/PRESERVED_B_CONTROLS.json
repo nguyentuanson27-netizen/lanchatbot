@@ -1,0 +1,44 @@
+{
+  "kind": "PRESERVED_HISTORICAL_B_CONTROLS_NOT_NEW_PROVIDER_REPLAY",
+  "controls": [
+    {
+      "caseId": "b1-price",
+      "capturedBodyHash": "615c8b1e5fd0f26c58f1914ae714314dea02904f425ea1ef30ce63a2c388a28e",
+      "customer": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+      "actualBodySha256": "615c8b1e5fd0f26c58f1914ae714314dea02904f425ea1ef30ce63a2c388a28e"
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "capturedBodyHash": "00886e407d2ba18b2943780ab2f59e889d950312310e0bc1cef135d5c4eb548e",
+      "customer": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+      "actualBodySha256": "00886e407d2ba18b2943780ab2f59e889d950312310e0bc1cef135d5c4eb548e"
+    },
+    {
+      "caseId": "b1-current-policy",
+      "capturedBodyHash": "ff81566001271c0ff892ddf38e0a8cb48ed1e53e19d5b727d0d46bc3193267ee",
+      "customer": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+      "actualBodySha256": "ff81566001271c0ff892ddf38e0a8cb48ed1e53e19d5b727d0d46bc3193267ee"
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "capturedBodyHash": "b303ac1de3a3952fa0e00eb6652a9f3656a39832f96d2c21ad4fa858b3288bca",
+      "customer": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+      "actualBodySha256": "b303ac1de3a3952fa0e00eb6652a9f3656a39832f96d2c21ad4fa858b3288bca"
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "capturedBodyHash": "2fd20dc2b2f22bebe2ff9b607b62f019650cd2b742b9e0654d90257b1cec5e79",
+      "customer": "Cho chị xem gần phần thêu áo Thạch Thảo nhé. Chị cao 1m58, nặng 52kg thì lấy size nào?",
+      "actualBodySha256": "2fd20dc2b2f22bebe2ff9b607b62f019650cd2b742b9e0654d90257b1cec5e79"
+    },
+    {
+      "caseId": "stateful-quote",
+      "capturedBodyHash": "3cdd593b5d42a1102654d0fccb51fdf289dec637c66ebc39a1b6305ed76a0a6e",
+      "customer": "Hai áo cả phí ship là bao nhiêu em?",
+      "actualBodySha256": "3cdd593b5d42a1102654d0fccb51fdf289dec637c66ebc39a1b6305ed76a0a6e"
+    }
+  ],
+  "previousReport": "apps/worker/evals/single-agent-commerce-qualification/bc-controlled-20261030/REPORT.md",
+  "newProviderRequests": 0,
+  "limitation": "Historical source/clock/wires remain frozen. This fresh-source run is not a paired B-C quality comparison."
+}

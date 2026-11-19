@@ -1,0 +1,2003 @@
+{
+  "source": "4673fdc401525d9c7e0e33424cdadf5dc8e5dbdb",
+  "worldHash": "83facf100a289302c2a34911c699856895c5ac446a78562671305162480a033c",
+  "sameWorldModelsPromptsAndScripts": true,
+  "identity": [
+    {
+      "kind": "CANDIDATE",
+      "current": {
+        "sourceSha": "4673fdc401525d9c7e0e33424cdadf5dc8e5dbdb",
+        "model": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "retry": 0,
+            "timeoutMs": 90000
+          }
+        },
+        "promptHash": "a29e54165dc0bd4809060e7bae28a51f4e024366b55257484dee2bd9a5f131cd",
+        "openingMediaRule": {
+          "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+        },
+        "contextPolicyHash": "ac8ed513e98debd19bbe3b904543df1ae49684cfeafe894b7c8c25ad194f1693",
+        "toolContractHash": "0291b405444a7a8127a7aef7ef53f3e3a652ca53a63b3101a2835112baac71c3",
+        "assemblyHash": "2851ed1430f3f9048d5ce414fe79df9d718a29fdc4a4004b79179afb3cbd8f2c",
+        "runtimeHash": "7f380256064de0c0b316ba47e4830ee101bbf057ed52ebf65defe9f30e987735",
+        "verifier": {
+          "model": {
+            "provider": "OPENAI",
+            "model": "gpt-6.1-sol",
+            "version": "gpt-6.1-sol",
+            "effort": "high",
+            "credentialRoute": "CODEX_CHATGPT_LOGIN",
+            "generationConfig": {
+              "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+              "cliVersion": "0.159.2",
+              "wireApi": "responses",
+              "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+              "tools": [],
+              "tool_choice": "none",
+              "parallel_tool_calls": false,
+              "store": false,
+              "stream": true,
+              "reasoningEffort": "high",
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+              "timeoutMs": 90000,
+              "maxResponseBytes": 1048576,
+              "relayUpstreamRequestsPerAttempt": 1,
+              "retry": 0,
+              "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+              "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+            }
+          },
+          "promptHash": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3",
+          "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+          "serializationHash": "be6d02ed3d0106cb995626769e47d37b417b6655d43c8bfb2b2f4b80f3f8e6d7",
+          "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+          "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+        }
+      },
+      "previousSource": "978fc83dcae93fbb21fd2f72485d50429589d788"
+    },
+    {
+      "kind": "CONTROLS",
+      "current": {
+        "sourceSha": "4673fdc401525d9c7e0e33424cdadf5dc8e5dbdb",
+        "model": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "retry": 0,
+            "timeoutMs": 90000
+          }
+        },
+        "promptHash": "a29e54165dc0bd4809060e7bae28a51f4e024366b55257484dee2bd9a5f131cd",
+        "openingMediaRule": {
+          "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+        },
+        "contextPolicyHash": "ac8ed513e98debd19bbe3b904543df1ae49684cfeafe894b7c8c25ad194f1693",
+        "toolContractHash": "0291b405444a7a8127a7aef7ef53f3e3a652ca53a63b3101a2835112baac71c3",
+        "assemblyHash": "2851ed1430f3f9048d5ce414fe79df9d718a29fdc4a4004b79179afb3cbd8f2c",
+        "runtimeHash": "7f380256064de0c0b316ba47e4830ee101bbf057ed52ebf65defe9f30e987735",
+        "verifier": {
+          "model": {
+            "provider": "OPENAI",
+            "model": "gpt-6.1-sol",
+            "version": "gpt-6.1-sol",
+            "effort": "high",
+            "credentialRoute": "CODEX_CHATGPT_LOGIN",
+            "generationConfig": {
+              "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+              "cliVersion": "0.159.2",
+              "wireApi": "responses",
+              "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+              "tools": [],
+              "tool_choice": "none",
+              "parallel_tool_calls": false,
+              "store": false,
+              "stream": true,
+              "reasoningEffort": "high",
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+              "timeoutMs": 90000,
+              "maxResponseBytes": 1048576,
+              "relayUpstreamRequestsPerAttempt": 1,
+              "retry": 0,
+              "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+              "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+            }
+          },
+          "promptHash": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3",
+          "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+          "serializationHash": "be6d02ed3d0106cb995626769e47d37b417b6655d43c8bfb2b2f4b80f3f8e6d7",
+          "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+          "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+        }
+      },
+      "previousSource": "978fc83dcae93fbb21fd2f72485d50429589d788"
+    }
+  ],
+  "turns": [
+    {
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE"
+        },
+        {
+          "name": "select_product_media",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": null,
+      "preCartQuotes": [],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "record_negotiation",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 1,
+          "grandTotalVnd": 529000,
+          "discountTotalVnd": 0,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 1,
+          "grandTotalVnd": 529000,
+          "discountTotalVnd": 0,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE"
+        },
+        {
+          "name": "select_product_media",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": null,
+      "preCartQuotes": [],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "record_negotiation",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "record_negotiation",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE"
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 1,
+          "grandTotalVnd": 529000,
+          "discountTotalVnd": 0,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE"
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": null,
+      "preCartQuotes": [],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "record_negotiation",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 1,
+          "grandTotalVnd": 529000,
+          "discountTotalVnd": 0,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 1,
+          "grandTotalVnd": 529000,
+          "discountTotalVnd": 0,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE"
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": null,
+      "preCartQuotes": [],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "record_negotiation",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 1,
+          "grandTotalVnd": 529000,
+          "discountTotalVnd": 0,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 1,
+          "grandTotalVnd": 529000,
+          "discountTotalVnd": 0,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE"
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": null,
+      "preCartQuotes": [],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "record_negotiation",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 1,
+          "grandTotalVnd": 529000,
+          "discountTotalVnd": 0,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "terminal": "SEND_ELIGIBLE",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 1,
+          "grandTotalVnd": 529000,
+          "discountTotalVnd": 0,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "terminal": "HANDOFF",
+      "error": null,
+      "recoveryReason": "FAIL",
+      "tools": [
+        {
+          "name": "record_negotiation",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "currentQuote": null,
+      "pendingSupport": {
+        "subjectRef": "SV2447",
+        "offerType": "AO",
+        "status": "NOT_EVALUATED",
+        "canApply": false,
+        "blockedReason": "CART_REQUIRED",
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        }
+      },
+      "preCartQuotes": [
+        {
+          "subjectRef": "SV2447",
+          "offerType": "AO",
+          "quantity": 2,
+          "grandTotalVnd": 978100,
+          "discountTotalVnd": 49900,
+          "negotiationAssessment": "NOT_EVALUATED",
+          "negotiatedPriceFloor": {
+            "status": "NOT_ESTABLISHED",
+            "amountVnd": null
+          }
+        }
+      ],
+      "verdict": "FAIL"
+    },
+    {
+      "case": "c-context-two-units",
+      "repetition": 1,
+      "turn": 1,
+      "terminal": "NO_SEND",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [],
+      "currentQuote": null,
+      "pendingSupport": null,
+      "preCartQuotes": [],
+      "verdict": null
+    },
+    {
+      "case": "c-context-two-units",
+      "repetition": 1,
+      "turn": 2,
+      "terminal": "NO_SEND",
+      "error": null,
+      "recoveryReason": null,
+      "tools": [],
+      "currentQuote": null,
+      "pendingSupport": null,
+      "preCartQuotes": [],
+      "verdict": null
+    }
+  ],
+  "generations": [
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 7549.144500000002,
+        "inputTokens": 10832,
+        "outputTokens": 1635,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "d6e6282a8952a57c3042a6d37a9bb5e26f4debcaaebed5db5312ff6a2edca764",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4523.520799999998,
+        "inputTokens": 14356,
+        "outputTokens": 397,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "d672276970b5f4851c8d21326d5ced2ccb57d1a91e85ecec33bda224ca383b7a",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 8273.520000000004,
+        "inputTokens": 9966,
+        "outputTokens": 69,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "ffa66f1bfa5defa6345bf1e76b942d91e921eaf610f1bdf9253891633434f924",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6239.429199999999,
+        "inputTokens": 11431,
+        "outputTokens": 1169,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "c676683d3a94d85d049608a6065b6fd8a84d2be19cc0de4f0fcf8243671154a6",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4990.280700000003,
+        "inputTokens": 17045,
+        "outputTokens": 783,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "156c6cf62051888c10d40e9f61a024d0c2b9ba2fd3c5ea933e2100942698b4dd",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 9209.070299999992,
+        "inputTokens": 11710,
+        "outputTokens": 82,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "d09cc850e5157b8ac466309e055deb252bc2a64475c3f2e2515dd3eeed95d350",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6236.87920000001,
+        "inputTokens": 11708,
+        "outputTokens": 1379,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "605c4095a0b69c5d3a1acce60e6b390b55793d8492a3d4bd7b6c8326ed966d46",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4087.813699999999,
+        "inputTokens": 16465,
+        "outputTokens": 420,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "7cf63c4aaa0a573a0483a8d9be1cba698efb51af3029f9384bbf9bf6fefd2fde",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 8200.612900000007,
+        "inputTokens": 11069,
+        "outputTokens": 64,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "bb59f94048c26fb36cfb20efe5d140f3167a646edc0bece626aa81c845241c14",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5716.422199999972,
+        "inputTokens": 10833,
+        "outputTokens": 1093,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "ee1275209b3398aa4fd5b62a07b3bcdaec464569a642f8a1edfd516dd1483757",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5752.6690000000235,
+        "inputTokens": 13367,
+        "outputTokens": 1041,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "4ab42d8731a737dd59bb0f5f9864505f6038dd30cacfef38064001781ebf22fb",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 6486.930300000007,
+        "inputTokens": 9735,
+        "outputTokens": 61,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "681ebd60b2c36fb8cbf5731d488fcbfd48d8f313c08346ee004a2367d413f1cb",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5306.951000000001,
+        "inputTokens": 10724,
+        "outputTokens": 1143,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "9b4b65f117762fdefa008fe615e6fba5805395fcf8a19a2e52111452ccdf4479",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5173.664699999994,
+        "inputTokens": 13178,
+        "outputTokens": 1024,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "c32fb5d5b72c768979c10d79277256afa1052c0454428acdf93d74bd15820ed5",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4765.325199999992,
+        "inputTokens": 10316,
+        "outputTokens": 963,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "4c5a3cff775cd602851b95dff5cb7158d5027d5cdfd1c0d935d2b1534cef6a59",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 1
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 6895.09090000001,
+        "inputTokens": 9489,
+        "outputTokens": 74,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "696f38b00159340712ff0dd323eda39958a94fd9e0729350ef01625f5a5ccd2a",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 8616.199600000022,
+        "inputTokens": 11675,
+        "outputTokens": 2211,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "da450a33702431344d39f5f95c6745ca6ac7478727cbd1d31e2a1f0215c13e83",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5925.276900000026,
+        "inputTokens": 17270,
+        "outputTokens": 1273,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "4c07bec47c023c60717aefdbb34bd9588a403edd12c582c5afc60213515fa9dc",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 5307.348900000041,
+        "inputTokens": 10981,
+        "outputTokens": 44,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "7535143c8105fad51460745d73f294529eff90ba90ce0b13c01eb4fa6ff5853c",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4180.47649999999,
+        "inputTokens": 10835,
+        "outputTokens": 882,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "68664fb28d885e677791f590aa8dbf0cc419ad0914fd6b82f199a1519d9fa0c2",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3572.741000000038,
+        "inputTokens": 13214,
+        "outputTokens": 389,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "948a6c14f8c4a9da7e69c8cac096176b6c1772ab7f7ff6d9b4bf4c200206b26d",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 6779.532799999986,
+        "inputTokens": 9608,
+        "outputTokens": 64,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "4d8321acd61129738da4b5005f2ea1ca6b2a9142e7aa6c3e5d9f7922cd158a0f",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6474.5693999999785,
+        "inputTokens": 11327,
+        "outputTokens": 1475,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "23f58dd9b6ee1a10403027419f58e2d6feae5ab818f46f7479939dd50576d9a3",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5595.595600000001,
+        "inputTokens": 17255,
+        "outputTokens": 1000,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "2003038d4150ee58a2d06b6e1e2b22bb3537e8a89e31aab1c018cc4f8e1a0a25",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 8327.563699999999,
+        "inputTokens": 11697,
+        "outputTokens": 113,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "044d7ac7329373b133830be283486516faaf0cadc7c9a90028e5864d097ce949",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5142.878900000011,
+        "inputTokens": 11608,
+        "outputTokens": 840,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "f269aeb34a74968f7478469c623319ea0cec91b5e2e5e3cfbc8c127f7bda0aa3",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3664.7615000000224,
+        "inputTokens": 15859,
+        "outputTokens": 406,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "15f276a8e1307cd6bc59a6c3960310bcb2b7de7291144b14924db352a45da6ec",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7204.432199999981,
+        "inputTokens": 11001,
+        "outputTokens": 61,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "292b7a71502f8777380c8fa4971dd0ed624f328f0c6f593e92ca2d040cd97440",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5914.113899999997,
+        "inputTokens": 10834,
+        "outputTokens": 1271,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "8727206f63cb3adf5478325fbd8ef104c548486444588f572ef91a9eb37f638d",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3681.583800000022,
+        "inputTokens": 13604,
+        "outputTokens": 317,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "5f196b3901a40b2b578774429a7245b61fce461993e35b28f01f893f58118ada",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 8149.867800000007,
+        "inputTokens": 9572,
+        "outputTokens": 80,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "73e2b31584e14459a203755019659874acc7dfff4c74b863e913be923fa06660",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6497.139199999976,
+        "inputTokens": 11336,
+        "outputTokens": 1684,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "015c7c00c09cf418c94f502a60804e80c30889c154eacf11804536e0cdccb46a",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3561.508300000045,
+        "inputTokens": 17439,
+        "outputTokens": 423,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "9db4a71e4328b1b3f48f72c6c0c8e74efbd11fa57c25b2e5a2e8b46fcd063e57",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7081.431600000011,
+        "inputTokens": 11617,
+        "outputTokens": 102,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "9ab39f4177d3fc56069c4adaf34e98c0702c4734808962b4ccad9cd224e0aeb0",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6111.394700000004,
+        "inputTokens": 11621,
+        "outputTokens": 1339,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "91a017759ade43adcf99c45d82dfc0f628a3b2a33db7184c476234a329867b81",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3817.003800000006,
+        "inputTokens": 16334,
+        "outputTokens": 555,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "3af9c8ade3906dd47a8b2a7ac4c7fe0ceaf3e16973481a1d9608ee8ec0eb5463",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 6171.3771000000415,
+        "inputTokens": 10963,
+        "outputTokens": 61,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "18438fbb47a4a9341b2d73be88421a08ffa800ca7c747bceb149e7166ee52ab8",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4895.863399999973,
+        "inputTokens": 10832,
+        "outputTokens": 940,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "ebda8d3e9b3c1ea15c35c2af1e93d9f512ba2d2a29891346c9611722bd87f37e",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3168.6433000000543,
+        "inputTokens": 13269,
+        "outputTokens": 271,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "b343b439aef5a6df3359db5c0ed8bfcc074dbe4fbaa6bfc038b11bee3f9d8931",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 6536.223899999983,
+        "inputTokens": 9616,
+        "outputTokens": 82,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "2c965025cb595ad8ccd357a0c6cad731efb39eab67ad04d4a6dca27e4ed362da",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4998.106400000048,
+        "inputTokens": 11328,
+        "outputTokens": 1150,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "a72657e155886042fafb5aee038746a0fbdd097ac5de59b1a3030faaba710af2",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4508.483000000007,
+        "inputTokens": 16936,
+        "outputTokens": 621,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "dbb9f6d5219e89d4585fcc6b94c28351bab639f7df82b18b70252b76def389c9",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 6482.645099999965,
+        "inputTokens": 11677,
+        "outputTokens": 99,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "e504bef302306d15c393f3ad752d47472f4f7fd1a34769872ab74ddeb0b49ee3",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6053.5148000000045,
+        "inputTokens": 11599,
+        "outputTokens": 1388,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "af529f16b54344370d18ee92368ed53b05803b3d458c26720c3ffcdc9530d261",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3403.3547000000253,
+        "inputTokens": 16395,
+        "outputTokens": 437,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "2ff7873514205addd3a3d35fda3620342cd3f9db08cc74d6556d8c174e2334e2",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 5559.213299999945,
+        "inputTokens": 10991,
+        "outputTokens": 52,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "e23b9e8a407699b859f7f5b7fcca414f45329ec857743e9db1dc2ef144f654f4",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "httpStatus": 200
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6158.3629,
+        "inputTokens": 10839,
+        "outputTokens": 1045,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "d8275e832cc168dbd8babbc6f5b99285022f3f9c6d1fc335be81208ac2f78dfd",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 14
+    },
+    {
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5005.298299999995,
+        "inputTokens": 17060,
+        "outputTokens": 609,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "7c920f8a0357da8f7b25898883ade32ca11d2655742c78f800afdfadf4269a27",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "toolMode": "VALIDATED",
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "declaredToolCount": 16
+    },
+    {
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 37900.8273,
+        "inputTokens": 12081,
+        "outputTokens": 1085,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "requestHash": "8e885959dda4a79100e772e117609d12872d90958908817f195f103371aefb7e",
+      "errorCode": null,
+      "failureLayer": null,
+      "case": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "httpStatus": 200
+    }
+  ],
+  "counts": {
+    "OWNER:OK": 33,
+    "VERIFIER:OK": 16
+  },
+  "terminal": {
+    "SEND_ELIGIBLE": 15,
+    "HANDOFF": 1,
+    "NO_SEND": 2
+  }
+}

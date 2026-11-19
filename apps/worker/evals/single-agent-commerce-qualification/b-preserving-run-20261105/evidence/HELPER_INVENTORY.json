@@ -1,0 +1,27 @@
+{
+  "sourceSha": "69bd122100f51584acd6d2ac97dde9254b3e562c",
+  "providerRequestsBeforeInputReview": 0,
+  "generationRetry": 0,
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-model-prepare-20261105-02.mjs",
+      "sha256": "d4feed63f07aebea797b375ac82d142e3c886eed1279f1ba691c4224839b9aed"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-model-finalize-inputs-20261105-02.mjs",
+      "sha256": "c26e7e9f8da2dca900f4ba554b6c8a278532ae006cc59b5a5084d6c02f0008b9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-model-launch-20261105-02.py",
+      "sha256": "0a3d17831da099779415a090a1b7cae2bb902cf47ffada46aa00d36c7c060e4c"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-media-context-model-source-wrapper-20261103-02.py",
+      "sha256": "21a677bf3ed5afa959ed00fb87053edabe603b677fbb4c0db7d099f140ac68d3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-model-prefix-accounting-20261105-02.mjs",
+      "sha256": "ae561ebb57a8394ea9bca9b4716437a71e1f6471a135aa0127fc5aee1fc7e3ed"
+    }
+  ]
+}

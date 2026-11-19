@@ -1,0 +1,86 @@
+{
+  "kind": "FROZEN_CONTINUATION_RECONSTRUCTION",
+  "worldHash": "a4a8d2437de0b6d19e741e80edf3fc3888f0aab90b08e534d1f9e2e5a28c92a8",
+  "observations": [
+    {
+      "label": "p09",
+      "file": "native-17e2f9dc6371e64a6fcf296720d0396439b19e6be8171a3951d8e7bcc2ce1d09-turn-1.json",
+      "error": null,
+      "budget": {
+        "textFrameBytes": 61629,
+        "systemBytes": 21996,
+        "toolSchemaBytes": 14475,
+        "trustedFrameBytes": 10927,
+        "dialogueBytes": 13971,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 61810,
+        "basePresentedFrameBytes": 61810,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      },
+      "actualToolResultsMatched": true,
+      "nativeSignedContentPreserved": true,
+      "requestHash": "e35007ff4da2d4d31547ce6c8701b346b26502f83a2e79cd5a6845ca1c429de6",
+      "bodyHash": "7256d624d55d72a1e43ed69cb88774df7aedb20150745105d04c76312ed3e9e9",
+      "beforeSameReconstruction": {
+        "error": "OWNER_REQUEST_BOUND",
+        "budget": {
+          "textFrameBytes": 66835,
+          "systemBytes": 21996,
+          "toolSchemaBytes": 19875,
+          "trustedFrameBytes": 10733,
+          "dialogueBytes": 13971,
+          "textLimitBytes": 65536
+        }
+      }
+    },
+    {
+      "label": "s15",
+      "file": "native-55f9da48e743326e074a65ef4b641eef52b9586106c91536acd151f0bced1740-turn-0.json",
+      "error": null,
+      "budget": {
+        "textFrameBytes": 60512,
+        "systemBytes": 21996,
+        "toolSchemaBytes": 14464,
+        "trustedFrameBytes": 6280,
+        "dialogueBytes": 17512,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 60693,
+        "basePresentedFrameBytes": 60693,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      },
+      "actualToolResultsMatched": null,
+      "nativeSignedContentPreserved": true,
+      "requestHash": "63c3b2d6bdc8d4d3bcdbafa647a34ca8fd4774f40040eadecaaa966395c0a602",
+      "bodyHash": "7df67d0fc83f152dc4f024d6efe83d2da6edec0200d2c76d3801e76e3a7f72eb",
+      "beforeSameReconstruction": {
+        "error": "OWNER_REQUEST_BOUND",
+        "budget": {
+          "textFrameBytes": 65718,
+          "systemBytes": 21996,
+          "toolSchemaBytes": 19864,
+          "trustedFrameBytes": 6086,
+          "dialogueBytes": 17512,
+          "textLimitBytes": 65536
+        }
+      }
+    },
+    {
+      "label": "legacy-s13-20261104",
+      "error": "OWNER_REQUEST_BOUND",
+      "budget": {
+        "textFrameBytes": 67660,
+        "systemBytes": 21488,
+        "toolSchemaBytes": 14464,
+        "trustedFrameBytes": 16978,
+        "dialogueBytes": 14470,
+        "textLimitBytes": 65536
+      }
+    }
+  ],
+  "providerRequests": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "limitation": "Failed historical bodies were not captured. Rebuilt contexts use original clock, frozen sources and captured native outputs/results; s15 applies the captured public profile result in memory without replaying mutation/receipt persistence. These are not exact historical wire bodies, new model results, or complete stateful acceptance."
+}

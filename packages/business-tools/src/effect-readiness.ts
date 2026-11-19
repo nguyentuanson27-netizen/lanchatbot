@@ -39,7 +39,7 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly deterministicEvidenceHash?: string | null;
   readonly parentReadinessHash?: string | null;
   readonly payloadHash?: string | null;
-  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REPLACE_LINE" | null;
   readonly mutationQuantity?: number | null;
   readonly checkedAt: Date;
 }
@@ -105,7 +105,7 @@ export function evaluateDeterministicEffectReadinessV1(
 
   const nowMs = input.checkedAt.getTime();
   for (const claim of input.claims) {
-    if (Date.parse(claim.provenance.expiresAt) <= nowMs) {
+    if (claim.provenance.expiresAt!==null&&Date.parse(claim.provenance.expiresAt) <= nowMs) {
       reasons.add("CLAIM_STALE");
     }
     if (claim.scope.kind === "PRODUCT" && !productIds.includes(claim.scope.productId)) {
@@ -127,12 +127,14 @@ export function evaluateDeterministicEffectReadinessV1(
       })
     : validateCartEffectClaimSemanticsV1({
         effect: input.effect,
+        variantHash: text => createHash("sha256").update(text, "utf8").digest("hex"),
         lines: input.cartLines.map((line) => ({
           parentProductId: line.parentProductId,
           offerId: line.offerId,
           quantity: line.quantity,
           posUnitPriceVnd: line.posUnitPriceVnd,
           priceFactRef: line.priceAuthority?.priceFactRef ?? null,
+          components: line.components,
         })),
         cartId: input.cartId,
         cartVersion: input.cartVersion,
@@ -204,7 +206,7 @@ export function evaluateDeterministicEffectReadinessV1(
   }
 
   const freshExpiries = input.claims
-    .map((claim) => Date.parse(claim.provenance.expiresAt))
+    .flatMap((claim) => claim.provenance.expiresAt===null?[]:[Date.parse(claim.provenance.expiresAt)])
     .filter((expiry) => Number.isFinite(expiry) && expiry > nowMs);
   const expiresAtMs = Math.min(
     nowMs + MAX_EFFECT_READINESS_LIFETIME_MS_V1,

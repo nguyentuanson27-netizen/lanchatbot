@@ -16,10 +16,11 @@ it("uses verified revalidation of an unchanged image without changing publicatio
 it("does not revive an explicit invalid proof through a recent publication time",()=>{
  expect(select({status:"INVALID"},"2026-10-28T11:00:00.000Z").images).toHaveLength(0);
 });
-it.each(["2026-10-29T00:00:00.000Z","2026-09-01T00:00:00.000Z"])("rejects future or expired revalidation %s",checkedAt=>{
+it.each(["2026-10-29T00:00:00.000Z","invalid"])("rejects future or malformed revalidation %s",checkedAt=>{
  expect(select({status:"VALID",checkedAt}).images).toHaveLength(0);
 });
-it("keeps legacy freshness when no proof is present",()=>{
+it("does not expire approved media by publication or revalidation age",()=>{
  expect(select(undefined,"2026-10-28T11:00:00.000Z").images).toHaveLength(1);
- expect(select(undefined).images).toHaveLength(0);
+ expect(select(undefined).images).toHaveLength(1);
+ expect(select({status:"VALID",checkedAt:"2026-09-01T00:00:00.000Z"}).images).toHaveLength(1);
 });

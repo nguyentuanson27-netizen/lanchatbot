@@ -1,0 +1,11 @@
+{
+  "baseSha": "4e2ac3489fab80be30cd831a0d4397c04a4af9ad",
+  "contracts": {
+    "false:false": "f12e71e0e5e398854f27a58cf83ffdf3680c9153274819df0e32a2f26f1c51c7",
+    "false:true": "0bf0697f52df59680c6214f9c5d1831a6c33a4b56a7ee5fd8e310a8aab06ca2f",
+    "true:false": "ab78525907b498ee7ba02da9508b8b560b7af2e697f94d2a50818c8b52db3ad2",
+    "true:true": "ecba999ad17c285f6f9b4463f361a45669f153e9d4ab6cfdb45998e281aaec2a"
+  },
+  "ownerPromptHash": "a3e486eb540becdf64149c4450b66bc32cee141c36a15e320267b4e88b323c9d",
+  "toolBytes": 19706
+}

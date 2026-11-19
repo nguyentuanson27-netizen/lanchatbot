@@ -1,0 +1,47 @@
+import {readFileSync,writeFileSync} from 'node:fs';import {execFileSync} from 'node:child_process';import {resolve} from 'node:path';import {pathToFileURL} from 'node:url';
+const root=process.argv[2],repo=process.cwd(),mod=p=>import(pathToFileURL(resolve(p)).href),read=p=>JSON.parse(readFileSync(p));
+const {createReadOnlyTools}=await mod('apps/worker/dist/single-agent-commerce-read-only-tools.js');
+const {createCommerceEffectTools}=await mod('apps/worker/dist/single-agent-commerce-effects.js');
+const {createSalesCycleRuntimeState,RuntimePolicyResolver}=await mod('packages/chat-runtime/dist/index.js');
+const {cartSelectionFromSnapshot}=await mod('apps/worker/dist/realtime-sales-catalog.js');
+const {buildGeminiCommerceRequest,ownerTextBytes,publicTurnTime}=await mod('apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs');
+const {admitPreparedCommerceContext}=await mod('apps/worker/evals/single-agent-commerce-read-only/preparation-admission.mjs');
+const {buildVerifierRequest}=await mod('apps/worker/evals/single-agent-commerce-read-only/protocol.mjs');
+const {withNativePresentation}=await mod('apps/worker/evals/single-agent-commerce-read-only/native-presentation.mjs');
+const {makeBinding,hardPrecheck}=await mod('apps/worker/dist/single-agent-semantic-verifier-boundary.js');
+const {fixtureProfile}=await mod('apps/worker/dist/single-agent-commerce.test-support.js');
+const {commerceHash}=await mod('apps/worker/dist/single-agent-commerce-read-only-context.js');
+const manifest=read('apps/worker/evals/single-agent-commerce-read-only/manifest.json'),owner=readFileSync('apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt','utf8'),verifier=readFileSync('apps/worker/evals/single-agent-commerce-read-only/prompts/verifier.vi.txt','utf8');
+const world=read(resolve(root,'world/WORLD.json')),audit=read(resolve(root,'AUDIT.json')),rows=[];
+for(const c of audit.conversations.filter(c=>c.caseId==='c-20261028-j4')){
+ const raw=read(resolve(root,c.turns[2].capturedArtifact)),prev=read(resolve(root,c.turns[1].capturedArtifact));
+ const v=prev.generations.find(g=>g.role==='VERIFIER'),ctx=JSON.parse(v.requestBody.input[0].content[0].text).trusted;
+ const inbound=raw.observed.inboundMessages[0],clock=new Date(inbound.occurredAt),bound=raw.observed.batch;
+ const scope={pageId:world.config.scope.pageId,shopId:'LANA',shopAlias:'LANA',conversationId:'offline-diagnostic',customerHash:bound.conversationHash,sourceMessageId:inbound.messageId,sourceObservedAt:inbound.occurredAt,requestId:bound.evaluationGroupId,
+ recipient:ctx.state.recipient,bindingVersion:`commerce:${bound.generation}:${ctx.state.recipient}`,revision:raw.before.publicState.revision,conversationOwner:'BOT',permission:true,privacyAllowed:true};
+ const state={...ctx.state,revision:scope.revision,conversationRevision:scope.revision,bindingVersion:scope.bindingVersion};
+ const product=world.products.find(p=>p.productId==='SV2447'),snapshot=world.snapshots.SV2447;
+ const resolver=new RuntimePolicyResolver({loadActivePointers:async()=>world.policyRecords},{enabled:true,publishedEnabled:true});const resolution=await resolver.resolve({pageId:scope.pageId,channel:'PUBLISHED',now:clock});scope.shopId=resolution.bundle.policy.shopId;
+ const base=createReadOnlyTools({scope,clock:()=>clock,policy:async()=>resolution,catalog:{readProduct:async()=>({product,snapshot}),searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product],state:()=>state,maxFactAgeSeconds:7200,prepareCurrentOffers:true,candidateEvidence:true});
+ const current=createSalesCycleRuntimeState('offline-diagnostic',{pageId:scope.pageId,conversationId:scope.conversationId},clock);current.revision=raw.before.publicState.salesRevision;
+ const quote=JSON.parse(ctx.policyLiterals.find(l=>l.ref.startsWith('pre-cart-quote:')).text),ps=ctx.state.pendingSupport;
+ current.pendingNegotiation={schemaVersion:1,pendingId:ps.pendingRef,productId:'SV2447',offerId:'AO',salesEpisodeId:'60000000-0000-4000-8000-000000000001',customerProfileId:state.customerProfileId,
+ sourceMessageId:quote.supportEvaluation.sourceMessageId,sourceTextHash:commerceHash(c.turns[1].customer),sourceObservedAt:raw.before.publicState.pendingSupportProof.sourceObservedAt,
+ recordedAt:raw.before.publicState.pendingSupportProof.sourceObservedAt,expiresAt:ctx.policyLiterals.find(l=>l.ref.startsWith('pre-cart-quote:')).expiresAt,status:'PENDING',cartOpeningCommandId:null,activatedByCartId:null,policyRef:{id:resolution.bundle.policy.policyBundleId,version:resolution.bundle.policy.policyVersion,contentHash:'x'}};
+ const effects=await createCommerceEffectTools({base,scope,clock:()=>clock,conversationKey:'offline-diagnostic',repository:{read:async()=>current,compareAndSwap:async()=>{throw Error('NO_WRITE');}},identity:{cartId:'50000000-0000-4000-8000-000000000001',salesEpisodeId:current.pendingNegotiation.salesEpisodeId,customerProfileId:state.customerProfileId},authorize:async()=>true,policy:async()=>resolution.bundle,selectionMaxAgeSeconds:7200,select:async q=>cartSelectionFromSnapshot(snapshot,{...q,selectionMode:'CANDIDATE_TUPLES'},clock)});
+ const contents=[...raw.before.publicHistory.history.map(m=>({role:m.role==='customer'?'user':'model',parts:[{text:m.text}]})),{role:'user',parts:[{text:inbound.text}]}];
+ const availableTools=['search_products','read_product','read_policy','apply_customer_state','recommend_size','quote_cart','add_to_cart','change_cart_item','confirm_purchase','record_negotiation','apply_pending_negotiation','cancel_pending_negotiation','request_handoff','select_product_media','view_product_media','quote_product'];
+ const stages=[];const oldVerifier=execFileSync('git',['show','2e292e7b:apps/worker/evals/single-agent-commerce-read-only/prompts/verifier.vi.txt'],{encoding:'utf8'});
+ const measuredWire=(context,draft,instructions)=>({model:manifest.models.verifier.model,reasoning:{effort:manifest.models.verifier.effort},instructions,input:[{type:'message',role:'user',content:[{type:'input_text',text:JSON.stringify({requestIdentity:makeBinding('r'.repeat(128),draft,context),turnTime:publicTurnTime({processingAt:clock.toISOString(),timeZone:'Asia/Ho_Chi_Minh'}),trusted:context,untrusted:{latestCustomerMessage:inbound.text,recentAcceptedDialogue:raw.before.publicHistory.history,finalDraft:draft}})}]}],tools:[],tool_choice:'none',parallel_tool_calls:false,store:false,stream:true,text:{format:{type:'json_schema',name:'semantic_egress_verdict',strict:true,schema:manifest.verdictSchema}}});
+ const admit=(context,stage)=>{
+  const request={generationId:scope.requestId+':owner:1',instructions:owner,contents,context,turnTime:{processingAt:clock.toISOString(),timeZone:'Asia/Ho_Chi_Minh'},toolWorkAccounting:'PRIMITIVE_WORK_V2',availableTools,toolsAllowed:true,terminalHandoffAllowed:true,toolBudget:{roundsRemaining:2,callsRemaining:4},signal:new AbortController().signal};
+  const row={stage,hardPrecheck:hardPrecheck(context,'Dạ.',clock),contextBytes:Buffer.byteLength(JSON.stringify(context)),subjects:context.boundSubjects.length,claims:context.protectedClaims.length};
+  try{const body=buildGeminiCommerceRequest(withNativePresentation(request,'VI_DATA_BLOCKS_COMPACT_V2'));row.ownerBytes=ownerTextBytes(body);}catch(e){row.ownerError=e.message;}
+  try{const finalDraft='\u0001'.repeat(4096);const body=buildVerifierRequest(manifest,{instructions:verifier,finalDraft,trusted:context,binding:makeBinding('r'.repeat(128),finalDraft,context),latest:inbound.text,history:raw.before.publicHistory.history,turnTime:request.turnTime});row.verifierBytes=Buffer.byteLength(JSON.stringify(body));}catch(e){row.verifierError=e.message;}
+  row.currentAdmission=admitPreparedCommerceContext(manifest,verifier,request);row.previousPromptAdmission=admitPreparedCommerceContext(manifest,oldVerifier,request);const worst='\u0001'.repeat(4096),normal='x'.repeat(4096);row.reservedVerifierBytes=Buffer.byteLength(JSON.stringify(measuredWire(context,worst,verifier)));row.previousPromptReservedBytes=Buffer.byteLength(JSON.stringify(measuredWire(context,worst,oldVerifier)));row.asciiMaxDraftVerifierBytes=Buffer.byteLength(JSON.stringify(measuredWire(context,normal,verifier)));row.ordinaryReplyVerifierBytes=Buffer.byteLength(JSON.stringify(measuredWire(context,'Dạ, một áo cả ship là 499.000đ chị nhé.',verifier)));if(row.verifierBytes!==undefined&&row.verifierBytes!==row.reservedVerifierBytes)throw Error('MEASUREMENT_PARITY');row.productSelectionObservations=context.runtimeProducts?.map(p=>({subjectRef:p.subjectRef,observations:p.selectionEvidence?.length??0}));stages.push(row);return true;
+ };
+ let error=null;
+ try{await base.invoke({name:'read_product',args:{subjectRef:'SV2447',offerType:'AO'}});admit(effects.snapshot(),'AFTER_TARGETED_AO_READ');const charged=await effects.preparePendingSelections(context=>admit(context,'AFTER_PENDING_PREPARE'));stages.push({pendingCharged:charged,statePending:base.snapshot().state.pendingPurchase,scopeBinding:scope.bindingVersion,baseBinding:base.snapshot().state.bindingVersion,permission:base.snapshot().state.permission,recipient:base.snapshot().state.recipient,scopeRecipient:scope.recipient});}catch(e){error={message:e.message,stack:e.stack};}
+ rows.push({repetition:c.repetition,stages,error});
+}
+writeFileSync(resolve(root,'OFFLINE_TARGETED_AO_ADMISSION_PROBE.json'),JSON.stringify({kind:'FROZEN_SOURCE_COMPONENT_RECONSTRUCTION_NOT_NATIVE_STORE_REPLAY',providerRequests:0,sourceWrites:0,rows},null,2));console.log(JSON.stringify(rows));

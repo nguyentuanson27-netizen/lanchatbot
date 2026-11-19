@@ -1,0 +1,10 @@
+{
+  "kind": "CAPTURED_COMMAND_LOG_UTF8_V1",
+  "rawSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+  "chunks": [
+    "\r\n",
+    "> @lana/worker@0.1.0 lint C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\r\n",
+    "> tsc -p tsconfig.json --noEmit\r\n",
+    "\r\n"
+  ]
+}

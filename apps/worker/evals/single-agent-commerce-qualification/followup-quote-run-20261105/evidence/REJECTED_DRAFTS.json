@@ -1,0 +1,22 @@
+[
+  {
+    "group": "r2",
+    "caseId": "c-20261028-s03",
+    "turnIndex": 0,
+    "exactFinalDraft": "Dạ, em gửi chị ảnh chụp cận cảnh chi tiết ren của Váy Ngọc Trâm nhé ạ!",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "media:a0ee96b205397ea2d64ff44d1b2b1f81dc0ac1498576acdb3a3d911c5851904b",
+          "excerpt": "ảnh chụp cận cảnh chi tiết ren của Váy Ngọc Trâm",
+          "basis": "Nguồn chỉ xác nhận ảnh DETAIL góc FRONT, không xác nhận chi tiết ren trong ảnh: confirmedParts rỗng và componentKnown=false. Mô tả sản phẩm có ren không đủ chứng minh ảnh được chọn chụp cận phần ren."
+        }
+      ]
+    },
+    "draftHash": "7c2b1ba760386047762efedeb80d880055a0c7c53fbe88f2faa696d8a0ae95f1",
+    "snapshotHash": "23ad833943fc0a9cc8c390ff149a8d5f6f65e181e611461f0e1e9027b154b1b7",
+    "customerVisible": false
+  }
+]

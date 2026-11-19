@@ -1,4 +1,6 @@
 import { z } from "zod";
+import {SizeFitTargetV1Schema} from "./size-fit-target.js";
+import { CartComponentSelectionV1Schema, type CartComponentSelectionV1 } from "./customer-size-cart.js";
 import {
   DECISION_BUYING_INTENT_EVIDENCE_CODES_V1,
   DECISION_DIALOGUE_EVIDENCE_CODES_V1,
@@ -123,6 +125,7 @@ export const CanonicalBuyingIntentV1Schema = z.object({
     "ADD_TO_CART",
     "SET_QUANTITY",
     "SET_COMPONENT_VARIANT",
+    "REPLACE_LINE",
     "REMOVE_FROM_CART",
     "PROCEED_TO_PAYMENT",
   ]),
@@ -185,17 +188,18 @@ export type CanonicalBuyingIntentV1 = z.infer<
 
 export function canonicalBuyingIntentAuthorizesCartMutationV1(
   intent: CanonicalBuyingIntentV1,
-  action: "ADD_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REMOVE_LINE",
+  action: "ADD_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REMOVE_LINE" | "REPLACE_LINE",
   productId: string,
   quantity: number,
 ): boolean {
+  if (action === "REPLACE_LINE" && !intent.contributors.includes("NATIVE_TOOL_PERMISSION")) return false;
   const requestedActions: readonly CanonicalBuyingIntentV1["requestedAction"][] =
-    action === "ADD_LINE" ? ["ADD_TO_CART"] : action === "SET_COMPONENT_VARIANT" ? ["SET_COMPONENT_VARIANT"] : action === "REMOVE_LINE" ? ["REMOVE_FROM_CART"] : ["SET_QUANTITY"];
+    action === "ADD_LINE" ? ["ADD_TO_CART"] : action === "REPLACE_LINE" ? ["REPLACE_LINE"] : action === "SET_COMPONENT_VARIANT" ? ["SET_COMPONENT_VARIANT"] : action === "REMOVE_LINE" ? ["REMOVE_FROM_CART"] : ["SET_QUANTITY"];
   return intent.decision === "COMMITTED" &&
     intent.contributors.some(c => c === "DETERMINISTIC_RUNTIME" || c === "NATIVE_TOOL_PERMISSION") &&
     intent.productId === productId &&
     requestedActions.includes(intent.requestedAction) &&
-    (action === "ADD_LINE"
+    (action === "ADD_LINE" || action === "REPLACE_LINE"
       ? (intent.quantity ?? 1) === quantity
       : action === "SET_QUANTITY" ? intent.quantity !== null && intent.quantity === quantity : intent.contributors.includes("NATIVE_TOOL_PERMISSION"));
 }
@@ -233,7 +237,7 @@ export type DeterministicConfirmationEvidenceV1 = z.infer<
 export const DeterministicCartMutationEvidenceV1Schema = z.object({
   schemaVersion: z.literal(1),
   authorityVersion: z.literal("DETERMINISTIC_CART_MUTATION_EVIDENCE_V1"),
-  action: z.enum(["ADD_LINE", "REMOVE_LINE", "SET_QUANTITY", "SET_COMPONENT_VARIANT"]),
+  action: z.enum(["ADD_LINE", "REMOVE_LINE", "SET_QUANTITY", "SET_COMPONENT_VARIANT", "REPLACE_LINE"]),
   authorityKind: z.enum([
     "CANONICAL_BUYING_INTENT",
     "DETERMINISTIC_REMOVE_CLASSIFIER",
@@ -312,14 +316,15 @@ const ProtectedClaimAuthorityV1Schema = z.enum([
   "MEDIA_SELECTOR_V2",
 ]);
 
-const ProtectedClaimProvenanceV1Schema = z.object({
+const protectedClaimProvenanceFields = {
   authority: ProtectedClaimAuthorityV1Schema,
   sourceVersion: z.string().trim().min(1).max(256),
   evidenceRef: z.string().trim().min(1).max(512),
   contentHash: Sha256Schema,
   observedAt: z.string().datetime(),
   expiresAt: z.string().datetime(),
-}).strict().superRefine((value, context) => {
+};
+const ProtectedClaimProvenanceV1Schema = z.object(protectedClaimProvenanceFields).strict().superRefine((value, context) => {
   if (Date.parse(value.expiresAt) <= Date.parse(value.observedAt)) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
@@ -327,6 +332,15 @@ const ProtectedClaimProvenanceV1Schema = z.object({
       message: "protected claim provenance must expire after observation",
     });
   }
+});
+
+// Catalog media remains valid until its exact approved source is replaced/revoked.
+// Other claim types retain mandatory bounded expiry.
+const ProtectedMediaProvenanceV1Schema = z.object({...protectedClaimProvenanceFields,
+  expiresAt:z.string().datetime().nullable(),
+}).strict().superRefine((value,context)=>{
+  if(value.expiresAt!==null&&Date.parse(value.expiresAt)<=Date.parse(value.observedAt))
+    context.addIssue({code:z.ZodIssueCode.custom,path:["expiresAt"],message:"media expiry must follow observation"});
 });
 
 const ProtectedClaimBase = z.object({
@@ -362,6 +376,7 @@ export const ProtectedClaimV1Schema = z.discriminatedUnion("type", [
   ProtectedClaimBase.extend({
     type: z.literal("SIZE_FIT"),
     value: z.object({
+      fitTarget:SizeFitTargetV1Schema.optional(),
       recommendedSizes: z.array(BoundedIdSchema).min(1).max(4),
       alternativeSizes: z.array(BoundedIdSchema).max(4),
       customerProfileId: z.string().uuid(),
@@ -399,6 +414,7 @@ export const ProtectedClaimV1Schema = z.discriminatedUnion("type", [
   }).strict(),
   ProtectedClaimBase.extend({
     type: z.literal("PRODUCT_MEDIA"),
+    provenance: ProtectedMediaProvenanceV1Schema,
     value: z.object({ assetId: BoundedIdSchema, assetSha256: Sha256Schema }).strict(),
   }).strict(),
 ]).superRefine((claim, context) => {
@@ -419,6 +435,9 @@ export const ProtectedClaimV1Schema = z.discriminatedUnion("type", [
       message: "protected claim authority does not match claim type",
     });
   }
+  if(claim.type==="SIZE_FIT"&&claim.value.fitTarget&&claim.scope.kind==="PRODUCT"&&
+    (claim.value.fitTarget.kind==="PRODUCT"?claim.value.fitTarget.productId:claim.value.fitTarget.parentProductId)!==claim.scope.productId)
+    context.addIssue({code:z.ZodIssueCode.custom,path:["value","fitTarget"],message:"size target must bind the claim parent"});
   const requiresCartScope = claim.type === "SHIPPING_FEE" ||
     claim.type === "FREESHIP" || claim.type === "PROMOTION_OFFER";
   if (requiresCartScope && claim.scope.kind !== "CART") {
@@ -455,7 +474,14 @@ export function requiredProtectedClaimTypesForEffectV1(
 
 function protectedClaimScopeKeyV1(claim: ProtectedClaimV1): string {
   if (claim.scope.kind === "PRODUCT") {
-    return `PRODUCT:${claim.scope.productId}:${claim.scope.variantId ?? ""}`;
+    const scope = `PRODUCT:${claim.scope.productId}:${claim.scope.variantId ?? ""}`;
+    if (claim.type !== "SIZE_FIT") return scope;
+    // Legacy fits describe the whole product. Neither revision nor the result
+    // belongs in identity: contradictory evidence for one target must conflict.
+    const target = claim.value.fitTarget ?? { kind: "PRODUCT", productId: claim.scope.productId };
+    return `${scope}:FIT:${JSON.stringify(target.kind === "PRODUCT"
+      ? ["PRODUCT", target.productId]
+      : ["COMPONENT", target.parentProductId, target.componentProductId, target.componentRole])}`;
   }
   if (claim.scope.kind === "CART") {
     return `CART:${claim.scope.cartId}:${claim.scope.cartVersion}`;
@@ -516,6 +542,44 @@ export interface CartEffectClaimLineV1 {
   readonly quantity: number;
   readonly posUnitPriceVnd: number | null;
   readonly priceFactRef: string | null;
+  readonly components?: readonly CartComponentSelectionV1[];
+}
+
+const variantLineSchema = z.object({
+  parentProductId: CanonicalProductIdV1Schema,
+  offerId: CanonicalProductIdV1Schema,
+  components: z.array(CartComponentSelectionV1Schema).min(1).max(4),
+});
+const variantToken = (v: string) => v.trim().normalize("NFC").toUpperCase();
+/** Browser-safe: callers supply their code-owned SHA256 implementation, never a wire digest. */
+export function canonicalCartVariantPreimageV2(line: Pick<CartEffectClaimLineV1, "parentProductId" | "offerId" | "components">): string {
+  const parsed = variantLineSchema.parse(line);
+  const components = parsed.components.map(c => ({ ...c, componentSku: variantToken(c.componentSku),
+    color: c.color === null ? null : variantToken(c.color), size: c.size === null ? null : variantToken(c.size) }))
+    .sort((a,b) => { const x=canonicalJsonV1(a),y=canonicalJsonV1(b);return x<y?-1:x>y?1:0; });
+  return canonicalJsonV1({ version: "CART_VARIANT_SCOPE_V2",
+    parentProductId: parsed.parentProductId, offerId: parsed.offerId, components });
+}
+export function canonicalCartVariantScopeV2(
+  line: Pick<CartEffectClaimLineV1, "parentProductId" | "offerId" | "components">,
+  sha256Text: (preimage: string) => string,
+): string {
+  const digest = sha256Text(canonicalCartVariantPreimageV2(line));
+  if (!/^[a-f0-9]{64}$/u.test(digest)) throw new Error("CART_VARIANT_HASH_INVALID");
+  return `cv2:${digest}`;
+}
+
+/** Potential shared physical stock is rejected, never assigned a capacity from component hashes. */
+export function cartComponentsMayShareStockV2(a: Pick<CartEffectClaimLineV1,"components">, b: Pick<CartEffectClaimLineV1,"components">): boolean {
+  if (!a.components?.length || !b.components?.length) return true;
+  return a.components.some(x => b.components!.some(y => {
+    const sameItem = variantToken(x.componentProductId) === variantToken(y.componentProductId) ||
+      variantToken(x.componentSku) === variantToken(y.componentSku);
+    const separateSize = x.size !== null && y.size !== null && variantToken(x.size) !== variantToken(y.size);
+    const separateColor = x.color !== null && y.color !== null &&
+      variantToken(x.color) !== "__NO_COLOR__" && variantToken(y.color) !== "__NO_COLOR__" && variantToken(x.color) !== variantToken(y.color);
+    return sameItem && !separateSize && !separateColor;
+  }));
 }
 
 /** Exact cart-line claim semantics shared by the worker and transaction guard. */
@@ -526,6 +590,7 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
   cartId?: string | null;
   cartVersion?: number | null;
   protectedClaimTypes?: readonly ProtectedClaimV1["type"][];
+  variantHash?: (preimage: string) => string;
 }>): Readonly<{ missing: boolean; conflict: boolean; mismatch: boolean }> {
   const requiredTypes = requiredProtectedClaimTypesForEffectV1(
     input.effect,
@@ -536,6 +601,34 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
   const catalogMedia = input.effect === "PROTECTED_OUTBOUND";
   let missing = catalogMedia && (input.protectedClaimTypes?.includes("PRODUCT_MEDIA") ?? false) &&
     !input.claims.some(claim => claim.type === "PRODUCT_MEDIA");
+  const variantClaims = input.claims.filter(c => c.scope.kind === "PRODUCT" && requiredTypes.includes(c.type));
+  const exact = variantClaims.some(c => c.scope.kind === "PRODUCT" && c.scope.variantId?.startsWith("cv2:"));
+  const provenanceByScope = new Map<string,string>();
+  let provenanceConflict=false;
+  if(exact)for(const claim of variantClaims){
+    const scope=claim.scope;
+    if(scope.kind!=="PRODUCT")continue;
+    const key=canonicalJsonV1([claim.type,scope.productId,scope.variantId]);
+    const signature=canonicalJsonV1([claim.value,claim.provenance.contentHash,claim.provenance.authority,claim.provenance.sourceVersion,claim.provenance.evidenceRef]);
+    if(provenanceByScope.has(key)&&provenanceByScope.get(key)!==signature)provenanceConflict=true;
+    provenanceByScope.set(key,signature);
+  }
+  const keys = new Map<CartEffectClaimLineV1, string>();
+  let identityMismatch = false;
+  for (const line of input.lines) {
+    try {
+      if (exact && !input.variantHash) throw new Error("CART_VARIANT_HASH_MISSING");
+      keys.set(line, exact ? canonicalCartVariantScopeV2(line, input.variantHash!) : line.offerId);
+    } catch { identityMismatch = true; }
+  }
+  for (let i=0;i<input.lines.length;i++) for (let j=i+1;j<input.lines.length;j++) {
+    const a=input.lines[i]!, b=input.lines[j]!;
+    // Even legacy offer scopes must not accept two different variants as one subject.
+    let sameVariant=false;
+    try { sameVariant=canonicalCartVariantPreimageV2(a)===canonicalCartVariantPreimageV2(b); } catch { /* legacy singleton compatibility */ }
+    if (!exact && a.parentProductId===b.parentProductId && a.offerId===b.offerId && !sameVariant) identityMismatch=true;
+    if (!sameVariant && cartComponentsMayShareStockV2(a,b)) identityMismatch=true;
+  }
   let mismatch = input.claims.some((claim) => {
     if (input.effect === "PROTECTED_OUTBOUND" && claim.type === "PRODUCT_MEDIA" && claim.scope.kind === "PRODUCT") {
       const scope = claim.scope;
@@ -548,12 +641,12 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
     }
     const { productId, variantId } = claim.scope;
     return !input.lines.some((line) =>
-      line.parentProductId === productId && line.offerId === variantId
+      line.parentProductId === productId && keys.get(line) === variantId
     );
   });
   const quantityByOffer = new Map<string, number>();
   for (const line of input.lines) {
-    const key = `${line.parentProductId}\u0000${line.offerId}`;
+    const key = `${line.parentProductId}\u0000${keys.get(line)}`;
     quantityByOffer.set(key, (quantityByOffer.get(key) ?? 0) + line.quantity);
   }
   for (const line of input.lines) {
@@ -564,7 +657,7 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
     for (const type of requiredTypes) {
       const matches = scoped.filter((claim) =>
         claim.type === type && claim.scope.kind === "PRODUCT" &&
-        claim.scope.variantId === line.offerId
+        claim.scope.variantId === keys.get(line)
       );
       if (matches.length === 0) {
         missing = true;
@@ -578,7 +671,7 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
         )) mismatch = true;
         if (claim.type === "STOCK") {
           const requiredQuantity = quantityByOffer.get(
-            `${line.parentProductId}\u0000${line.offerId}`,
+            `${line.parentProductId}\u0000${keys.get(line)}`,
           ) ?? line.quantity;
           const orderable = claim.value.status === "PRE_ORDER" || (
             (claim.value.status === "IN_STOCK" || claim.value.status === "LOW_STOCK") &&
@@ -600,7 +693,7 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
       : { protectedClaimTypes: catalogMedia ? input.protectedClaimTypes.filter(type => type !== "PRODUCT_MEDIA") : input.protectedClaimTypes }),
     claims: catalogMedia ? input.claims.filter(claim => claim.type !== "PRODUCT_MEDIA") : input.claims,
   });
-  return { missing: missing || base.missing, conflict: base.conflict, mismatch };
+  return { missing: missing || base.missing, conflict: base.conflict || provenanceConflict, mismatch: mismatch || identityMismatch };
 }
 
 export const DeterministicEffectReadinessV1Schema = z.object({

@@ -1,0 +1,914 @@
+{
+  "kind": "INDEPENDENT_POST_RUN_ACCOUNTING_FIREWALL_CAPTURE_AUDIT_V1",
+  "status": "APPROVED",
+  "disposition": "APPROVE_POST_RUN_ACCOUNTING_FIREWALL_CAPTURE_EVIDENCE",
+  "reviewer": "/root/phase_c_task_completion_implementation_review",
+  "reviewedAt": "2026-11-02T10:08:51.046Z",
+  "runSourceSha": "2628987aae6c62958db4484ba5f152907f833d83",
+  "registrationHash": "da7813d7bc3a180f92b3ebd060355a7d4d984e0fad27d62eae19cd57b52fdb0e",
+  "corpusHash": "d28163cbac6f92918902c3dbf04d560c2ddab564e6d21800ba1f2067f10b1c52",
+  "worldHash": "ed2e8b681dfe552ef0764c83f74828a3503d361949600496d7669146833bebed",
+  "pendingRegistrationHash": "b9caf7889eedde170275b07370fedd95bf2042aa66b3803decc2e7fe31692a34",
+  "scope": {
+    "reportArtifactsByteHashesVerified": 94,
+    "nativeRawCanonicalAndFileHashesVerified": 28,
+    "generationIdentityAndRequestHashesVerified": 36,
+    "ownerOutgoingWireHashesVerified": 31,
+    "verifierActualWireBodiesVerified": 5,
+    "acceptedTextUnitsVerified": 5,
+    "acceptedImageUnitsVerified": 4,
+    "mutationsByReviewer": "THIS_AUDIT_FILE_ONLY",
+    "providerRequestsByReviewer": 0
+  },
+  "checks": {
+    "allFrozenCasesAndTurnsRetained": "PASS_21_CASES_28_TURNS",
+    "registrationSourceIdentityAndCommandExit": "PASS_CLEAN_262_EXIT0",
+    "frozenCohorts": "PASS_8_SALES_READY_13_SOURCE_UNAVAILABLE_UNCHANGED",
+    "generationDenominator": "PASS_36_RECORDS_36_HTTP_31_OWNER_5_VERIFIER",
+    "perSlotPerTurnRolesCapsRetryAndNoPostFailureContinuation": "PASS_MAX112_3OWNER_1VERIFIER_RETRY0",
+    "requestBodyNativeRuntimeAndEvaluatorFirewall": "PASS_36_OF36",
+    "actualOutgoingOwnerWireHashAndBytes": "PASS_31_OF31_MAX_PRESENTED_TEXT_FRAME_61786",
+    "verifierActualRequestBodiesAndDraftBindings": "PASS_5_OF5_ALL_VERDICTS_PASS_MAX_BODY_BYTES_36392",
+    "nativeTurnRawAndGenerationMembershipHashes": "PASS_28_OF28",
+    "acceptedOutboxStatusesMembershipOrderContentAndDurableMediaProof": "PASS_5_TEXT_4_IMAGE",
+    "silentHandoffAndNoSendNoCustomerPayload": "PASS_17_HANDOFF_6_NO_SEND",
+    "humanOwnedFollowups": "PASS_NO_MODELS_NO_NEW_STATE_WRITES",
+    "nativeEffectsPreservedAfterFailure": "PASS_P08_J6_CART_OPENED_ONLY_NO_CONFIRM_OR_PREVIEW",
+    "cleanup": "PASS_DATABASE_DROPPED_SEND_DISABLED_DIAGNOSTIC_STOP_NULL",
+    "reportedLatencyTokensAndUnknownCost": "PASS_NEAREST_RANK_AND_USAGE_SUMS"
+  },
+  "counts": {
+    "registeredCases": 21,
+    "nativeTurns": 28,
+    "repetitions": 1,
+    "maximumGenerationRequests": 112,
+    "generationRecords": 36,
+    "generationHttpRequests": 36,
+    "owner": 31,
+    "verifier": 5,
+    "generationStatuses": {
+      "OK": 35,
+      "MALFORMED": 1
+    },
+    "actualTerminals": {
+      "SEND_ELIGIBLE": 5,
+      "HANDOFF": 17,
+      "NO_SEND": 6
+    },
+    "acceptedTexts": 5,
+    "acceptedImages": 4,
+    "verifierPass": 5,
+    "verifierReject": 0,
+    "verifierTransportErrors": 0,
+    "verifierTimeout": 0
+  },
+  "verifierLatencyMs": {
+    "p50": 6896.470299999994,
+    "p95": 8056.019899999985
+  },
+  "observedTokenUsage": {
+    "inputObserved": 356155,
+    "outputObserved": 35200,
+    "usageRows": 36,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "findings": [
+    {
+      "id": "MODEL_OUTPUT_MALFORMED_S08",
+      "caseId": "c-20261028-s08",
+      "classification": "OBSERVED_MODEL_OUTPUT_ERROR_HTTP200",
+      "facts": "One OWNER record MALFORMED, HTTP200, rawFinishReason MALFORMED_RESPONSE, failureLayer MODEL_OUTPUT. Generic stored errorCode PROVIDER_ERROR is not evidence of a transport failure; no retry and silent handoff."
+    },
+    {
+      "id": "POST_CART_MEDIA_ATTRIBUTION_LIMIT",
+      "caseIds": [
+        "c-po-20261031-p08",
+        "c-20261028-j6"
+      ],
+      "classification": "OBSERVED_FAILURE_BOUNDARY_CAUSE_UNPROVEN",
+      "facts": "CART_OPENED committed with component color __NO_COLOR__, then MEDIA_SELECT ERROR UNKNOWN_INTERNAL and silent handoff. No checkout clarification, preview, purchase confirmation or customer output observed. Generic preregistration media readiness does not prove later exact cart-color media readiness; frozen j6 SALES_READY remains unchanged."
+    },
+    {
+      "id": "OTHER_MEDIA_UNKNOWN",
+      "caseId": "c-20261028-s15",
+      "classification": "OBSERVED_MEDIA_ERROR_CAUSE_UNPROVEN",
+      "facts": "MEDIA_SELECT UNKNOWN_INTERNAL is also present on s15. It does not prove product media absence, a source-only cause, or a sole sentinel root cause."
+    }
+  ],
+  "hashScopes": [
+    {
+      "kind": "registration",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-sealed-20261102-01\\REGISTRATION.json",
+      "sha256": "a3048998a00d437040144fc176d0b715f88493f369cff177f7a980054ce0cc71"
+    },
+    {
+      "kind": "inputApproval",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-sealed-20261102-01\\INPUT_APPROVAL.json",
+      "sha256": "25dc2c8215723faf59fb4d0f4cfee6531ea48402975c12c8a1263810db97032d"
+    },
+    {
+      "kind": "preflight",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-sealed-20261102-01\\PREFLIGHT.json",
+      "sha256": "78c5eefe82554f23516a988b522f183985416e8bef20b67afcc29781ef61aa06"
+    },
+    {
+      "kind": "evidence",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "c810b24278016535947efe4ce2c3a1ca7772e06da717ac914fde858e521ac177"
+    },
+    {
+      "kind": "integration",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/integration.json",
+      "sha256": "effac8aa5bb9f74b2c036ad3218ea727de240e14132bce745285b64b023e516c"
+    },
+    {
+      "kind": "journal",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/NATIVE_REQUESTS.jsonl",
+      "sha256": "fd443aa054c10a8d6994c746503b8682f266ed7694dce61653a93e780fd5b1eb"
+    },
+    {
+      "kind": "primaryAccounting",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-accounting-20261102-01.json",
+      "sha256": "deeb91b2a55d9952ff1a7c77f63d2842339ff393423bd71e0bfbb6c7c3f05e37"
+    },
+    {
+      "kind": "commandRecord",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-command-20261102-01.json",
+      "sha256": "6ef2cafa18328de2bac00d969bbe7525af37416a2961c0bfe50a7897b0588570"
+    },
+    {
+      "kind": "reportInventory",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-report-20261102-01/ARTIFACTS.json",
+      "sha256": "5c13abad9b53a18705816bcf4c59081b3f0739b875502382197d560ed5fae87b"
+    },
+    {
+      "kind": "reportSnapshot",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-report-20261102-01/REPORT.md",
+      "sha256": "9407f7dfa47a2b88e0dc37e67b6d89b960060cd88324da057e0d67f8b8b7292f"
+    },
+    {
+      "kind": "reportConversations",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-report-20261102-01/CONVERSATIONS.md",
+      "sha256": "6c95b8eea81fd79ead990f9ff20de3b95827e3c7c0c0989daa77ead0e84e30d6"
+    },
+    {
+      "kind": "reportPopulation",
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-report-20261102-01/FROZEN_POPULATION.json",
+      "sha256": "5749088076385336d3e6fd834a87b1dc80f18ebd104e3fd7ce42c1dd23c21aa7"
+    }
+  ],
+  "nativeFrames": [
+    {
+      "caseId": "c-po-20261031-p01",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-1ea3b9162761657cf731bf32ba844936c173ed37ceeda63923e16d035aa4dc5d-turn-0.json",
+      "canonicalArtifactHash": "57bf1d35da37199612d2d0706e8b1cdc73d00066ee857070490383494ca3c835",
+      "fileSha256": "213ad3446c73e9879ae60d3028551399508792a990dff4ab914c3a17e9b51bff",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p02",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-c50ae27020fd01bbe673f886dd05cfd3b2a4d18ad0016d55d8c87ae98923d168-turn-0.json",
+      "canonicalArtifactHash": "7ff3fa2d9b493070cfdfa1df600d895c732166415c5403c2b1b8cbc4c270d025",
+      "fileSha256": "d9818713989fc004fa5302d283869e56987e31100ae18b24a0aa59a40fa3fa00",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p03",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-4b6b80036f8cee76aa5c528a50765c77611e92f5976f0f1bf20f10ce19f48a12-turn-0.json",
+      "canonicalArtifactHash": "e2d8ee4675a5fc55159259ef0d219a316550b6a26f2b68c71de34962747733b7",
+      "fileSha256": "d93085fb6a80e5daffe49bb75d062f0df4a5d59687494e12738f25cb13d864d5",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-9e035fa7b1414a338cf84abdd1ddda811970b3530bf03715e1104d3cde28bd85-turn-0.json",
+      "canonicalArtifactHash": "b52407c64fa483e8b13a9c41aaae7aebf2db253e2fea1a31cdbdb023524d1af2",
+      "fileSha256": "93d1c4178a7c554fe4f9818d24e1161ec6540c5c2b516049078a172af216c07f",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-9e035fa7b1414a338cf84abdd1ddda811970b3530bf03715e1104d3cde28bd85-turn-1.json",
+      "canonicalArtifactHash": "70d412349b944d56489fbcc84a0e044b4738efc83396b70eaac01667ba11354e",
+      "fileSha256": "335a44f3ccd34a90f6814a9579227d75add612fbb252b7f5940a7cd0eef8b4ca",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-59e1d86e0f3bde875705981f643209cf9aefd8c3e17aad13d207b21a8f947588-turn-0.json",
+      "canonicalArtifactHash": "c6d41504a6cc31f83bc17d89c344b9fb7a50c2c3ce04e4891296b936aaa5da51",
+      "fileSha256": "6f36b9ed6decd1399a312ff5ae245fdfbbfa5d108def47263bcea31b64ccd478",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-0b9eff2574fe05741e929863399f73712ceefa2de7042ad71160d03ee0e45940-turn-0.json",
+      "canonicalArtifactHash": "bfe3e79f3fbc7b6d9f8f0a8e615d8ccad5c48371192484b5e8a60134f9f46d61",
+      "fileSha256": "70ea9c51b19b604cc49fe788c34a98d48dea269bd613a2c9dcfad183993c5cf0",
+      "terminal": "HANDOFF",
+      "reason": "SIZE_RULE_UNAVAILABLE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-cceda1d7fd27d18614c65a090077eccc66a73b8fb9ea1ebcc0622b57dff8da9b-turn-0.json",
+      "canonicalArtifactHash": "e84c1d1a40535433c178068d29c1fb18a761a52327a1dfd0ecf6504ed1106380",
+      "fileSha256": "41ea362f0c75dbb82168ad6f75ad8e957c11b86ffea7a8747e9e0a7323381e10",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED"
+      ],
+      "cartPresentAfter": true,
+      "mediaUnknownInternal": true
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-cceda1d7fd27d18614c65a090077eccc66a73b8fb9ea1ebcc0622b57dff8da9b-turn-1.json",
+      "canonicalArtifactHash": "5b224b4bebb3ba89862688bc6d82f74f7b802461840cb7c620f3dc53ae902168",
+      "fileSha256": "eb88450fb5fa5039288558a7cefe1ada632564812b25ee0b02f8f3d591904246",
+      "terminal": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "newReceiptKinds": [],
+      "cartPresentAfter": true,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-c294970ad0433bb8ec570d3ccc86a9c06e82bb81b551185c9ca385ebc22e006c-turn-0.json",
+      "canonicalArtifactHash": "398ed249ce6f7019f5079db9fd6be8f13cfc87a09a37347c860d4ff785b26194",
+      "fileSha256": "9002dce4f294fca837f9470bd85f797507927e922fe97142b23ae048e3a49772",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-c294970ad0433bb8ec570d3ccc86a9c06e82bb81b551185c9ca385ebc22e006c-turn-1.json",
+      "canonicalArtifactHash": "744c44b82701b8a3b64e23a33caa5dfdf7f3949d6afd42b125f628ebd4806688",
+      "fileSha256": "5201e0e92831878f1d836d8571f1b4d9b30c463f09f8a842f98a8ad4cee9b8b3",
+      "terminal": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-1d34f3fff47d52247851974f94b3aae53eecadae402304cb7dd653d829ce63b6-turn-0.json",
+      "canonicalArtifactHash": "6055531fab12553b11aab9981cd91157df7b612054c2cb40198e2023954368f2",
+      "fileSha256": "e72ce9c0960548826b1311a44c40f38c1a67539cbdf648c4b01abe7c26f1207b",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-h01",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-16e55bd8f3a3fbd9556b68bdc3fe7b497f5355ef5fa7982b31dda447b8a380ea-turn-0.json",
+      "canonicalArtifactHash": "4862970d46a27d54ab9caa1520b64e22e8f653d0518060f4c9291482f985bb48",
+      "fileSha256": "72ef0087d16b91c20cc45e736ad0dc453c643470263dd426160554087213f230",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-po-20261031-h02",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-9716c3b1a0784d7b6cb208344e3044c19edf9f0241f0bc867569fc5767c592b5-turn-0.json",
+      "canonicalArtifactHash": "8cdefb32c6e7285814be06a1a3acb4d679302e209bd734edea6881ab746c91e4",
+      "fileSha256": "8ca6b2b8d5e9d1faa7b3301aa5c07471239d52d6f87458c0beb1b343a155e9a2",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-0cc8e2792314d2c7bdcfcffa397820b7cb20232db82df8402a6b0df29087ba4e-turn-0.json",
+      "canonicalArtifactHash": "05391400c4e38a9922000da595213b96aa6d43aeb075f29a151a8bc6919cb58d",
+      "fileSha256": "a3c614e82ecbdfb9ba84ba25226d4f818a5cbc4594a9a56ab69eabbda0725e75",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-a5544dddfc471e04c00f7887f2215f314868e7a2aad288d94633d264f8707908-turn-0.json",
+      "canonicalArtifactHash": "6339b305f18b75da6ff66a91b3852981c06b259ad611213c917fae7ba137e3e1",
+      "fileSha256": "70458aa50173972bd4323280c5b17cc05dd1bee0171003a5edb656d6e3600901",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-c47abd0e94bf9f6b92cf4a21de70818c4ea16b71cdce1765c0f72de640033ea8-turn-0.json",
+      "canonicalArtifactHash": "3cf9fed788bd257ba55e9112df76ddc564cc677ce3294bd92be0b32741dc46ad",
+      "fileSha256": "37c4273258838a2f5d29e615b363ee37591271b82f13108cee8da60ba88eed31",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-97a8bb8f386a85304536733f8e31e5682699a747875d9be972c6a18c260f8cd6-turn-0.json",
+      "canonicalArtifactHash": "227bdbad92825d61e2bfab11967542890bbdc665c52c892a3e7a4ec01e88883e",
+      "fileSha256": "114c7452f95d5b5538e75f534f17f6738887b9c19cc863d1c47f90e2a92a89d8",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-3775a823f4183f4691aa2208b2c05a69937c2ae3714d4c3ca02ccfd72c2823c1-turn-0.json",
+      "canonicalArtifactHash": "969f72414f8aa5a7ed9e0b1086d546d030c31db3eef296151011202f975ce3c2",
+      "fileSha256": "51072cbadbdd996a5e442ec562ee893f375b21cedf72bc0845d61ca38138c03d",
+      "terminal": "HANDOFF",
+      "reason": "AFTER_SALES_REQUEST",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-381223eb3c6b7cf1caac517ab4a53c31b8943f08ea619a5113557d11b38297e2-turn-0.json",
+      "canonicalArtifactHash": "96a0d581a57999dadfb5c614b77c8cad510640dbfcb198a15f8a7d93d82083b1",
+      "fileSha256": "c6cd3d935399ab72823931e4929bd2a77b19eac48d660a29dbdfda7a9d432c77",
+      "terminal": "HANDOFF",
+      "reason": "DEFECT",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-14613e8b544cdf723741ca9a280fd2ae0516d820a02f8af8d2716d4b607d508e-turn-0.json",
+      "canonicalArtifactHash": "010030d90fda5c8101219e97c90b44753d0a91a73f5214f68a2c85c5d5365241",
+      "fileSha256": "4bd121659be2c1514895a3f7931bf88e09b0ee1247d0b3a8c98deb3c5e6a4678",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-358eacfb80e6d231c0fbca978e108c3c649eeccd1cdbdf11445e929f91789044-turn-0.json",
+      "canonicalArtifactHash": "fbd8507ca4b3aa92476ce379ba803e252d47866539a2750b2656860bdd9c86a5",
+      "fileSha256": "486b517d68a9859a0100762c56f27c0465813ab7b0cf2ec75e99d29895553364",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": true
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-90bed95b0579fe1bb92a2e48400868a39f65086a00afaf03e245a5bad893fa2c-turn-0.json",
+      "canonicalArtifactHash": "00124634a8e10a950d52d6f0520c96dc6356fb3e5141e5778d8b5d4a947e4ff5",
+      "fileSha256": "2d5ad6faca29316e80b7c121b839c702287fec844747e8e0e62641798cb89769",
+      "terminal": "HANDOFF",
+      "reason": "SIZE_RULE_UNAVAILABLE",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-90bed95b0579fe1bb92a2e48400868a39f65086a00afaf03e245a5bad893fa2c-turn-1.json",
+      "canonicalArtifactHash": "97adb82a73a0056c4b24fc00a14d94f698cb3dc04caa5d09765cdcaf5cf1db46",
+      "fileSha256": "5a1bf78410d3e7d6fb767093047225672300d9ffc2c7a535e48a591685858b16",
+      "terminal": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 2,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-90bed95b0579fe1bb92a2e48400868a39f65086a00afaf03e245a5bad893fa2c-turn-2.json",
+      "canonicalArtifactHash": "0f0b87fa50539ca8955e33ff3a3334c74349a7f5b835da3ff7c43254fc2968d2",
+      "fileSha256": "983c5a1f36e245f103bca382d326d3ef52318f2fb9f7ead81967909494b371d3",
+      "terminal": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "newReceiptKinds": [],
+      "cartPresentAfter": false,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-60e93f29eb4fbba3bfc0ade68a897ad8f9d40acaa3737811f144945d69233d0f-turn-0.json",
+      "canonicalArtifactHash": "09e76c042b23085d27ce407c819584f5abe7862cb39beed31cc6df32553ccd50",
+      "fileSha256": "695b1e645a8dcb738633b201e52191defd550fad38a33e00e08074d8aa83e84d",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "newReceiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED"
+      ],
+      "cartPresentAfter": true,
+      "mediaUnknownInternal": true
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-60e93f29eb4fbba3bfc0ade68a897ad8f9d40acaa3737811f144945d69233d0f-turn-1.json",
+      "canonicalArtifactHash": "5cbaad70cdc3689639900ec825a66e3cabb87bd48d2c73f4feb8c9692e2248f8",
+      "fileSha256": "529b49ace256ef92e4aaad6c6cb36c744b5424e0c0bb8b3c6d7053e7ad50e511",
+      "terminal": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "newReceiptKinds": [],
+      "cartPresentAfter": true,
+      "mediaUnknownInternal": false
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-run-20261102-01/native-60e93f29eb4fbba3bfc0ade68a897ad8f9d40acaa3737811f144945d69233d0f-turn-2.json",
+      "canonicalArtifactHash": "d90da4dbde3f9d4dba0997c3670b5ad67ba908553c8b91d55a784f1985b5c74a",
+      "fileSha256": "fef04b7fff6437443be73d104845312837d900450c388db1d7a8b81041265461",
+      "terminal": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "newReceiptKinds": [],
+      "cartPresentAfter": true,
+      "mediaUnknownInternal": false
+    }
+  ],
+  "generationIdentities": [
+    {
+      "id": "677ff2f9-19bd-4db4-aeed-c334f000d614:owner:1",
+      "slotId": "1ea3b9162761657cf731bf32ba844936c173ed37ceeda63923e16d035aa4dc5d",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "d07bd273facf89251b94f6001922538823c0c97c7cbf522f9e6d368c43536d9f",
+      "requestHash": "65222ad69167e807b53a4499f15addf7b49bf1bb6e684350290db9ef90674692",
+      "actualOwnerWireSha256": "0e4dc4339605f99f9a262fbc8ea350d6ceebc348fef804e58608b0553e7ffc07"
+    },
+    {
+      "id": "677ff2f9-19bd-4db4-aeed-c334f000d614:owner:2",
+      "slotId": "1ea3b9162761657cf731bf32ba844936c173ed37ceeda63923e16d035aa4dc5d",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "d07bd273facf89251b94f6001922538823c0c97c7cbf522f9e6d368c43536d9f",
+      "requestHash": "51b9c3a24c3698f6b858d7d145652cf5be421f514c5e0ae7f0584f36cbf9f0ba",
+      "actualOwnerWireSha256": "c886ddc12cb56ff28a1160421acfb296b5c2a4093488d09288ba7f1d5af45b5c"
+    },
+    {
+      "id": "677ff2f9-19bd-4db4-aeed-c334f000d614:verifier:1",
+      "slotId": "1ea3b9162761657cf731bf32ba844936c173ed37ceeda63923e16d035aa4dc5d",
+      "turnIndex": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "d07bd273facf89251b94f6001922538823c0c97c7cbf522f9e6d368c43536d9f",
+      "requestHash": "b18147fadaddc0d8e4b799c70655948f9b6505c92c84374126d7132fb4c21707",
+      "actualOwnerWireSha256": null
+    },
+    {
+      "id": "579d2c5e-1193-4efe-a51f-357396b2f1b8:owner:1",
+      "slotId": "c50ae27020fd01bbe673f886dd05cfd3b2a4d18ad0016d55d8c87ae98923d168",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "df3810db0b1f5015ae69408c201abb2c8f8c4cf58348592dab75e95dc84b9b70",
+      "requestHash": "145545b1dbf52037d19d620857aa0d628644d65628d07667c5b05bc28e31b1bf",
+      "actualOwnerWireSha256": "0b741e8dee959b693145dd2e17f72edc60ee46d3ac7c2bffce878c834290be63"
+    },
+    {
+      "id": "7482495e-e41c-4401-ae03-44cd7a4ffee8:owner:1",
+      "slotId": "4b6b80036f8cee76aa5c528a50765c77611e92f5976f0f1bf20f10ce19f48a12",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "a59bb5aac93f6086c1e63087318d2ed8ca8b119f50168a117002d85a91a532a5",
+      "requestHash": "d3c0198e2e850abcf6b71003d2ed6d7f86117e76dc808fabdb460331d0490933",
+      "actualOwnerWireSha256": "2acc02cd76c62ba64ef82322b7a5f0cb97011f313999f9ebcb37ad0d9aa65084"
+    },
+    {
+      "id": "7482495e-e41c-4401-ae03-44cd7a4ffee8:verifier:1",
+      "slotId": "4b6b80036f8cee76aa5c528a50765c77611e92f5976f0f1bf20f10ce19f48a12",
+      "turnIndex": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "a59bb5aac93f6086c1e63087318d2ed8ca8b119f50168a117002d85a91a532a5",
+      "requestHash": "efb03f4b8119326e0b5f79f1bf0e6df1b6c3d8126cf224d1c91c379431d75537",
+      "actualOwnerWireSha256": null
+    },
+    {
+      "id": "fbfb5c73-b916-4d8d-8843-a4e0fb82f337:owner:1",
+      "slotId": "9e035fa7b1414a338cf84abdd1ddda811970b3530bf03715e1104d3cde28bd85",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "2b952571caf2dc2a7d758856eb591609d6395122b29f8069070ec0a14e8fad45",
+      "requestHash": "e01f7b58a95d7347664fb4c6223f88a6bc0f8175a3bff0287a5b7503a7b1538d",
+      "actualOwnerWireSha256": "83fec23b3a93c11ed203b7f3810089a240f7845fcd4afae047c2db1fe4444f43"
+    },
+    {
+      "id": "fbfb5c73-b916-4d8d-8843-a4e0fb82f337:owner:2",
+      "slotId": "9e035fa7b1414a338cf84abdd1ddda811970b3530bf03715e1104d3cde28bd85",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "2b952571caf2dc2a7d758856eb591609d6395122b29f8069070ec0a14e8fad45",
+      "requestHash": "c543704b47d64c80a90c7e889d54972baa8684052dff3b9e2fcb3eac441635f6",
+      "actualOwnerWireSha256": "3d7bed9ed04f09bf2dc292088dfa46ce65a3a4b8db1d1ef212d89dafc0a21e30"
+    },
+    {
+      "id": "fbfb5c73-b916-4d8d-8843-a4e0fb82f337:verifier:1",
+      "slotId": "9e035fa7b1414a338cf84abdd1ddda811970b3530bf03715e1104d3cde28bd85",
+      "turnIndex": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "2b952571caf2dc2a7d758856eb591609d6395122b29f8069070ec0a14e8fad45",
+      "requestHash": "eb41f580d7cecba0efca79b74aae704520fc238504a89427279da9ce0ebf099d",
+      "actualOwnerWireSha256": null
+    },
+    {
+      "id": "a969874d-8d46-4231-925a-f3bd73b4a212:owner:1",
+      "slotId": "9e035fa7b1414a338cf84abdd1ddda811970b3530bf03715e1104d3cde28bd85",
+      "turnIndex": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "f64cf35cfd59a3cfb21bed34ccc33dfb0f0df4939493045a6b4c22f82732d86d",
+      "requestHash": "2546b857a431975da9fc7582dc8e6091ab56e5e27925777ef89d400c5f8aac1d",
+      "actualOwnerWireSha256": "2d7cc9d5075468bee567ac139d2ab12e3f7d7c90e33172f887b29dcec21e723d"
+    },
+    {
+      "id": "a969874d-8d46-4231-925a-f3bd73b4a212:verifier:1",
+      "slotId": "9e035fa7b1414a338cf84abdd1ddda811970b3530bf03715e1104d3cde28bd85",
+      "turnIndex": 1,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "f64cf35cfd59a3cfb21bed34ccc33dfb0f0df4939493045a6b4c22f82732d86d",
+      "requestHash": "55d4fbc923523e2c62c42df499106bb4f5418d22203377fc339ff4e119869023",
+      "actualOwnerWireSha256": null
+    },
+    {
+      "id": "a24c7333-a2ed-4207-83be-7f95df5a6b21:owner:1",
+      "slotId": "59e1d86e0f3bde875705981f643209cf9aefd8c3e17aad13d207b21a8f947588",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "3320bde56097b8dbb94c3fe2a923fc9c98f837671ade312db553d93a31a448e4",
+      "requestHash": "135ad983d66e4fac52048a1f31cdedc2ba66c99f6c6beadbaefea1ddc7480b1b",
+      "actualOwnerWireSha256": "eb3805c004bd2cde41b9ee861bca37d9567fa270e75a21e2545fa422a3fb292e"
+    },
+    {
+      "id": "cb9604ce-9d0f-401b-8b5c-2a03ac03344d:owner:1",
+      "slotId": "0b9eff2574fe05741e929863399f73712ceefa2de7042ad71160d03ee0e45940",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "55815a3ae38c73bc0ec849e76042d0e06671165a6e21f1d41c3147061456f1af",
+      "requestHash": "889e578a4c59f340a038732ddcd7a041beddfd856dbcac20aedc2e97c0512f76",
+      "actualOwnerWireSha256": "b6e14abe052131a72852d8fc523598237ce2624b481bc691b34a77cc5d9fd548"
+    },
+    {
+      "id": "cb9604ce-9d0f-401b-8b5c-2a03ac03344d:owner:2",
+      "slotId": "0b9eff2574fe05741e929863399f73712ceefa2de7042ad71160d03ee0e45940",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "55815a3ae38c73bc0ec849e76042d0e06671165a6e21f1d41c3147061456f1af",
+      "requestHash": "3148e3608b1f9ee72f8d8b74f32fe22857ab80fb3b8f0f7211c99b2b0d904b5c",
+      "actualOwnerWireSha256": "83abd3fd389d4458d9792b36adbe812e862e45a3e740d38ad39574483479efe8"
+    },
+    {
+      "id": "bc1e24d3-5e64-480f-bf8d-8a25fa9534f2:owner:1",
+      "slotId": "cceda1d7fd27d18614c65a090077eccc66a73b8fb9ea1ebcc0622b57dff8da9b",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "1bbfc18523ff1dc9b737bfb1d058562518b837cb7430de8ed653ddccf58e70c4",
+      "requestHash": "196b0e04ba7aec065bca5a7928c0c914743f2bfcb9ad3f2f833268b334d3517a",
+      "actualOwnerWireSha256": "769cef41fa6b004440f11becc633df969e2613ce454f1d22fd17476aae4a06b7"
+    },
+    {
+      "id": "bc1e24d3-5e64-480f-bf8d-8a25fa9534f2:owner:2",
+      "slotId": "cceda1d7fd27d18614c65a090077eccc66a73b8fb9ea1ebcc0622b57dff8da9b",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "1bbfc18523ff1dc9b737bfb1d058562518b837cb7430de8ed653ddccf58e70c4",
+      "requestHash": "396c225694239f2a4549f9d1e68c2ef1b5360d0f2662bdd6648f1314adbada1e",
+      "actualOwnerWireSha256": "1a5d9e45c4aa89b67e0f03e1af5243b0e2abf118133af84888d439f2aad50f3b"
+    },
+    {
+      "id": "660277b5-b4cd-42f7-b057-7463e13630bf:owner:1",
+      "slotId": "c294970ad0433bb8ec570d3ccc86a9c06e82bb81b551185c9ca385ebc22e006c",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "900eb31d632bb68881a4e649f68ccbb870163fe46db9027195a8fad9292777bb",
+      "requestHash": "a64770eac8947068bf8d2df4d2b167c834b16d867b1e5cb466080d5058c33946",
+      "actualOwnerWireSha256": "628905863daad00cd2df0ad8ae75cde8183d70ab32a368f65cf8ea842ac2b159"
+    },
+    {
+      "id": "b89757f3-0628-4927-8ce8-f0e0886c0945:owner:1",
+      "slotId": "1d34f3fff47d52247851974f94b3aae53eecadae402304cb7dd653d829ce63b6",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "3c1c90a00aac581e5d7e3a595cb0e07ce401afdec738b15cf4d0e7db0d2247f5",
+      "requestHash": "7d9fad2e016995a2ce4517afb5afda1e18560f5e0c73b37b29077511eece4069",
+      "actualOwnerWireSha256": "f169afe62d245c9ca9c3d197973eaf867c0be21541f69fc7f62edb54e4728dcd"
+    },
+    {
+      "id": "b89757f3-0628-4927-8ce8-f0e0886c0945:owner:2",
+      "slotId": "1d34f3fff47d52247851974f94b3aae53eecadae402304cb7dd653d829ce63b6",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "3c1c90a00aac581e5d7e3a595cb0e07ce401afdec738b15cf4d0e7db0d2247f5",
+      "requestHash": "5bffba5a1a29f8e55555f94b10fc70a8594b12f74ae5c88636443f509655f5b3",
+      "actualOwnerWireSha256": "14bfdc8882eff87855e54c7e7fce4786bc4566f47dd5fc0d58d4220cf14b8920"
+    },
+    {
+      "id": "68ff656d-ead8-4129-874d-f75402923531:owner:1",
+      "slotId": "16e55bd8f3a3fbd9556b68bdc3fe7b497f5355ef5fa7982b31dda447b8a380ea",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "4ebf1a9a333d44f1ac592955fc815074a4393ae41f5c5c3a934a70caff17166f",
+      "requestHash": "fd23a6b20f394a28d92def0cdbe255c5e1605d713b854d3a0714298bced897d8",
+      "actualOwnerWireSha256": "41f0c1f9117cc3c4cae83ff0a15fa979575400fea95dd5d4494cb8519001080f"
+    },
+    {
+      "id": "2af6e2a2-fabd-4d9f-9699-54819da1a1d3:owner:1",
+      "slotId": "9716c3b1a0784d7b6cb208344e3044c19edf9f0241f0bc867569fc5767c592b5",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "044c7f1c39ec14031d9f67e8697dd45f44ac89a9cc29cb82bd70370b0770fb33",
+      "requestHash": "4a9431bf1c824c3adb5c83c392230984e85582380122f3799eb41664f4fbf739",
+      "actualOwnerWireSha256": "7e72802f1ab2a63b6fd84b22300e82fc22abedb83cc23b075934ceba2c4d2c85"
+    },
+    {
+      "id": "2299a9c6-da49-440d-a5de-579752e01f1d:owner:1",
+      "slotId": "0cc8e2792314d2c7bdcfcffa397820b7cb20232db82df8402a6b0df29087ba4e",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "ed7a855edebc9e30e246f83bbff4a0832192cf8d04685f1bf8413e1c1c11010d",
+      "requestHash": "69d42fcb9188e1d188299259f1e68fe2fc8ca49d5069c93ef5079a7d2b86cfbe",
+      "actualOwnerWireSha256": "80434e1c86a4063300f735819f4d9275e8b973ff7b1c4a9b307ccb93c8316efe"
+    },
+    {
+      "id": "2299a9c6-da49-440d-a5de-579752e01f1d:owner:2",
+      "slotId": "0cc8e2792314d2c7bdcfcffa397820b7cb20232db82df8402a6b0df29087ba4e",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "ed7a855edebc9e30e246f83bbff4a0832192cf8d04685f1bf8413e1c1c11010d",
+      "requestHash": "98efbca2a7eaf2af8d705389464c9eacff0167ef042181d3f1256f00f08c55d7",
+      "actualOwnerWireSha256": "ab554432c07876f44fb22bab407aed7bbd57b1b33be3d82957d8d071d018ebb7"
+    },
+    {
+      "id": "2299a9c6-da49-440d-a5de-579752e01f1d:owner:3",
+      "slotId": "0cc8e2792314d2c7bdcfcffa397820b7cb20232db82df8402a6b0df29087ba4e",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "ed7a855edebc9e30e246f83bbff4a0832192cf8d04685f1bf8413e1c1c11010d",
+      "requestHash": "675f30829990d1215677fc67eec2b1ccd9eda342cd00c9f791fe71c2054b45bb",
+      "actualOwnerWireSha256": "530580cbc08f0b882deae30e9d88380efe658705df18f3f7ec789b66b03ff4a0"
+    },
+    {
+      "id": "4b0062a3-ab57-4599-a63a-638c6772012e:owner:1",
+      "slotId": "a5544dddfc471e04c00f7887f2215f314868e7a2aad288d94633d264f8707908",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "e03a00065bc259a3550c4802a567b4ecca16a9de0bb18aca985f60da0427cbf7",
+      "requestHash": "18cd072ae4d57dc4a7bed8f6393f277d3439e84c093f6fb7a232c2a6016e8364",
+      "actualOwnerWireSha256": "4ad8510ed2800e70276338ead4db2cbdcdc4e1ef0a84766de2eb81d7f65563a3"
+    },
+    {
+      "id": "118cfe95-15fd-43e5-b835-26835815f76c:owner:1",
+      "slotId": "c47abd0e94bf9f6b92cf4a21de70818c4ea16b71cdce1765c0f72de640033ea8",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "boundRuntimeHash": "a9e14fb56a5441cb2a78f85af1995578b8525d80f2fbfe22513ca146267c4a09",
+      "requestHash": "704196da1bbf02a221221e622a0b47111dd13a0519f2acab903fc232c15677d6",
+      "actualOwnerWireSha256": "3aa5c78a7b24eef56e9e2ab7b0676c67e41c5997c6e07762158ab0a46ea9d013"
+    },
+    {
+      "id": "79e3f0c8-714a-4031-ba78-502088da9fe2:owner:1",
+      "slotId": "97a8bb8f386a85304536733f8e31e5682699a747875d9be972c6a18c260f8cd6",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "cfa8c47c6077321398b6efcaa1d83a9104d28137a5879fad0a4b312378b86077",
+      "requestHash": "134e43461f23563875c7e7d742014ebbbc2c46e63283a2a527ff8a536882ad64",
+      "actualOwnerWireSha256": "311dfa2f9d8efa014aa15ffe6dfcb9af177cea24f7276e7456a7d034186fb47e"
+    },
+    {
+      "id": "b06aede1-7015-47ea-8d8d-00cf814895c6:owner:1",
+      "slotId": "3775a823f4183f4691aa2208b2c05a69937c2ae3714d4c3ca02ccfd72c2823c1",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "05efbe37df1dda45cb797c6e7fc020126a866b6aad881907800275ccf6ffde1e",
+      "requestHash": "dbc39fc0bff82ed9c603df90eed49bdadc8aa3a46ca9f20e31b39330d19d8e86",
+      "actualOwnerWireSha256": "9ccbe09cbd71231c3cd6583674a13e27486194c79645dac33dce9b7552a9536f"
+    },
+    {
+      "id": "b06aede1-7015-47ea-8d8d-00cf814895c6:owner:2",
+      "slotId": "3775a823f4183f4691aa2208b2c05a69937c2ae3714d4c3ca02ccfd72c2823c1",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "05efbe37df1dda45cb797c6e7fc020126a866b6aad881907800275ccf6ffde1e",
+      "requestHash": "8d7f6fa28372a3a52a843a62efd097986ec38b433bb3a89589d738398b283e72",
+      "actualOwnerWireSha256": "ef43b4f28e5ff18a6298e452ead29e5271074932a381bb4014718cc1c8a144d2"
+    },
+    {
+      "id": "68a82057-2ba8-4f63-bc46-09292c09895b:owner:1",
+      "slotId": "381223eb3c6b7cf1caac517ab4a53c31b8943f08ea619a5113557d11b38297e2",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "0dabb3eeb997047f69eabef1b842b1cedfb79e96c9a5c67a0435118aac5b2542",
+      "requestHash": "93de18be8c69050822bb4be236d2e47785f03c00bbd5c2a771518b8582ee894b",
+      "actualOwnerWireSha256": "e5c1195d5b327764f8edbeaa9cdc0ce345bec495d95f9b1d262f5747f64f14e5"
+    },
+    {
+      "id": "217443f6-44d2-4a5d-b8b3-89a8b3e50c4b:owner:1",
+      "slotId": "14613e8b544cdf723741ca9a280fd2ae0516d820a02f8af8d2716d4b607d508e",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "0d672fa0f7e5f2ae50d591a182a79faf8cc9a23d2fd51097fc7ff02ab88c8cee",
+      "requestHash": "b83149a9be982e9f9d39192664a428a191bcd8e1cf2d9508e92a861f3dfead86",
+      "actualOwnerWireSha256": "7dfe3000155168b95a99186e5d111fe77ce5fe233ed49c4e28336c49536dd6b5"
+    },
+    {
+      "id": "217443f6-44d2-4a5d-b8b3-89a8b3e50c4b:verifier:1",
+      "slotId": "14613e8b544cdf723741ca9a280fd2ae0516d820a02f8af8d2716d4b607d508e",
+      "turnIndex": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "0d672fa0f7e5f2ae50d591a182a79faf8cc9a23d2fd51097fc7ff02ab88c8cee",
+      "requestHash": "bb4414cbdded400e0b70d61752e89bcbcbf1df4a639c500026123a1d4e00650d",
+      "actualOwnerWireSha256": null
+    },
+    {
+      "id": "9b48e45f-3506-4372-a415-d5872a079b18:owner:1",
+      "slotId": "358eacfb80e6d231c0fbca978e108c3c649eeccd1cdbdf11445e929f91789044",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "c5de91af986d88eaa8f322b1f176667b6d779d6f430a55998368d1c1cbbd5279",
+      "requestHash": "644e36863def68b5d018a95e7aa60705ceff3c1d38e515c51044bf911d9e2621",
+      "actualOwnerWireSha256": "ba8403abc1a25f9d2af10b3ece2e0abe64b250023554e9c3164ce18e5a66d2ec"
+    },
+    {
+      "id": "6cefc6c7-0736-4355-9a78-427e802ee88c:owner:1",
+      "slotId": "90bed95b0579fe1bb92a2e48400868a39f65086a00afaf03e245a5bad893fa2c",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "505928e5d81e5f86bfd66568b8aac5e3053eaa98b4bf1849e0e26be27e7c9a7f",
+      "requestHash": "b938579b9be32b43acc606c217d18709c225e76ac53c7f3c71417c29e8a1f814",
+      "actualOwnerWireSha256": "0214d87729b4db9309bd692f4a1034fb049cac6e9a3fa83ec6f23caa3d537265"
+    },
+    {
+      "id": "977c57d5-013d-4d12-ab35-25890e451a7e:owner:1",
+      "slotId": "60e93f29eb4fbba3bfc0ade68a897ad8f9d40acaa3737811f144945d69233d0f",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "3e90d3a8fc9a1ad1cacb692fd9b7ddba8ae890244157c52266084dcb111f4001",
+      "requestHash": "d56d0daa8d294018fdfe3574ba8e9900447f73d7193b4591bb54b49c982cfdd7",
+      "actualOwnerWireSha256": "a124529259d6460f201b9f475fe1abcfc75ab7f8f13df151c87abb34a5f721b5"
+    },
+    {
+      "id": "977c57d5-013d-4d12-ab35-25890e451a7e:owner:2",
+      "slotId": "60e93f29eb4fbba3bfc0ade68a897ad8f9d40acaa3737811f144945d69233d0f",
+      "turnIndex": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "boundRuntimeHash": "3e90d3a8fc9a1ad1cacb692fd9b7ddba8ae890244157c52266084dcb111f4001",
+      "requestHash": "c07717730033e2444a195b352fb41652f9c56d3847bd707e0d2cd689502b0dd3",
+      "actualOwnerWireSha256": "7e94eef2707783b2194764cf2d9c854682c102d3464915ca45f856dffe8aac7e"
+    }
+  ],
+  "limitations": [
+    "Accounting/firewall/capture evidence approval only; independent whole-turn quality remains NOT_GRADED.",
+    "5 verifier PASS results do not establish semantic quality of all21cases or success of checkout in this model batch.",
+    "No new checkout-media code-owned send was observed in this model batch; earlier pure/native PG evidence is a separate scope.",
+    "Known development population, N1; not fresh holdout, qualification, C3 matched information parity, production SLO or GO.",
+    "Source-write/live-send absence is bounded to source-bound frozen isolated harness/command records; no production service audit was performed.",
+    "No new provider request, runtime patch, cohort relabel, retry, deploy or follow-up campaign is authorized by this audit."
+  ]
+}

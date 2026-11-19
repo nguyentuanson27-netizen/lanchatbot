@@ -86,9 +86,20 @@ test('protocol identity is fixed before any provider invocation',()=>{
 });
 
 test('B request bounds are frozen per role and reject silent owner or verifier changes',()=>{
- assert.deepEqual(manifest.requestBounds,{ownerWireBytes:65536,verifierWireBytes:65536});
- for(const requestBounds of [undefined,{ownerWireBytes:32768,verifierWireBytes:32768},{ownerWireBytes:65536,verifierWireBytes:49152}])
+ assert.deepEqual(manifest.requestBounds,{ownerWireBytes:70000,verifierWireBytes:70000});
+ for(const requestBounds of [undefined,{ownerWireBytes:32768,verifierWireBytes:32768},{ownerWireBytes:70000,verifierWireBytes:65536}])
   assert.throws(()=>validateProtocol({...manifest,requestBounds}),/REQUEST_BOUNDS/);
+});
+
+test('verifier accepts 70000 bytes and rejects 70001 before provider dispatch',async()=>{
+ const base=request(),size=Buffer.byteLength(JSON.stringify(buildVerifierRequest(manifest,base)));
+ for(const delta of [-1,0,1]){
+  const r={...base,instructions:base.instructions+'x'.repeat(70000-size+delta)};
+  let calls=0;
+  const verifier=createCommerceVerifier(manifest,async()=>{calls++;return {status:'OK',answer:'{"verdict":"PASS","violations":[]}',providerRequests:1};});
+  if(delta>0){assert.throws(()=>buildVerifierRequest(manifest,r),/VERIFIER_INPUT_BOUND/);await assert.rejects(verifier(r),/VERIFIER_INPUT_BOUND/);assert.equal(calls,0);}
+  else{assert.equal(Buffer.byteLength(JSON.stringify(buildVerifierRequest(manifest,r))),70000+delta);await verifier(r);assert.equal(calls,1);}
+ }
 });
 test('verifier request retains a bounded multi-product context instead of failing before provider dispatch',()=>{
  const r=request();r.instructions=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');

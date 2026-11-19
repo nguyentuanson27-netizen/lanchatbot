@@ -1,0 +1,20 @@
+[
+  {
+    "group": "r1",
+    "runSourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+    "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+    "corpusHash": "eef693ede670b79f721d6db0ec8f194d2cc87613518a6bbce073dc164a6647bf",
+    "scopeHash": "cb9f7022a7a9df1d19738e24b4d4d8a18b6d3594af3c765a71b1d45cb42ab9d0",
+    "registrationHash": "802e2eaaed5f9f9344f0f77f83f24eb328784c95316d77f504ec79c6bb7d2b39",
+    "configHash": "8e569bac4c87d67cb51abb3db10d6541f624a9f7e4c19028466496b84213a2fa"
+  },
+  {
+    "group": "r2",
+    "runSourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+    "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+    "corpusHash": "24db2f7a3298ed65c2f1575b62e4eabd1e4f8ae7c641ff4baaf489edf7efbd17",
+    "scopeHash": "b67368cd5cb762e69ade4bb4904a11a769d2734adcff8e8c34ab32a5085d2929",
+    "registrationHash": "293f3c01086378e0723b10bc4f5de411d87c06b1d310028af6fd477ae16118a1",
+    "configHash": "4f4f2a74373885fc8f1550b7b62d4f9dce9ecc9a18e44015dab94d05d3720861"
+  }
+]

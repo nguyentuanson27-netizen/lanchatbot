@@ -295,7 +295,7 @@ export const ContextV2Schema = z.object({
   buyingIntent: z.object({
     decision: z.enum(["NONE", "CONSIDERING", "COMMITTED", "NEGATED"]),
     requestedAction: z.enum([
-      "NONE", "OPEN_CART", "ADD_TO_CART", "SET_QUANTITY", "SET_COMPONENT_VARIANT", "REMOVE_FROM_CART", "PROCEED_TO_PAYMENT",
+      "NONE", "OPEN_CART", "ADD_TO_CART", "SET_QUANTITY", "SET_COMPONENT_VARIANT", "REPLACE_LINE", "REMOVE_FROM_CART", "PROCEED_TO_PAYMENT",
     ]),
     productId: CanonicalProductIdV1Schema.nullable(),
     evidenceHash: Sha256Schema.nullable(),
@@ -331,6 +331,10 @@ export const ContextV2Schema = z.object({
   contextHash: Sha256Schema,
 }).strict().superRefine((value, context) => {
   const claimTypes = [...new Set(value.verifiedClaims.map(({ type }) => type))].sort();
+  // Legacy ContextV2 consumers have product-only size semantics. Component-aware
+  // candidate tools use their own target-bound trusted envelope instead.
+  if(value.verifiedClaims.some(c=>c.type==="SIZE_FIT"&&c.value.fitTarget?.kind==="COMPONENT"))
+    context.addIssue({code:z.ZodIssueCode.custom,path:["verifiedClaims"],message:"ContextV2 does not authorize component fit"});
   if (JSON.stringify(claimTypes) !== JSON.stringify([...value.verifiedClaimTypes].sort())) {
     context.addIssue({
       code: z.ZodIssueCode.custom,

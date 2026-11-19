@@ -1,0 +1,51 @@
+{
+  "kind": "FROZEN_CONTINUATION_RECONSTRUCTION",
+  "observations": [
+    {
+      "file": "native-c364beee37c67187ba51b94667c668028e85386f5a91d3690edf7b3622810e15-turn-0.json",
+      "latest": "Chị lấy mỗi áo của Thạch Thảo thôi, báo chị giá áo nhé.",
+      "error": null,
+      "budget": {
+        "textFrameBytes": 64985,
+        "systemBytes": 22000,
+        "toolSchemaBytes": 18946,
+        "trustedFrameBytes": 11825,
+        "dialogueBytes": 11954,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 65162,
+        "basePresentedFrameBytes": 65162,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      },
+      "baselinePresentedBytes": 68514,
+      "actualToolResultsMatched": true,
+      "nativeSignedContentPreserved": true,
+      "fullExpandedBodyMatchesBaseline": true
+    },
+    {
+      "file": "native-f990ba490ee55d298dc8d9996ac816dadcba2453d0efad12572d31636243f88a-turn-0.json",
+      "latest": "Chị lấy một áo Thạch Thảo, gửi về Cần Thơ thì cả ship hết bao nhiêu em?",
+      "error": null,
+      "budget": {
+        "textFrameBytes": 64727,
+        "systemBytes": 22000,
+        "toolSchemaBytes": 18946,
+        "trustedFrameBytes": 12815,
+        "dialogueBytes": 10706,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 64904,
+        "basePresentedFrameBytes": 64904,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      },
+      "baselinePresentedBytes": 68506,
+      "actualToolResultsMatched": true,
+      "nativeSignedContentPreserved": true,
+      "fullExpandedBodyMatchesBaseline": true
+    }
+  ],
+  "providerRequests": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "limitation": "Failed second bodies were not captured. These are reconstructions from frozen sources and captured successful outputs/tool results at the original clock, not byte-identical historical requests or model results."
+}

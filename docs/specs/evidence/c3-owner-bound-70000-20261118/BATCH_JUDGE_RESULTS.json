@@ -1,0 +1,546 @@
+{
+  "identity": {
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "version": "gpt-6.1-sol",
+    "cliVersion": "0.159.2",
+    "rubricHash": "95f8bb5e0e436fa5fc7d6286fb34028e6d631f54e4549b4f1984db8a24c01d88",
+    "schemaHash": "79b1d3bac15af9cf8355a8dd65320befddb775d5ef055a6cd3d34e5162139b29",
+    "retry": 0,
+    "maximumJudgeRequests": 10,
+    "packetBytesLimit": 262144
+  },
+  "packetHash": "6e4b5592ddc2a0ca107c8d183548c906a13d512717b97e1bdf06ed01a12c584e",
+  "rows": [
+    {
+      "id": "fb5a0cd08719fcecd45663746c5c1556ac515a293d04f0d55d700444d73d8e7b",
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Hỏi màu còn thiếu đúng lựa chọn tool trả về: Trắng có sẵn, Be đặt trước; giữ size M khách đã chọn. Yêu cầu hỗ trợ đã được ghi nhận nhưng chưa xét, lời đáp không hứa giảm giá hay freeship. Tổng một áo gửi Cần Thơ 499.000đ + 30.000đ = 529.000đ khớp quote thực, không áp giảm theo số lượng hoặc giả đã thanh toán. Giọng lịch sự, gọn; nhắc lại câu hỏi màu hợp lý vì khách chưa chọn."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 41726,
+        "output_tokens": 303,
+        "total_tokens": 42029,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 109
+        }
+      },
+      "latencyMs": 13239,
+      "error": null
+    },
+    {
+      "id": "659593420545e0a91bf9b090f7fe003420e86ef39c09b36787b546a8b2afc7f1",
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Giọng tự nhiên, gọn và đúng mạch hỏi mua. Hỏi màu theo kết quả tool xác nhận áo M Trắng có sẵn, Be đặt trước; chưa tự chọn màu hay nhận đã lên giỏ. Yêu cầu hỗ trợ đã được lưu và chỉ hẹn xem xét sau khi đủ màu, không tự giảm giá hoặc freeship. Tổng một áo gửi Cần Thơ 499.000đ + 30.000đ = 529.000đ khớp quote thực tế; không áp ưu đãi số lượng hay nói khách đã thanh toán."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 42424,
+        "output_tokens": 320,
+        "total_tokens": 42744,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 124
+        }
+      },
+      "latencyMs": 11067,
+      "error": null
+    },
+    {
+      "id": "b46c015ef68a2f39860a77eba8b41318f2d412e7439500adbd2719aa85e87893",
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Trả lời gọn, đúng mạch mua áo lẻ size M; hỏi màu theo lựa chọn tool xác nhận, không tự thêm giỏ khi khách chưa chọn. Yêu cầu hỗ trợ đã được ghi nhận bằng receipt và chỉ hẹn xem xét, không hứa giảm tiền hay freeship. Tổng gửi Cần Thơ 499.000đ + 30.000đ = 529.000đ khớp quote cho một áo; không tự áp giảm theo số lượng, không nói khách đã thanh toán hay đơn đã chốt."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 41595,
+        "output_tokens": 387,
+        "total_tokens": 41982,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 197
+        }
+      },
+      "latencyMs": 12612,
+      "error": null
+    },
+    {
+      "id": "5ed744a7c317a5cd7147d447bc22a771ecf735c6da91e8852543c84bf424b779",
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Hỏi màu đúng phần còn thiếu, phân biệt trắng có sẵn và be đặt trước theo kết quả tool, kèm ảnh hợp lệ. Yêu cầu hỗ trợ đã được lưu nhưng chưa xét; lời đáp chỉ hẹn xem xét khi lên giỏ, không tự giảm giá hay freeship. Báo đúng một áo AO size M 499.000đ + ship Cần Thơ 30.000đ = 529.000đ; không giả đã chốt đơn hoặc thanh toán. Giọng gọn, tự nhiên và bám nhu cầu."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 41702,
+        "output_tokens": 290,
+        "total_tokens": 41992,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 98
+        }
+      },
+      "latencyMs": 10672,
+      "error": null
+    },
+    {
+      "id": "e41a5e5966dcdb99e235158650f67379453cf23f69756898fab12c2333fa99b9",
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Trả lời gọn, đúng mạch mua áo lẻ size M; hỏi màu còn thiếu theo kết quả tool, phân biệt trắng có sẵn và be đặt trước. Yêu cầu hỗ trợ đã được ghi nhận nhưng chưa xét, lời thoại chỉ hẹn shop xem chứ không tự hứa giảm hay freeship. Tổng gửi Cần Thơ đúng quote một áo: 499.000đ + 30.000đ ship = 529.000đ; không nhận đã vào giỏ, chốt đơn hay thanh toán khi chưa có."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 41658,
+        "output_tokens": 311,
+        "total_tokens": 41969,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 120
+        }
+      },
+      "latencyMs": 12416,
+      "error": null
+    },
+    {
+      "id": "b701bc5fd392ca509e5568aa2408347eab7aef9f9a774aeed57cb28a873e9d38",
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lời đáp tự nhiên, đúng nhu cầu. Lượt đầu lưu yêu cầu hỗ trợ, chưa hứa cấp thêm ưu đãi; tổng 978.100đ gồm ship đúng ưu đãi số lượng cho hai áo. Khi khách chọn trắng, giỏ được tạo đúng 2 áo M trắng và pending được kích hoạt một lần theo receipt, hỗ trợ miễn ship đưa tổng về 948.100đ. Lượt cuối báo đúng tổng hiện hành, không cộng lại phí ship hay nhân sai đơn vị ưu đãi."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 47047,
+        "output_tokens": 332,
+        "total_tokens": 47379,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 103
+        }
+      },
+      "latencyMs": 11338,
+      "error": null
+    },
+    {
+      "id": "fa61791db75b6f84243dd3537aeb7d8980e5d0d14dff786bedf17e14ef97ad9d",
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu lưu pending đúng receipt, chưa hứa có hỗ trợ thêm; tổng 978.100đ chỉ gồm giảm 5% theo hai áo và ship. Khi khách chọn trắng, giỏ được tạo đúng 2 áo M trắng, pending kích hoạt một lần và miễn 30.000đ ship; hai lượt sau báo đúng tổng hiện hành 948.100đ, không nhận đã tạo đơn. Giọng lịch sự, dễ hiểu, dù cách nói về hệ thống xét ưu đãi hơi máy móc."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 44264,
+        "output_tokens": 623,
+        "total_tokens": 44887,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 439
+        }
+      },
+      "latencyMs": 20161,
+      "error": null
+    },
+    {
+      "id": "07f5081aca854f6f58798c4b48e3b5025807da05650e118b1af12cdb093cae7e",
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Đã lưu yêu cầu hỗ trợ trước giỏ, không hứa cấp thêm ưu đãi; mức giảm 5% và tổng 978.100đ ban đầu đúng báo giá hai áo. Khi khách chọn trắng, giỏ được tạo đúng 2 áo M trắng và pending được kích hoạt một lần theo receipt, thêm miễn ship, đưa tổng về 948.100đ. Lượt cuối báo đúng tổng hiện hành, không áp dụng hỗ trợ lặp. Giọng lịch sự, dễ hiểu; cách nhắc hệ thống và hỏi chốt hơi khuôn nhưng không ảnh hưởng đáng kể."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 50781,
+        "output_tokens": 348,
+        "total_tokens": 51129,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 149
+        }
+      },
+      "latencyMs": 12378,
+      "error": null
+    },
+    {
+      "id": "c27da3bd62427a60070e8c292316da91d70582a7bf7319d656c7072552dfbcf2",
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Đã lưu yêu cầu hỗ trợ trước giỏ, không hứa cấp thêm ưu đãi; mức giảm 5% và tổng 978.100đ ban đầu đúng báo giá hai áo. Khi khách chọn trắng, giỏ có đúng 2 áo AO size M, pending được kích hoạt một lần và receipt cấp miễn ship. Hai lượt sau báo đúng tổng hiện hành 948.100đ, không cộng lại phí ship hay nhân sai đơn vị ưu đãi. Lượt đầu hơi thiên về diễn giải hệ thống và hỏi xác nhận dư, nhưng vẫn rõ ràng; các lượt sau gọn, đúng ý khách."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 49975,
+        "output_tokens": 514,
+        "total_tokens": 50489,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 309
+        }
+      },
+      "latencyMs": 19836,
+      "error": null
+    },
+    {
+      "id": "08fdb57add0085c8444869d83806c64b28f43b5178d57843d5fbf269eb48204f",
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Đã lưu yêu cầu hỗ trợ trước giỏ, không hứa cấp thêm ưu đãi; mức 5% và tổng tạm 978.100đ đúng báo giá hai áo. Khi khách chọn trắng, giỏ có đúng 2 áo M trắng, pending được kích hoạt một lần và receipt xác nhận miễn ship. Hai lượt sau báo đúng tổng hiện hành 948.100đ. Giọng lịch sự, rõ việc, dù lượt đầu hơi thiên về diễn giải hệ thống."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 44213,
+        "output_tokens": 394,
+        "total_tokens": 44607,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 217
+        }
+      },
+      "latencyMs": 16942,
+      "error": null
+    }
+  ]
+}

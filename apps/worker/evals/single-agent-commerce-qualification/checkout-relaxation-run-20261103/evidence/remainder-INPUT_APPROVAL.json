@@ -1,0 +1,34 @@
+{
+  "status": "APPROVED",
+  "reviewer": "/root/sales_completion_implementation_review",
+  "checkedAtUTC": "2026-11-03T17:08:09.798588+00:00",
+  "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "worldHash": "38fb7a629f9dc3ddf7e4336a0f56ce298476ffe51dd40bdeefb5800f1f3bf7cb",
+  "pendingRegistrationHash": "aa0337a7b0b71b357d4785e6f9b46db531e74ed62b00039916c3e299fe7a3c8d",
+  "launcherInventorySha256": "7e186593eb2e2658b2f3e032c14e9647489f730d19c1d0ad806ca21349a00956",
+  "newProviderResultsObserved": 0,
+  "checks": {
+    "exactSourceClean": "PASS",
+    "currentReadiness": "PASS_AT_REVIEW_TIME",
+    "scriptsBranchesUnchanged": "PASS",
+    "runtimeEvaluatorFirewall": "PASS",
+    "metadataAmendment": "PASS",
+    "realInitialStateDatabaseDropped": "PASS",
+    "frozenNineHelperHashes": "PASS"
+  },
+  "limits": {
+    "cases": 12,
+    "turns": 20,
+    "maxGenerationRequests": 80,
+    "repetitions": 1,
+    "retry": 0,
+    "ready": 2,
+    "sourceGaps": 10,
+    "sendEnabled": false
+  },
+  "conditions": [
+    "Actual-time preflight must pass before dispatch; do not renew timestamps.",
+    "Development diagnostic only; not full55/S6 or qualification/quality GO.",
+    "Retain failures and hard stops; no automatic generation retry."
+  ]
+}

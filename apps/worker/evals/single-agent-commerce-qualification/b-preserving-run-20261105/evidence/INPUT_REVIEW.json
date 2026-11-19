@@ -1,0 +1,40 @@
+{
+  "status": "APPROVED_INPUTS_CONDITIONAL_DISPATCH",
+  "sourceSha": "69bd122100f51584acd6d2ac97dde9254b3e562c",
+  "worldHash": "35644f4ed3fa0e1dea4f51212a35ca3badd64a0c4ab2af5cf2d7d3c833d67e44",
+  "reviewer": "/root/b_preserving_independent_review",
+  "results": [
+    {
+      "label": "prefix",
+      "cases": 13,
+      "turns": 24,
+      "maximumGenerationRequests": 96,
+      "cohorts": {
+        "SALES_READY": 13
+      },
+      "pendingRegistrationHash": "2781004693a9426b9422044af36cbdfc598fda35e8badc4c55f6d3180e50b7fb"
+    },
+    {
+      "label": "remainder",
+      "cases": 20,
+      "turns": 24,
+      "maximumGenerationRequests": 96,
+      "cohorts": {
+        "SALES_READY": 19,
+        "SOURCE_UNAVAILABLE": 1
+      },
+      "pendingRegistrationHash": "6bb2d25a998208258946a1746a4ac829a562990c45080948ee5a4485952b2d55"
+    },
+    {
+      "label": "checkout",
+      "cases": 1,
+      "turns": 7,
+      "maximumGenerationRequests": 28,
+      "cohorts": {
+        "SALES_READY": 1
+      },
+      "pendingRegistrationHash": "b494f20e1c8fdcc9878f39241ed6a4465598cdac05af411a1ab4e830445da140"
+    }
+  ],
+  "providerRequests": 0
+}

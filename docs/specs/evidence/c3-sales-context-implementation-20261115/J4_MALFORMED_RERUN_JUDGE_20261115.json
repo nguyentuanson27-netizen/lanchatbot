@@ -1,0 +1,122 @@
+{
+  "identity": {
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "version": "gpt-6.1-sol",
+    "cliVersion": "0.159.2",
+    "rubricHash": "95f8bb5e0e436fa5fc7d6286fb34028e6d631f54e4549b4f1984db8a24c01d88",
+    "schemaHash": "79b1d3bac15af9cf8355a8dd65320befddb775d5ef055a6cd3d34e5162139b29",
+    "retry": 0,
+    "maximumJudgeRequests": 2,
+    "packetBytesLimit": 262144
+  },
+  "packetHash": "1185cee3b4b50034628d43a3a48867a19941aeb57f16d5382a1ea337751ee644",
+  "rows": [
+    {
+      "id": "b2d94c102d39c80e430c8c437d69a53501bedf2546dd61f36032b41674abc67c",
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Hỏi màu đúng phần còn thiếu, phân biệt Trắng có sẵn và Be đặt trước theo kết quả tool; có ảnh mở đầu hợp lệ. Yêu cầu hỗ trợ mới được ghi nhận, chưa được cấp ưu đãi nên không tự giảm hay freeship. Báo đúng một áo AO 499.000đ + ship Cần Thơ 30.000đ = 529.000đ theo quote thực, không nhận đã chốt đơn hay thanh toán. Giọng lịch sự, rõ ràng; việc nhắc lại chọn màu vẫn phù hợp vì khách chưa chọn."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 36174,
+        "output_tokens": 297,
+        "total_tokens": 36471,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 100
+        }
+      },
+      "latencyMs": 13683,
+      "error": null
+    },
+    {
+      "id": "98e99a7310ee3e6a6caba11fc0d308be4e731bea8d3f62ab46e5cfc288d251bb",
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": true,
+            "factsPass": false,
+            "materialIssue": true,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": false
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Giọng tự nhiên, hỏi màu đúng phần còn thiếu; offer AO và trạng thái Trắng có sẵn/Be đặt trước đều có nguồn. Tuy nhiên, lượt 2 khẳng định đây là giá tốt nhất khi yêu cầu hỗ trợ mới chỉ được ghi nhận, còn NOT_EVALUATED và bị chặn do chưa có giỏ: kết luận này có thể khiến khách bỏ quyền được xét hỗ trợ. Lượt 3 báo đúng tổng một áo gửi Cần Thơ: 499.000đ + 30.000đ = 529.000đ theo quote thực, không tự giảm giá, freeship hay giả đã thanh toán."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 41361,
+        "output_tokens": 446,
+        "total_tokens": 41807,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 191
+        }
+      },
+      "latencyMs": 18393,
+      "error": null
+    }
+  ]
+}

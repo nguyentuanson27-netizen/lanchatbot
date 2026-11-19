@@ -1,0 +1,218 @@
+{
+  "kind": "BASELINE_NATIVE_N1_DEVELOPMENT_EVIDENCE_NOT_QUALIFICATION",
+  "runSourceSha": "6ac0eb783a3dba2e5641d503cfc222d74f2b0f5f",
+  "implementationBaseSha": "b70dd7202fe2624b7a9f6e5531c17f6864dfe164",
+  "worldHash": "551b7fc0ae29d7f87b66250e7c4d6f4c5b38495b8fb01589c5604f232efee3ba",
+  "registration": {
+    "cases": [
+      "j1-total",
+      "ack-control"
+    ],
+    "repetitions": 1,
+    "maxGenerations": 8,
+    "presentation": "VI_DATA_BLOCKS_COMPACT_V2",
+    "arm": "A",
+    "retry": 0,
+    "toolsExecuted": true
+  },
+  "lifetimePreflight": {
+    "minimumProofExpiresAt": "2026-11-08T01:49:16.341Z",
+    "headroomMsAtSeal": 865105
+  },
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "ownerPromptSha256": "75e29844627f136512f5dd427df4592b57f33598b03eff8118fc495fb9d1e109",
+  "verifierPromptSha256": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944",
+  "toolchainHash": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a",
+  "runtimeSourceUnchanged": true,
+  "sourceCleanDuringRun": true,
+  "rawArtifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-model-20261108-01\\ACCOUNTING.json",
+      "sha256": "1a18a70005d03c0941e33a4ebe32ce68030b7ef31de2d38987c07008c20a729c",
+      "bytes": 73944
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-model-20261108-01\\BASELINE_ack-control.json",
+      "sha256": "93df90d604f33af6d9125a6193a62d72754b0652e530b33c0ede0c9f81922a2e",
+      "bytes": 65072
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-model-20261108-01\\BASELINE_DISPATCH.json",
+      "sha256": "5f3560722b3a047f99fa1cebfac0c8332586a9d1d015cbae486efdc0f7917127",
+      "bytes": 398
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-model-20261108-01\\BASELINE_j1-total.json",
+      "sha256": "ee3b2c817f9226586aec8ef4221cfdd7ea84edda1aa5d8cdcbce94c38c0df88e",
+      "bytes": 95584
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-model-20261108-01\\CAMPAIGN.jsonl",
+      "sha256": "d84c8792fa848c2bd2d046adddb211325991b14d12ade6b7ddc4486f75d6de42",
+      "bytes": 478879
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-model-20261108-01\\GENERATIONS.jsonl",
+      "sha256": "64f44cfe52e4b6e161485e54f50a055fdc7a56a35e0fc96a2d7c7fb29c39400b",
+      "bytes": 69885
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-model-20261108-01\\integration.json",
+      "sha256": "d6293ff02ecee78d9236d7039bf7ac0db50ec41a3dc388fb5d609d800bd3661a",
+      "bytes": 260198
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-model-20261108-01\\RESULT.json",
+      "sha256": "b2a281228c4f7d3609fa7b9b4c6e4d2f1545dac6beea0b43442112e0ed31bd41",
+      "bytes": 172465
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-model-20261108-01.log",
+      "sha256": "c97ca3d81284b0abf3db502e424e4dbc3d090e5e8a539418a8a0953274bcfa57",
+      "bytes": 24
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-world-20261108-01.log",
+      "sha256": "b0e9e156e247e3519aea9eae045cd3e915f26700e6dc1676470b8a35c90e75ad",
+      "bytes": 138
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-world-20261108-01\\WORLD.json",
+      "sha256": "9d0a54f31de072b305e6423e5b116e19d3390face91747c9ca117c54cce2b2e8",
+      "bytes": 42784407
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-world-20261108-01\\SUMMARY.json",
+      "sha256": "aba8c21c32d7fe77ddf27a32d1e0999bac8c4c4ce206c4ae3d47851673b7dbb8",
+      "bytes": 2736
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-world-20261108-01\\PUBLIC_SOURCE_WORLD.json",
+      "sha256": "ec8929aa7b705976d3b26008efa8759bf1e2dc8399403355ac74abe4ce62b8b1",
+      "bytes": 42772968
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-input-20261108-01.json",
+      "sha256": "85c3de34ccd72295d33b11c97ea88c8987312824a60d849139f49471c65d7e2b",
+      "bytes": 774
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-preflight-20261108-01.json",
+      "sha256": "173af2f03affc513fbc15ae31a6afb0fa965e89a6d588c70d246ebec0dc93a45",
+      "bytes": 5229
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-preflight-blocked-20261108-01.json",
+      "sha256": "7321b9b763348b78ab3a195e74a60126900db53886f873ef15f8fcf05df11ebb",
+      "bytes": 2943
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-input-preparer-20261108-01.mjs",
+      "sha256": "6b99748c963763e172a798f34337734243add8b380a1649355875c4c88635d2b",
+      "bytes": 3349
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-input-preparer-20261108-02.mjs",
+      "sha256": "b5b1487c378e25f9c66538022e8bfd5731f2f67ccb8298e071e2175e392cb8f6",
+      "bytes": 3329
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-audit-20261108-01.mjs",
+      "sha256": "5dc2dd49ff8d92d4dcd74173e52e1ac7acdf1469a612ed4da2d09f2aa1f43371",
+      "bytes": 5527
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j1-baseline-integrity-20261108-01.json",
+      "sha256": "84ccc7e8c5e154a617891468ba61ed46c567390b930b07784eb4f8411927f3c1",
+      "bytes": 1264
+    }
+  ],
+  "commandsActuallyRun": [
+    "git status --short; git rev-parse HEAD",
+    "node inspectCodex with task-local APPDATA/pinned0.159.2",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs ../c3-j1-baseline-world-20261108-01 ../c3-media-context-model-codes-20261103-02.json",
+    "node ../c3-j1-baseline-input-preparer-20261108-01.mjs (BLOCKED/0generation: over-specified separate TOP media)",
+    "sourceReadiness on same world records failed preflight; GENERIC-only source readiness PASS",
+    "node ../c3-j1-baseline-input-preparer-20261108-02.mjs (READY/0generation)",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j1-baseline-model-20261108-01 COD --j2-j1-campaign ../c3-j1-baseline-input-20261108-01.json",
+    "node ../c3-j1-baseline-audit-20261108-01.mjs"
+  ],
+  "recommendation": "RETAIN_BASELINE_NO_PHASE_C_GO",
+  "independentJudge": "NOT_RUN",
+  "limitations": [
+    "N1 each/two customer turns only",
+    "Two J1 prefix turns deterministically seeded, not generated",
+    "Fresh world differs from prior primary, not causal comparison",
+    "ACK has generic adjectives and unnecessary closing question",
+    "No full final gate replay or new blind score/C3 comparison",
+    "New full suite/build/typecheck/lint not run in execution-only turn"
+  ],
+  "publishedArtifacts": [
+    {
+      "path": "CONVERSATIONS.md",
+      "sha256": "c5530d31e6d6097e702eaec03bdfa25c9c18b5f1637e78603dec22ea2ca36d85"
+    },
+    {
+      "path": "INTEGRITY.json",
+      "sha256": "84ccc7e8c5e154a617891468ba61ed46c567390b930b07784eb4f8411927f3c1"
+    },
+    {
+      "path": "METRICS.json",
+      "sha256": "4352d5a53f0fcd309d999e52fda81421451e8b807f942d944ea00990e5be3fd7"
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "1b77593ce1c583ce812e09360b5fd914c6570bfa0fb500384db74dcf175b8dad"
+    }
+  ]
+}

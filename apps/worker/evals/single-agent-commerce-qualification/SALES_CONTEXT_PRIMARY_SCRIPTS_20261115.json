@@ -1,0 +1,122 @@
+[
+  {
+    "id": "c-20261028-s15",
+    "mode": "SINGLE",
+    "turns": [
+      {
+        "latest": "Chị thích áo Thạch Thảo màu be, cảm ơn em nhé.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447",
+          "SQ2447"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c-20261028-s16",
+    "mode": "SINGLE",
+    "turns": [
+      {
+        "latest": "Shop có ảnh khách mặc áo Thạch Thảo không em?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447",
+          "SQ2447"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "c-20261028-j2",
+    "mode": "JOURNEY",
+    "turns": [
+      {
+        "latest": "Chị muốn chọn size áo của bộ váy Thạch Thảo, cao 1m62 nặng 56kg.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      {
+        "latest": "Chị nhắn nhầm cân nặng, 51kg thôi em nhé. Ngực 88, eo 70, mông 94.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      {
+        "latest": "Chị thích mặc thoải mái một chút, em chọn size giúp chị nhé.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      }
+    ],
+    "customerPolicy": {
+      "kind": "FROZEN_SCRIPTED_BRANCHES",
+      "selector": "HUMAN_RECORDED_FROM_ACTUAL_REPLY",
+      "branches": [
+        {
+          "turnIndex": 1,
+          "when": "shop asks a missing measurement",
+          "latest": "Chị nhắn nhầm cân nặng, 51kg thôi em nhé. Ngực 88, eo 70, mông 94."
+        }
+      ],
+      "hash": "6c482bbd327b9c389418568075209c709d5501476e3c4e1cbdebec62eefba232"
+    }
+  },
+  {
+    "id": "c-20261028-j4",
+    "mode": "JOURNEY",
+    "turns": [
+      {
+        "latest": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      {
+        "latest": "Shop hỗ trợ thêm cho chị được chút nào không?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      {
+        "latest": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      }
+    ],
+    "customerPolicy": {
+      "kind": "FROZEN_SCRIPTED_BRANCHES",
+      "selector": "HUMAN_RECORDED_FROM_ACTUAL_REPLY",
+      "branches": [
+        {
+          "turnIndex": 1,
+          "when": "shop asks to confirm quantity",
+          "latest": "Một áo size M thôi em. Shop hỗ trợ thêm cho chị được chút nào không?"
+        }
+      ],
+      "hash": "dad1122cd20fa24030c3104f59053e15e9d428de97eae6b179f2736b7fb94ec4"
+    }
+  },
+  {
+    "id": "c-20261028-s08",
+    "mode": "SINGLE",
+    "turns": [
+      {
+        "latest": "Váy Odette với Diệp An, em chọn giúp chị một mẫu mặc đi lễ nhé.",
+        "history": [],
+        "initialProductCodes": [
+          "V039",
+          "V168"
+        ]
+      }
+    ]
+  }
+]

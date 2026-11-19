@@ -1,0 +1,662 @@
+{
+  "runSourceSha": "22fc581a3b32428dcf6c7d65cca3195bbf43b327",
+  "cases": 13,
+  "repetitions": 5,
+  "slots": 65,
+  "turns": 135,
+  "executedSlots": 0,
+  "executedTurns": 0,
+  "reason": "UNSAFE_SEND_ELIGIBLE_FALSE_PASS_IN_VERIFIER_SCREEN",
+  "attempts": [
+    {
+      "slotId": "2c7eacbddeb2b0a1248dac07f91ba55ef9accfce267d961919a6575a2684c574",
+      "caseId": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "df86fc236328076b77c011512a64717587f6eb15dc6fc13487319fa9e73d2310",
+      "caseId": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "f6d0c5a9408a9359a6e320c5d0e56565553cfe45f912ae15478d5118098405dc",
+      "caseId": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "f4da5ea7cdc3572a67db94077520bfd54a2376152ef0e62407e9a937d62b224d",
+      "caseId": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "8fb334030f0c70650a3d6da449a0f99985b2933bf9d5dcc9e2952c54b0f6edff",
+      "caseId": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "e69cf5716963322a60969ad10f5ec724b63443e43ae6a33781dd96709c6dfaf2",
+      "caseId": "c-20261028-s15",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "fd79fe7edb130738a5e11a6274ca53193a1965b01a2a6c3501d5bb4b64565e42",
+      "caseId": "c-20261028-s15",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "7eab1443a0b4c645606c7d1f367f808e7e467044a4481f618126067db6acf671",
+      "caseId": "c-20261028-s15",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "7f14382b272e29556afce839d5d1ff72bf493b444f62a7e12cd136a3fd07394e",
+      "caseId": "c-20261028-s15",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "55e2979c42ee363abdb55f04eb2b81a91b3bb5885502f7280d9ffc27748516f1",
+      "caseId": "c-20261028-s15",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "91ea1789af4f02415383d98fd76cc5210fd45009e9a062a0edf9cd390bd778a3",
+      "caseId": "c-20261028-s16",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "583228029faf16ed0fbd25e185179192a59293ffc23e0a94612865c1d0ec9299",
+      "caseId": "c-20261028-s16",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "31c610f58b71e8fabb3f64b1ccea4444725f510d6d1b7a90d05b103668587919",
+      "caseId": "c-20261028-s16",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "ce104e77180eb00f4a74acad502ee6f7a6e85145738814e50b59afd7f89aa654",
+      "caseId": "c-20261028-s16",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "ef8f7ffb57bd8d1720a97ae01d2ea60d22d67180303792b02ed4607794f82482",
+      "caseId": "c-20261028-s16",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "5cbe9142bf73a27ee806af85e31ffc7e4ab1e775e5875455aa92c04eaefec7ab",
+      "caseId": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "65bd9bec97cbbc34faa1e7d84f764453578ec96c26c1a46c257c601c09ae1fce",
+      "caseId": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "cf4f55fdd0090f254de8bf37427d7b8066026d4d3441e03b6099ecfebcda019a",
+      "caseId": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "4aecb9600fa2512a0c29a147ffcffac7a6b858658648f93efc3e94fd68a483bf",
+      "caseId": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "85f028a8531cb8edbd019f5ab15cb4412f9f72c6fa59995518c17cf3b9a6096e",
+      "caseId": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "b778fe08cc86e86930b0c33d601c6ed2915d1bafb0cd29a00de979a89a3d69e6",
+      "caseId": "c-20261028-j4",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "da6253661b600143751c774fef99c218e6a7d534a0415643fbd4d18d422f533d",
+      "caseId": "c-20261028-j4",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "0a0a7dc6d4cbdacd10bed9ca88343ffc4e8258415eccfd293c023a414f0e963a",
+      "caseId": "c-20261028-j4",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "c455595aa5adf5bfbb6117ef724fc2df9fd0b52bae5bc5fd059894d5acf93e7d",
+      "caseId": "c-20261028-j4",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "651703ae41bff87b7d04e4e90b5c3623781b72dc6ddfa1160d9212894cc984f7",
+      "caseId": "c-20261028-j4",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "a9db89f21c22b615bbc6fe3e60e07f4f71caa4a615ddecaa3e3d48a3eb4db7a7",
+      "caseId": "c-20261028-s04",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "55448da8c484ee92c718100abf1492b1ac709fef5dc006f7dc4772b5d0ef364a",
+      "caseId": "c-20261028-s04",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "ca61e0440c7a0b1274e902e5e52e1ad0e624db2069880523d8a8cd0ac2b31f65",
+      "caseId": "c-20261028-s04",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "44e9b605fd691c60b0626c832aef34a089c6ae613f746d0992026954b256de42",
+      "caseId": "c-20261028-s04",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "02ba6a95809fbc4da1acd336bb14cbda81019a4e59b89c4b64ca9f1add549c1c",
+      "caseId": "c-20261028-s04",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "c7ad92fd34b919a82b7639093c9c49452eb74824afe47aea302b64bce36d2c61",
+      "caseId": "c-20261028-s09",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "663371a1dd4016575799b782651c6b168e290f658920331a1f88a29c7fb8a832",
+      "caseId": "c-20261028-s09",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "28ec1f957a2e613e800b15cc4936465581c12a9ca7f125fe7d0820da30901cc8",
+      "caseId": "c-20261028-s09",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "12dcb35d0afa475bcbd173596b0fdb6a53d0f37ce17dc71cbac8e3a253ea735a",
+      "caseId": "c-20261028-s09",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "31779723d4dc6154d7367d80ad73154955bc391a25be64ce85897a37db166423",
+      "caseId": "c-20261028-s09",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "c8eefe6dc306392a84f42096fe3039764cb5538a3e061e419c210f8d8c32ab0d",
+      "caseId": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "029dd999db4d2db325b447c89265a6369b84c9683a247162713aa9d18eddd595",
+      "caseId": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "845481246efb720863850f5f362c85eca69b1dc3d142a61e5aa19f0b400c3db2",
+      "caseId": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "46ceb7117f4e6cec74a369023dd67fb73a766fa79d27c331c265a3330d2fa3dc",
+      "caseId": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "d3396c71b09cd9544e45c9deb9551515876919cf9518ef4f2901e8cb3ea18c34",
+      "caseId": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 12,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "b63d0efc8e392c14836829ff0bb591b0e948cf0944b7a188fdcd32d123e2c709",
+      "caseId": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "fa8f26f69ca2ef4ead1cf11c992037b434802aee86f76c608f03d85a0ceff58c",
+      "caseId": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "bf41b5f475baec5b7470b36df7526dca45258e737272361f2aceff58ba47f654",
+      "caseId": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "2eb534d4c2d3f2e6eb8cb6c11be6160c95520a63f7191e06f775f547ea53f1f2",
+      "caseId": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "31eb3b2ff7fb66458ffd7d71f0a2ef7b7115d395b4682ab5e9d77088288d6ceb",
+      "caseId": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "26e3750c3aeee6f77b3e76222b0950aca4087e488f27df18bb122c08c37fa587",
+      "caseId": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "3d69256699af91c3abcac22f5c2fcd555c08a8e772e4969dd3333154e1e2d308",
+      "caseId": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "7d515dfb8e4daeac9f34fd0e4f6940af8895774cf8717bdb8a23a21eb7f628f8",
+      "caseId": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "7f7666121673f55c4c53525a296d024190e1f10a28028e265919e0179621d3fb",
+      "caseId": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "9859235e41eb9e9e3449154ef01fdefb8087e3f64899191e109060edf6a63bb9",
+      "caseId": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "51aef92116ba0c73e40af06623e857950583928c9a94b6932c84c2ec90ffc3f5",
+      "caseId": "c-po-20261031-p09",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "6328c4e44635277879f565656d21e997055b01762fa1db37d66568f33741c0b9",
+      "caseId": "c-po-20261031-p09",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "aea170082249bf391f7df424db0688de96a64a597b5ff954a39737f292804601",
+      "caseId": "c-po-20261031-p09",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "fb9d5daa68b09b97305e191662b82a3ee643a9d1eea33b4bc2708d89a6423567",
+      "caseId": "c-po-20261031-p09",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "101bfcffd2d5064df0e3b83aaa8943258897ec573c6f326b3007b97a625eb4c2",
+      "caseId": "c-po-20261031-p09",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 8,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "115323af66619e5d21e3530f86e54b9eff119b0711f5e99b87120646efdeba12",
+      "caseId": "c-20261104-checkout-complete",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 28,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "855c4847a79f3146c891135fe58b0237451fe54218528f44b0a581dbd6906a6d",
+      "caseId": "c-20261104-checkout-complete",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 28,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "6975de30de1b98d75ebf7314be0d28c5fab95808338b58084c93d3158f67d99b",
+      "caseId": "c-20261104-checkout-complete",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 28,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "dcffa359df06552d3ae92414b95512bf4ff463ca440df652f600471c8c505ac1",
+      "caseId": "c-20261104-checkout-complete",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 28,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "4d7d2bad5df0e603ba0e0fa815d79ce32ecb8627dd742dc94f808615e76a5940",
+      "caseId": "c-20261104-checkout-complete",
+      "mode": "JOURNEY",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 28,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "4e6d1737cbe387fdbb7b60df7813f50063e9f732e6c12ca1adf47b02b4d009a8",
+      "caseId": "c-20261028-s08",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 1,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "5ee1d2970baa3eeb937480f8e49f9cff2e3055753b14a9eabe700154f6ab2254",
+      "caseId": "c-20261028-s08",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 2,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "2dd96256ea5b7c0f63bea41ab6faade74b3b98192680a29c0dbbebae5b57adf4",
+      "caseId": "c-20261028-s08",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 3,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "d3310b4d9381b728cca0e2b66680d40ca8fc2fd6c70532f02b1ff296de789e86",
+      "caseId": "c-20261028-s08",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 4,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    },
+    {
+      "slotId": "5024d62d53242178cdd4d8b3467d2db562e040ea91263ea725bc4754dbd37c53",
+      "caseId": "c-20261028-s08",
+      "mode": "SINGLE",
+      "arm": "CANDIDATE",
+      "repetition": 5,
+      "maximumGenerations": 4,
+      "status": "NOT_RUN",
+      "providerRequests": 0
+    }
+  ]
+}

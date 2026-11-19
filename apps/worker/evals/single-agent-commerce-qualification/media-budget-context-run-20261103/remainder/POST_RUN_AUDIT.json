@@ -1,0 +1,49 @@
+{
+  "kind": "POST_RUN_CAPTURE_ACCOUNTING_REPORT_AUDIT",
+  "status": "APPROVED",
+  "reviewer": "/root/missing_run_review",
+  "checkedAtUTC": "2026-11-03T06:01:41Z",
+  "sourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "reviewerProviderRequests": 0,
+  "authHttpRequests": 1,
+  "auxiliaryHttpRequests": 0,
+  "quality": "NOT_GRADED",
+  "qualification": "BLOCKED",
+  "C3": "NOT_RUN",
+  "cases": 12,
+  "capturedTurns": 20,
+  "generationRecords": 25,
+  "generationHttpRequests": 25,
+  "acceptedTexts": 4,
+  "acceptedImages": 4,
+  "verifierVerdicts": {
+    "PASS": 4,
+    "FAIL": 3
+  },
+  "actualTerminals": {
+    "SEND_ELIGIBLE": 4,
+    "HANDOFF": 10,
+    "NO_SEND": 6
+  },
+  "checks": {
+    "rawFrameHashes": "PASS",
+    "completeGenerationJournal": "PASS",
+    "requestHashesNativeWireFirewall": "PASS",
+    "singleDispatchAndFrozenCaps": "PASS",
+    "transcriptsDraftsAndDiagnostics": "PASS",
+    "tokenAndLatencyMetrics": "PASS",
+    "commandAndSealedRegistrationBindings": "PASS",
+    "artifactHashesAndReportCopies": "PASS",
+    "cleanSourceDatabaseDroppedSendDisabled": "PASS",
+    "noHardStopOrUnknownCompletion": "PASS",
+    "outboxContentHashes": "PASS",
+    "verifierFailureDescriptions": "PASS"
+  },
+  "evidenceSha256": {
+    "integration": "63de49b10af8ecb7bc2bf21691da58441b733cf6d3a4754a91fb8283eb1ea178",
+    "candidateEvidence": "74d10ffb6c2eaa645a78c718cfa231c9b479d05df333c0dcde3b2cd651162f23",
+    "nativeRequests": "d9cef8b02a239e3d79b7179e83eb0a737f63613d34afdaa00421e51c4d192b58",
+    "accounting": "ba67599617adacda05446416dbd2fbeef763d750b95703f1ec67f7f8d8cc3e42",
+    "operational": "45f7b643c6b646e5da43a82490e44f880082c06676008862e4e549aef8d5a3a0"
+  }
+}

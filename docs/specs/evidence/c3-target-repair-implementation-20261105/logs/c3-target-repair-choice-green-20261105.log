@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ✓ src/single-agent-commerce-effects.test.ts (113 tests) 1059ms
+   ✓ code-owned commerce effects and recovery > retains add→confirm in the actual runtime/native wire before a cart exists  335ms
+
+ Test Files  1 passed (1)
+      Tests  113 passed (113)
+   Start at  17:13:31
+   Duration  5.43s (transform 2.42s, setup 0ms, collect 3.48s, tests 1.06s, environment 0ms, prepare 244ms)
+

@@ -1,0 +1,330 @@
+{
+  "kind": "COMPLETE_OWNER_CONTINUED_DEVELOPMENT_DIAGNOSTIC_NOT_QUALIFICATION",
+  "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "reportOnlyBranchRestoredBeforePublication": true,
+  "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+  "candidate": {
+    "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "75e29844627f136512f5dd427df4592b57f33598b03eff8118fc495fb9d1e109",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "99d82e4b65cca20725d48362e884170c55690ad7c48ae6c2652e2d46b1b75a3c",
+    "toolContractHash": "ff6fcff49a16536f0fdb4ae91b75c18cf22e76d29c22477291e5c078cffebee5",
+    "assemblyHash": "54a635c8534ff0d3d0ab9b8ea8b6eda6b23f8db1496a74a0fd6e8480b68c5c72",
+    "runtimeHash": "cefa29b9ea72bea115a81e504dd2a155043157dccee9feaeeab3e462c9b53987",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "aff01bf07dd1715b8e6f4b2447c2c1cf29fa52644cc6b61c2be2767d633fe24f",
+      "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+      "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+    }
+  },
+  "thresholdsUnchanged": {
+    "singleQuality": 0.9,
+    "journeyQuality": 0.9,
+    "safeUsability": 0.9,
+    "singleNetWin": 0.1,
+    "journeyNetWin": 0.1
+  },
+  "groups": [
+    {
+      "group": "r1",
+      "cases": 4,
+      "turns": 7,
+      "outcomes": {
+        "SEND_ELIGIBLE": 7
+      },
+      "generations": 23,
+      "generationHttpRequests": 23,
+      "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+      "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+      "corpusHash": "8c11f52782b53c5d07f3493139b8a1705393c84dbd84b7ef71df6c9d474fd480",
+      "registrationRawSha256": "096f410ed702405b6c0d7f5af6b5d28135cb56c9cbd983babeca39b4b1711b34",
+      "evidenceRawSha256": "927d16029047e27d5a74d10daa47f67f67eb9beefb56da8a3d4a91a60dcbc8dd",
+      "integrationRawSha256": "5c6c8e1f969ade83e34e75046c81e2659d2afecbda0e1813d9ab4ccce79d8156",
+      "accountingRawSha256": "27a289474ce7d49257452b6299e49cc0b9f375f58b17718911fed2e242918040",
+      "command": {
+        "kind": "QUOTE_BATCH_REPAIR_DEVELOPMENT_N1_NOT_QUALIFICATION",
+        "command": [
+          "python",
+          "../c3-media-context-model-source-wrapper-20261103-02.py",
+          "node",
+          "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+          "..\\c3-quote-batch-model-r1-run-20261108-01",
+          "COD",
+          "--phase-c-diagnostic-registration",
+          "..\\c3-quote-batch-model-r1-sealed-20261108-01\\REGISTRATION.json",
+          "--phase-c-world",
+          "../c3-quote-batch-model-world-20261108-02/WORLD.json",
+          "--phase-c-seed",
+          "..\\c3-quote-batch-model-r1-sealed-20261108-01\\PRIVATE_BLIND_SEED.json"
+        ],
+        "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+        "registrationHash": "4feda53c5e72737df2ba681261990ca0f481b620d6a5cc9ede304f3954aecd5c",
+        "retry": 0,
+        "sendEnabled": false,
+        "startedAt": "2026-11-07T17:24:39.080910+00:00",
+        "exitCode": 0,
+        "completedAt": "2026-11-07T17:30:11.158702+00:00"
+      }
+    },
+    {
+      "group": "r2",
+      "cases": 9,
+      "turns": 17,
+      "outcomes": {
+        "HANDOFF": 5,
+        "NO_SEND": 3,
+        "SEND_ELIGIBLE": 7,
+        "CODE_OWNED_SEND": 2
+      },
+      "generations": 33,
+      "generationHttpRequests": 33,
+      "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+      "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+      "corpusHash": "ba8e54d2c40e1a025a0c606501f6b08365a3b758ca01b17ba071fbf9d30c293d",
+      "registrationRawSha256": "fb312eed99320f8f167675c8af41a72e9e7913d76cc91a5e31ad203296e7eee5",
+      "evidenceRawSha256": "cfd2fb5705e1f0617b9052f65e7960f19c6fc7ce94a9460cabc14aa108ee1d61",
+      "integrationRawSha256": "4a3b0370c57e97e5568ffb6ba25d406c6bff9615747bb96b9adc8a1f5090a3d1",
+      "accountingRawSha256": "2cff0e2cc4840cf065b930f7ada98b5dc02bcf91af53311bc563b517475fb890",
+      "command": {
+        "kind": "QUOTE_BATCH_REPAIR_DEVELOPMENT_N1_NOT_QUALIFICATION",
+        "command": [
+          "python",
+          "../c3-media-context-model-source-wrapper-20261103-02.py",
+          "node",
+          "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+          "..\\c3-quote-batch-model-r2-run-20261108-01",
+          "COD",
+          "--phase-c-diagnostic-registration",
+          "..\\c3-quote-batch-model-r2-sealed-20261108-01\\REGISTRATION.json",
+          "--phase-c-world",
+          "../c3-quote-batch-model-world-20261108-02/WORLD.json",
+          "--phase-c-seed",
+          "..\\c3-quote-batch-model-r2-sealed-20261108-01\\PRIVATE_BLIND_SEED.json"
+        ],
+        "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+        "registrationHash": "069073a24ef7853c5fa7af8607aa1ae76a44536cfadcee0ab28f2475e4833b9c",
+        "retry": 0,
+        "sendEnabled": false,
+        "ownerOverride": "2026-11-08 run all remaining cases after R1 FAIL; one review after completion; preserve all prior results",
+        "startedAt": "2026-11-07T18:01:04.677925+00:00",
+        "exitCode": 0,
+        "completedAt": "2026-11-07T18:09:06.044814+00:00"
+      }
+    },
+    {
+      "group": "remainder",
+      "cases": 20,
+      "turns": 24,
+      "outcomes": {
+        "SEND_ELIGIBLE": 18,
+        "HANDOFF": 4,
+        "NO_SEND": 2
+      },
+      "generations": 59,
+      "generationHttpRequests": 59,
+      "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+      "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+      "corpusHash": "60e8e841850b3854cc5a1181e4054677971aadcb396f46ed40f5b2f53bcd543b",
+      "registrationRawSha256": "78847819b5bdf41176ac11a5dece7a451d91e28f72c805e063763163aa708205",
+      "evidenceRawSha256": "460f0f1875407c6839506956a746cb20f6af9fb833ea01cc52b15b782b8fe1fe",
+      "integrationRawSha256": "eb868221d1e482efa229c3d76835bc48c638ecfb479dffa9f39645c9e9bafd73",
+      "accountingRawSha256": "b116bd00271c1a4c631c482e83946d1c218485c1e477d0535f539393ec3763c3",
+      "command": {
+        "kind": "QUOTE_BATCH_REPAIR_DEVELOPMENT_N1_NOT_QUALIFICATION",
+        "command": [
+          "python",
+          "../c3-media-context-model-source-wrapper-20261103-02.py",
+          "node",
+          "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+          "..\\c3-quote-batch-model-remainder-run-20261108-01",
+          "COD",
+          "--phase-c-diagnostic-registration",
+          "..\\c3-quote-batch-model-remainder-sealed-20261108-01\\REGISTRATION.json",
+          "--phase-c-world",
+          "../c3-quote-batch-model-world-20261108-02/WORLD.json",
+          "--phase-c-seed",
+          "..\\c3-quote-batch-model-remainder-sealed-20261108-01\\PRIVATE_BLIND_SEED.json"
+        ],
+        "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+        "registrationHash": "72f069a4c703c53c4bc1db354b9fd1f31782d8e6fe0d5618ea7b2f2c2353b53d",
+        "retry": 0,
+        "sendEnabled": false,
+        "ownerOverride": "2026-11-08 run all remaining cases after R1 FAIL; one review after completion; preserve all prior results",
+        "startedAt": "2026-11-07T18:09:41.413568+00:00",
+        "exitCode": 0,
+        "completedAt": "2026-11-07T18:23:39.940041+00:00"
+      }
+    },
+    {
+      "group": "checkout",
+      "cases": 1,
+      "turns": 7,
+      "outcomes": {
+        "SEND_ELIGIBLE": 1,
+        "CODE_OWNED_SEND": 5,
+        "HANDOFF": 1
+      },
+      "generations": 5,
+      "generationHttpRequests": 5,
+      "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+      "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+      "corpusHash": "d01ca48e34d6be215d0a36b0110eb2be51a14a52bae78c38c3ab960d84b0be79",
+      "registrationRawSha256": "f394de7729975f3e7065b893ad6f0a4087a76a3ebc9d17b686b56113d4498e9d",
+      "evidenceRawSha256": "7863bac3385e9d6a2a979a1b4075e272565b423092be969ad690acb6accb5049",
+      "integrationRawSha256": "ad91f24b121d50453a9f50c456652fd6664a47a05fe7fd3a2ad9372d799f80b9",
+      "accountingRawSha256": "366296489d99ec2edd87cc375855ecc263d356fb578cbe00847e7ef8fd8677bb",
+      "command": {
+        "kind": "QUOTE_BATCH_REPAIR_DEVELOPMENT_N1_NOT_QUALIFICATION",
+        "command": [
+          "python",
+          "../c3-media-context-model-source-wrapper-20261103-02.py",
+          "node",
+          "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+          "..\\c3-quote-batch-model-checkout-run-20261108-01",
+          "COD",
+          "--phase-c-diagnostic-registration",
+          "..\\c3-quote-batch-model-checkout-sealed-20261108-01\\REGISTRATION.json",
+          "--phase-c-world",
+          "../c3-quote-batch-model-world-20261108-02/WORLD.json",
+          "--phase-c-seed",
+          "..\\c3-quote-batch-model-checkout-sealed-20261108-01\\PRIVATE_BLIND_SEED.json"
+        ],
+        "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+        "registrationHash": "84c1d612486b2aefa659c36ba645c8d8281daf019d857f156249ff4eed0311eb",
+        "retry": 0,
+        "sendEnabled": false,
+        "ownerOverride": "2026-11-08 run all remaining cases after R1 FAIL; one review after completion; preserve all prior results",
+        "startedAt": "2026-11-07T18:23:54.099654+00:00",
+        "exitCode": 0,
+        "completedAt": "2026-11-07T18:25:59.866459+00:00"
+      }
+    }
+  ],
+  "complete": {
+    "cases": 34,
+    "turns": 55,
+    "notRun": 0,
+    "actualTerminalCounts": {
+      "SEND_ELIGIBLE": 33,
+      "HANDOFF": 10,
+      "NO_SEND": 5,
+      "CODE_OWNED_SEND": 7
+    },
+    "generations": 120,
+    "generationHttpRequests": 120,
+    "generationStatuses": {
+      "OK": 119,
+      "MALFORMED": 1
+    },
+    "roles": {
+      "OWNER": {
+        "calls": 84,
+        "input": 851828,
+        "output": 94786
+      },
+      "VERIFIER": {
+        "calls": 36,
+        "input": 324581,
+        "output": 3955
+      }
+    },
+    "inputTokensObserved": 1176409,
+    "outputTokensObserved": 98741,
+    "cost": "NOT_EXPOSED",
+    "providerVerifierLatencyMs": {
+      "n": 36,
+      "p50": 6771.905200000037,
+      "p95": 12981.161899999948
+    },
+    "runtimeVerificationWindowMs": {
+      "n": 36,
+      "p50": 9162.197100000005,
+      "p95": 18135.266700000037
+    },
+    "authRequestsSeparate": 4
+  },
+  "continuationOnly": {
+    "cases": 30,
+    "turns": 48,
+    "generationHttpRequests": 97,
+    "reviewCallsDuringExecution": 0,
+    "postCompletionIndependentReviews": 1
+  },
+  "publicProjectionLimits": "V2 reviewer helper masked some image URL numeric segments and two policy hash refs as phone-like strings. Those JSON projections are not published. Native original requests/results, hash validation and database evidence are unchanged; public transcript contains no image URLs, and synthetic contact fields are redacted. Display LF/trailing-space normalization only.",
+  "artifacts": {
+    "COMPLETE_AUTOMATED_INTEGRITY.json": "cfde382e759eb6200182465365d49b59cb2e6c7673e38e234693cebd3010b108",
+    "CONTINUATION_AUTHORIZATION.json": "0d15c527bf2b252e6f6b5db3c60441b827dad7b6b21865272dfe6ff6b903ee51",
+    "FULL_CONVERSATIONS.md": "08a7b6c5ece35ab4668eafe209565eb3318e9d646192e574d1d6dfdb71069e34",
+    "SINGLE_REVIEW.json": "3999a1ec7ef266815d89acf958868d8d288b8efb1e13ef2139b3fc2c93d27eb9",
+    "SINGLE_REVIEW.md": "dc3565bd35a799295c61324b29ab88d65ab8c6a5ede40657935c96b8e9b92a98"
+  },
+  "remainingRuntimeKnowns": "R1FAIL retained; no new code/prompt/provider changes, no automatic generation retry, no live send/source-shop writes; no formal blind quality/C3 comparison/GO.",
+  "commandsActuallyRun": [
+    "python ../c3-quote-batch-model-all-remaining-20261108-01.py",
+    "node ../c3-quote-batch-model-accounting-20261108-01.mjs r2",
+    "node ../c3-quote-batch-model-accounting-20261108-01.mjs remainder",
+    "node ../c3-quote-batch-model-accounting-20261108-01.mjs checkout",
+    "node ../c3-quote-batch-complete-packet-20261108.mjs"
+  ],
+  "auditDevelopmentNote": "Initial offline full audit expected RESULT only; known MALFORMED attempt uses ERROR terminal event. Corrected helper accepts exactly one RESULT-or-ERROR event, retaining all attempts and one-dispatch checks. Initial derived V1/V2 helper outputs/logs retained outside repo. No provider attempt was rerun.",
+  "singleReviewResult": "MATERIAL_FAIL_OBSERVED_NOT_GO",
+  "caseStatusCounts": {
+    "TASK_OK": 23,
+    "MATERIAL_FAIL": 6,
+    "EXPECTED_HANDOFF": 4,
+    "CONTROL_NOT_REACHED": 1
+  }
+}

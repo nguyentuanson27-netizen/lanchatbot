@@ -1,0 +1,188 @@
+{
+  "status": "APPROVED_REPORT_ACCURACY_ONLY",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T08:58:40.586014+00:00",
+  "runSourceSha": "69bd122100f51584acd6d2ac97dde9254b3e562c",
+  "packetDirectory": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-qualification\\b-preserving-run-20261105",
+  "checked": {
+    "all24ActualConversations": true,
+    "metricsAndDenominators": true,
+    "sourceAndAssumptionLimits": true,
+    "sevenFailureCauses": true,
+    "rejectedDraftRetainedExact": true,
+    "BReplayDirtyWorktreeExplicit": true,
+    "verificationLogHashes": true,
+    "remaining21Cases31TurnsNotRun": true,
+    "futureFixesExplicitlyNotImplemented": true,
+    "nativeAuditGateSemanticCopiesUnchanged": true
+  },
+  "resolvedFindings": [
+    "Populate exact rejected s03 draft instead of null.",
+    "State B component replay occurred on dirty d83 worktree, not clean69bd."
+  ],
+  "unresolvedReportFindings": [],
+  "functionalGate": "FAIL",
+  "recommendation": "STOP",
+  "notApprovalOf": [
+    "Model acceptance or whole-reply quality",
+    "Full qualification or GO",
+    "Unimplemented future fixes"
+  ],
+  "fileManifest": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/CONVERSATIONS.md",
+      "sha256": "049f064b49f88641a27174b6460c0c5187049905b84ad0ca66274956bfb7ab04",
+      "bytes": 7397
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/ACCOUNTING.json",
+      "sha256": "dda69eb35b2929c0b0a874c088d792fcfba73b30f74523511a6a5f53d158e0b0",
+      "bytes": 117314
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/B_COMPONENT_COMPARISON.json",
+      "sha256": "7941039b979e7dd560c70de6e9a69c58f7e9b5ebad7a5c8714b7079607dc2704",
+      "bytes": 2194
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/CHECKOUT_INPUT_APPROVAL.json",
+      "sha256": "0e79456adaa533782734bf3ddc87041169a96bd9a91f658fe65a4a4749082ff5",
+      "bytes": 2304
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/CHECKOUT_PREFLIGHT.json",
+      "sha256": "9fb0d3ef09a8cc61e4d24379ae9cca9e83221cff28405b08950dc326fee20361",
+      "bytes": 865
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/CLEAN_PG.json",
+      "sha256": "421c50338acba3dfa89229c83a48d3b55e23d7dd062afed5c741c4cb65edb713",
+      "bytes": 6545
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/COMPARISON.json",
+      "sha256": "d44b5b62a80078750902be6821642c5261d02518a75b830fe3852948b4e82569",
+      "bytes": 15549
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/EVALUATOR_CORRECTION_APPROVAL.json",
+      "sha256": "09eafc63d01a9059ad82fb6e8b8d3d4e7d7c5d5a6807c4a35a49b8c7fc96ffce",
+      "bytes": 2363
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/FROZEN_CONFIG.json",
+      "sha256": "231046fe11df47fffa82a7b8c10adee68510064d766a94ff3f3df51a45990f84",
+      "bytes": 5266
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/FROZEN_CORPUS_HASHES.json",
+      "sha256": "9ee943d414f722f9e66eb08f452269ea20f1e09a3f308c5230f8f9756483976b",
+      "bytes": 62874
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/HELPER_INVENTORY.json",
+      "sha256": "f2ff98cab7f84eb820553666f8fd19859bd4a4c8727f96f45aeb88aa1b38b1b7",
+      "bytes": 1218
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/IMPLEMENTATION_APPROVAL.json",
+      "sha256": "bdffa98ad65bdf4c2540daa873637d2885d2f38adda10980065c7983da547dee",
+      "bytes": 15284
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/INITIAL_STATE.json",
+      "sha256": "72760c622498c607f5de5265e19ef86bb7b27a2196b316c410c8c10c30f9d8fc",
+      "bytes": 700
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/INPUT_REVIEW.json",
+      "sha256": "9d0c9adbe6669dc2fec4686fa1012cf52c8ecc8d5dc5f6ce17ecb1e3ec9cad3d",
+      "bytes": 1138
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/NEW_QUOTE_RECONSTRUCTION.json",
+      "sha256": "ee89d55eee79595f1d8d6fc170077846706323f9faf31677f35e6a5110a322b8",
+      "bytes": 1107
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/OLD_S13_RECONSTRUCTION.json",
+      "sha256": "d031554f9d328960c4777794c12d1788a3ee1d8f9d1fb9ec1c29532b9a6fc061",
+      "bytes": 941
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/POST_RUN_AUDIT.json",
+      "sha256": "405c4828146970f69f79c2a4106585ac316a7ddb57ebd0fc3789f2a5cf52aebe",
+      "bytes": 17729
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/PREFIX_GATE.json",
+      "sha256": "43e0a079a8d6ff98df412a1266334f93611cf7df394c5fe14a0b83f260bb46eb",
+      "bytes": 1041
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/PREFIX_INPUT_APPROVAL.json",
+      "sha256": "8859bdb93eb886c5bfb020c6395a21877703abf3043c683c00bc7006c9599fba",
+      "bytes": 2307
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/PREFIX_PREFLIGHT.json",
+      "sha256": "65549ec7d874d7ea7238b086f26a17ffb572164ff4fb625f0ed08f1217efef5a",
+      "bytes": 867
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/REGISTRATION_INDEX.json",
+      "sha256": "7ad02b4faecca294d1f93212f4d74395d16fc46c470398a130e916f24d69d3e9",
+      "bytes": 1298
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/REJECTED_DRAFTS_AND_ERRORS.json",
+      "sha256": "346630c60bfc8e4cfcac7e402be35b46337ed86428a31cae656f3c42bedf763e",
+      "bytes": 2886
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/REMAINDER_INPUT_APPROVAL.json",
+      "sha256": "37000eb53a38358bb266f460a51eecc7529b68e7a6af498d22ba040dfd7f658a",
+      "bytes": 2338
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/REMAINDER_PREFLIGHT.json",
+      "sha256": "580cbd78ef6c46157b42d6541bb00cbaa6f582fb4431001e777aa40827c42bfc",
+      "bytes": 867
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/ROOT_CAUSE_REPLAYS.json",
+      "sha256": "d6f5ef25630ea3b0b1d849906eadc75a7e1bfd9851cfc4e7b07f8d6d62e3204c",
+      "bytes": 3203
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/RUN_COMMAND.json",
+      "sha256": "0746d0961c1a78197ee9ac964cdfab24411dea3b2ec4acea8b58e007010a572b",
+      "bytes": 927
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/RUN_INTEGRATION.json",
+      "sha256": "3ba45d397269974956bc70c97744e5e5b927494dece5e3761f606c5ca0429eda",
+      "bytes": 7615
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/VERIFICATION_LOG_HASHES.json",
+      "sha256": "d102d19c0d2d12843b2319a8b318978e9a6b993d0cf922c3e058c3b17a8f91e6",
+      "bytes": 3334
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/evidence/WORLD_SUMMARY.json",
+      "sha256": "b690e5bb3aa3b71551c5879f1c728f94349c0ef63fabff3bbbac226b59e559bf",
+      "bytes": 2736
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/REPORT.md",
+      "sha256": "d783b0334182bd23d0938756a31ed8b42df2ebaa06ee08f767266db733366c6f",
+      "bytes": 10861
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/SUMMARY.json",
+      "sha256": "de3ee41efa4263092f0a6692031440239d52b573ba05251626645319b3f2f822",
+      "bytes": 1310
+    }
+  ]
+}

@@ -12,6 +12,17 @@ const setup = (description?: string) => {
   return { scope, tools, verifier, clock: () => commerceNow, latest: "Mẫu này bao nhiêu em?", history: [], ownerPrompt: "Tư vấn theo nguồn.", verifierPrompt: "Kiểm exact reply." };
 };
 const final = (text = "Áo giá 499k chị nhé."): OwnerGeneration => ({ kind: "FINAL", text });
+it("captures the actual final boundary only on explicit evaluation request", async () => {
+  const regular=setup(),captured=setup();
+  const a=await runCommerceTurn({...regular,owner:async()=>final()});
+  const b=await runCommerceTurn({...captured,owner:async()=>final(),captureBoundaryWitness:true});
+  expect(a).not.toHaveProperty("boundaryWitness");expect(b.terminal).toEqual(a.terminal);
+  expect(b).toHaveProperty("boundaryWitness");
+  if (!("boundaryWitness" in b)||!b.boundaryWitness)throw Error("BOUNDARY_WITNESS_REQUIRED");
+  expect(b.boundaryWitness).toMatchObject({terminal:b.terminal,responseKind:"VERDICT",checkedAt:commerceNow.toISOString()});
+  expect(b).toHaveProperty("boundaryWitness.expected.requestId",captured.scope.requestId);
+  expect(b).toHaveProperty("boundaryWitness.currentBinding.requestId",captured.scope.requestId);
+});
 const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TOOLS", calls: [{ name, args }],
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 
@@ -379,5 +390,109 @@ describe("one conversational owner, tools and exact egress", () => {
       verifier: role === "verifier" ? timeout : s.verifier });
     expect(result.recovery?.originalReason).toBe("TIMEOUT"); expect(timeout).toHaveBeenCalledOnce();
     expect(result.generations.find(g => g.role === role)).toMatchObject({ status: "TIMEOUT", telemetry: { providerRequests: 1 } });
+  });
+});
+
+describe("a continuation the transport cannot build", () => {
+  const bound = () => Object.assign(new Error("OWNER_REQUEST_BOUND"), { requestBytes: 68237 });
+  const run = async (owner: (request: OwnerRequest, step: number) => OwnerGeneration | Promise<OwnerGeneration>, prompt = "Bộ quần nhé.") => {
+    const s = setup(); let step = 0; const requests: OwnerRequest[] = [];
+    const r = await runCommerceTurn({ ...s, latest: prompt, owner: async request => { requests.push(request); return owner(request, ++step); } });
+    return { r, requests, verifier: s.verifier };
+  };
+  it("answers once from the gathered facts instead of losing completed tool work", async () => {
+    const { r, requests, verifier } = await run((request, step) => {
+      if (step === 1) return tool("read_product", { subjectRef: "SM613" });
+      if (step === 2) { expect(request.toolsAllowed).toBe(true); throw bound(); }
+      return final();
+    });
+    expect(requests).toHaveLength(3);
+    // Same turn, same facts, existing final phase: no tools offered and the tool round kept as history.
+    expect(requests[2]).toMatchObject({ toolsAllowed: false, toolBudget: { roundsRemaining: 1 } });
+    expect(requests[2]!.contents).toEqual(requests[1]!.contents);
+    expect(r.terminal).toMatchObject({ disposition: "SEND_ELIGIBLE", reason: "PASS" });
+    expect(r.generations.map(g => `${g.role}:${g.status}`)).toEqual(["owner:OK", "owner:PROVIDER_ERROR", "owner:OK", "verifier:OK"]);
+    expect(r.ownerGenerations).toBe(3); expect(verifier).toHaveBeenCalledTimes(1);
+  });
+  it("still fails closed when the reply request cannot be built either", async () => {
+    const { r, requests } = await run((_request, step) => { if (step === 1) return tool("read_product", { subjectRef: "SM613" }); throw bound(); });
+    expect(requests).toHaveLength(3); expect(requests[2]!.toolsAllowed).toBe(false);
+    expect(r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+    expect(r.recovery).toMatchObject({ originalDisposition: "FALLBACK", originalReason: "PROVIDER_ERROR" });
+  });
+  it("does not retry a first request, a provider failure or a late generation", async () => {
+    const first = await run(() => { throw bound(); });
+    expect(first.requests).toHaveLength(1); expect(first.r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+    const provider = await run((_request, step) => { if (step === 1) return tool("read_product", { subjectRef: "SM613" }); throw new Error("GENERATION_HTTP"); });
+    expect(provider.requests).toHaveLength(2); expect(provider.r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+    const late = await run((_request, step) => { if (step < 3) return tool("read_product", { subjectRef: "SM613" }); throw bound(); });
+    expect(late.requests).toHaveLength(3); expect(late.requests[2]!.toolsAllowed).toBe(false);
+    expect(late.r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+  });
+});
+
+describe("a provider answer with no usable owner output", () => {
+  const run = async (owner: (request: OwnerRequest, step: number) => OwnerGeneration | Promise<OwnerGeneration>) => {
+    const s = setup(); let step = 0; const requests: OwnerRequest[] = [];
+    const r = await runCommerceTurn({ ...s, owner: async request => { requests.push(request); return owner(request, ++step); } });
+    return { r, requests, verifier: s.verifier };
+  };
+  it.each(["OWNER_FINISH_REASON", "OWNER_CONTENT_PARTS", "OWNER_FINAL_EMPTY", "OWNER_CANDIDATE_COUNT", "OWNER_CONTENT_ROLE"])("is asked for once more with the same request (%s)", async code => {
+    const { r, requests, verifier } = await run((_request, step) => { if (step === 1) throw new Error(code); return final(); });
+    expect(requests).toHaveLength(2);
+    const { generationId: _a, signal: _x, ...first } = requests[0]!, { generationId: _b, signal: _y, ...second } = requests[1]!;
+    expect(second).toEqual(first);
+    expect(r.terminal).toMatchObject({ disposition: "SEND_ELIGIBLE", reason: "PASS" });
+    expect(r.generations.map(g => `${g.role}:${g.status}`)).toEqual(["owner:PROVIDER_ERROR", "owner:OK", "verifier:OK"]);
+    expect(verifier).toHaveBeenCalledTimes(1);
+  });
+  it("is retried only once per turn and stays inside the generation cap", async () => {
+    const twice = await run(() => { throw new Error("OWNER_FINISH_REASON"); });
+    expect(twice.requests).toHaveLength(2); expect(twice.r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+    const afterTools = await run((_request, step) => { if (step < 3) return tool("read_product", { subjectRef: "SM613" }); throw new Error("OWNER_FINISH_REASON"); });
+    expect(afterTools.requests).toHaveLength(3); expect(afterTools.r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+    const mid = await run((_request, step) => { if (step === 1) return tool("read_product", { subjectRef: "SM613" }); if (step === 2) throw new Error("OWNER_FINISH_REASON"); return final(); });
+    expect(mid.requests).toHaveLength(3); expect(mid.r.terminal.disposition).toBe("SEND_ELIGIBLE");
+    // The completed tool round is neither repeated nor lost.
+    expect(mid.requests[2]!.contents).toEqual(mid.requests[1]!.contents); expect(mid.r.toolRounds).toBe(1);
+  });
+  it.each(["TIMEOUT", "GENERATION_HTTP", "OWNER_TOOL_OUTPUT", "OWNER_OUTPUT_SURFACE", "OWNER_FINAL_BOUND", "AUTH_HTTP"])("never retries %s", async code => {
+    const { r, requests } = await run(() => { throw new Error(code); });
+    expect(requests).toHaveLength(1); expect(r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+  });
+});
+
+describe("a known tool called outside its schema", () => {
+  const slip = (name: string, field: string, extra: { name: string; args: unknown }[] = []): OwnerGeneration => {
+    const calls = [{ name, args: { subjectRef: "SM613", unexpected: true }, invalidArguments: { field } }, ...extra];
+    return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(c => ({ functionCall: { name: c.name, args: c.args }, thoughtSignature: "opaque-signature" })) } };
+  };
+  const run = async (owner: (request: OwnerRequest, step: number) => OwnerGeneration) => {
+    const s = setup(); let step = 0; const requests: OwnerRequest[] = [], invoked: string[] = [];
+    const tools = { ...s.tools, invokeBatch: async (calls: Parameters<typeof s.tools.invokeBatch>[0]) => {
+      invoked.push(...calls.map(c => c.name)); return s.tools.invokeBatch(calls); } };
+    const r = await runCommerceTurn({ ...s, tools, owner: async request => { requests.push(request); return owner(request, ++step); } });
+    return { r, requests, invoked };
+  };
+  it("is refused with the field named, executes nothing, and lets the owner correct it in the same turn", async () => {
+    const { r, requests, invoked } = await run((_request, step) => step === 1 ? slip("recommend_size", "fitScope") : step === 2 ? tool("read_product", { subjectRef: "SM613" }) : final());
+    expect(invoked).toEqual(["read_product"]);
+    const refused = requests[1]!.contents.at(-1)!.parts[0] as { functionResponse: { name: string; response: unknown } };
+    expect(refused.functionResponse).toEqual({ name: "recommend_size", response: { status: "REJECTED", reason: "TOOL_ARGUMENTS",
+      data: { executed: false, invalidField: "fitScope", meaning: expect.stringContaining("Sửa trường này") } } });
+    // The model's own signed call is returned unchanged; the refused round is charged.
+    expect(requests[1]!.contents.at(-2)).toMatchObject({ role: "model", parts: [{ thoughtSignature: "opaque-signature" }] });
+    expect(requests[1]!.toolBudget).toEqual({ roundsRemaining: requests[0]!.toolBudget.roundsRemaining - 1, callsRemaining: requests[0]!.toolBudget.callsRemaining - 1 });
+    expect(r.terminal).toMatchObject({ disposition: "SEND_ELIGIBLE", reason: "PASS" }); expect(r.rejectedToolCalls).toBe(1);
+  });
+  it("runs no call of a batch that contains a malformed one", async () => {
+    const { requests, invoked } = await run((_request, step) => step === 1 ? slip("recommend_size", "fitScope", [{ name: "read_product", args: { subjectRef: "SM613" } }]) : final());
+    expect(invoked).toEqual([]);
+    expect(requests[1]!.contents.at(-1)!.parts.map(p => (p as { functionResponse: { response: { reason: string } } }).functionResponse.response.reason)).toEqual(["TOOL_ARGUMENTS", "BATCH_NOT_EXECUTED"]);
+  });
+  it("cannot loop: a second slip uses the last round and a third ends the turn without sending", async () => {
+    const { r, requests, invoked } = await run(() => slip("recommend_size", "fitScope"));
+    expect(invoked).toEqual([]); expect(requests).toHaveLength(3); expect(requests[2]!.toolsAllowed).toBe(false);
+    expect(r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
   });
 });

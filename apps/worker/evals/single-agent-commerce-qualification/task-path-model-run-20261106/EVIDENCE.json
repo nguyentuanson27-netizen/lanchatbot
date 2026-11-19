@@ -1,0 +1,85 @@
+{
+  "runSourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "worldHash": "436a5be7095ec64c2eaa851b1fcdf7c0a6a6ee5b381a049c3a84978be1159b4f",
+  "casesRegistered": 4,
+  "turnsRegistered": 7,
+  "frames": 7,
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 6,
+    "HANDOFF": 1
+  },
+  "generationCount": 22,
+  "roles": {
+    "OWNER": 15,
+    "VERIFIER": 7
+  },
+  "generationStatuses": {
+    "OK": 22
+  },
+  "providerRequests": 22,
+  "verifierLatencyMs": {
+    "p50": 11396.430699999997,
+    "p95": 13724.889599999995
+  },
+  "tokenUsage": {
+    "inputObserved": 226147,
+    "outputObserved": 14942,
+    "usageRows": 22,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "journalSha256": "3eee443e5996cacbdb02141695f20a93aca0c5cdd92beb89c6e35604284a5d8b",
+  "sourceDirty": false,
+  "testDatabaseDropped": true,
+  "diagnosticStop": null,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "preflightIndependentCheck": "reviewer-run checker completed successfully; reviewer initial turn interrupted after automated output; independent post-run audit completed",
+  "p07": {
+    "fitResults": [
+      {
+        "status": "OK",
+        "role": "TOP",
+        "recommendedSizes": [
+          {
+            "componentProductId": "SV2447-AO",
+            "componentRole": "TOP",
+            "size": "M"
+          }
+        ],
+        "alternativeSizes": []
+      },
+      {
+        "status": "OK",
+        "role": "PANTS",
+        "recommendedSizes": [
+          {
+            "componentProductId": "SQ2447-QUAN",
+            "componentRole": "PANTS",
+            "size": "M"
+          }
+        ],
+        "alternativeSizes": []
+      }
+    ],
+    "ownerDraft": "Với chiều cao 1m60 và cân nặng 55kg, hệ thống gợi ý chị mặc size M cho cả áo và quần của set này. Tuy nhiên, nếu chị quen mặc quần rộng rãi hơn thì có thể chọn áo size M và quần size L nhé ạ.",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "b84c0066-8478-40c5-9f8e-99ee6d65d1d4",
+          "excerpt": "nếu chị quen mặc quần rộng rãi hơn thì có thể chọn áo size M và quần size L nhé ạ.",
+          "basis": "Kết quả SIZE_FIT cho phần quần, khớp hồ sơ và binding hiện tại, chỉ đề xuất M và không có size thay thế. Khách đang nhờ chọn size từng phần; thói quen mặc L không phải yêu cầu tự đặt size và không cấp căn cứ để shop đề xuất quần L."
+        }
+      ]
+    },
+    "actualTerminal": "HANDOFF",
+    "materialFailure": true
+  },
+  "laterGroups": "NOT_RUN, R1 material failure, per frozen staged policy",
+  "independentPostRunGate": "FAIL — independent integrity audit passed",
+  "acceptedOutbox": {
+    "text": 6,
+    "image": 3
+  }
+}

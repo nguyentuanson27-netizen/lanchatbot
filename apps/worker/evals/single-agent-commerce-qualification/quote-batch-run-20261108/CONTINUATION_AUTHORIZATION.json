@@ -1,0 +1,21 @@
+{
+  "kind": "EXPLICIT_OWNER_CONTINUATION_AFTER_R1_FAIL",
+  "authorizedAt": "2026-11-07T18:00:36.820771+00:00",
+  "ownerInstruction": "chạy tiếp các ca còn lại, chạy xong toàn bộ mới review 1 lần, ko gọi đi gọi lại theo dõi như vậy",
+  "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "reportBranchHead": "db4afe0538b903c39cc821e6aa654df438cb95d3",
+  "sourceCheckout": "DETACHED_EXACT_ORIGINAL_RUN_SOURCE; return report branch after completion",
+  "runtimeChanged": false,
+  "promptsModelsCorporaChanged": false,
+  "existingR1Verdict": "FAIL_RETAINED",
+  "cases": 30,
+  "turns": 48,
+  "generationRetry": 0,
+  "maximumGenerations": 192,
+  "reviewPolicy": "ONE_POST_COMPLETION_REVIEW_NO_INTERMEDIATE_AGENT_REVIEWS",
+  "hardSafetyPrivacyFreshnessAccountingStopsRetained": true,
+  "helpers": {
+    "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-owner-continue-20261108-01.py": "ffed676eaa2a806973ed1f918ce987b25780b9eadc36159ec2560cad9885ac6f",
+    "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-all-remaining-20261108-01.py": "3f54f012fa1ba133bd35b8a3aa8367b9aa7e81531d0ffee0adc928dba3d61dd6"
+  }
+}

@@ -1,0 +1,357 @@
+{
+  "status": "REVIEW_COMPLETE_PREFIX_FAIL_STOP_REMAINDER",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T08:53:54.963220+00:00",
+  "sourceSha": "69bd122100f51584acd6d2ac97dde9254b3e562c",
+  "registrationHash": "0c736539117e36bb5e69dba757bfa69909869c4eaa9e69ffeb52a065e0393d13",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-run-20261105-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "05b08bbca7c58dbe3ff6c0ddeaf3e4e9993a32ba8c2d36cc4feecdc0b92add62",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-run-20261105-02\\integration.json",
+  "integrationSha256": "3ba45d397269974956bc70c97744e5e5b927494dece5e3761f606c5ca0429eda",
+  "accountingPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-accounting-20261105-02.json",
+  "accountingSha256": "dda69eb35b2929c0b0a874c088d792fcfba73b30f74523511a6a5f53d158e0b0",
+  "registeredCases": 13,
+  "executedCases": 13,
+  "registeredTurns": 24,
+  "capturedTurns": 24,
+  "materialTaskFailures": 7,
+  "caseOutcomes": [
+    {
+      "caseId": "c-po-20261031-p04",
+      "taskResult": "PASS_WITH_LIMITS",
+      "category": "COMPLETED_REGISTERED_PREFIX_TASK",
+      "reason": "Current registered task served, including legitimate customer colour clarification or incomplete checkout field intake; not a full sales-quality endorsement."
+    },
+    {
+      "caseId": "c-po-20261031-p06",
+      "taskResult": "FAIL",
+      "category": "INFRASTRUCTURE",
+      "reason": "Order-sensitive component array hash falsely marks same COMPOSITE multiset VARIANT_DEPENDENT; bound SD023/price available, but owner hands off PRODUCT_AMBIGUOUS."
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "taskResult": "FAIL",
+      "category": "INFRASTRUCTURE",
+      "reason": "TOP and PANTS valid SIZE_FIT share PRODUCT SQ2447 variantId=null; generic conflict key ignores fitTarget. Exact pure readiness replay BLOCKED only CLAIM_CONFLICT after verifier/final binding PASS."
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "taskResult": "PASS_WITH_LIMITS",
+      "category": "COMPLETED_REGISTERED_PREFIX_TASK",
+      "reason": "Current registered task served, including legitimate customer colour clarification or incomplete checkout field intake; not a full sales-quality endorsement."
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "taskResult": "PASS_WITH_LIMITS",
+      "category": "COMPLETED_REGISTERED_PREFIX_TASK",
+      "reason": "Current registered task served, including legitimate customer colour clarification or incomplete checkout field intake; not a full sales-quality endorsement."
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "taskResult": "FAIL",
+      "category": "OWNER_MEDIA_SEMANTICS",
+      "reason": "Owner calls DETAIL photo lace closeup without confirmed image-part evidence; verifier correctly rejects. Actual customer receives no answer/image."
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "taskResult": "FAIL",
+      "category": "PROVIDER_COMPLETION",
+      "reason": "HTTP200 MALFORMED_RESPONSE, one provider request, no generation retry."
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "taskResult": "FAIL",
+      "category": "OWNER_TOOL_ARGUMENT",
+      "reason": "HTTP200 STOP but read_product UNKNOWN_FIELD; decoder rejects OWNER_TOOL_OUTPUT, no generation retry."
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "taskResult": "PASS_WITH_LIMITS",
+      "category": "COMPLETED_REGISTERED_PREFIX_TASK",
+      "reason": "Current registered task served, including legitimate customer colour clarification or incomplete checkout field intake; not a full sales-quality endorsement."
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "taskResult": "FAIL",
+      "category": "CONTINUATION_BOUND",
+      "reason": "Local continuation66933 bytes exceeds65536 after two add_to_cart with missing colour. Rejected generation has providerRequests0. Last turn silence follows human ownership."
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "taskResult": "PASS_WITH_LIMITS",
+      "category": "COMPLETED_REGISTERED_PREFIX_TASK",
+      "reason": "Current registered task served, including legitimate customer colour clarification or incomplete checkout field intake; not a full sales-quality endorsement."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "taskResult": "FAIL",
+      "category": "PROVIDER_COMPLETION",
+      "reason": "HTTP200 MALFORMED_FUNCTION_CALL. Two later turns silent because HUMAN_OWNS_CONVERSATION."
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "taskResult": "PASS_WITH_LIMITS",
+      "category": "COMPLETED_REGISTERED_PREFIX_TASK",
+      "reason": "Current registered task served, including legitimate customer colour clarification or incomplete checkout field intake; not a full sales-quality endorsement."
+    }
+  ],
+  "criticalInfrastructureFindings": [
+    {
+      "priority": "P1",
+      "caseId": "c-po-20261031-p06",
+      "code": "COMPONENT_ORDER_FALSE_VARIANCE",
+      "cause": "COMPOSITE has three rows with the same component multiset (QD001 twice, SD023-AO once); order-sensitive array hash removes structure from owner projection as VARIANT_DEPENDENT. Bound product SD023 and price 989000 are available; owner hands off PRODUCT_AMBIGUOUS after read_product + quote_product. Material task failure, not legitimate missing customer product selection.",
+      "paths": [
+        "apps/worker/src/single-agent-commerce-read-only-tools.ts:109",
+        "apps/worker/src/single-agent-commerce-read-only-tools.ts:121"
+      ],
+      "nativeArtifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-run-20261105-02\\native-d963081202a7a520dc3ce5acaf1766ae4195eb8fe4935a39a29bd636d6825fd3-turn-0.json",
+      "nativeSha256": "29dd54c00648a28724742328a4b1c0701cced06b2eab962acf17cc944a37e3d5",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "PRODUCT_AMBIGUOUS"
+      }
+    },
+    {
+      "priority": "P1",
+      "caseId": "c-po-20261031-p07",
+      "code": "COMPONENT_FIT_FALSE_CONFLICT",
+      "cause": "Two current valid SIZE_FIT claims for TOP and PANTS share PRODUCT SQ2447 / variantId=null. Generic conflict key ignores fitTarget and treats their differing contentHash as conflict. Pure built-package readiness replay yields only CLAIM_CONFLICT. Verifier PASS and final snapshot gate PASS; delivery is NO_SEND EGRESS_READINESS.",
+      "paths": [
+        "packages/contracts/src/v2/canonical-evidence-readiness.ts:475",
+        "packages/contracts/src/v2/canonical-evidence-readiness.ts:524",
+        "apps/worker/src/single-agent-commerce-ingress.ts:372"
+      ],
+      "nativeArtifact": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-run-20261105-02\\native-7ca3d033f20d2aced84dc97a9b8639ccfae1d25a8e7d60e4bd0acd1216492395-turn-0.json",
+      "nativeSha256": "8bd3d0df6e174695ded3288bf4702908c9bdfc8ddf79616ede28de580a537a2d",
+      "actualTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "EGRESS_READINESS"
+      }
+    }
+  ],
+  "generationCount": 52,
+  "providerRequests": 51,
+  "maxRequestsPerGeneration": 1,
+  "generationStatuses": {
+    "OK": 48,
+    "MALFORMED": 3,
+    "PROVIDER_ERROR": 1
+  },
+  "localBuildRejectionsWithoutProviderRequest": 1,
+  "authEvents": 1,
+  "noHiddenGenerationRetryObserved": true,
+  "testDatabaseDropped": true,
+  "sourceDirty": false,
+  "liveSends": false,
+  "diagnosticHardStop": null,
+  "internalTerminalCounts": {
+    "SEND_ELIGIBLE": 12,
+    "HANDOFF": 6,
+    "NO_SEND": 6
+  },
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 12,
+    "HANDOFF": 6,
+    "NO_SEND": 4,
+    "CODE_OWNED_SEND": 2
+  },
+  "nativeArtifacts": [
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "artifact": "native-10cbdfa38f07e4c68fce1f0c94c22a2eaf9afcc57a8dac9dc7b59f0c9c4be903-turn-0.json",
+      "rawSha256": "04945e6d9301a3aace9e272336fa4b50bb1ea920f121bd66acfd39247b7a73cc",
+      "semanticHash": "92cc0fd5253df1f8979b1c2fffda5540baa1656f0d67f8d55841e340a26401cc"
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "artifact": "native-10cbdfa38f07e4c68fce1f0c94c22a2eaf9afcc57a8dac9dc7b59f0c9c4be903-turn-1.json",
+      "rawSha256": "c953fe93a209840e64df16dccfe5fe7f590533f4fdc952ebbc4266ddfe7968b0",
+      "semanticHash": "293b9dd4ca0f0d9a234620fbfacd6a60a1958b815d66187c30f39a760ef778f8"
+    },
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "artifact": "native-d963081202a7a520dc3ce5acaf1766ae4195eb8fe4935a39a29bd636d6825fd3-turn-0.json",
+      "rawSha256": "29dd54c00648a28724742328a4b1c0701cced06b2eab962acf17cc944a37e3d5",
+      "semanticHash": "c2059786b5c3d0563106df7ed404cdde25cbf06f44e316f9c9d7a2fdcd71941c"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "artifact": "native-7ca3d033f20d2aced84dc97a9b8639ccfae1d25a8e7d60e4bd0acd1216492395-turn-0.json",
+      "rawSha256": "8bd3d0df6e174695ded3288bf4702908c9bdfc8ddf79616ede28de580a537a2d",
+      "semanticHash": "fbb1397b8fb61946e4e3fdbe80b42193e7c4a34d2738d1568d126480060fa2bd"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "artifact": "native-cec5eb160c2bbc053fed366f5b46a89ab713a1d46cd8171c42947b118a31f957-turn-0.json",
+      "rawSha256": "d95664216137443e85cda9bfc27dd0744a75d2371e29a636d1fe460d879d4fb7",
+      "semanticHash": "0db24519473b9e3a7f7316ac49356bff7a346f4407ec8c05c6cf7ad31f42884a"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "artifact": "native-cec5eb160c2bbc053fed366f5b46a89ab713a1d46cd8171c42947b118a31f957-turn-1.json",
+      "rawSha256": "af88039b68e71739b30d2be9eb5668b9fca25c9209cd89d544950ace974075eb",
+      "semanticHash": "2cdba7b04df2e112b3cbc38620c0fb25a2b43ba9c99ff58aed529ba193938fa7"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 0,
+      "artifact": "native-1cda5f99bbb456f6e72a78d7c8e18729433698cc643f163fecf2511eae7209f7-turn-0.json",
+      "rawSha256": "db5d379a00c1df6ed30c5e4012d2fa9682e0f89d209ec229a8551ec6e8b101ad",
+      "semanticHash": "481b4315f682652a718ed38da3d5e2a1004d1a9635c062e3f63e0c9c94957f02"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "artifact": "native-1cda5f99bbb456f6e72a78d7c8e18729433698cc643f163fecf2511eae7209f7-turn-1.json",
+      "rawSha256": "248d8a6e633e97ebd7468e18a361f2804e2ca01ca73e937adbaa1a5deb61cf93",
+      "semanticHash": "2c33e1a6a6f89803d796f476e8b26a0c76ff12d3eca2ee52be0db1725510ff34"
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "turnIndex": 0,
+      "artifact": "native-24286bd79b0009c883a6c65f6de964615c2577893253473aa48a77314ec0c72a-turn-0.json",
+      "rawSha256": "38a48326a7834279c59821b4d3d6a93af8f46e3b5f28785c02df90395ac9e8b6",
+      "semanticHash": "49beab9a1929f92cc9678d978e3e1118f44292fb5724a10d8797cfb699d54691"
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "turnIndex": 0,
+      "artifact": "native-fd2867b31f2c930c8ebade6060342b19cacded308da83dbd498524b1d1f48ddf-turn-0.json",
+      "rawSha256": "2922d154ff7df41548ec6b5d0900631eea51e86d1ef13994f5d68a6a06ed9000",
+      "semanticHash": "c8df4c0f09b173ca56a25ce0af5a0c08d47c2b8b81c7a2f9764f8a8524bcaae3"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "artifact": "native-6f5f0d621fe154d7673d512f070f5269f4e487b772f00300bd320482c3078a51-turn-0.json",
+      "rawSha256": "fe057ffc5826e2fb96e361c5d0dceda18e36900f5ba8f93d8e2dedc92a33824a",
+      "semanticHash": "1959fe9e7b29a01e1f002e67e4d756ac995b3f2667b0dba2261891878e93725f"
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "turnIndex": 0,
+      "artifact": "native-ed1389e9a679edffa6724691b594e25c9b7866f2d4dbf87f8660117a33d003a4-turn-0.json",
+      "rawSha256": "80a5a38707e63bf524eb580c2d11680ffc69a3db190622eba8d4b19b4e8bd28a",
+      "semanticHash": "4f0f7d0083c62b1ca37df99c542b547a7e85b0ae38533457b0be9908bc8276ad"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "artifact": "native-b02d2b6d34ce33c6919a4814fe28958b267616cbfb852840b668c46d70d7a99b-turn-0.json",
+      "rawSha256": "877908d7699bbecd7e4b137e3217a5b4b92a551ebbbcae2c42cde82b4f617569",
+      "semanticHash": "a56697880318b7b89f84114fa7f3dc9ce882f6d73f273e00751d3a388a7be8a0"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "artifact": "native-b02d2b6d34ce33c6919a4814fe28958b267616cbfb852840b668c46d70d7a99b-turn-1.json",
+      "rawSha256": "4a396dd6784720e740c9628fb560e1fe68f15b2183a7f7dfb5c841d7bece66f5",
+      "semanticHash": "17834a61b04533e58779b307e2d7e8c5d8d25a7b3d9a3894d0451caf0853e7f1"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "artifact": "native-b02d2b6d34ce33c6919a4814fe28958b267616cbfb852840b668c46d70d7a99b-turn-2.json",
+      "rawSha256": "c00e1e3542f1b01536120bfab01cc2139c05da22357110a9b36d1859d8832c10",
+      "semanticHash": "a29617a065d8f6daae67571cd04b1862276deb8f1410d6ad1a6538fc4323ecc4"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "artifact": "native-556b500dd37b25155a6c30d4a5c88385367f6d09eb2c42db63438a41555d44a1-turn-0.json",
+      "rawSha256": "fc7cdc9f5765137b7fdc80ac1a0c787b7b13a88d988faada45f9ae165b674df5",
+      "semanticHash": "900c8f0ebd8cfa4867972c6a7d1a8f4d7e865ddabb1dfb90e2185add9d431ddf"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "artifact": "native-556b500dd37b25155a6c30d4a5c88385367f6d09eb2c42db63438a41555d44a1-turn-1.json",
+      "rawSha256": "86096e7e883c6cd74e9af0fbcdd8253122300fef3c231d2097ac8a67a725577e",
+      "semanticHash": "c2d4de0de4abdfe1f0b98e480035712045841fabe36f7ff689f537a1344c5e96"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 2,
+      "artifact": "native-556b500dd37b25155a6c30d4a5c88385367f6d09eb2c42db63438a41555d44a1-turn-2.json",
+      "rawSha256": "11ad3bae3295788310e2e837691ac45593bd7ff762f89394bdfa35b41c6334f6",
+      "semanticHash": "97cd5504005fb273fbecbe34d9340ea5b5031b1d569512dfeed0f49f850ae5e1"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "artifact": "native-fa436e6f004227c898175dc065837583c75c12b3cc4ddae793057a24fb924b12-turn-0.json",
+      "rawSha256": "232fbfe0c7eaa56538387550c1b6aed73d4b2dade9cba44505c1a780e6a363b0",
+      "semanticHash": "65071334ebd99410c9141955002dd10dda5459705195a520e1eb003a1ab17694"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 1,
+      "artifact": "native-fa436e6f004227c898175dc065837583c75c12b3cc4ddae793057a24fb924b12-turn-1.json",
+      "rawSha256": "450609e0e33bd4ecb0f5a3f43d0e01cc976f25bf4fd8a399e1c2c40e0999b6bb",
+      "semanticHash": "014eb0c4a2a5f903d59514c2769dac9fe9b3196e658495717d1b52acf7c051be"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "artifact": "native-fa436e6f004227c898175dc065837583c75c12b3cc4ddae793057a24fb924b12-turn-2.json",
+      "rawSha256": "df084f63dad3460727c23e2721a8d2519fa35828d6745526bd61800a31e5d1fe",
+      "semanticHash": "6304e2e1797b429d2f2a36ed98c578f9380862dbbd767e23366e246edba0fe54"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "artifact": "native-d398dedaddc352d3ccd7477b716ee94992470fe7e1544a358238c6d993d91eed-turn-0.json",
+      "rawSha256": "6928e4dfe6e80f2a864270ed40cacad5113392bd6e2ab164dcb9739b140bedd6",
+      "semanticHash": "c48f4147e337da99433c8438860a2ec64c43911f2b254b7de84c03b7f731efe1"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "artifact": "native-d398dedaddc352d3ccd7477b716ee94992470fe7e1544a358238c6d993d91eed-turn-1.json",
+      "rawSha256": "72c74977112afae2a583da35fd778425dea68fab291ecea1a41338fa36bb52b1",
+      "semanticHash": "acb4e88caeefe9198dae3853c799d0293022ca79e6391735ade0648aaa9d7081"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "artifact": "native-d398dedaddc352d3ccd7477b716ee94992470fe7e1544a358238c6d993d91eed-turn-2.json",
+      "rawSha256": "1fb6702adc73b76954b213253882d0980afde39a83a841f2665d3dd046431111",
+      "semanticHash": "b6af9914eda2fed819b8182d65b6cf394d8cf714191c534010a0681ae3618856"
+    }
+  ],
+  "integrityChecks": {
+    "all24RawSemanticHashes": true,
+    "allProviderWireHashesAndRuntimeEvaluatorFirewall": true,
+    "uniqueGenerationIds52AndRequestIds51": true,
+    "actualTextHashesAndAcceptedOutbox": true,
+    "imageCountsAndAcceptedRawOutboxIds": true,
+    "silentHandoffAndFallback": true,
+    "noObservedPIILeakInReviewedRuntimeFrames": true,
+    "denominatorRetainsAllErrorsAndDownstreamSilence": true
+  },
+  "verifiedCommand": "Independent Node evidence audit exited0: 13 cases/24 turns/52 generations/51 requests/auth1. Exact pure readiness replay p07 returned BLOCKED:[CLAIM_CONFLICT].",
+  "limits": [
+    "Development prefix N1 only, no locked-quality judge result or Phase C GO.",
+    "6 case tasks completed with limits; does not imply convincing/natural sales voice. j2 still repeats all customer measurements; scoped functional test passes.",
+    "12 generated SEND_ELIGIBLE plus2 CODE_OWNED_SEND checkout questions; internal NO_SEND count is not actual customer silence.",
+    "Assumed feedback uses owner-approved isolated catalog imagery, not genuine customer provenance. No new visual inspection in final audit.",
+    "Remainder20 cases24 turns and extra checkout1 case7 turns not run because prefix failed; retain as NOT_RUN.",
+    "No claim of stable improvement from one sample or universal continuation-budget fix."
+  ],
+  "remaining": {
+    "cases": 21,
+    "turns": 31,
+    "status": "NOT_RUN_STOPPED_BY_PREFIX_FAILURE"
+  }
+}

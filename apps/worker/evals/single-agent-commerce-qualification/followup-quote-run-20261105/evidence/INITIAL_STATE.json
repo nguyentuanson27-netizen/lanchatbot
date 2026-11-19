@@ -1,0 +1,29 @@
+{
+  "kind": "REAL_ADAPTER_NATIVE_INITIAL_STATE",
+  "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+  "sourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+  "sourceDirty": false,
+  "publicState": {
+    "owner": "BOT",
+    "revision": 0,
+    "salesRevision": 0,
+    "stage": "DISCOVERY",
+    "cart": null,
+    "preview": null,
+    "confirmation": null,
+    "profile": {
+      "revision": 1,
+      "measurements": [],
+      "fitPreference": null,
+      "preferences": {
+        "colors": [],
+        "styles": [],
+        "materials": []
+      }
+    },
+    "negotiation": null,
+    "checkoutPublic": null
+  },
+  "providerRequests": 0,
+  "testDatabaseDropped": true
+}

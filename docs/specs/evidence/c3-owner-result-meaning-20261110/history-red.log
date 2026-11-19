@@ -1,0 +1,155 @@
+✖ owner groups exact current fit and unknown negotiation in native continuation without changing raw or signed parts (6.4613ms)
+✖ owner groups exact current fit and unknown negotiation in final completed trace without changing raw or signed parts (2.5644ms)
+✔ current owner prompt uses only the active public read/quote contract (1.2353ms)
+✔ quote request target survives only when actually callable (native) (4.6567ms)
+✔ quote request target survives only when actually callable (final) (1.9236ms)
+✖ missing fit inputs and explicit engine alternatives retain their distinct meanings (0.7885ms)
+✖ historical fit and negotiation results stay historical in native wires (1.1598ms)
+✖ historical fit and negotiation results stay historical in final wires (1.5638ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 3
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 639.9968
+
+✖ failing tests:
+
+test at apps\worker\evals\single-agent-commerce-read-only\owner-result-meaning.test.mjs:14:33
+✖ owner groups exact current fit and unknown negotiation in native continuation without changing raw or signed parts (6.4613ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + undefined
+  - {
+  -   alternativeSizes: [],
+  -   inputFitPreference: null,
+  -   meaning: 'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.',
+  -   missingInputs: [],
+  -   recommendedSizes: [
+  -     {
+  -       componentProductId: 'C',
+  -       componentRole: 'PANTS',
+  -       size: 'M'
+  -     }
+  -   ],
+  -   sizeSourceHash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  -   status: 'RECOMMENDED',
+  -   target: {
+  -     componentProductId: 'C',
+  -     componentRole: 'PANTS',
+  -     kind: 'COMPONENT',
+  -     parentProductId: 'P'
+  -   }
+  - }
+
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/owner-result-meaning.test.mjs:19:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { status: 'RECOMMENDED', target: { kind: 'COMPONENT', parentProductId: 'P', componentProductId: 'C', componentRole: 'PANTS' }, sizeSourceHash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', missingInputs: [], recommendedSizes: [ [Object] ], inputFitPreference: null, alternativeSizes: [], meaning: 'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at apps\worker\evals\single-agent-commerce-read-only\owner-result-meaning.test.mjs:14:33
+✖ owner groups exact current fit and unknown negotiation in final completed trace without changing raw or signed parts (2.5644ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + undefined
+  - {
+  -   alternativeSizes: [],
+  -   inputFitPreference: null,
+  -   meaning: 'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.',
+  -   missingInputs: [],
+  -   recommendedSizes: [
+  -     {
+  -       componentProductId: 'C',
+  -       componentRole: 'PANTS',
+  -       size: 'M'
+  -     }
+  -   ],
+  -   sizeSourceHash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  -   status: 'RECOMMENDED',
+  -   target: {
+  -     componentProductId: 'C',
+  -     componentRole: 'PANTS',
+  -     kind: 'COMPONENT',
+  -     parentProductId: 'P'
+  -   }
+  - }
+
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/owner-result-meaning.test.mjs:19:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { status: 'RECOMMENDED', target: { kind: 'COMPONENT', parentProductId: 'P', componentProductId: 'C', componentRole: 'PANTS' }, sizeSourceHash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', missingInputs: [], recommendedSizes: [ [Object] ], inputFitPreference: null, alternativeSizes: [], meaning: 'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at apps\worker\evals\single-agent-commerce-read-only\owner-result-meaning.test.mjs:48:1
+✖ missing fit inputs and explicit engine alternatives retain their distinct meanings (0.7885ms)
+  TypeError: Cannot read properties of undefined (reading 'recommendedSizes')
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/owner-result-meaning.test.mjs:54:25)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at apps\worker\evals\single-agent-commerce-read-only\owner-result-meaning.test.mjs:60:33
+✖ historical fit and negotiation results stay historical in native wires (1.1598ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  0 !== 2
+
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/owner-result-meaning.test.mjs:68:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at apps\worker\evals\single-agent-commerce-read-only\owner-result-meaning.test.mjs:60:33
+✖ historical fit and negotiation results stay historical in final wires (1.5638ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  0 !== 2
+
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/owner-result-meaning.test.mjs:68:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

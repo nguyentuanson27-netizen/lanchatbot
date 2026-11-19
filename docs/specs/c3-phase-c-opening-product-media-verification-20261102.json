@@ -1,0 +1,610 @@
+{
+  "kind": "PHASE_C_OPENING_PRODUCT_MEDIA_IMPLEMENTATION_VERIFICATION",
+  "implementationBaseSha": "9b6fec45abec3c3e98f5505504842ac4755fa0a3",
+  "implementationSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+  "runtimePostgresSha": "41ad8e2f57d7a2b9f6200ed3efb8c6633a8c8318",
+  "openingMediaRule": {
+    "version": "FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1"
+  },
+  "ownerEvidenceRef": "call_6adb3f092d604a2a8905429aed1f6936:0",
+  "independentReview": {
+    "status": "APPROVE_IMPLEMENTATION_P2",
+    "reviewer": "/root/phase_c_task_completion_implementation_review",
+    "codeBlockers": [],
+    "reviewedExecutableSha": "41ad8e2f57d7a2b9f6200ed3efb8c6633a8c8318",
+    "artifactHashesVerified": 45,
+    "sourceGitBlobsVerified": 25,
+    "qualificationGo": false,
+    "modelQuality": "NOT_RUN"
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/c3-reference.mjs",
+      "sha256": "219c5805092db0ed3410a7ba3612265ec9c95162b795328569b2bcbbd75e882a",
+      "gitBlob": "f4cba1bf19a02f89c4c75812619e90b801044667"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/candidate-provider.mjs",
+      "sha256": "d52fff7f7b4e604490dc69f0c3dcada69f4aab5e31ff867034507a0e8702a08c",
+      "gitBlob": "62b7a6e5e53c6650f1a3ffea5e93b5231fa457b6"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/candidate-provider.test.mjs",
+      "sha256": "3ae4c572d397c9467d74e6f4ccb5e08a7b1c8a5c836d03a1030361483e459a76",
+      "gitBlob": "b78c032cb178d7215272bfdbde0c05ea5592b986"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/cli.mjs",
+      "sha256": "dffe4e6549067cdd169a8bc72f0cac40699fe90bdb891e71f9d347cb2be59a66",
+      "gitBlob": "478cd8766fb88809b679eccf5836086938739cc5"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/cli.test.mjs",
+      "sha256": "1052d0847d1997581df0fdb8cb17d5caace504022ae4e3b4ce5b33982f0045a5",
+      "gitBlob": "a497d6bc31a6b415d957b0e49750995ea0e3b9ae"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/context-coverage.mjs",
+      "sha256": "2b7046bdbc0a6dc69d3a999517082e05cc64fe90ca4c2e21bc50823c0215a022",
+      "gitBlob": "a8ce10262b4084f9b334bec95ab5237f238665ab"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/context-coverage.test.mjs",
+      "sha256": "c834b45715b630d590ffe6067a685cb7205895963835ca52e33174741c6ef7fd",
+      "gitBlob": "59cbedd426eb0bf6fdf79b20f13d7726b47fe67d"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/judge-task-contract.mjs",
+      "sha256": "c651d0833e229566ae40d0f04424ee0f6ba0a6fc3f643310d61ad292f270dd28",
+      "gitBlob": "e5996cd0364d18a6c67ceea969f9ba27ef5e5d81"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/owner-decisions.json",
+      "sha256": "031a33daeeb4f3311b8a62b26afe538b9aaff2076e2f38775e0a8ca82570f403",
+      "gitBlob": "de7b9687cb8b786b796258989898f3ac94a1ceeb"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/qualification.mjs",
+      "sha256": "5a0eb56ba826bca5c6648a4c5d3d612696ae9a4a002bcf32cf3b499a88ca1d2a",
+      "gitBlob": "8789dcdec365e4dad4c5098e509d960b4e2f936d"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/qualification.test.mjs",
+      "sha256": "0e7e83954ae7c2b7f97012b3c23e35921dccd4dc28c69a18eaf1669691c2d812",
+      "gitBlob": "a3a279595d0fee45a8a0ba80335fb866530f13ab"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-identity.mjs",
+      "sha256": "629efd3b54bdb29bd897a5e4a3c4630f3a11bbb95acca6bed4b074395142abd1",
+      "gitBlob": "b0e06a445e9601f46670e296b67c3a92d49c2084"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-readiness.mjs",
+      "sha256": "af78a6714282c8d714a4ecaaa41b9c4daeed9f102da38df9dffa39e88481e102",
+      "gitBlob": "bd3d2b0c7d9b216561e295a77acf15882cf63ac1"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs",
+      "sha256": "aa6198ca0647ac445f95ba01616f9c560b4ac5318e2cc9b9ee1c1658800ba422",
+      "gitBlob": "6aab4e9cd15196920971ff3c5801d72476e96e7f"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "4715e5fa5a7acf5dc4e38e2ac95c671b3043d328d691475f0fb80609b3c68f1e",
+      "gitBlob": "741787306869a3d7802af0d8d046e0d4fdbff40f"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.test.ts",
+      "sha256": "407c508186e5bbde2f97e171e57b089004747a7b923dfa8f33734582f46ef1cb",
+      "gitBlob": "40404d04b43ca140a55fc99ecea0ad8467346370"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.ts",
+      "sha256": "5250830e8f2e4a68fb9b79949c4cb3308625b48965f1fcb5022ebe516ab6256a",
+      "gitBlob": "1da3091118ecd51f3374c5c86fe1a9209aff1d46"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-media.ts",
+      "sha256": "0e4983f85d296474eb8c7f0a0c5f6ffc19e94375956de9ecaad7aa429ce654c7",
+      "gitBlob": "a88b1be219dba92a25ca39d47f249f42eaaa4f65"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-opening-media.test.ts",
+      "sha256": "2e68986d83cbb1c45da95ccd4691cc527355ca2e00fab16092d3591f43702019",
+      "gitBlob": "f084281f379d8cae79075c9a36b89deb3af9e9d3"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-opening-media.ts",
+      "sha256": "5816a63b3c812a3f4f0fcdf20dd0b7a9b43befc1bd6c0717045164884a394d5e",
+      "gitBlob": "e7a087842ea6d5a71a0143879dc3d5e4ddb084d0"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only.ts",
+      "sha256": "f7ea79a3bfa19f6ddeb66a3c6b5606f2fc94032d4ccc61d24b904186383048b7",
+      "gitBlob": "0375167fac30b879145a43993e8afb3103d93387"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce.ts",
+      "sha256": "63c0c99b50614c109086e7a9bef510bfb35852599b22bdc8aca11d9afcf01996",
+      "gitBlob": "96881a2131b602bcff19f21c67a12d09dbf519e8"
+    },
+    {
+      "path": "docs/specs/c3-phase-c-opening-product-media-plan-20261102.md",
+      "sha256": "bd1719d03c87c6f069809e18e436a51ca90127e47579dd389fe8693fad7c8d4b",
+      "gitBlob": "7ef273e13dbaf236d837ef11d1df0b3c887e5c75"
+    },
+    {
+      "path": "packages/database/src/chat-history.test.ts",
+      "sha256": "a05e21596eb2110c992055b729a930124afd4f99958ad4ac164e094ea11422b1",
+      "gitBlob": "ecb9a9afcbf0f2bb7cf2e5920897cb33b2e9d7a2"
+    },
+    {
+      "path": "packages/database/src/chat-history.ts",
+      "sha256": "0103c0a3eb24a70fa8290db85637014976cd808d3a617878befc5f0d6b78b67c",
+      "gitBlob": "af0f86f96bcc8cec0ca20b05f22f8e6721f4577f"
+    }
+  ],
+  "runtimeSourceParity": true,
+  "checks": [
+    {
+      "id": "worker-broad",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts",
+      "log": "../c3-opening-worker-broad01-20261102.log",
+      "observed": {
+        "pass": 883,
+        "fail": 0
+      },
+      "sourceSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "node-full-final",
+      "command": "pnpm --filter @lana/worker test:evals",
+      "log": "../c3-opening-node-full-final-20261102.log",
+      "observed": {
+        "pass": 817,
+        "fail": 0,
+        "skip": 2
+      },
+      "sourceSha": "41ad8e2f57d7a2b9f6200ed3efb8c6633a8c8318",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "database-all",
+      "command": "pnpm --filter @lana/database exec vitest run src",
+      "log": "../c3-opening-database-all-20261102.log",
+      "observed": {
+        "pass": 267,
+        "fail": 0,
+        "skip": 30
+      },
+      "sourceSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "protected-assembly",
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "log": "../c3-opening-protected-20261102.log",
+      "observed": {
+        "pass": 21,
+        "fail": 0
+      },
+      "sourceSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "worker-build",
+      "command": "pnpm --filter @lana/worker build",
+      "log": "../c3-opening-build-final-20261102.log",
+      "observed": {
+        "exitCode": 0
+      },
+      "sourceSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "worker-typecheck",
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit",
+      "log": "../c3-opening-worker-typecheck-final-20261102.log",
+      "observed": {
+        "exitCode": 0
+      },
+      "sourceSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "worker-lint",
+      "command": "pnpm --filter @lana/worker lint",
+      "log": "../c3-opening-worker-lint-20261102.log",
+      "observed": {
+        "exitCode": 0
+      },
+      "sourceSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "database-typecheck",
+      "command": "pnpm --filter @lana/database exec tsc -p tsconfig.json --noEmit",
+      "log": "../c3-opening-db-typecheck-final-20261102.log",
+      "observed": {
+        "exitCode": 0
+      },
+      "sourceSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "database-lint",
+      "command": "pnpm --filter @lana/database lint",
+      "log": "../c3-opening-db-lint-20261102.log",
+      "observed": {
+        "exitCode": 0
+      },
+      "sourceSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "postgres-full",
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-opening-media-pg-full-20261102-02 COD",
+      "log": "../c3-opening-media-pg-full02-20261102.log",
+      "observed": {
+        "pass": 110,
+        "fail": 0
+      },
+      "sourceSha": "41ad8e2f57d7a2b9f6200ed3efb8c6633a8c8318",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    },
+    {
+      "id": "postgres-invariants",
+      "command": "node ../c3-task-completion-validate-20261102.mjs ../c3-opening-media-pg-full-20261102-02",
+      "log": "../c3-opening-pg-validate-20261102.log",
+      "observed": {
+        "pass": 7,
+        "fail": 0
+      },
+      "sourceSha": "41ad8e2f57d7a2b9f6200ed3efb8c6633a8c8318",
+      "note": "58d06→41ad only exact-offer fixture argument; worker/packages identical."
+    }
+  ],
+  "artifactHashes": [
+    {
+      "path": "../c3-opening-advice-adapter-tests.log",
+      "bytes": 9106,
+      "sha256": "71883dbb1ca4747633631c4ffd81873eb9ac12f11cdb0e320eb09cd327e5f12c"
+    },
+    {
+      "path": "../c3-opening-advice-build.log",
+      "bytes": 5249,
+      "sha256": "f4b9ac77acdda3a2c94eee496c92acf2fa27eaf7e581270eb5f68b1441e9a58e"
+    },
+    {
+      "path": "../c3-opening-advice-node-tests-final.log",
+      "bytes": 63735,
+      "sha256": "89d6111681afadc3a6b028187371e4d95d0f1b982e75fb1fe82d67d36847ba20"
+    },
+    {
+      "path": "../c3-opening-advice-node-tests.log",
+      "bytes": 64457,
+      "sha256": "fdcaabc9af7faeb4744c7e8cd750ef853dc83596357c0df940feae4cb932d2fa"
+    },
+    {
+      "path": "../c3-opening-advice-worker-tests.log",
+      "bytes": 12721,
+      "sha256": "4cf5767d3a03ebded667652d58d267893395deda3b5b2689e5cb3bff053f1f6a"
+    },
+    {
+      "path": "../c3-opening-build-final-20261102.log",
+      "bytes": 5249,
+      "sha256": "822e269194b24253d2290a751aeb1129df380dc3c1e317889b00774d6bb1e7ef"
+    },
+    {
+      "path": "../c3-opening-build03-20261102.log",
+      "bytes": 5249,
+      "sha256": "97635d000b960c2660c26d5ff8e7f1e73e56e85bd68c7db78acee4187d09fcca"
+    },
+    {
+      "path": "../c3-opening-cli-20261102.log",
+      "bytes": 5843,
+      "sha256": "37914adc30a59d600302d71df17de837df7ea276f4c97980f6d3f2d00d73ee64"
+    },
+    {
+      "path": "../c3-opening-cli02-20261102.log",
+      "bytes": 661,
+      "sha256": "34dd0e6717ae646f17fec8e15165e91218e3d62aa4ddc55849ce8cc75e4ece11"
+    },
+    {
+      "path": "../c3-opening-database-all-20261102.log",
+      "bytes": 2637,
+      "sha256": "7e61dd37464626ff86d4ffe9b3365190fa34b5eeb47a72372392b31700404042"
+    },
+    {
+      "path": "../c3-opening-db-focused02-20261102.log",
+      "bytes": 366,
+      "sha256": "fb9903e899472557407f4f11c581d857abee8062595b7d990b9d53fe26297170"
+    },
+    {
+      "path": "../c3-opening-db-lint-20261102.log",
+      "bytes": 770,
+      "sha256": "79181855e27a57c0fc74bb95ac72516ebe57b0901d6f72465deef2bc25320215"
+    },
+    {
+      "path": "../c3-opening-db-typecheck-final-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-focused03-20261102.log",
+      "bytes": 20115,
+      "sha256": "37f8067fe7b2b03db28e56abb6fb4aa2d1ac4b50ed4915482184f69e44978aed"
+    },
+    {
+      "path": "../c3-opening-focused04-20261102.log",
+      "bytes": 583,
+      "sha256": "01a958f0642c6c8bb89e39c34d982ee643be2ab084f77322bd59886be013da31"
+    },
+    {
+      "path": "../c3-opening-focused05-20261102.log",
+      "bytes": 4039,
+      "sha256": "c5ccad3fc666ea7e62b3b0de3de69b1f3fc86169adbf0ef1463f0750f47c07ae"
+    },
+    {
+      "path": "../c3-opening-focused06-20261102.log",
+      "bytes": 388,
+      "sha256": "86afa44c69fd09d0e98a956a6aefd43c95937561b2d5e68dd97361c2d5d42171"
+    },
+    {
+      "path": "../c3-opening-history-green-20261102.log",
+      "bytes": 366,
+      "sha256": "8de5856438185bc121098e7e55383dff7552e863b84d14deb9b0848b979bf305"
+    },
+    {
+      "path": "../c3-opening-history-red-20261102.log",
+      "bytes": 2883,
+      "sha256": "8725953b00757dd4ccbb536456a3a964d4791ac9fefcd46ec3bff6dc088fe3fc"
+    },
+    {
+      "path": "../c3-opening-ingress-green-20261102.log",
+      "bytes": 482,
+      "sha256": "34a2399fcd56a2a56820c51705220c624d5f77dd3ddd17e8450b267f03d7a24f"
+    },
+    {
+      "path": "../c3-opening-ingress-red-20261102.log",
+      "bytes": 14247,
+      "sha256": "879fb4da3c79a98a75ee35e092996fccd456bb9e0884b98ef943425885a20a16"
+    },
+    {
+      "path": "../c3-opening-media-build01-20261102.log",
+      "bytes": 8044,
+      "sha256": "4333fefe16de4c874415b74a2e7cca7bc2284c6eb1018dd53e82782984d99601"
+    },
+    {
+      "path": "../c3-opening-media-build02-20261102.log",
+      "bytes": 5249,
+      "sha256": "41faec974cb0e0018116c2f7e158f90de114f5f5d5d6e16a9372d2bdf3481acd"
+    },
+    {
+      "path": "../c3-opening-media-focused01-20261102.log",
+      "bytes": 710,
+      "sha256": "c023c0f998e1d362c5391235a9eb96503884bf7bfa37e02662ee9c816371d8ba"
+    },
+    {
+      "path": "../c3-opening-media-focused02-20261102.log",
+      "bytes": 583,
+      "sha256": "8765622225dd961690c1cef5452c26b6024747401d38e2761c5538e2b3b9b608"
+    },
+    {
+      "path": "../c3-opening-media-green-20261102.log",
+      "bytes": 2860,
+      "sha256": "c09f79ba22e976a58c3409f9b6a8e47a78371845843bf3dfa43d563e202944dd"
+    },
+    {
+      "path": "../c3-opening-media-green2-20261102.log",
+      "bytes": 385,
+      "sha256": "40cd41de6f2491688659858f86735e2d9ab40859fcd5733a4423582d7b78b87e"
+    },
+    {
+      "path": "../c3-opening-media-pg-20261102-01/integration.json",
+      "bytes": 7932,
+      "sha256": "6927e4b36ba53f375f23037d1d1c5ff2a421d89eeef1bd756a2ea1b5810768d5"
+    },
+    {
+      "path": "../c3-opening-media-pg-full-20261102-02/integration.json",
+      "bytes": 39714,
+      "sha256": "c0091ec1c3e39dd9c92c005900d0527c5fb96fdef0a18ee67b2f0cc9dc8288c8"
+    },
+    {
+      "path": "../c3-opening-media-pg-full-20261102-02/VALIDATED_INVARIANTS.json",
+      "bytes": 1993,
+      "sha256": "71b03bcf2d074f18b084dfdc72598df6c78ab66b077988c168d4b63210bc1071"
+    },
+    {
+      "path": "../c3-opening-media-pg-full02-20261102.log",
+      "bytes": 8823,
+      "sha256": "d211275748869b3f397c511465add9ed40f35397def8a510454e4bbe844e8287"
+    },
+    {
+      "path": "../c3-opening-media-pg01-20261102.log",
+      "bytes": 1674,
+      "sha256": "de8bd2b88c87e5280473741a525181e4e03bb612139698dba5c97b2946748007"
+    },
+    {
+      "path": "../c3-opening-media-red-20261102.log",
+      "bytes": 7302,
+      "sha256": "6ba16c37f3a894d0edfec69e9b7a0002046a08cbb0074646594966f2fe0227db"
+    },
+    {
+      "path": "../c3-opening-media-red-corrected-20261102.log",
+      "bytes": 4442,
+      "sha256": "288cc8aa653978031e3ae89ba76d2b709c6f00e0190d14e5a98809969be4eaf1"
+    },
+    {
+      "path": "../c3-opening-media-typecheck02-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-node-focused01-20261102.log",
+      "bytes": 5948,
+      "sha256": "faa275ca1263ea8c5ccaea1b8334101ccd0c0646eb0de23a54e5d868766c8344"
+    },
+    {
+      "path": "../c3-opening-node-full-final-20261102.log",
+      "bytes": 89897,
+      "sha256": "9b6566e2674fb37d2aa518eeb7f97e5bcbcc2a4aaa7351f2f92b18d2b42e7191"
+    },
+    {
+      "path": "../c3-opening-node-full01-20261102.log",
+      "bytes": 89920,
+      "sha256": "e8c285d18aa6f9872b1b81883027efd77b58ab0a7daa9ec5a76e1043f389050d"
+    },
+    {
+      "path": "../c3-opening-pg-validate-20261102.log",
+      "bytes": 160,
+      "sha256": "4695ae618c6dfd6b150cff9f3fd76de267628e9b04c77e92e4f93c9a39d2ce23"
+    },
+    {
+      "path": "../c3-opening-protected-20261102.log",
+      "bytes": 429,
+      "sha256": "c3fa1f9b2ed237d724957ff881c4d21b1eca92e5584f15cc1e521a9658253175"
+    },
+    {
+      "path": "../c3-opening-source-inventory-20261102.json",
+      "bytes": 6271,
+      "sha256": "cd55f36c7ff79cef95ae6770305e981d53824354c89f0e3d60f2ea6a8dbb5c6b"
+    },
+    {
+      "path": "../c3-opening-tsc04-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-worker-broad01-20261102.log",
+      "bytes": 5752,
+      "sha256": "18cc954f6c0a280769d19a18f3ee9a6240d2f7fa1ddd361a5626e90304d30f6e"
+    },
+    {
+      "path": "../c3-opening-worker-lint-20261102.log",
+      "bytes": 171,
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    },
+    {
+      "path": "../c3-opening-worker-typecheck-final-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "postgres": {
+    "cases": 110,
+    "pass": 110,
+    "fail": 0,
+    "openingCases": 16,
+    "legacyCases": 94,
+    "validatedInvariants": 7,
+    "sourceDirty": false,
+    "databaseDropped": true,
+    "providerGenerations": 0,
+    "sendEnabled": false
+  },
+  "preservedPostgresFailure": {
+    "sourceSha": "58d06b497472a8e4f8ac247413def7a7b243d4e0",
+    "pass": 12,
+    "fail": 1,
+    "notExecutedOpening": 3,
+    "databaseDropped": true,
+    "cause": "Fixture used DIRECT instead of exact selected SM613-DIRECT; mutation rejected before exercising changed-colour media guard. Only fixture corrected."
+  },
+  "modelQuality": "NOT_RUN",
+  "qualification": "BLOCKED",
+  "replacementParity": "INFORMATION_PARITY_NOT_ESTABLISHED",
+  "providerRequests": 0,
+  "sourceShopWrites": 0,
+  "liveSends": 0,
+  "additionalSemanticRoles": 0,
+  "additionalOnlineSemanticLayers": 0,
+  "complexityDelta": {
+    "codeOwnedMediaRuleModules": 1,
+    "scopedDurableHistoryExistenceReads": 1,
+    "providerClientOrPromptSchemaChanges": 0
+  },
+  "limitations": [
+    "First-opening private/code-only checkout and confirm require silent handoff until atomic opening media is supported.",
+    "Conflicting component colours, unavailable media or budget/cap/history failure hand off; no generic retry.",
+    "Every admitted product is covered, including possible discovery candidates; model quality under this rule is not yet measured.",
+    "C3 wrapper prepares media before strategist, candidate after FINAL; replacement comparison remains machine-blocked.",
+    "Continuation 393-byte headroom is only the previously tested constructed envelope, not a universal bound guarantee."
+  ],
+  "notes": [
+    "Counts overlap; not a model population.",
+    "30 database skips and2 Node skips remain disclosed. Actual PG is separate named coverage.",
+    "Canonical worker build includes database dependency build. Shared-source change limited to scoped history read.",
+    "Failed setup/TDD/build/fixture runs remain in artifactHashes, never relabelled as PASS.",
+    "No owner/verifier prompt, model, effort, request cap, retry policy, production entrypoint, migration source or shop source changed."
+  ],
+  "unchangedRuntimeContract": {
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "promptHashes": {
+      "owner": "2a17c6b9fcc36a1dcea771631f0c8f3e7ff77d2f47f857550e9b906f801346ce",
+      "verifier": "d9d999d0b6f08dd111081cfbf1324e26aaf29904d3c03c8519eb7614b0216c73"
+    },
+    "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+    "requestBounds": {
+      "ownerWireBytes": 65536,
+      "verifierWireBytes": 65536
+    },
+    "toolCalls": 6,
+    "toolRounds": 2
+  },
+  "specGitBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b"
+  }
+}

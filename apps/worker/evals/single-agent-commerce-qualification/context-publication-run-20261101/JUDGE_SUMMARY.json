@@ -1,0 +1,53 @@
+{
+  "kind": "LOCKED_DEVELOPMENT_JUDGE_SUMMARY",
+  "packetHash": "36059438fedbcfa89bbf3d7ef515b0dbacbbd95c72dcca1d09f2a12f2251019a",
+  "gradeHash": "07f81d114ca23b244c1660a51e78d6c0fe989790fec81e32c31559dc18081402",
+  "lock": {
+    "packetHash": "36059438fedbcfa89bbf3d7ef515b0dbacbbd95c72dcca1d09f2a12f2251019a",
+    "gradeHash": "07f81d114ca23b244c1660a51e78d6c0fe989790fec81e32c31559dc18081402",
+    "gradeHashMethod": "SHA256_CANONICAL_JSON_SORTED_KEYS_UTF8",
+    "bytesHash": "250f569a63829f8fdb0b553255c7f86d0c1932b4b8793e2f7266c4d5328b9519",
+    "bytesHashMethod": "SHA256_EXACT_INDEPENDENT_GRADES_JSON_FILE_BYTES",
+    "items": 21,
+    "lockedAt": "2026-11-01T08:19:17.545Z"
+  },
+  "all": {
+    "cases": 21,
+    "whole": 13,
+    "allThree": 8,
+    "fail": 7,
+    "unresolved": 1
+  },
+  "single": {
+    "cases": 16,
+    "whole": 10,
+    "allThree": 6,
+    "fail": 5,
+    "unresolved": 1
+  },
+  "journey": {
+    "cases": 5,
+    "whole": 3,
+    "allThree": 2,
+    "fail": 2,
+    "unresolved": 0
+  },
+  "cohorts": {
+    "SALES_READY": {
+      "cases": 15,
+      "whole": 11,
+      "allThree": 7,
+      "fail": 4,
+      "unresolved": 0
+    },
+    "SOURCE_UNAVAILABLE": {
+      "cases": 6,
+      "whole": 2,
+      "allThree": 1,
+      "fail": 3,
+      "unresolved": 1
+    }
+  },
+  "qualification": "NOT_APPLIED_DEVELOPMENT_PACKET_NOT_OFFICIAL_ABSOLUTE_OR_COMPARISON",
+  "graderSourceLimit": "Shop opening-media rule and color prerequisites not explicit in the public judge capability map; original grades retained, no post-unmask regrading. P06 lacks adequate referent/BOM context; j2 product-only readiness does not establish component applicability."
+}

@@ -1,0 +1,16 @@
+✔ shared BOM components appear once while parent offer/source/read identities round-trip independently (8.9183ms)
+✔ known product data tables round-trip all values, order and nested source identities (4.0259ms)
+✔ heterogeneous omitted fields are not conflated with null, false, zero or an empty array (3.4776ms)
+✔ invalid table markers, duplicate columns, wrong rows and mixed read targets fail explicitly (2.1551ms)
+✔ same-body fact references round-trip exact facts and retain historical differences (1.2423ms)
+✔ same-body exact selection result references preserve the full query and options (8.2399ms)
+✔ different historical/source/query evidence remains local; references cannot dangle or forge a hash (2.4384ms)
+✔ quantity-bearing logical components preserve multiplicity across owner product packing (1.0786ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 366.8225

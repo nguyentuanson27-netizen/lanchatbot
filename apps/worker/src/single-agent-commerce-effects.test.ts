@@ -1,12 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
 import { applySalesCycleCommand, computeBankTransferPolicyHash, computeOrderPreviewHash, createSalesCycleRuntimeState, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1 } from "@lana/chat-runtime";
 import { createCommerceEffectTools } from "./single-agent-commerce-effects.js";
+import {commerceHash} from "./single-agent-commerce-read-only-context.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { runCommerceTurn, type OwnerGeneration } from "./single-agent-commerce-read-only.js";
-import { hardPrecheck, makeBinding, terminalFallback } from "./single-agent-semantic-verifier-boundary.js";
+import { finalGate, hardPrecheck, makeBinding, terminalFallback } from "./single-agent-semantic-verifier-boundary.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfile, fixtureCartLine } from "./single-agent-commerce.test-support.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import { cartSelectionFromSnapshot } from "./realtime-sales-catalog.js";
+import { CommerceEffectCommitError } from "./single-agent-commerce-effect-failure.js";
+import { createCustomerStateTools } from "./single-agent-commerce-state.js";
+import { canonicalCartPolicyLinesV2 } from "@lana/business-tools";
+import {withExplicitQuoteTask} from "./single-agent-commerce-quote.js";
+import {readFileSync} from "node:fs";
 
 const bankPolicy = { policyId: "synthetic-bank", version: "1", bankName: "Synthetic bank", accountNumber: "118619000",
   accountHolder: "SYNTHETIC TEST", qrImageUrl: "https://example.invalid/qr.png", customerInstruction: "Thông tin thanh toán từ code.",
@@ -19,7 +25,7 @@ function fixtureSelection(snapshot: ReturnType<typeof fixtureProduct>["snapshot"
   return { ...result, shopId: commerceScope().shopId, line: { ...result.line,
     priceAuthority: { ...result.line.priceAuthority!, shopId: commerceScope().shopId } } };
 }
-async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi cao, bớt cho chị được không?"]) {
+async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi cao, bớt cho chị được không?"],unprovedEffect=false,evaluateStoredSupportAtCartOpening=false) {
   const scope = commerceScope(), f = fixtureProduct(), policy = (await fixturePolicy()).bundle!;
   let current = createSalesCycleRuntimeState("test-cycle", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   // Existing domain precondition, representing earlier verified size advice; never fake it in the effect tool.
@@ -35,7 +41,8 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     current = structuredClone(c.nextState); commits.push(structuredClone(current));
     if (fault === "AFTER") throw new Error("response lost"); return true;
   }) };
-  const base = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(), initialProducts: [f.product],
+  let activeFee = 25_000;
+  const base = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(activeFee), initialProducts: [f.product],
     catalog: { readProduct: async () => f, searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", product: f.product, score: 1, gap: null }) } });
   const authorize = vi.fn(async () => true), select = vi.fn(async (query?: CartSelectionQuery): Promise<Extract<CartSelectionResult, { status: "READY" }>> => {
     const line = fixtureCartLine(); line.quantity = query?.quantity ?? 1; line.lineTotalVnd = line.posUnitPriceVnd! * line.quantity;
@@ -44,7 +51,8 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     sourceAuthority: "POS_SNAPSHOT" as const, stockStatus: "IN_STOCK" as const, stockAvailableQuantity: 4,
     sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() }; });
   const readPolicy = vi.fn(async () => policy);
-  const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,
+  const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,evaluateStoredSupportAtCartOpening,
+    ...(unprovedEffect?{executeCommand:async()=>{throw new CommerceEffectCommitError("READBACK");}}:{}),
     policy: readPolicy,negotiationSources:negotiationTexts.map((text,i)=>({text,sourceMessageId:i===0?scope.sourceMessageId:`other-message-${i}`,observedAt:commerceNow.toISOString()})),
     resolveBankTransferPolicy: () => bankPolicy,
     trustedPorts: {
@@ -58,9 +66,355 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
   });
   const add = { name: "add_to_cart", args: { subjectRef: "SM613", offerType: "DIRECT", size: "M", color: "navy", quantity: 1 } };
   return { tools, base, scope, policy, readPolicy, authorize, select, repository, commits, add, setFault: (v: typeof fault) => { fault = v; }, current: () => current,
-    setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
+    setCurrent: (value: SalesCycleRuntimeState) => { current = value; }, setActiveFee:(v:number)=>{activeFee=v;} };
 }
+
+async function resumeEffects(s:Awaited<ReturnType<typeof setup>>,messageId=s.scope.sourceMessageId,text="Giá hơi cao, bớt cho chị được không?"){
+ const scope={...s.scope,sourceMessageId:messageId};
+ const tools=await createCommerceEffectTools({base:s.base,scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+  identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+  authorize:s.authorize,policy:s.readPolicy,select:s.select,
+  negotiationSources:[{text,sourceMessageId:messageId,observedAt:commerceNow.toISOString()}]});
+ return {tools,scope};
+}
+
+describe("replacement choices and negotiation prerequisites",()=>{
+ it("keeps a valid unlabelled tuple selectable within its existing offer",async()=>{
+  const s=await setup(),f=fixtureProduct();f.snapshot.offers.DIRECT!.rows[0]!.color="__NO_COLOR__";
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  const add={...s.add,args:{...s.add.args,color:"__NO_COLOR__"}};
+  expect((await s.tools.invoke(add)).status).toBe("OK");const line=s.current().cart!.value.lines[0]!;
+  expect((await s.tools.invoke({name:"change_cart_item",args:{subjectRef:line.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"DIRECT",size:"M",color:"__NO_COLOR__"}})).status).toBe("OK");
+  expect(s.current().cart!.value.lines[0]!.components[0]!.color).toBe("__NO_COLOR__");
+ });
+ it("does not commit when a legacy selector ignores a replacement colour prerequisite",async()=>{
+  const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");const before=structuredClone(s.current());
+  const result=await s.tools.invoke({name:"change_cart_item",args:{subjectRef:before.cart!.value.lines[0]!.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"__NO_COLOR__"}});
+  expect(result.status).toBe("UNAVAILABLE");expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(1);
+ });
+ it.each([1,2])("does not inherit an unrecorded colour into a new offer (%s physical choices)",async count=>{
+  const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+  row.color="__NO_COLOR__";
+  f.snapshot.offers.AO={...structuredClone(f.snapshot.offers.DIRECT!),rows:[{...structuredClone(row),color:"white"},
+   ...(count===2?[{...structuredClone(row),color:"be"}]:[])]};
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  expect((await s.tools.invoke({...s.add,args:{...s.add.args,color:"__NO_COLOR__"}})).status).toBe("OK");
+  const before=structuredClone(s.current()),commits=s.commits.length,line=before.cart!.value.lines[0]!;
+  const result=await s.tools.invoke({name:"change_cart_item",args:{subjectRef:line.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"__NO_COLOR__"}});
+  expect(result).toMatchObject({status:"UNAVAILABLE",data:{effectCommitted:false,selectionStatus:"COLOR_REQUIRED",
+   choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE",field:"COLOR"},selectionEvidence:{color:null}}});
+  expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(commits);
+  expect(s.select.mock.calls.at(-1)![0]).toMatchObject({offerType:"AO",color:null});
+ });
+ it("distinguishes unexamined negotiation from a denial of further shop support",async()=>{
+  const s=await setup(),before=structuredClone(s.current());
+  expect(await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao, bớt cho chị được không?"}}))
+   .toMatchObject({status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED",data:{effectCommitted:false,
+    negotiationStatus:"NOT_EVALUATED",missing:["CART","NEGOTIATION"],supportAvailability:"UNKNOWN"}});
+  expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(0);
+ });
+ it.each(["changed-state","unknown-commit"])("keeps selection no-commit proof code-only and invalidates it after %s",async mode=>{
+  const s=await setup(undefined,undefined,mode==="unknown-commit"),f=fixtureProduct();f.snapshot.offers.DIRECT!.rows.push({...structuredClone(f.snapshot.offers.DIRECT!.rows[0]!),color:"be"});
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  const failed=await s.tools.invoke({...s.add,args:{...s.add.args,color:null}}),before=structuredClone(s.current());
+  expect(failed).toMatchObject({status:"UNAVAILABLE",failureStage:"SOURCE",data:{effectCommitted:false,choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE"}}});
+  expect(s.tools.uncommittedSelectionResult!(failed)).toBe(true);expect(s.tools.uncommittedSelectionResult!(structuredClone(failed))).toBe(false);
+  const reads=vi.spyOn(s.repository,"read"),n=reads.mock.calls.length;
+  expect(s.tools.uncommittedSelectionResult!(failed)).toBe(true);expect(reads).toHaveBeenCalledTimes(n);expect(s.commits).toHaveLength(0);expect(s.current()).toEqual(before);
+  await s.tools.invoke(s.add);
+  expect(s.tools.uncommittedSelectionResult!(failed)).toBe(false);expect(s.commits).toHaveLength(mode==="unknown-commit"?0:1);
+  if(mode==="unknown-commit")expect(await s.tools.terminalOutcome!()).toMatchObject({disposition:"NO_SEND",reason:"UNKNOWN_COMMIT"});
+ });
+ it("carries the real no-commit selection route into the next native owner wire without quote I/O",async()=>{
+  const {buildGeminiCommerceRequest}=await import(new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs",import.meta.url).href);
+  const s=await setup(),f=fixtureProduct();f.snapshot.offers.DIRECT!.rows.push({...structuredClone(f.snapshot.offers.DIRECT!.rows[0]!),color:"be"});
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  const policy=vi.fn(async()=>s.policy.policy),tools=withExplicitQuoteTask({...s.base,...s.tools,availableTools:["read_product","request_handoff","add_to_cart"]},s.scope,false,policy,()=>commerceNow);
+  const call={...s.add,args:{...s.add.args,color:null}},signed={role:"model" as const,parts:[{functionCall:call,thoughtSignature:"keep-signature"}]};
+  await s.base.prepare!();const failed=await tools.invoke(call);
+  const wire=buildGeminiCommerceRequest({generationId:"test:next-owner",context:tools.snapshot(),
+   instructions:readFileSync(new URL("../evals/single-agent-commerce-read-only/prompts/owner.vi.txt",import.meta.url),"utf8"),
+   availableTools:tools.availableTools,toolWorkAccounting:"PRIMITIVE_WORK_V2",toolsAllowed:true,toolBudget:{callsRemaining:4,roundsRemaining:1},
+   contents:[{role:"user",parts:[{text:"Chị lấy áo size M nhé."}]},signed,{role:"user",parts:[{functionResponse:{name:call.name,response:failed}}]}],
+   ownerContextPresentation:"VI_DATA_BLOCKS_COMPACT_V2",signal:new AbortController().signal});
+  expect(Buffer.byteLength(JSON.stringify(wire))).toBeLessThanOrEqual(65536);
+  expect(wire.contents.find((m:Record<string,any>)=>m.role==="model")).toEqual(signed);
+  const response=wire.contents.flatMap((m:Record<string,any>)=>m.parts).find((p:Record<string,any>)=>p.functionResponse)?.functionResponse.response;
+  // The owner reads the meaning first: nothing was added, and which colours to ask for. Hashes stay out of this result.
+  expect(response).toMatchObject({status:"NOT_DONE",reason:"CUSTOMER_CHOICE_NEEDED",data:{effectCommitted:false,
+   outcome:{done:false,cartChanged:false,needsFromCustomer:"COLOR",choicesAreAllForRequest:true,
+    choices:[{color:"navy",size:"M",stock:"IN_STOCK"},{color:"be",size:"M",stock:"IN_STOCK"}]},
+   preCartQuoteRequest:{calculationStatus:"NOT_CALCULATED",sourcePriceStatus:"REQUIRES_QUOTE_READ",target:{subjectRef:"SM613",offerTypes:["DIRECT"]}}}});
+  expect(Object.keys(response.data)[0]).toBe("outcome");
+  for(const internal of ["selectionEvidenceFromProduct","selectionOptionsFromEvidence","choiceResolution","availableColors"])expect(response.data).not.toHaveProperty(internal);
+  expect(response).not.toHaveProperty("failureStage");
+  // The raw result still carries the proof the quote route and verifier context rely on.
+  expect(failed).toMatchObject({status:"UNAVAILABLE",reason:"SELECTION_UNAVAILABLE",failureStage:"SOURCE",data:{choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE"}}});
+  expect(policy).not.toHaveBeenCalled();expect(s.commits).toHaveLength(0);expect(tools.quoteTaskWork!()).toEqual([]);
+ });
+});
+
+// PR 392 case J1 through the real layers: the refused purchase is written to the profile by the turn that asked
+// for it and reaches the owner of the next turn together with the quote request.
+it("carries a purchase that still lacks a colour into the next turn's owner view and settles it when the cart is written",async()=>{
+ const {buildGeminiCommerceRequest}=await import(new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs",import.meta.url).href);
+ const s=await setup(),f=fixtureProduct();f.snapshot.offers.DIRECT!.rows.push({...structuredClone(f.snapshot.offers.DIRECT!.rows[0]!),color:"be"});
+ f.snapshot.offers.DIRECT!.rows.push(...f.snapshot.offers.DIRECT!.rows.map(row=>({...structuredClone(row),size:"L"})));
+ const ready=s.select.getMockImplementation()!;
+ s.select.mockImplementation(async q=>q?.color?ready(q):fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+ let stored=fixtureProfile();
+ const store={read:async()=>structuredClone(stored),compareAndSwap:async(expected:number,next:typeof stored)=>{if(stored.profile.revision!==expected)return false;stored=structuredClone(next);return true;}};
+ const turn=async()=>{
+  const state=await createCustomerStateTools({base:s.base,scope:s.scope,clock:()=>commerceNow,store,sourceMessages:[],sizeInput:async()=>{throw Error("NOT_USED");}});
+  const effects=await createCommerceEffectTools({base:state,scope:s.scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+   identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+   authorize:s.authorize,policy:async()=>s.policy,select:s.select});
+  // The same attachments createCommerceTools makes after composing the layers.
+  return withExplicitQuoteTask({...effects,setPendingPurchase:state.setPendingPurchase!,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","add_to_cart"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+ };
+ await s.base.prepare!();
+ const first=await turn(),sizes=["M","L"].map(size=>({...s.add,args:{...s.add.args,size,color:null}}));
+ const refused=await first.invokeBatch(sizes);
+ expect(refused.map(r=>(r.data as {preCartQuoteRequest?:unknown}).preCartQuoteRequest!==undefined)).toEqual([true,true]);
+ const lines=["M","L"].map(size=>({productId:"SM613",offerType:"DIRECT",size,color:null,quantity:1,missing:"COLOR"}));
+ expect(stored.profile.pendingPurchase).toEqual({lines,recordedAt:commerceNow.toISOString()});expect(s.commits).toHaveLength(0);
+ // Next turn: new tools from the same stores. The customer asks for the total.
+ const second=await turn(),dispatched=vi.fn();
+ const readsBefore=s.select.mock.calls.length;
+ await expect(second.preparePendingSelections!(()=>true,{maxCalls:1,onDispatch:dispatched})).rejects.toThrow("PREPARATION_BUDGET");
+ expect(s.select).toHaveBeenCalledTimes(readsBefore);expect(dispatched).not.toHaveBeenCalled();
+ expect(await second.preparePendingSelections!(()=>true,{maxCalls:2,onDispatch:dispatched})).toBe(2);
+ expect(dispatched).toHaveBeenCalledTimes(2);
+ const context=second.snapshot();
+ expect(context.runtimeProducts?.[0]?.selectionEvidence).toHaveLength(2);
+ expect(context.runtimeProducts?.[0]?.selectionEvidence?.[0]?.options.map(o=>o.color)).toEqual(expect.arrayContaining(["navy","be"]));
+ expect(context.state.pendingPurchase).toEqual({lines,recordedAt:commerceNow.toISOString()});
+ const wire=buildGeminiCommerceRequest({generationId:"test:pending",context,instructions:"Tư vấn theo nguồn.",availableTools:second.availableTools,toolWorkAccounting:"PRIMITIVE_WORK_V2",
+  toolsAllowed:true,toolBudget:{callsRemaining:6,roundsRemaining:2},contents:[{role:"user",parts:[{text:"Em báo lại tổng cả phí ship cho chị nhé."}]}],
+  ownerContextPresentation:"VI_DATA_BLOCKS_COMPACT_V2",signal:new AbortController().signal});
+ const text=JSON.stringify(wire).replace(/\\+"/g,'"');
+ expect(text).toContain('"quoteRequests":[{"tool":"quote_product","subjectRef":"SM613","offerTypes":["DIRECT"],"quantity":2}]');
+ expect(text).toContain("không hỏi lại màu hay size trước");expect(Buffer.byteLength(JSON.stringify(wire))).toBeLessThanOrEqual(65536);
+ // The quote the note points at is accepted as written.
+ const quoted=await second.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:2}});
+ expect(quoted).toMatchObject({status:"OK",data:{calculationBasis:"PRE_CART_POLICY",preCartQuote:{quantity:2}}});
+ // The customer names the colour: the cart now holds the order and the note is gone.
+ const third=await turn();
+ expect((await third.invoke({...s.add,args:{...s.add.args,color:"navy"}})).status).toBe("OK");
+ expect(stored.profile).not.toHaveProperty("pendingPurchase");expect(third.snapshot().state).not.toHaveProperty("pendingPurchase");expect(s.commits).toHaveLength(1);
+});
+
+it("binds a validated ambiguous selection to both models and invalidates it when source changes",async()=>{
+ const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+ f.snapshot.fulfillment_policy={tinh_trang:"READY_STOCK",can_order_when_zero:true,prep_min_days:1,prep_max_days:2,zero_stock_policy:"ALLOW",zero_stock_prep_min_days:3,zero_stock_prep_max_days:5,eta_valid_until:""};
+ f.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"be",stock_quantity:0});
+ s.select.mockImplementation(async query=>cartSelectionFromSnapshot(f.snapshot,{...query!,selectionMode:"CANDIDATE_TUPLES"},commerceNow) as never);
+ const result=await s.tools.invoke({...s.add,args:{...s.add.args,color:null}});
+ expect(result).toMatchObject({status:"UNAVAILABLE",data:{selectionEvidence:{quantity:1,options:expect.arrayContaining([expect.objectContaining({color:"be",status:"PRE_ORDER"})])}}});
+ expect(result).toMatchObject({data:{choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE",field:"COLOR",
+  completeness:"ALL_EXACT_TUPLES_FOR_QUERY",optionRefs:expect.any(Array)}}});
+ const data=result.data as {selectionEvidence:{contentHash:string;options:{identityHash:string}[]};choiceResolution:{evidenceHash:string;optionRefs:string[]}};
+ expect(data.choiceResolution.evidenceHash).toBe(data.selectionEvidence.contentHash);
+ expect(data.choiceResolution.optionRefs).toEqual(data.selectionEvidence.options.map(o=>o.identityHash));
+ expect(result).toMatchObject({data:{effectCommitted:false}});
+ expect(s.commits).toHaveLength(0);
+ const proof=(result.data as {selectionEvidence:unknown}).selectionEvidence;
+ expect(s.tools.snapshot().runtimeProducts?.find(p=>p.subjectRef==="SM613")?.selectionEvidence).toEqual([proof]);
+ await expect(s.tools.readback()).resolves.toMatchObject({runtimeProducts:expect.arrayContaining([expect.objectContaining({selectionEvidence:[proof]})])});
+ f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=0;
+ await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
+});
+
+it.each([true,false])("reports missing shop colour before asking for a customer choice (size provided=%s)",async hasSize=>{
+ const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+ row.color="__NO_COLOR__";
+ f.snapshot.fulfillment_policy={tinh_trang:"READY_STOCK",can_order_when_zero:true,prep_min_days:1,prep_max_days:2,zero_stock_policy:"ALLOW",zero_stock_prep_min_days:3,zero_stock_prep_max_days:5,eta_valid_until:""};
+ f.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"be",stock_quantity:0});
+ s.select.mockImplementation(async query=>cartSelectionFromSnapshot(f.snapshot,{...query!,selectionMode:"CANDIDATE_TUPLES"},commerceNow) as never);
+ const {size,...withoutSize}=s.add.args;
+ const result=await s.tools.invoke({...s.add,args:{...withoutSize,...(hasSize?{size}:{}),color:null}});
+ expect(result).toMatchObject({status:"UNAVAILABLE",data:{shopDataGap:"SHOP_COLOR_UNRECORDED",
+  choiceResolution:{kind:"SHOP_DATA_MISSING",reason:"SHOP_COLOR_UNRECORDED"}}});
+ expect(s.commits).toHaveLength(0);
+});
+
+it("removes only superseded unreferenced offer subjects when cart selections add two sizes",async()=>{
+ const s=await setup(),f=fixtureProduct(),offer=f.snapshot.offers.DIRECT!;
+ f.snapshot.offers=Object.fromEntries(['DIRECT','AO','CV'].map(name=>[name,structuredClone(offer)]));
+ const base=createReadOnlyTools({scope:s.scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],
+  catalog:{readProduct:async()=>f,searchText:async()=>({status:'NOT_FOUND' as const,reasonCode:'NO_CANDIDATES' as const})}});
+ expect((await base.invoke({name:'read_product',args:{subjectRef:'SM613',offerTypes:['DIRECT','AO','CV']}})).status).toBe('OK');
+ const prepared=base.snapshot();s.base.snapshot=()=>structuredClone(prepared);
+ const originalSelect=s.select.getMockImplementation()!;
+ s.select.mockImplementation(async q=>{const r=await originalSelect(q);r.line.offerId='DIRECT';r.line.priceAuthority!.offerId='DIRECT';r.line.components[0]!.size=q?.size??'M';return r;});
+ expect((await s.tools.invoke(s.add)).status).toBe('OK');
+ expect((await s.tools.invoke({...s.add,args:{...s.add.args,size:'L'}})).status).toBe('OK');
+ const context=s.tools.snapshot();
+ expect(context.state.cartItems).toHaveLength(2);
+ expect(context.boundSubjects).toHaveLength(8);
+ expect(context.boundSubjects.some(s=>s.ref==='offer:SM613:DIRECT')).toBe(false);
+ expect(context.boundSubjects.filter(s=>s.kind==='VARIANT'&&s.ref.startsWith('cart-variant:'))).toHaveLength(2);
+ expect(hardPrecheck(context,'Dạ chị.',commerceNow)).toBeNull();
+ // A still-referenced offer remains bound even if another claim for it was superseded.
+ prepared.policyLiterals.push({ref:'retained-reference',text:JSON.stringify({variantId:'offer:SM613:DIRECT'}),sourceVersion:'v1',observedAt:commerceNow.toISOString(),expiresAt:null});
+ expect(s.tools.snapshot().boundSubjects.some(s=>s.ref==='offer:SM613:DIRECT')).toBe(true);
+ expect(hardPrecheck(s.tools.snapshot(),'Dạ chị.',commerceNow)).toBe('MALFORMED');
+});
+it("does not accept a different replay envelope merely because its source hash is unchanged",async()=>{
+ const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+ f.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"white"});
+ s.select.mockImplementation(async query=>cartSelectionFromSnapshot(f.snapshot,{...query!,selectionMode:"CANDIDATE_TUPLES"},commerceNow) as never);
+ expect((await s.tools.invoke({...s.add,args:{...s.add.args,color:null}})).status).toBe("UNAVAILABLE");
+ const first=s.select.mock.calls.at(-1)![0]!;
+ const changed=cartSelectionFromSnapshot(f.snapshot,{...first,selectionMode:"CANDIDATE_TUPLES"},commerceNow);
+ if(changed.status==="READY"||!changed.selectionEvidence)throw Error("EXPECTED_AMBIGUOUS_PROOF");
+ changed.selectionEvidence.options[0]!.status=changed.selectionEvidence.options[0]!.status==="OUT_OF_STOCK"?"UNKNOWN":"OUT_OF_STOCK";
+ const {contentHash:_old,...body}=changed.selectionEvidence;
+ changed.selectionEvidence.contentHash=commerceHash(body);
+ s.select.mockResolvedValue(changed as never);
+ await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
+});
+it.each(["quantity","selector","invalid","policy","heartbeat"])("revalidates selection replay %s without renewing the first observation",async mode=>{
+ let now=commerceNow;const s=await setup(()=>now),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+ f.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"white"});
+ s.select.mockImplementation(async query=>cartSelectionFromSnapshot(f.snapshot,{...query!,selectionMode:"CANDIDATE_TUPLES"},now) as never);
+ expect((await s.tools.invoke({...s.add,args:{...s.add.args,color:null}})).status).toBe("UNAVAILABLE");const before=s.tools.snapshot();
+ const q=s.select.mock.calls.at(-1)![0]!,replay=cartSelectionFromSnapshot(f.snapshot,{...q,selectionMode:"CANDIDATE_TUPLES"},now);
+ if(replay.status==="READY"||!replay.selectionEvidence)throw Error("PROOF_REQUIRED");
+ if(mode==="heartbeat"){now=new Date(commerceNow.getTime()+2000);f.snapshot.synced_at=new Date(commerceNow.getTime()+1000).toISOString();await expect(s.tools.readback()).resolves.toEqual(before);return;}
+ if(mode==="policy")s.readPolicy.mockResolvedValue({...s.policy,policy:{...s.policy.policy,effectiveUntil:new Date(now.getTime()+60000).toISOString()}});
+ else{if(mode==="quantity")replay.selectionEvidence.quantity=2;
+  if(mode==="selector"){replay.selectionEvidence.size="L";for(const o of replay.selectionEvidence.options)o.size="L";}
+  const {contentHash:_hash,...body}=replay.selectionEvidence;replay.selectionEvidence.contentHash=mode==="invalid"?"0".repeat(64):commerceHash(body);s.select.mockResolvedValue(replay as never);}
+ await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
+});
 describe("code-owned commerce effects and recovery", () => {
+  it("retains add→confirm in the actual runtime/native wire before a cart exists",async()=>{
+    const s=await setup(),tools={...s.tools,availableTools:["add_to_cart","confirm_purchase"]};
+    const invoke=vi.spyOn(tools,"invokeBatch");let n=0;
+    const {buildGeminiCommerceRequest}=await import(new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs",import.meta.url).href);
+    const calls=[s.add,{name:"confirm_purchase",args:{}}];
+    await runCommerceTurn({scope:s.scope,tools,clock:()=>commerceNow,latest:"Chị lấy áo M navy, chốt cho chị.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",
+      owner:async r=>{const wire=buildGeminiCommerceRequest(r);expect(wire.tools.flatMap((t:{functionDeclarations:{name:string}[]})=>t.functionDeclarations.map(d=>d.name))).toEqual(r.callableTools);
+        if(n++===0){expect(r.context.state.cartItems).toEqual([]);expect(r.callableTools).toContain("confirm_purchase");
+          return {kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}};}
+        return {kind:"FINAL",text:"Dạ chị."};},verifier:async()=>({result:{verdict:"PASS",violations:[]}})});
+    expect(invoke).toHaveBeenCalledOnce();const results=await invoke.mock.results[0]!.value;
+    expect(results[0]!.status).toBe("OK");expect(results).toHaveLength(2);
+    // Callable/admission continuity reaches the domain preview guard with a
+    // real cart. This does not prove checkout initiation or detail collection.
+    expect(results[1]).toMatchObject({status:"REJECTED",reason:"CONFIRMATION_OUTSIDE_ORDER_PREVIEW",failureStage:"DOMAIN"});
+    expect(s.current().cart).not.toBeNull();
+  });
+  it.each(["REPLACE_QUOTE","MULTI_EFFECT"])("retains native runtime batch continuity %s",async mode=>{
+    const s=await setup();await s.tools.invoke(s.add);const before=structuredClone(s.current()),lineId=before.cart!.value.lines[0]!.lineId;
+    const base=await createCustomerStateTools({base:s.base,scope:s.scope,clock:()=>commerceNow,
+      store:{read:async()=>fixtureProfile(),compareAndSwap:async()=>false},sourceMessages:[],sizeInput:async()=>{throw Error("NOT_USED");},
+      quoteInput:async()=>({policy:s.policy.policy,lines:canonicalCartPolicyLinesV2(s.current().cart!.value.lines,s.scope.shopId)!,now:commerceNow,
+        closingEvidence:{previousState:null,purchaseReady:true,priceObjectionCount:0,secondConcessionAlreadyApplied:false}})});
+    const selected=await s.select();s.select.mockImplementation(async q=>{
+      const next=structuredClone(selected);next.line.quantity=q?.quantity??1;next.line.lineTotalVnd=next.line.posUnitPriceVnd!*next.line.quantity;
+      if(q?.offerType==="AO"){next.line.offerId="AO";next.line.priceAuthority!.offerId="AO";}
+      next.line.components[0]!.size=q?.size??"M";return next;
+    });
+    const effects=await createCommerceEffectTools({base,scope:s.scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+      identity:before.cart!.value,authorize:s.authorize,policy:async()=>s.policy,select:s.select});
+    const tools={...effects,availableTools:["change_cart_item","quote_cart"]},seen=vi.spyOn(tools,"invokeBatch");let n=0;
+    const calls=mode==="REPLACE_QUOTE"?[{name:"change_cart_item",args:{subjectRef:lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy"}},{name:"quote_cart",args:{}}]:
+      [{name:"change_cart_item",args:{subjectRef:lineId,action:"SET_QUANTITY",quantity:2}},{name:"change_cart_item",args:{subjectRef:lineId,action:"SET_QUANTITY",quantity:3}}];
+    const {buildGeminiCommerceRequest}=await import(new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs",import.meta.url).href);
+    await runCommerceTurn({scope:s.scope,tools,clock:()=>commerceNow,latest:"Đổi lựa chọn cho chị.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",
+      owner:async r=>{const wire=buildGeminiCommerceRequest(r);expect(wire.tools.flatMap((t:{functionDeclarations:{name:string}[]})=>t.functionDeclarations.map(d=>d.name))).toEqual(r.callableTools);
+        return n++===0?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}}:{kind:"FINAL",text:"Dạ chị."};},verifier:async()=>({result:{verdict:"PASS",violations:[]}})});
+    expect(seen).toHaveBeenCalledOnce();expect((await seen.mock.results[0]!.value).map((r:{status:string})=>r.status)).toEqual(["OK","OK"]);
+    expect(s.current().cart!.value.lines[0]!.offerId).toBe(mode==="REPLACE_QUOTE"?"AO":before.cart!.value.lines[0]!.offerId);
+    expect(s.commits).toHaveLength(mode==="REPLACE_QUOTE"?2:3);
+  });
+  it("replaces the only line with a verified offer and does not reapply its receipt",async()=>{
+    const s=await setup();await s.tools.invoke(s.add);
+    const before=structuredClone(s.current()),line=before.cart!.value.lines[0]!;
+    const selected=await s.select();selected.line.offerId="AO";selected.line.priceAuthority!.offerId="AO";
+    selected.line.posUnitPriceVnd=400_000;selected.line.lineTotalVnd=400_000;
+    s.select.mockResolvedValue(selected);
+    const call={name:"change_cart_item",args:{subjectRef:line.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy"}};
+    expect(await s.tools.invoke(call)).toMatchObject({status:"OK",data:{effect:"CART_MUTATED",cartItems:[{subjectRef:line.lineId,offerType:"AO"}]}});
+    expect(s.current().cart!.value.revision).toBe(before.cart!.value.revision+1);
+    expect(s.current().cart!.value.lines).toHaveLength(1);
+    expect(s.commits).toHaveLength(2);
+    expect(await s.tools.invoke(call)).toMatchObject({status:"OK",data:{duplicate:true}});
+    expect(s.commits).toHaveLength(2);
+  });
+  it.each(["source","wrong-offer","wrong-size","wrong-color","permission","before","after"])("contains replacement failure %s without a half-applied cart",async mode=>{
+    const s=await setup();await s.tools.invoke(s.add);const before=structuredClone(s.current()),selected=await s.select();
+    selected.line.offerId="AO";selected.line.priceAuthority!.offerId="AO";
+    s.select.mockResolvedValue(selected);
+    if(mode==="source")s.select.mockRejectedValue(new Error("SOURCE_UNAVAILABLE"));
+    if(mode==="wrong-offer")selected.line.offerId="OTHER";
+    if(mode==="wrong-size")selected.line.components[0]!.size="L";
+    if(mode==="wrong-color")selected.line.components[0]!.color="red";
+    if(mode==="permission")s.authorize.mockResolvedValue(false);
+    if(mode==="before")s.setFault("BEFORE");if(mode==="after")s.setFault("AFTER");
+    const result=await s.tools.invoke({name:"change_cart_item",args:{subjectRef:before.cart!.value.lines[0]!.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy"}});
+    if(mode==="after"){
+      expect(result.status).toBe("OK");expect(s.current().cart!.value.lines[0]!.offerId).toBe("AO");expect(s.commits).toHaveLength(2);
+    }else{expect(result.status).not.toBe("OK");expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(1);
+      expect(result.failureStage).toBe(mode==="permission"?"AUTHORITY":mode==="before"?"COMMIT_UNKNOWN":"SOURCE");}
+  });
+  it.each(["CAS","DOMAIN","SOURCE","READBACK"] as const)("retains bounded %s failure stage without raw exception content",async stage=>{
+    const s=await setup();await s.tools.invoke(s.add);const before=structuredClone(s.current());
+    const tools=await createCommerceEffectTools({base:s.base,scope:s.scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+      identity:{cartId:before.cart!.value.cartId,salesEpisodeId:before.cart!.value.salesEpisodeId,customerProfileId:before.cart!.value.customerProfileId},
+      authorize:s.authorize,policy:async()=>s.policy,select:s.select,
+      executeCommand:async()=>{if(stage==="READBACK")throw new CommerceEffectCommitError("READBACK");
+        return {status:stage==="CAS"?"CONFLICT":"REJECTED",reasonCode:"CONTROLLED_TEST_FAILURE",failureStage:stage};}});
+    const result=await tools.invoke({name:"change_cart_item",args:{subjectRef:before.cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:2}});
+    expect(result.status).not.toBe("OK");expect(result.failureStage).toBe(stage);expect(s.current()).toEqual(before);
+    expect(JSON.stringify(result)).not.toContain("COMMERCE_COMMIT_UNCONFIRMED");
+  });
+  it.each([{quantity:null},{color:undefined},{targetSubjectRef:null},{targetSubjectRef:"UNKNOWN"},{color:{untrusted:"value"}}])("rejects malformed replacement before source or authorization work %j",async invalid=>{
+    const s=await setup();await s.tools.invoke(s.add);const before=structuredClone(s.current());
+    s.select.mockClear();s.authorize.mockClear();s.readPolicy.mockClear();
+    const args={subjectRef:before.cart!.value.lines[0]!.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy",...invalid};
+    if(invalid.color===undefined&&Object.hasOwn(invalid,"color"))delete (args as Record<string,unknown>).color;
+    expect(await s.tools.invoke({name:"change_cart_item",args})).toMatchObject({status:"REJECTED",failureStage:"VALIDATION"});
+    expect(s.select).not.toHaveBeenCalled();expect(s.authorize).not.toHaveBeenCalled();expect(s.readPolicy).not.toHaveBeenCalled();expect(s.current()).toEqual(before);
+  });
+  it.each(["permission","privacy","recipient","binding","revision","expiry"])("rechecks replacement %s after target preflight and before commit",async mode=>{
+    let now=commerceNow;const s=await setup(()=>now);await s.tools.invoke(s.add);const before=structuredClone(s.current());
+    const old=await s.select(),target={...structuredClone(old),sourceExpiresAt:new Date(commerceNow.getTime()+10).toISOString()};target.line.offerId="AO";target.line.priceAuthority!.offerId="AO";
+    const authority={...s.scope};let selected=false;
+    const tools=await createCommerceEffectTools({base:s.base,scope:s.scope,clock:()=>now,conversationKey:"test-cycle",repository:s.repository,identity:before.cart!.value,
+      authorize:async()=>{if(selected&&mode==="expiry")now=new Date(commerceNow.getTime()+20);return true;},policy:async()=>s.policy,readAuthority:async()=>({...authority}),
+      select:async q=>{
+        if(q.offerType!=="AO")return old;
+        selected=true;
+        if(mode==="permission")authority.permission=false;if(mode==="privacy")authority.privacyAllowed=false;
+        if(mode==="recipient")authority.recipient="different-recipient";if(mode==="binding")authority.bindingVersion="new-binding";
+        if(mode==="revision")s.setCurrent({...before,revision:before.revision+1});
+        return target;
+      }});
+    const r=await tools.invoke({name:"change_cart_item",args:{subjectRef:before.cart!.value.lines[0]!.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy"}});
+    expect(r.status).not.toBe("OK");expect(r.failureStage).toBe(mode==="expiry"?"SOURCE":mode==="revision"?"CAS":"AUTHORITY");
+    expect(s.current().cart).toEqual(before.cart);expect(s.commits).toHaveLength(1);
+  });
+  it("rejects a different transaction policy without rewriting the committed cart",async()=>{
+    const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");const before=structuredClone(s.current());
+    s.readPolicy.mockResolvedValue((await fixturePolicy(30_000)).bundle!);
+    await expect(s.tools.readback()).rejects.toThrow("TRANSACTION_POLICY_BINDING_CHANGED");
+    expect(s.current()).toEqual(before);
+  });
+  it("keeps current advice policy distinct from a committed transaction binding",async()=>{
+    const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");
+    const committed=structuredClone(s.current());s.setActiveFee(30_000);
+    expect((await s.base.invoke({name:"read_policy",args:{}})).status).toBe("OK");
+    const world=await s.tools.readback();
+    const active=world.policyLiterals.filter(p=>p.ref.startsWith("policy:"));
+    const transaction=world.policyLiterals.filter(p=>p.ref.startsWith("transaction-policy:"));
+    expect(active).toHaveLength(1);expect(JSON.parse(active[0]!.text).shipping.defaultFeeVnd).toBe(30_000);
+    expect(transaction).toHaveLength(1);expect(JSON.parse(transaction[0]!.text).shipping.defaultFeeVnd).toBe(25_000);
+    expect(JSON.parse(transaction[0]!.text).policyBinding.purpose).toBe("COMMITTED_TRANSACTION");
+    expect(s.current()).toEqual(committed);
+  });
   it.each([true,false])("uses ledger readback after a successful persisted mutation (receipt=%s)",async available=>{
     const s=await setup();let operationId="";
     const readReceipt=vi.fn(async()=>available?{ref:`receipt:${operationId}`,operationId,subjectRef:s.current().cart!.value.cartId,effect:"CART_OPENED",status:"SUCCESS",stateRevision:s.current().revision,
@@ -72,6 +426,13 @@ describe("code-owned commerce effects and recovery", () => {
         s.setCurrent(state);operationId=call.command.commandId;return {status:"APPLIED",state,transferToHuman:false};}});
     expect((await tools.invoke(s.add)).status).toBe(available?"OK":"UNAVAILABLE");expect(readReceipt).toHaveBeenCalledOnce();
     if(available)expect(tools.snapshot().effectReceipts).toEqual([await readReceipt.mock.results[0]!.value]);else expect(tools.snapshot().effectReceipts).toEqual([]);
+    if(!available){
+      expect(await tools.terminalOutcome!()).toMatchObject({disposition:'NO_SEND',reason:'UNKNOWN_COMMIT',text:null});
+      const owner=vi.fn(async()=>({kind:'FINAL' as const,text:'Dạ chị.'})),verifier=vi.fn(async()=>({result:{verdict:'PASS',violations:[]}}));
+      const r=await runCommerceTurn({scope:s.scope,tools,clock:()=>commerceNow,latest:'Dạ chị.',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',owner,verifier});
+      expect(r.terminal.disposition).not.toBe('SEND_ELIGIBLE');expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
+    }
+
   });
   it("returns the committed bounded quote in each effect response, including duplicates, without rewriting earlier versions", async () => {
     const s = await setup(), added = await s.tools.invoke(s.add);
@@ -90,6 +451,49 @@ describe("code-owned commerce effects and recovery", () => {
     const failed = await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: s.current().cart!.value.lines[0]!.lineId, action: "SET_QUANTITY", quantity: 2 } });
     expect(failed.status).not.toBe("OK");
     expect(failed.data).toBeUndefined();
+  });
+
+  it("preserves applied benefit amounts and policy decisions in the public quote without declaring an absolute price floor",async()=>{
+    const s=await setup();await s.tools.invoke({...s.add,args:{...s.add.args,quantity:2}});
+    const r=await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});
+    expect(r.status).toBe("OK");
+    const view=(r.data as {cartQuote:Record<string,unknown>}).cartQuote,cart=s.current().cart!.value;
+    expect(view.appliedAdjustments).toEqual(cart.adjustments.map(a=>({kind:a.kind,amountVnd:a.amountVnd,
+      percentageBps:a.percentageBps,decisionId:a.policyAuthorization.decisionId,policyRuleId:a.policyAuthorization.ruleId})));
+    expect(view.appliedAdjustments).toEqual(expect.arrayContaining([expect.objectContaining({kind:"PERCENT_DISCOUNT",amountVnd:49900}),
+      expect.objectContaining({kind:"FREE_SHIPPING",amountVnd:25000})]));
+    expect(view).toMatchObject({shippingFeeVnd:25000,negotiatedPriceFloor:{status:"NOT_ESTABLISHED",amountVnd:null}});
+    expect(s.tools.snapshot().state.cartQuote).toEqual(view);
+  });
+  it.each([
+   "Dạ, tổng cả ship là 948.100đ. Phí ship đã được shop miễn rồi chị nhé.",
+   "Dạ, hai áo cả ship là 948.100đ, mình được miễn phí ship luôn rồi."
+  ])("exposes current cart benefits on a later turn without inventing a receipt: %s",async text=>{
+   const s=await setup();await s.tools.invoke({...s.add,args:{...s.add.args,quantity:2}});
+   await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});
+   const {tools,scope}=await resumeEffects(s,"total-question","Cả ship hết bao nhiêu em?"),before=structuredClone(s.current());
+   const verifier=vi.fn(async(request:Parameters<Parameters<typeof runCommerceTurn>[0]["verifier"]>[0])=>{
+    expect(request.finalDraft).toBe(text);expect(request.trusted.effectReceipts).toEqual([]);
+    expect(request.trusted.cartBinding).toEqual({cartId:before.cart!.value.cartId,cartVersion:before.cart!.value.revision});
+    expect(request.trusted.state.cartQuote).toMatchObject({grandTotalVnd:948100,appliedAdjustments:expect.arrayContaining([expect.objectContaining({kind:"FREE_SHIPPING",amountVnd:25000})])});
+    // Scripted verdict checks the envelope and final gate, not model semantics.
+    return {result:{verdict:"PASS",violations:[]}};
+   });
+   const result=await runCommerceTurn({scope,tools,clock:()=>commerceNow,latest:"Cả ship hết bao nhiêu em?",history:[],
+    ownerPrompt:"Tư vấn",verifierPrompt:readFileSync(new URL("../evals/single-agent-commerce-read-only/prompts/verifier.vi.txt",import.meta.url),"utf8"),
+    owner:async()=>({kind:"FINAL",text}),verifier});
+   expect(verifier).toHaveBeenCalledOnce();expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(s.current()).toEqual(before);
+   const binding=makeBinding("benefits",text,tools.snapshot()),response={kind:"VERDICT" as const,binding,result:{verdict:"PASS",violations:[]}};
+   for(const field of ["revision","recipient","permission"]){
+    const changed=structuredClone(tools.snapshot());
+    if(field==="revision")changed.state.revision++;
+    if(field==="recipient")changed.state.recipient="other-recipient";
+    if(field==="permission")changed.state.permission=false;
+    expect(finalGate({expected:binding,response,current:changed,finalDraft:text,now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
+   }
+   expect(finalGate({expected:binding,response,current:tools.snapshot(),finalDraft:text,now:new Date(commerceNow.getTime()+1_200_001)}).disposition).not.toBe("SEND_ELIGIBLE");
+   await s.tools.invoke({name:"change_cart_item",args:{subjectRef:s.current().cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:1}});
+   expect(finalGate({expected:binding,response,current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
   });
 
   it("recovers the current negotiated discount and total without claiming an additional discount",async()=>{
@@ -144,7 +548,7 @@ describe("code-owned commerce effects and recovery", () => {
   });
   it("rejects a missing offer before selection or commit instead of reporting a default offer color", async () => {
     const s = await setup(), { offerType: _offer, ...args } = s.add.args;
-    expect(await s.tools.invoke({ ...s.add, args })).toEqual({ status: "REJECTED", reason: "OFFER_REQUIRED" });
+    expect(await s.tools.invoke({ ...s.add, args })).toEqual({ status: "REJECTED", reason: "OFFER_REQUIRED",failureStage:"VALIDATION" });
     expect(s.select).not.toHaveBeenCalled();
     expect(s.readPolicy).not.toHaveBeenCalled();
     expect(s.repository.compareAndSwap).not.toHaveBeenCalled();
@@ -168,7 +572,7 @@ describe("code-owned commerce effects and recovery", () => {
     source.offers.SET_VAY!.rows = source.offers.SET_VAY!.rows.map(row => ({ ...row, color: "black" }));
     s.select.mockImplementation(async q => fixtureSelection(source, q!) as never);
     const rejected = await s.tools.invoke({ ...s.add, args: { ...s.add.args, offerType: "SET_VAY" } });
-    expect(rejected).toMatchObject({ status: "UNAVAILABLE", data: { reasonCode: "CART_COLOR_NOT_FOUND", availableColors: ["BLACK"] } });
+    expect(rejected).toMatchObject({ status: "UNAVAILABLE", data: { reasonCode: "CART_COLOR_NOT_FOUND", selectionOptions: [] } });
     expect(s.commits).toHaveLength(0);
     expect((await s.tools.invoke({ ...s.add, args: { ...s.add.args, offerType: "AO" } })).status).toBe("OK");
     expect(s.current().cart!.value.lines[0]!.offerId).toBe("AO");
@@ -252,7 +656,7 @@ describe("code-owned commerce effects and recovery", () => {
     const s = await setup(); await s.tools.invoke(s.add);
     const before = structuredClone(s.current()); s.authorize.mockClear(); s.select.mockClear();
     expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: before.cart!.value.lines[0]!.lineId, ...args } }))
-      .toEqual({ status: "REJECTED", reason: "TOOL_ARGUMENTS" });
+      .toMatchObject({ status: "REJECTED", reason: "TOOL_ARGUMENTS",failureStage:"VALIDATION" });
     expect(s.current()).toEqual(before); expect(s.commits).toHaveLength(1);
     expect(s.authorize).not.toHaveBeenCalled(); expect(s.select).not.toHaveBeenCalled();
     expect(s.tools.snapshot().effectReceipts.some(r => r.effect === "CART_MUTATED")).toBe(false);
@@ -301,7 +705,7 @@ describe("code-owned commerce effects and recovery", () => {
     const s = await setup();
     const failure = { status, reasonCode: "CART_VARIANT_AMBIGUOUS", availableSizes: ["L"], availableColors: ["BE"] };
     s.select.mockResolvedValue({ ...failure, evaluator: "PRIVATE_EVALUATOR_LABEL" } as never);
-    expect(await s.tools.invoke(s.add)).toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: failure });
+    expect(await s.tools.invoke(s.add)).toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE",failureStage:"SOURCE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"ALL_EXACT_TUPLES_FOR_QUERY"} });
     expect(s.commits).toHaveLength(0); expect(s.current().cart).toBeNull();
     expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
     expect(s.tools.snapshot().protectedClaims).not.toEqual(expect.arrayContaining([expect.objectContaining({ type: "SIZE_FIT" })]));
@@ -312,7 +716,7 @@ describe("code-owned commerce effects and recovery", () => {
     const failure = { status: "VARIANT_UNAVAILABLE", reasonCode: "CART_SIZE_NOT_FOUND", availableSizes: ["M"], availableColors: ["NAVY"] };
     s.select.mockResolvedValue(failure as never);
     expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: line.lineId, action: "SET_COMPONENT_VARIANT", componentRole: line.components[0]!.componentRole, size: "L" } }))
-      .toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: failure });
+      .toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE",failureStage:"SOURCE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"ALL_EXACT_TUPLES_FOR_QUERY"} });
     expect(s.current()).toEqual(before); expect(s.commits).toHaveLength(1);
     expect(s.tools.snapshot().effectReceipts.some(r => r.effect === "CART_MUTATED")).toBe(false);
   });
@@ -760,4 +1164,330 @@ describe("code-owned commerce effects and recovery", () => {
     expect(s.tools.snapshot().state.cartQuote).toMatchObject({ cartId: s.current().cart!.value.cartId,
       cartVersion: s.current().cart!.value.revision, grandTotalVnd: s.current().cart!.value.grandTotalVnd });
   });
+});
+
+describe("deferred support uses actual committed request and cart receipts",()=>{
+ it.each(["same-turn","restored","intervening-revision"] as const)("keeps receipt continuity only through proved consecutive commits: %s",async mode=>{
+  const s=await setup(),f=fixtureProduct();s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+  await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"DIRECT"}});
+  await s.tools.invoke(s.add);const opening=structuredClone(s.tools.snapshot().effectReceipts[0]!);
+  if(mode==="intervening-revision")s.setCurrent({...s.current(),revision:s.current().revision+1});
+  const tools=mode!=="restored"?s.tools:await createCommerceEffectTools({base:s.base,scope:s.scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+    identity:{cartId:s.current().cart!.value.cartId,salesEpisodeId:s.current().cart!.value.salesEpisodeId,customerProfileId:fixtureProfile().profile.profileId},
+    authorize:s.authorize,policy:async()=>s.policy,select:s.select,readReceipt:async id=>id===opening.operationId?opening:null});
+  const result=await tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:s.current().pendingNegotiation!.pendingId}});
+  expect(result.status).toBe("OK");const context=tools.snapshot();
+  expect(context.effectReceiptContinuity!==undefined).toBe(mode!=="intervening-revision");
+  if(mode!=="intervening-revision")expect(context.effectReceipts.find(r=>r.effect==="CART_OPENED")).toEqual(opening);
+  expect(hardPrecheck(context,"Dạ chị.",commerceNow)).toBeNull();
+  const bound=makeBinding("sequence", "Dạ chị.",context);await tools.invoke({name:"change_cart_item",args:{subjectRef:s.current().cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:2}});
+  const changed=await tools.readback();expect(changed.effectReceiptContinuity).toBeUndefined();
+  expect(changed.effectReceipts.some(r=>r.effect==="CART_OPENED")).toBe(false);
+  expect(finalGate({expected:bound,response:{kind:"VERDICT",binding:bound,result:{verdict:"PASS",violations:[]}},current:changed,finalDraft:"Dạ chị.",now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
+ });
+ it("records without a concession and consumes after an authorized cart commit",async()=>{
+  const s=await setup(),f=fixtureProduct();
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  expect((await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}})).status).toBe("OK");
+  const recorded=await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"DIRECT"}});
+  expect(recorded).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_REQUEST_RECORDED",supportEvaluation:{negotiationApplied:false,pendingCommitted:true}}});
+  expect(s.current().cart).toBeNull();expect(s.current().negotiation).toBeNull();
+  const pending=s.current().pendingNegotiation!;
+  expect(s.tools.snapshot().state.pendingSupport).toMatchObject({pendingRef:pending.pendingId,canApply:false});
+  expect((await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}})).status).not.toBe("OK");
+  expect((await s.tools.invoke(s.add)).status).toBe("OK");
+  const commitsBefore=s.commits.length;
+  const opening=structuredClone(s.tools.snapshot().effectReceipts.find(r=>r.effect==="CART_OPENED")!);
+  expect((await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId,sourceQuote:"Giá hơi cao"}})).reason).toBe("TOOL_ARGUMENTS");
+  expect(s.commits).toHaveLength(commitsBefore);
+  const activated=await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}});
+  expect(activated.reason).toBeUndefined();
+  expect(activated).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_UPDATED"}});
+  expect(s.current().pendingNegotiation?.status).toBe("ACTIVATED");
+  expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
+  const context=s.tools.snapshot();
+  expect(context.effectReceipts.find(r=>r.effect==="CART_OPENED")).toEqual(opening);
+  expect(context.effectReceiptContinuity?.receiptRefs).toEqual([opening.ref,context.effectReceipts.find(r=>r.effect==="NEGOTIATION_UPDATED")!.ref]);
+  expect(hardPrecheck(context,"Dạ chị.",commerceNow)).toBeNull();
+  const count=s.commits.length;
+  const duplicate=await s.tools.invoke({name:"record_negotiation",args:{action:"APPLY_PENDING",pendingRef:pending.pendingId}});
+  expect(duplicate.status).toBe("OK");expect(s.commits).toHaveLength(count);
+ });
+ it("rejects an unbound offer and never calls selection just to record support",async()=>{
+  const s=await setup();await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+  const before=structuredClone(s.current());
+  expect(await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"invented"}}))
+   .toMatchObject({status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED"});
+  expect(s.current()).toEqual(before);expect(s.select).not.toHaveBeenCalled();
+ });
+});
+
+it.each(["mutation","ordinary-negotiation"] as const)("does not offer pending activation after %s changes the cart",async mode=>{
+ const s=await setup(),f=fixtureProduct();
+ s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+ await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+ const record=await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"DIRECT"}});
+ expect(record.status).toBe("OK");
+ await s.tools.invoke(s.add);expect(s.tools.snapshot().state.pendingSupport).toMatchObject({canApply:true});
+ const result=await s.tools.invoke(mode==="mutation"?{name:"change_cart_item",args:{subjectRef:s.current().cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:2}}:
+  {name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});
+ expect(result.status).toBe("OK");
+ const baseSnapshot=s.base.snapshot;
+ s.base.snapshot=()=>{const c=baseSnapshot();c.state.pendingPurchase={lines:[{productId:"SM613",offerType:"DIRECT",missing:"COLOR"}]};return c;};
+ expect(s.tools.snapshot().state.pendingSupport).toMatchObject({canApply:false,evaluation:{by:"CODE",when:"REQUEST_DIFFERS_FROM_CART",waitingForStatus:"UNKNOWN",waitingFor:[]}});
+ expect(result.data).toMatchObject({pendingSupport:{canApply:false}});
+});
+
+it("executes W3 record-and-quote then activate-and-quote through the existing guarded batch path",async()=>{
+ const s=await setup(),f=fixtureProduct(),sourceQuote="Giá hơi cao, bớt cho chị được không?";
+ s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+ const quoted=()=>withExplicitQuoteTask({...s.base,...s.tools,availableTools:["read_product","request_handoff","add_to_cart","record_negotiation","apply_pending_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+ const first=quoted();
+ expect((await first.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}})).status).toBe("OK");
+ const quote={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:2}};
+ const record={name:"record_negotiation",args:{action:"RECORD",intent:"PRICE_OBJECTION",sourceQuote,subjectRef:"SM613",offerType:"DIRECT"}};
+ const recorded=await first.invokeBatch([record,quote]);
+ expect(recorded.map(r=>r.status),JSON.stringify(recorded)).toEqual(["OK","OK"]);
+ expect(s.current().pendingNegotiation?.status).toBe("PENDING");
+ expect(s.current().cart).toBeNull();expect(s.current().negotiation).toBeNull();
+ expect((await s.tools.invoke({...s.add,args:{...s.add.args,quantity:2}})).status).toBe("OK");
+ const activation={name:"apply_pending_negotiation",args:{pendingRef:s.current().pendingNegotiation!.pendingId}};
+ const applied=await quoted().invokeBatch([activation,quote]);
+ expect(applied.map(r=>r.status)).toEqual(["OK","OK"]);
+ expect(s.current().pendingNegotiation?.status).toBe("ACTIVATED");
+ expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
+ const count=s.commits.length;
+ expect((await s.tools.invoke(activation)).status).toBe("OK");expect(s.commits).toHaveLength(count);
+});
+
+it("continues independent quote after proved no-commit rejection of an old objection",async()=>{
+ const s=await setup();await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+ const tools=withExplicitQuoteTask({...s.base,...s.tools,availableTools:["read_product","request_handoff","record_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+ const result=await tools.invokeBatch([{name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"old message outside this batch",subjectRef:"SM613",offerType:"DIRECT"}},
+  {name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}}]);
+ expect(result.map(r=>r.status)).toEqual(["REJECTED","OK"]);expect(s.commits).toHaveLength(0);
+ expect(s.tools.noCommitNegotiationResult!(result[0]!)).toBe(true);
+ expect(s.tools.noCommitNegotiationResult!(structuredClone(result[0]!))).toBe(false);
+ expect(result[1]?.data).toMatchObject({benefitAuthorization:{status:"NOT_GRANTED",grantedBenefits:[]}});
+ s.setCurrent({...s.current(),revision:s.current().revision+1});
+ await s.tools.readback();
+ expect(s.tools.noCommitNegotiationResult!(result[0]!)).toBe(false);
+});
+
+describe("code evaluates a stored support request when the matching cart opens",()=>{
+ const record={name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"DIRECT"}};
+ async function stored(evaluate=true){
+  const s=await setup(()=>commerceNow,undefined,false,evaluate),f=fixtureProduct();
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  expect((await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}})).status).toBe("OK");
+  return s;
+ }
+ it.each([1,2])("quotes support before a cart without consuming evidence, then commits the same price for %s units",async quantity=>{
+  const s=await stored();await s.tools.invoke(record);
+  const before=structuredClone(s.current()),count=s.commits.length;
+  const tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","add_to_cart"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  const result=await tools.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity}});
+  const total=quantity===1?499000:948100;
+  expect(result).toMatchObject({status:"OK",data:{appliesNegotiationReceipt:false,preCartQuote:{grandTotalVnd:total,
+   negotiationAssessment:"QUOTED",benefitAuthorization:{status:"NOT_GRANTED",receiptRef:null},
+   supportEvaluation:{status:"QUOTED",pendingRef:before.pendingNegotiation!.pendingId,additionalDiscountVnd:25000,negotiationApplied:false}}}});
+  expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(count);
+  const original=tools.snapshot(),text="Cả ship hết số tiền shop vừa báo chị nhé.";
+  const binding=makeBinding("pre-cart-support",text,original);
+  const response={kind:"VERDICT" as const,result:{verdict:"PASS",violations:[]},binding};
+  expect(finalGate({response,expected:binding,current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
+  expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(count);
+  expect((await tools.invoke({...s.add,args:{...s.add.args,quantity}})).status).toBe("OK");
+  expect(s.current().cart!.value.grandTotalVnd).toBe(total);
+  expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
+  expect(tools.snapshot().effectReceipts.map(r=>r.effect)).toEqual(["CART_OPENED","NEGOTIATION_UPDATED"]);
+  const after=tools.snapshot(),afterBinding=makeBinding("after-cart",text,after);
+  expect(after.policyLiterals.some(p=>p.ref.startsWith("pre-cart-quote:"))).toBe(false);
+  expect(finalGate({expected:afterBinding,response:{...response,binding:afterBinding},current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
+ });
+ it("reuses admitted prices after a later record without stale NOT_EVALUATED state or another read",async()=>{
+  const s=await stored(),tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","record_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  const result=await tools.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}});
+  expect(result).toMatchObject({data:{preCartQuote:{negotiationAssessment:"NOT_EVALUATED",grandTotalVnd:524000}}});
+  await tools.invoke(record);
+  const before=tools.snapshot(),pending=before.state.pendingSupport as {priceQuote:{grandTotalVnd:number}};
+  expect(pending.priceQuote.grandTotalVnd).toBe(499000);
+  expect(result).toMatchObject({data:{preCartQuote:{negotiationAssessment:"NOT_EVALUATED"}}}); // Historical result is immutable.
+  const text="Dạ cả ship là 499.000đ.",binding=makeBinding("later-record",text,before);
+  expect(finalGate({expected:binding,response:{kind:"VERDICT",binding,result:{verdict:"PASS",violations:[]}},current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
+  expect(tools.quoteTaskWork?.()).toEqual([{reservedUnits:1,readInvocations:1,selectionInvocations:0}]);
+  expect(s.commits).toHaveLength(1);expect(s.current().cart).toBeNull();
+ });
+ it("supports authenticated record then quote in one batch, without opening a cart",async()=>{
+  const s=await stored(),tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","record_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  const result=await tools.invokeBatch([record,{name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}}]);
+  expect(result.map(r=>r.status)).toEqual(["OK","OK"]);
+  expect(result[1]).toMatchObject({data:{preCartQuote:{grandTotalVnd:499000,negotiationAssessment:"QUOTED"}}});
+  expect(s.commits).toHaveLength(1);expect(s.current().cart).toBeNull();expect(s.current().negotiation).toBeNull();
+ });
+ it("recalculates the actual purchase quantity instead of committing an older quoted amount",async()=>{
+  const s=await stored();await s.tools.invoke(record);
+  const tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","add_to_cart"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  await tools.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}});
+  const before=tools.snapshot(),text="Tổng 499.000đ.",binding=makeBinding("old-quantity",text,before);
+  await tools.invoke({...s.add,args:{...s.add.args,quantity:2}});
+  expect(s.current().cart!.value.grandTotalVnd).toBe(948100);
+  expect(finalGate({expected:binding,response:{kind:"VERDICT",binding,result:{verdict:"PASS",violations:[]}},current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
+ });
+ it.each(["no-record","other-product","other-offer","policy-hash","episode","profile","expired","future"])("refuses a support quote without exact pending proof: %s",async mode=>{
+  const s=await stored();if(mode!=="no-record")await s.tools.invoke(record);
+  const p=structuredClone(s.policy.policy),target={subjectRef:"SM613",offerType:"DIRECT"};
+  if(mode==="other-product")target.subjectRef="OTHER";if(mode==="other-offer")target.offerType="AO";
+  if(mode==="policy-hash")p.shipping.defaultFeeVnd+=1;
+  if(["episode","profile","expired","future"].includes(mode)){
+   const state=structuredClone(s.current()),pending=state.pendingNegotiation!;
+   if(mode==="episode")pending.salesEpisodeId="60000000-0000-4000-8000-000000000099";
+   if(mode==="profile")pending.customerProfileId="30000000-0000-4000-8000-000000000099";
+   if(mode==="expired")pending.expiresAt=commerceNow.toISOString();
+   if(mode==="future")pending.sourceObservedAt=new Date(commerceNow.getTime()+1000).toISOString();
+   const {pendingNegotiationIdPreimageV1}=await import("@lana/contracts");const {createHash}=await import("node:crypto");
+   pending.pendingId=createHash("sha256").update(pendingNegotiationIdPreimageV1(pending)).digest("hex");
+   s.setCurrent(state);await s.tools.readback();
+  }
+  expect(s.tools.preCartSupportEvidence!(target,p)).toBeNull();
+ });
+ it.each(["cancel","replace-same-price","policy-same-version","expired"])("invalidates an old support quote after %s",async mode=>{
+  const s=await stored();await s.tools.invoke(record);
+  const tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  await tools.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}});
+  const before=tools.snapshot(),text="Dạ cả phí giao hàng là 499.000đ chị nhé.",binding=makeBinding("quoted-support",text,before);
+  const response={kind:"VERDICT" as const,result:{verdict:"PASS",violations:[]},binding};
+  if(mode==="cancel")await s.tools.invoke({name:"cancel_pending_negotiation",args:{pendingRef:s.current().pendingNegotiation!.pendingId}});
+  if(mode==="replace-same-price"){
+   const state=structuredClone(s.current());state.pendingNegotiation!.sourceMessageId="replacement";
+   const {pendingNegotiationIdPreimageV1}=await import("@lana/contracts");const {createHash}=await import("node:crypto");
+   state.pendingNegotiation!.pendingId=createHash("sha256").update(pendingNegotiationIdPreimageV1(state.pendingNegotiation!)).digest("hex");
+   s.setCurrent(state);
+  }
+  if(mode==="policy-same-version")s.policy.policy.negotiation.finalConcession.fixedDiscountVnd+=1;
+  const current=await tools.readback(),now=mode==="expired"?new Date(s.current().pendingNegotiation!.expiresAt):commerceNow;
+  expect(finalGate({response,expected:binding,current,finalDraft:text,now}).disposition).not.toBe("SEND_ELIGIBLE");
+  if(mode==="replace-same-price"){
+   const old=JSON.parse(before.policyLiterals.find(p=>p.ref.startsWith("pre-cart-quote:"))!.text),updated=JSON.parse(current.policyLiterals.find(p=>p.ref.startsWith("pre-cart-quote:"))!.text);
+   expect(updated.grandTotalVnd).toBe(old.grandTotalVnd);expect(updated.supportEvaluation.pendingRef).not.toBe(old.supportEvaluation.pendingRef);
+  }
+ });
+ it("tells owner and verifier the same next step and what the customer still has to choose, not a cart to create",async()=>{
+  const s=await stored();
+  expect((await s.tools.invoke(record)).status).toBe("OK");
+  const view=s.tools.snapshot().state.pendingSupport as Record<string,unknown>;
+  expect(view).toMatchObject({status:"NOT_EVALUATED",canApply:false,evaluation:{by:"CODE",when:"MATCHING_CART_OPENS",waitingForStatus:"UNKNOWN",waitingFor:[]}});
+  expect(view).not.toHaveProperty("blockedReason");
+  expect((view.evaluation as {meaning:string}).meaning).not.toContain("lên giỏ xong shop sẽ xem hỗ trợ");
+  // The colour the customer has not chosen for this exact item comes from the stored purchase note.
+  const snapshot=s.base.snapshot;
+  s.base.snapshot=()=>{const c=snapshot();c.state.pendingPurchase={lines:[{productId:"SM613",offerType:"DIRECT",size:"M",color:null,quantity:1,missing:"COLOR"},
+   {productId:"OTHER",offerType:"DIRECT",size:null,color:"navy",quantity:1,missing:"SIZE"}]};return c;};
+  expect(s.tools.snapshot().state.pendingSupport).toMatchObject({evaluation:{when:"MATCHING_CART_OPENS",waitingForStatus:"KNOWN",waitingFor:["COLOR"]}});
+ });
+ it.each([
+  ["same target size", "SM613","DIRECT","SIZE","KNOWN",["SIZE"]],
+  ["other product", "OTHER","DIRECT","COLOR","UNKNOWN",[]],
+  ["other offer", "SM613","AO","COLOR","UNKNOWN",[]],
+ ])("reports only a proved missing choice: %s",async(_name,productId,offerType,missing,status,fields)=>{
+  const s=await stored();await s.tools.invoke(record);
+  const snapshot=s.base.snapshot;
+  s.base.snapshot=()=>{const c=snapshot();c.state.pendingPurchase={lines:[{productId,offerType,missing}]};return c;};
+  expect(s.tools.snapshot().state.pendingSupport).toMatchObject({evaluation:{waitingForStatus:status,waitingFor:fields}});
+ });
+ it.each(["Giá hơi cao, bớt cho chị được không?","Chị lấy hai áo. Giá hơi cao, bớt cho chị được không?"])(
+  "does not infer a missing purchase decision from a request with no choice record: %s",async text=>{
+   const s=await setup(()=>commerceNow,[text]);
+   await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+   expect((await s.tools.invoke(record)).status).toBe("OK");
+   expect(s.tools.snapshot().state.pendingSupport).toMatchObject({evaluation:{waitingForStatus:"UNKNOWN",waitingFor:[]}});
+  });
+ it("reuses the exact pending record read-only without renewing provenance or creating another effect",async()=>{
+  const s=await stored();
+  await s.tools.invoke(record);const count=s.commits.length,before=structuredClone(s.current());
+  const repeated=await s.tools.invoke(record);
+  expect(repeated).toMatchObject({status:"OK",data:{duplicate:true,pendingReused:true,effectCommitted:false,
+   pendingSupport:{pendingRef:before.pendingNegotiation!.pendingId,canApply:false,evaluation:{when:"MATCHING_CART_OPENS"}}}});
+  expect(repeated.data).not.toHaveProperty("effect");expect(repeated.data).not.toHaveProperty("operationId");
+  expect(s.commits).toHaveLength(count);expect(s.current()).toEqual(before);
+ });
+ it.each(["policy","expired","source","permission"])("does not reuse a pending record after %s changes",async mode=>{
+  let now=commerceNow;const s=await setup(()=>now);await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+  await s.tools.invoke(record);const before=structuredClone(s.current()),count=s.commits.length;
+  if(mode==="policy")s.policy.policy.shipping.defaultFeeVnd+=1;
+  if(mode==="expired")now=new Date(before.pendingNegotiation!.expiresAt);
+  if(mode==="permission")s.authorize.mockResolvedValue(false);
+  const result=await s.tools.invoke(mode==="source"?{...record,args:{...record.args,sourceQuote:"không có trong tin khách"}}:record);
+  expect(result.status).toBe("REJECTED");expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(count);
+ });
+ it("reuses the same source across requests without a receipt, but keeps a genuine new request distinct",async()=>{
+  const s=await stored();await s.tools.invoke(record);const before=structuredClone(s.current()),count=s.commits.length;
+  const same=await resumeEffects(s);expect(await same.tools.invoke(record)).toMatchObject({status:"OK",data:{pendingReused:true,effectCommitted:false}});
+  expect(same.tools.snapshot().effectReceipts).toEqual([]);expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(count);
+  const next=await resumeEffects(s,"new-objection","Giá hơi cao, bớt cho chị được không? Lần này chị muốn hỏi thêm.");
+  expect(await next.tools.invoke(record)).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_REQUEST_RECORDED"}});
+  expect(s.current().pendingNegotiation!.sourceMessageId).toBe("new-objection");
+  expect(s.current().pendingNegotiation!.pendingId).not.toBe(before.pendingNegotiation!.pendingId);expect(s.commits).toHaveLength(count+1);
+ });
+ it("rejects reuse when the same message identity carries different source text",async()=>{
+  const s=await stored();await s.tools.invoke(record);const before=structuredClone(s.current());
+  const next=await resumeEffects(s,s.scope.sourceMessageId,"Giá hơi cao, bớt cho chị được không? Nội dung đã đổi.");
+  expect(await next.tools.invoke(record)).toMatchObject({status:"REJECTED",reason:"PENDING_NEGOTIATION_INVALID"});
+  expect(s.current()).toEqual(before);expect(next.tools.snapshot().effectReceipts).toEqual([]);
+ });
+ it("evaluates once inside the add_to_cart that opens the cart, with both receipts and the evaluated total",async()=>{
+  const s=await stored();
+  await s.tools.invoke(record);const pending=s.current().pendingNegotiation!,before=s.commits.length;
+  const opened=await s.tools.invoke(s.add);
+  expect(opened).toMatchObject({status:"OK",data:{effect:"CART_OPENED",supportEvaluation:{status:"EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:true}}});
+  expect(opened.data).not.toHaveProperty("pendingSupport");
+  expect(s.commits).toHaveLength(before+2);
+  expect(s.current().pendingNegotiation).toMatchObject({pendingId:pending.pendingId,status:"ACTIVATED"});
+  expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
+  const context=s.tools.snapshot(),cart=s.current().cart!.value;
+  expect(context.state.pendingSupport).toBeUndefined();
+  expect((opened.data as {cartQuote:unknown}).cartQuote).toEqual(context.state.cartQuote);
+  expect(context.state.cartQuote).toMatchObject({cartVersion:cart.revision,grandTotalVnd:cart.grandTotalVnd});
+  expect((opened.data as {supportEvaluation:{grandTotalAfterVnd:number}}).supportEvaluation.grandTotalAfterVnd).toBe(cart.grandTotalVnd);
+  expect(context.effectReceipts.map(r=>r.effect)).toEqual(["CART_OPENED","NEGOTIATION_UPDATED"]);
+  expect(context.effectReceiptContinuity?.receiptRefs).toEqual(context.effectReceipts.map(r=>r.ref));
+  expect(hardPrecheck(context,"Dạ chị.",commerceNow)).toBeNull();
+  // Nothing is left to evaluate: the explicit command replays the same commit and writes nothing.
+  const count=s.commits.length;
+  expect((await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}})).status).toBe("OK");
+  expect(s.commits).toHaveLength(count);
+ });
+ it("keeps the opened cart when the evaluation is refused before commit and leaves the explicit command as recovery",async()=>{
+  const s=await stored();
+  await s.tools.invoke(record);const pending=s.current().pendingNegotiation!,before=s.commits.length;
+  // add_to_cart is authorised twice (validation and pre-commit); the evaluation that follows is refused.
+  let calls=0;s.authorize.mockImplementation(async()=>++calls<=2);
+  const opened=await s.tools.invoke(s.add);
+  expect(opened).toMatchObject({status:"OK",data:{effect:"CART_OPENED",supportEvaluation:{status:"NOT_EVALUATED",negotiationApplied:false,reason:"EFFECT_PERMISSION"},
+   pendingSupport:{canApply:true,evaluation:{when:"NOT_COMPLETED_AT_CART_OPENING",waitingForStatus:"KNOWN",waitingFor:[]}}}});
+  expect(s.commits).toHaveLength(before+1);
+  expect(s.current().cart).not.toBeNull();expect(s.current().pendingNegotiation?.status).toBe("PENDING");
+  expect(await s.tools.terminalOutcome!()).toBeNull();
+  s.authorize.mockImplementation(async()=>true);
+  expect(await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}})).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_UPDATED"}});
+  expect(s.current().pendingNegotiation?.status).toBe("ACTIVATED");
+ });
+ it("blocks the turn when the evaluation commit cannot be proved, instead of presenting the cart as settled",async()=>{
+  const s=await stored();
+  await s.tools.invoke(record);
+  const cas=s.repository.compareAndSwap as ReturnType<typeof vi.fn>,write=cas.getMockImplementation()!;
+  let writes=0;cas.mockImplementation(async update=>{if(++writes===2){await write(update);s.setCurrent({...s.current(),revision:s.current().revision+1});throw new Error("response lost");}return write(update);});
+  const opened=await s.tools.invoke(s.add);
+  expect(opened.status).not.toBe("OK");
+  expect(await s.tools.terminalOutcome!()).toMatchObject({disposition:"NO_SEND",reason:"UNKNOWN_COMMIT"});
+ });
+ it("does not evaluate when the option is off: the stored request stays for the explicit command",async()=>{
+  const s=await stored(false);
+  await s.tools.invoke(record);const before=s.commits.length;
+  const opened=await s.tools.invoke(s.add);
+  expect(opened.data).not.toHaveProperty("supportEvaluation");
+  expect(opened.data).toMatchObject({pendingSupport:{canApply:true}});
+  expect(s.commits).toHaveLength(before+1);
+ });
 });

@@ -1,0 +1,52 @@
+{
+  "status": "APPROVED_INPUTS_CONDITIONAL_STAGED_DISPATCH",
+  "reviewer": "/root/b_preserving_independent_review",
+  "sourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "worldHash": "dd16e7c161f33f70e190b0510af85e685ff67a75d6ebeeea78db3fa1dd37ab79",
+  "helperInventoryHash": "7aa0325529a1107937653ef7d14b523856a1eb0f9dbb5b8488423f4bd9edade4",
+  "evaluationPolicyHash": "b57bfdeb408f7d746dccc72c6a36cac6a4789d8cc4946dbdc07e12a97e3fffbf",
+  "providerRequests": 0,
+  "results": [
+    {
+      "dir": "../c3-target-model-r1-sealed-20261105-01",
+      "cases": 4,
+      "turns": 7,
+      "maximumGenerationRequests": 28,
+      "cohorts": {
+        "SALES_READY": 4
+      },
+      "pendingRegistrationHash": "416de9e8d32bc3b1b4d242e726bad5c6108233f74af3bd9650eb110e72c449db"
+    },
+    {
+      "dir": "../c3-target-model-r2-sealed-20261105-01",
+      "cases": 9,
+      "turns": 17,
+      "maximumGenerationRequests": 68,
+      "cohorts": {
+        "SALES_READY": 9
+      },
+      "pendingRegistrationHash": "f0b4bf53d884afb1ebadf1b1b038a272d5608df3469c24d908b65589be06648e"
+    },
+    {
+      "dir": "../c3-target-model-remainder-sealed-20261105-01",
+      "cases": 20,
+      "turns": 24,
+      "maximumGenerationRequests": 96,
+      "cohorts": {
+        "SALES_READY": 19,
+        "SOURCE_UNAVAILABLE": 1
+      },
+      "pendingRegistrationHash": "b01740cd5f85776196fcfd4747df4dc239e5e9bdd461bb3a1be41415651c1139"
+    },
+    {
+      "dir": "../c3-target-model-checkout-sealed-20261105-01",
+      "cases": 1,
+      "turns": 7,
+      "maximumGenerationRequests": 28,
+      "cohorts": {
+        "SALES_READY": 1
+      },
+      "pendingRegistrationHash": "d6159028dfd2b9dbf47b52403f79a6e0942d811d5d00d3f9a273a5a32544e97f"
+    }
+  ]
+}

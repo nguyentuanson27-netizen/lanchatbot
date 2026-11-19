@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import {writeFileSync} from 'node:fs';
+import {createCustomerStateTools} from './lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/dist/single-agent-commerce-state.js';
+import {createReadOnlyTools} from './lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/dist/single-agent-commerce-read-only-tools.js';
+import {commerceScope,commerceNow,fixtureProfile,fixtureProduct,fixturePolicy,fixtureSizeInput} from './lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/dist/single-agent-commerce.test-support.js';
+const scope=commerceScope(),latest='Chị nhắn nhầm cân nặng, 51kg thôi em nhé. Ngực 88, eo 70, mông 94.';
+let stored=fixtureProfile(),sizeCalls=0;
+const provenance={...stored.profile.measurements[0].provenance,observedAt:new Date(commerceNow.getTime()-1000).toISOString()};
+stored.profile.measurements=[{kind:'HEIGHT_CM',value:162,provenance},{kind:'WEIGHT_KG',value:56,provenance}];
+const store={read:async()=>structuredClone(stored),compareAndSwap:async(expected,next)=>{if(stored.profile.revision!==expected)return false;stored=structuredClone(next);return true;}};
+const f=fixtureProduct('QU714'),make=async()=>{
+ const base=createReadOnlyTools({scope,clock:()=>commerceNow,policy:()=>fixturePolicy(),initialProducts:[f.product],catalog:{readProduct:async()=>f,searchText:async()=>({status:'NOT_FOUND'})}});
+ return createCustomerStateTools({base,scope,store,clock:()=>commerceNow,sizeInput:async()=>{sizeCalls++;return fixtureSizeInput();},sourceMessages:[{text:latest,sourceMessageId:scope.sourceMessageId,observedAt:scope.sourceObservedAt}]});
+};
+const correct=[['WEIGHT_KG',51,'51kg'],['BUST_CM',88,'Ngực 88'],['WAIST_CM',70,'eo 70'],['HIPS_CM',94,'mông 94']].map(([kind,value,sourceQuote])=>({op:'SET',field:'measurements.'+kind,value,sourceQuote}));
+const tools=await make();
+const first=await tools.invoke({name:'recommend_size',args:{subjectRef:'QU714',customerStateOps:[{op:'SET',field:'measurements.HEIGHT_CM',value:162,sourceQuote:'cao 1m62'},...correct]}});
+assert.equal(first.reason,'MEASUREMENT_SOURCE_INVALID');
+const second=await tools.invoke({name:'recommend_size',args:{subjectRef:'QU714',customerStateOps:correct}});
+assert.equal(second.reason,'STATE_OR_REF');assert.equal(sizeCalls,0);
+assert.equal(stored.profile.measurements.find(m=>m.kind==='WEIGHT_KG').value,51);
+const state=tools.snapshot().state;assert.equal(state.customerStateUpdatePending,true);
+const fresh=await make(),third=await fresh.invoke({name:'recommend_size',args:{subjectRef:'QU714'}});
+assert.equal(third.status,'OK');assert(sizeCalls>0);
+const result={kind:'MINIMAL_OFFLINE_REAL_CODE_PROBE_NOT_PROVIDER_OR_FULL_COMPONENT_PG_REPLAY',first,second,stored:stored.profile.measurements.map(m=>({kind:m.kind,value:m.value})),pendingState:state.customerStateUpdatePending,pendingFields:state.unresolvedCustomerStateFields??state.unresolvedFields??null,freshInstance:third,sizeCalls,providerRequests:0,sourceWrites:0};
+writeFileSync('../c3-rootcause-state-probe-20261108.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
