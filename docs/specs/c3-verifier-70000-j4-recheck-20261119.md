@@ -21,3 +21,9 @@ git diff --check
 ```
 
 Lệnh đầu là RED, các kiểm cuối PASS. Unit harness chứng minh chỉ lượt cuối dùng generation và prefix hash sai bị chặn trước tạo session. Run mới sẽ có source SHA riêng sau commit, không tái dùng identity 48a27a1b.
+
+## Sửa harness sau lần dispatch đầu
+
+Lần đầu trên `2d81c264` dùng sender kiểm J1 cũ đã tính cả thoughtSignature vào text bound: request continuation có text 63.152 và signature 12.692 byte, raw 75.844 byte, bị J1_TEXT_BOUND trước fetch. Raw ledger ghi UNKNOWN vì assertion xảy ra ngoài telemetry sender; giữ nguyên ledger. Probe exact captured body với fetch bị chặn xác nhận assertion đồng bộ trước auth/generation, 0 fetch; sidecar reconciliation ghi call bị chặn =0 provider requests, run abort tổng 1 owner request đã hoàn tất. DB đã dọn; không lặp lại attempt như chưa chạy.
+
+Mode J4 dùng validator bám contract native: signature riêng tối đa 65.536 byte, text tối đa 70.000 byte; validate clone bỏ giá trị signature, giữ original body gửi provider nguyên vẹn. Prevalidate trước khi đánh dấu dispatch để lỗi local không bị ghi UNKNOWN. Các mode J1 cũ không đổi. Thêm test signature lớn vẫn hợp lệ và body không bị sửa; signature quá trần/text 70.001 vẫn reject. Nhóm protocol/campaign 34 PASS. Run bổ sung sẽ seal source mới, giữ run abort và toàn bộ request đã dùng trong accounting; world capture hiện có được giữ nguyên bytes/thời điểm/source gốc nếu còn hạn, không giả cập nhật nguồn khi chỉ sửa harness.

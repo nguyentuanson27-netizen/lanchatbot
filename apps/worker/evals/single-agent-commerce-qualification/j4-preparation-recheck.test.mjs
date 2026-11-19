@@ -4,7 +4,17 @@ import {mkdtempSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname,basename} from 'node:path';
 import {digest} from './bc-control.mjs';
-import {runJ4PreparationRecheck} from './j4-preparation-recheck.mjs';
+import {runJ4PreparationRecheck,assertJ4OwnerWire} from './j4-preparation-recheck.mjs';
+import {ownerTextBytes} from '../single-agent-commerce-read-only/gemini-inference.mjs';
+test('native signature bytes are bounded independently without modifying the provider body',()=>{
+ const body={contents:[{role:'user',parts:[{text:'Tư vấn'}]},{role:'model',parts:[{functionCall:{name:'quote_product',args:{}},thoughtSignature:'s'.repeat(65536)}]}],tools:[],
+  generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
+ const before=structuredClone(body);assert.doesNotThrow(()=>assertJ4OwnerWire(body));assert.deepEqual(body,before);
+ body.contents[1].parts[0].thoughtSignature+='s';assert.throws(()=>assertJ4OwnerWire(body),/J4_SIGNATURE_BOUND/);
+ body.contents[1].parts[0].thoughtSignature='s'.repeat(12692);
+ body.contents[0].parts[0].text+='x'.repeat(70000-ownerTextBytes(body));assert.doesNotThrow(()=>assertJ4OwnerWire(body));
+ body.contents[0].parts[0].text+='x';assert.throws(()=>assertJ4OwnerWire(body),/J1_TEXT_BOUND/);
+});
 function fixture(){
  const out=mkdtempSync(join(tmpdir(),'j4-recheck-test-'));
  const conversations=Array.from({length:5},(_,i)=>({repetition:i+1,turns:[

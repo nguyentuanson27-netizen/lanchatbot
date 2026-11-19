@@ -13,6 +13,8 @@ import {buildGeminiCommerceRequest} from '../single-agent-commerce-read-only/gem
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {assertRuntimeFirewall} from './qualification.mjs';
 import {OPENING_PRODUCT_MEDIA_RULE} from '../../dist/single-agent-commerce-opening-media.js';
+import {createCapturedOwnerSender} from './bc-owner-replay.mjs';
+import {assertJ4OwnerWire} from './j4-preparation-recheck.mjs';
 
 const read=p=>JSON.parse(readFileSync(p,'utf8'));
 const j2Texts=['Chị muốn chọn size áo của bộ váy Thạch Thảo, cao 1m62 nặng 56kg.',
@@ -69,7 +71,9 @@ export async function createCampaignPorts({root,input,world,out,readPorts}){
  source();let phase='PREPARATION',turn=0,arm='A',seedOwner=null,capture=null,minimumProofExpiresAt=input.minimumProofExpiresAt;
  const ledger=createCampaignAccounting(out),generations=ledger.generations;let stopped=false;
  const audit=(event,value)=>appendFileSync(resolve(out,'CAMPAIGN.jsonl'),JSON.stringify({event,at:new Date().toISOString(),value})+'\n');
- const sender=createJ1Sender({projectId:world.config.vertex.projectId,model:m.models.conversation});
+ const sender=input.mode==='J4_RECHECK'
+  ?createCapturedOwnerSender({projectId:world.config.vertex.projectId,model:m.models.conversation},{assertBody:assertJ4OwnerWire})
+  :createJ1Sender({projectId:world.config.vertex.projectId,model:m.models.conversation});
  const verify=createCommerceVerifier(m,undefined,(id,value)=>audit('VERIFIER_CHECKPOINT',{id,value}));
  const claim=role=>{
   source();assert(['RUN','RESUME','BASELINE_NATIVE','J4_RECHECK'].includes(input.mode)&&!stopped,'CAMPAIGN_GENERATION_DISABLED');
@@ -83,7 +87,8 @@ export async function createCampaignPorts({root,input,world,out,readPorts}){
  const sendOwner=async body=>{
   const row=claim('OWNER');let dispatched=false;
   try{
-   assertRuntimeFirewall(body);audit('OWNER_REQUEST',{id:row.id,body,hash:byteHash(JSON.stringify(body))});dispatched=true;
+   assertRuntimeFirewall(body);if(input.mode==='J4_RECHECK')assertJ4OwnerWire(body);
+   audit('OWNER_REQUEST',{id:row.id,body,hash:byteHash(JSON.stringify(body))});dispatched=true;
    const result=await sender(body,byteHash(JSON.stringify(body)));
    ledger.complete(row,{status:result.status,providerRequests:result.telemetry.providerRequests,telemetry:result.telemetry});
    audit('GENERATION_RESULT',{...row,output:result.output??null});return result;

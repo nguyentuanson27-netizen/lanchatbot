@@ -4,6 +4,16 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {digest,write} from './bc-control.mjs';
+import {assertJ1Wire} from './j1-operation-control.mjs';
+import {ownerSignatureBytes,OWNER_SIGNATURE_MAX_BYTES} from '../single-agent-commerce-read-only/gemini-inference.mjs';
+/** Same independent signature bound as the native builder; never change the wire sent to the provider. */
+export function assertJ4OwnerWire(body){
+ assert(ownerSignatureBytes(body)<=OWNER_SIGNATURE_MAX_BYTES,'J4_SIGNATURE_BOUND');
+ const textView=structuredClone(body);
+ for(const message of textView.contents??[])for(const part of message.parts??[])
+  if(typeof part.thoughtSignature==='string')part.thoughtSignature='';
+ assertJ1Wire(textView);
+}
 export async function runJ4PreparationRecheck({input,out,ports,sessionFactory,snapshot}){
  assert.equal(input.mode,'J4_RECHECK');assert.equal(input.slots?.length,5);
  assert.deepEqual(input.slots.map(s=>s.repetition),[1,2,3,4,5]);
