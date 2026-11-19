@@ -16,6 +16,8 @@ import {validateProtocol,geminiVerifier} from '../single-agent-commerce-read-onl
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {assertOpeningProductMediaRule} from '../../dist/single-agent-commerce-opening-media.js';
 import {assertProspectiveOpeningReadiness} from './source-readiness.mjs';
+import {CHAT_PRIORITY_NATIVE_SCOPE} from './chat-priority-native-scope.mjs';
+import {assertPriorityReplayPassed} from './chat-priority-replay.mjs';
 const read=p=>JSON.parse(readFileSync(p,'utf8').replace(/^\uFEFF/,''));
 export const DIAGNOSTIC_SCOPE=read(new URL('./remediation-20261029/DIAGNOSTIC_SCOPE.json',import.meta.url));
 export const FULL_NATIVE_DIAGNOSTIC_SCOPE=read(new URL('./FULL_NATIVE_DIAGNOSTIC_SCOPE_20261029.json',import.meta.url));
@@ -27,6 +29,7 @@ B_PRESERVING_SCOPES.push(read(new URL('./TOOL_CONTRACT_SCREEN_SCOPE_20261109.jso
 B_PRESERVING_SCOPES.push(...['PRIMARY','CONTROLS'].map(n=>read(new URL(`./SALES_CONTEXT_${n}_SCOPE_20261115.json`,import.meta.url))));
 export function diagnosticScope(corpus){
  const name=corpus.provenance?.diagnosticScope;
+ if(name===CHAT_PRIORITY_NATIVE_SCOPE.name)return CHAT_PRIORITY_NATIVE_SCOPE;
  const repairScope=B_PRESERVING_SCOPES.find(s=>s.name===name);if(repairScope)return repairScope;
  assert(name===undefined||[FULL_NATIVE_DIAGNOSTIC_SCOPE.name,PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE.name,FULL_NATIVE_REMAINDER_SCOPE.name,PURCHASE_MISSING_SCOPE.name].includes(name),'D_UNKNOWN_SCOPE');
  return name===PURCHASE_MISSING_SCOPE.name?PURCHASE_MISSING_SCOPE:name===FULL_NATIVE_REMAINDER_SCOPE.name?FULL_NATIVE_REMAINDER_SCOPE:name===PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE.name?PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE:name===FULL_NATIVE_DIAGNOSTIC_SCOPE.name?FULL_NATIVE_DIAGNOSTIC_SCOPE:DIAGNOSTIC_SCOPE;
@@ -35,7 +38,8 @@ export function diagnosticScope(corpus){
 // change is judged on a pass rate per case, not on one sample. Each repetition is its own slot with its own
 // session and caps; repetition 1 keeps the historical slot identity.
 export function diagnosticRepetitions(corpus, approvedRepetitions){
- return diagnosticScope(corpus).name==='SALES_CONTEXT_CONTROLS_20261115'?1:approvedRepetitions;
+ const scope=diagnosticScope(corpus);
+ return scope===CHAT_PRIORITY_NATIVE_SCOPE||scope.name==='SALES_CONTEXT_CONTROLS_20261115'?1:approvedRepetitions;
 }
 export function diagnosticSlots(corpus,repetitions=1){
  const scope=diagnosticScope(corpus);
@@ -52,8 +56,10 @@ export function validateDiagnostic(reg,world){
  const scope=diagnosticScope(reg.corpus);
  assert(reg.kind==='PHASE_C_DEVELOPMENT_DIAGNOSTIC_V1'&&reg.status==='REGISTERED_DEVELOPMENT_NOT_QUALIFICATION'&&
   reg.sendEnabled===false&&reg.corpus.provenance?.developmentOnly===true&&reg.scopeHash===digest(scope),'D_REGISTRATION_KIND');
- if(scope===FULL_NATIVE_DIAGNOSTIC_SCOPE||scope===PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE||scope===FULL_NATIVE_REMAINDER_SCOPE||scope===PURCHASE_MISSING_SCOPE||B_PRESERVING_SCOPES.includes(scope))assert.equal(digest(reg.corpus.scenarios.map(s=>({id:s.id,mode:s.mode,turns:s.turns,customerPolicy:s.customerPolicy??null}))),scope.customerScriptsHash,'D_CUSTOMER_SCRIPTS_CHANGED');
+ if(scope===CHAT_PRIORITY_NATIVE_SCOPE||scope===FULL_NATIVE_DIAGNOSTIC_SCOPE||scope===PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE||scope===FULL_NATIVE_REMAINDER_SCOPE||scope===PURCHASE_MISSING_SCOPE||B_PRESERVING_SCOPES.includes(scope))assert.equal(digest(reg.corpus.scenarios.map(s=>({id:s.id,mode:s.mode,turns:s.turns,customerPolicy:s.customerPolicy??null}))),scope.customerScriptsHash,'D_CUSTOMER_SCRIPTS_CHANGED');
  validateConfig(reg.config);assert.equal(reg.config.retry,0);
+ if(scope===CHAT_PRIORITY_NATIVE_SCOPE)assert(reg.config.salesVoiceOfferTerms===undefined&&reg.config.salesContextScreen===undefined&&
+  reg.config.salesContextPresentation===undefined,'CHAT_PRIORITY_NATIVE_ONLY');
  if(reg.config.salesVoiceOfferTerms!==undefined)assert(reg.config.salesVoiceOfferTerms===true&&
   scope.maximumCases===13&&reg.config.repetitions===5&&salesVoiceSlotIds(reg).length===25,'D_SALES_VOICE_SCOPE');
  if(reg.config.salesContextScreen!==undefined)assert(reg.config.salesContextScreen===true&&scope.name==='SALES_CONTEXT_PRIMARY_20261115'&&
@@ -125,8 +131,11 @@ export function diagnosticProviderRegistration(sealed){
   ...(sealed.config.salesVoiceOfferTerms?{salesVoiceOfferTerms:true}:{}),
   ...(sealed.config.salesContextPresentation?{salesContextPresentation:true}:{})};
 }
-export function diagnosticPreflight(root,registrationPath,worldPath,contextProof){
+export function diagnosticPreflight(root,registrationPath,worldPath,contextProof,priorityReplayDir){
  const sealed=read(registrationPath),world=read(worldPath);validateDiagnostic(sealed,world);
+ const chatPriorityNative=diagnosticScope(sealed.corpus)===CHAT_PRIORITY_NATIVE_SCOPE;
+ assert(chatPriorityNative===Boolean(priorityReplayDir)&&(!chatPriorityNative||!contextProof),'CHAT_PRIORITY_NATIVE_REPLAY_REQUIRED');
+ if(chatPriorityNative)assert.equal(assertPriorityReplayPassed(priorityReplayDir,root),sealed.corpus.provenance.chatPriorityReplayScoreHash);
  assertProspectiveOpeningReadiness(sealed.corpus,sealed.config.candidate.openingMediaRule);
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
  assertCurrentCandidate(root,sealed.config);assertApprovedDecisions(root,sealed.config);
@@ -134,7 +143,7 @@ export function diagnosticPreflight(root,registrationPath,worldPath,contextProof
  const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'))),codex=geminiVerifier(m)?null:inspectCodex();
  if(codex)assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion);
  assert.deepEqual(m.models.conversation,sealed.config.candidate.model);assert.deepEqual(m.models.verifier,sealed.config.candidate.verifier.model);
- const p={root,sealed,world,m,codex,config:world.config,registration:diagnosticProviderRegistration(sealed)};
+ const p={root,sealed,world,m,codex,config:world.config,registration:diagnosticProviderRegistration(sealed),...(chatPriorityNative?{chatPriorityNative:true}:{})};
  p.diagnosticControl=diagnosticControl(sealed,{checkSource:()=>{assertCandidateSource(p);for(const snapshot of sealed.sourceChecks)assert.equal(hardPrecheck(snapshot,'Dạ.',new Date()),null,'D_SOURCE_INVALIDATED');}});
  if(diagnosticScope(sealed.corpus).name.startsWith('SALES_CONTEXT_')){
   assert(contextProof,'CONTEXT_CAMPAIGN_REQUIRED');

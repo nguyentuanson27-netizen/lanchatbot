@@ -21,6 +21,7 @@ import {
   buildGuardedModelNegotiationProposalV1,
   prepareHandoffStatePlanV1,
   formatCartLineSelection,
+  formatCheckoutPreviewLine,
   type ModelNegotiationProposalV1,
 } from "./realtime-sales-cycle.js";
 import {
@@ -108,6 +109,19 @@ describe("customer-visible cart choices", () => {
     selected.components[1]!.size = "L";
     expect(formatCartLineSelection(selected)).toBe("1 bộ CB182 (áo màu be, size M; chân váy màu navy, size L)");
   });
+  it("shows bound set and combo choices on their own preview line", () => {
+    const selected = line(1);
+    selected.components[1]!.color = "NAVY";
+    selected.components[1]!.size = "L";
+    const product = { productId: "CB182", title: "Set váy Thạch Thảo" };
+    expect(formatCheckoutPreviewLine(selected, product))
+      .toBe("Set váy Thạch Thảo ×1: 699.000đ\nÁo màu be, size M và chân váy màu navy, size L");
+    selected.offerKind = "COMBO_3";
+    selected.components.push({ ...selected.components[1]!, componentRole: "PANTS", size: null, color: "__NO_COLOR__" });
+    expect(formatCheckoutPreviewLine(selected, { productId: "OTHER42", title: "Không phải mẫu này" }))
+      .toBe("CB182 ×1: 699.000đ\nÁo màu be, size M, chân váy màu navy, size L và quần");
+  });
+
   it("does not borrow a missing choice or a display name from another line", () => {
     const first = line(1), second = line(2);
     second.parentProductId = "OTHER42";
@@ -490,7 +504,7 @@ describe("realtime Phase 3 sales cycle", () => {
       "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD", "preorder-details"), facts: currentFacts });
     expect(previewed.plan?.state.stage).toBe("ORDER_PREVIEW");
     const text = previewed.messages.filter(m => m.kind === "TEXT").map(m => m.text).join("\n");
-    expect(text).toContain("1 bộ CB182 (áo màu be, size M; chân váy màu be, size M)");
+    expect(text).toContain("CB182 ×1: 699.000đ\nÁo màu be, size M và chân váy màu be, size M");
     if (preorder) {
       expect(text).toContain("CB182: hàng đặt trước");
       expect(previewed.protectedOutbound?.claimTypes).toContain("STOCK");

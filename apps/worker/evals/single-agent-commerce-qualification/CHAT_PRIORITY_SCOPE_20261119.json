@@ -1,0 +1,144 @@
+{
+  "scope": {
+    "name": "CHAT_PRIORITY_NATIVE_20261119",
+    "purpose": "DEVELOPMENT_ONLY_NOT_QUALIFICATION",
+    "repetitions": 1,
+    "maximumCases": 4,
+    "maximumNativeCustomerTurns": 9,
+    "maximumVerifierOnlyProbes": 0,
+    "maximumGenerationRequests": 36,
+    "maximumOwnerGenerationsPerNativeTurn": 3,
+    "maximumVerifierGenerationsPerTurn": 1,
+    "generationRetry": 0,
+    "customerScriptsHash": "b9440c93ca08d833c3741e2936e933c2820ea5018d737e37d7a071bd97e3c6aa",
+    "ads": {
+      "caseId": "c-context-opening",
+      "turnIndex": 0,
+      "productCode": "SD023"
+    },
+    "cases": [
+      {
+        "sourceCase": "c-20261028-j2",
+        "mode": "JOURNEY",
+        "turns": 3,
+        "maximumGenerationRequests": 12
+      },
+      {
+        "sourceCase": "c-20261028-j4",
+        "mode": "JOURNEY",
+        "turns": 3,
+        "maximumGenerationRequests": 12
+      },
+      {
+        "sourceCase": "c-po-20261031-p09",
+        "mode": "JOURNEY",
+        "turns": 2,
+        "maximumGenerationRequests": 8
+      },
+      {
+        "sourceCase": "c-context-opening",
+        "mode": "SINGLE",
+        "turns": 1,
+        "maximumGenerationRequests": 4
+      }
+    ]
+  },
+  "pairs": [
+    {
+      "group": "r1",
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "kind": "TOTAL",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "slotId": "b779181ba05c3d8585c91110e93d59e2715a7b8dcfe18ead5221df39e9a62f85",
+      "requestHash": "e8a4c7e93c11e63bc6858873e1a75b2326d3519f74417d0d3565562bae889721",
+      "requestId": "ea7bbcc0-2826-454c-8c08-86163b6db4b1:owner:2",
+      "verifierHash": "dd539fe6a023bc9ba5f917b37f0315a06910bf19e0a632b067b9968b198d9b61",
+      "judgeEvidenceHash": "70873fac29d3d1c42ec4523ff7abcf3d16915399a24b1d20b0ac7114f9e46299"
+    },
+    {
+      "group": "r2",
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "kind": "INTEREST",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "slotId": "930d41f174d85de212cac8642ee217b8b254703d6550356d0f6600a800c71e0a",
+      "requestHash": "d9548ee834a02047201ed509c985667becde677c87a054b47bc5e3327228c951",
+      "requestId": "43f57595-6055-44c1-80e3-d9395c685718:owner:2",
+      "verifierHash": "f4a056a28b1c3c303d6637a3e0b28b55204004ca46ad9661fbb24bd7a22f69b9",
+      "judgeEvidenceHash": "974fa015864f573e04b35ce0e138a0d0d35b031074eebcecde3bbc790ee6b79a"
+    },
+    {
+      "group": "remainder",
+      "caseId": "c-20261028-s05",
+      "turnIndex": 0,
+      "kind": "CHOICE",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "slotId": "f59bb64b4b89d110e7df5e4075fa1fbe1363464af94791d09558ebe217dc48d7",
+      "requestHash": "af7066f58a142e13a1950c33c75325452c083807ec1098f9078ebf942548d9ce",
+      "requestId": "7a680707-25db-48a6-9173-d6781bafd735:owner:3",
+      "verifierHash": "750847ce9fbc5ed2f788b8841111d84980b9dc56381606a374451c009e1e7048",
+      "judgeEvidenceHash": "f6d6cfa5593345e34220f4566dc43c1ea1a5b9d64938effcef01bb054aa1d63e"
+    },
+    {
+      "group": "remainder",
+      "caseId": "c-20261028-s08",
+      "turnIndex": 0,
+      "kind": "CHOICE",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "slotId": "7d1e70a88c51a84b34b61870e73d87624c62f509005954e7c7ba0c8d3bf49cb4",
+      "requestHash": "3026074311692fa41b70a9f0b88ddc6f045d0980e98357ecc046aba762b78ab8",
+      "requestId": "b9992f2a-2cb6-41ec-affc-952bbddb3722:owner:2",
+      "verifierHash": "fab279e6a85eb6e313b6a46a4f892327284608d9a6060f99fa904235677681ea",
+      "judgeEvidenceHash": "f2782dc227bb1a14de5e311544ef749fb714dc1c875a7bb1452b689a085f5e0f"
+    },
+    {
+      "group": "r2",
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "kind": "SIZE_CORRECTION",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "slotId": "56c88db3dc59276b6fcffcb91262b4d90a3c6f307e986675741909b170c96949",
+      "requestHash": "3828b90b03462500e3572516062cd1bb3ffa61d60a8d1d8e9396b0f95022fbd6",
+      "requestId": "4d47b283-6e3f-41c5-85d9-ebc23d5ae89d:owner:2",
+      "verifierHash": "d13ad326b05fcb7a6283fc4764abbc52d9c10eaac567075d6b3a481d125d26ac",
+      "judgeEvidenceHash": "637846ca4352864afbd2fd79a364d0318d24224714afb555618042e58d7288fc"
+    },
+    {
+      "group": "r2",
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "kind": "TOTAL",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "slotId": "f47dfcb6bfb1deab4eec9469da5b66c480ae13b63d98337237486ff31ddfe09b",
+      "requestHash": "16b5da2ba29c1fecc32156adabd3c256ae1dd0eadf43cdb6b67b70a8174b12d7",
+      "requestId": "f7c99688-c58b-4f37-bbfd-c12e24197f49:owner:2",
+      "verifierHash": "8b2e447eab0634750956f3bb497792f212f999b3c957983d9e00b88fffcf47d0",
+      "judgeEvidenceHash": "13e7147c4b9a31b04506b9311cc490bec1d1efa49b3dfb6e7ede1d3b4ed4b045"
+    },
+    {
+      "group": "remainder",
+      "caseId": "c-20261028-s04",
+      "turnIndex": 0,
+      "kind": "STOCK_CONTROL",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "slotId": "909a80fe9d97f8037d7dd6c0faab993ac974209535fb87d9f7953a8503ab0895",
+      "requestHash": "13ef2d9ffe0efacea131a6cc2eab5a25e082b118e788ae70fa4281b59c813e95",
+      "requestId": "890c38e1-4296-4641-a82c-5ed45b748855:owner:3",
+      "verifierHash": "470d7651f4754bc861e8d54459cd84d725e2ee32d294fcaafe21f87810991abd",
+      "judgeEvidenceHash": "485db9674b75ed2811b279f7ba19f2236e0984e1a823980dfb91bc92f7a1de9c"
+    },
+    {
+      "group": "ads",
+      "caseId": "c-context-opening",
+      "turnIndex": 0,
+      "kind": "ADS_CONTROL",
+      "source": "9a65450fdf29b1c5c544465bf61c450d3c22f133",
+      "slotId": "f8000748d433da7c9aa84e198d9daf1167c3f539e52bb0881f8e2ad5522b5cf1",
+      "requestHash": "02b92301081942348bc9687325fdbb98ec375856b140abcc5184510b43119dd7",
+      "requestId": "74ef27ba-a2fa-45f4-8d11-90c3ca930bf5:owner:2",
+      "verifierHash": "991d4913cac33cba23a05f7b9632a1a291e2b4004e5230f3dc2d7736a64a9bf8",
+      "judgeEvidenceHash": "46ef101e257a4b8b587f9a82c6c7825e28e86368183cf89f9b84861eea169657"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import {runtimeProjection,digest,textDigest,outcomeDigest} from './qualification
 import {commonModelConfig} from './native-wire.mjs';
 import {selectFrozenCustomerTurn,selectCheckoutCustomerTurn} from './customer-branches.mjs';
 import {captureNativeTerminal,capturedOutputViolations,clarificationCapture,previewMediaCapture,checkoutBranchWitness} from './native-terminal.mjs';
+import {priorityNativeMessage} from './chat-priority-native-scope.mjs';
 const salesVoiceTargets=['c-20261028-s15','c-20261028-s16','c-20261028-j2','c-20261028-j4','c-20261028-s08'];
 export function salesVoiceSlotIds(sealed){
  const selected=sealed.slots.filter(s=>s.arm==='CANDIDATE'&&s.mode!=='SAFETY'&&salesVoiceTargets.includes(s.caseId));
@@ -37,6 +38,8 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
   slotIds=selected;
  }
 
+ if(preflight.chatPriorityNative&&slotIds!==undefined)assert.deepEqual(slotIds,reg.slots.map(s=>s.slotId),'CHAT_PRIORITY_NATIVE_COMPLETE_SLOT_SET');
+
  const attempts=reg.slots.filter(s=>s.arm===arm&&s.mode!=='SAFETY').map(s=>({...s,identity,status:'NOT_RUN'}));
  assert.equal(digest(seed),reg.config.blinding.seedCommitment,'C_BLIND_SEED_CHANGED');
  const cases=reg.corpus.scenarios.filter(s=>s.mode!=='SAFETY');
@@ -45,7 +48,7 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
  save();
  // One attempt per registered slot: every repetition of a case starts from its own fresh session.
  const registered=reg.slots.filter(s=>s.arm===arm&&s.mode!=='SAFETY');
- const repetitions=preflight.contextJob?.kind==='CONTROLS'?1:reg.config.repetitions;
+ const repetitions=preflight.chatPriorityNative||preflight.contextJob?.kind==='CONTROLS'?1:reg.config.repetitions;
  assert(registered.length===cases.length*repetitions&&new Set(registered.map(s=>s.slotId)).size===registered.length,'C_SLOT_POPULATION');
  for(const slot of selectRegisteredNativeSlots(reg,arm,slotIds)){
   const scenarioIndex=attempts.findIndex(attempt=>attempt.slotId===slot.slotId);
@@ -75,7 +78,7 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    let observed,errorCode=null;
    try{
     const adsControl=preflight.contextJob?.kind==='CONTROLS'&&scenario.id==='c-context-opening'&&i===0;
-    const message=adsControl?{messages:[{text:input.latest,attachments:[],adsContext:{source:'ADS',
+    const message=preflight.chatPriorityNative?priorityNativeMessage(scenario,i,input):adsControl?{messages:[{text:input.latest,attachments:[],adsContext:{source:'ADS',
      adTitle:input.initialProductCodes[0],postId:null,adId:null,ref:null}}]}:{};
     observed=await session.turn(input.latest,[],{slot:slot.slotId+':'+i,...message});
     if(observed.qualification?.status==='VALID')await session.drain();

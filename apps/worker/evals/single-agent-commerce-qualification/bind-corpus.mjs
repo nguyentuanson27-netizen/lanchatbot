@@ -17,7 +17,7 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact,diag
  const scripts=c=>c.scenarios.map(s=>({id:s.id,mode:s.mode,turns:s.turns,customerPolicy:s.customerPolicy??null}));
  if(diagnostic){
   const scope=diagnosticScope(draft);
-  assert(draft.provenance?.developmentOnly===true&&(['SALES_CONTEXT_PRIMARY_20261115','SALES_CONTEXT_CONTROLS_20261115'].includes(scope.name)||
+  assert(draft.provenance?.developmentOnly===true&&(['SALES_CONTEXT_PRIMARY_20261115','SALES_CONTEXT_CONTROLS_20261115','CHAT_PRIORITY_NATIVE_20261119'].includes(scope.name)||
    scope.name==='TOOL_CONTRACT_SCREEN_20261109'&&initialStateArtifact.sourceSha==='7cdd2e80b0ebda08f0176082ea09885a63a76fe2'),
   'C_CONTEXT_BINDING_SCOPE');
   assert(draft.scenarios.every(s=>s.mode!=='SAFETY'),'C_CONTEXT_BINDING_PROBES');

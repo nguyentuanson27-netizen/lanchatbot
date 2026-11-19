@@ -655,26 +655,70 @@ function negotiationOfferText(cart: CartV1, customerState: "READY" | "HESITANT" 
     : `Em hỗ trợ ${offer} cho giỏ này.`;
 }
 
+type CartSelectionLine = CartV1["lines"][number];
+type CartProductName = NonNullable<RealtimeSalesCycleInput["productNames"]>[number];
+
+const cartComponentRoles = { TOP: "áo", SKIRT: "chân váy", PANTS: "quần", DRESS: "váy", JACKET: "áo khoác", ACCESSORY: "phụ kiện", OTHER: "sản phẩm" };
+
+function boundCartTitle(line: CartSelectionLine, product?: CartProductName): string | undefined {
+  return product && normalizeCatalogToken(product.productId) === line.parentProductId && product.title.trim() ? product.title : undefined;
+}
+
+function cartComponentDetails(component: CartSelectionLine["components"][number]) {
+  const color = component.color && component.color !== "__NO_COLOR__" ? `màu ${component.color.toLocaleLowerCase("vi-VN")}` : null;
+  const size = component.size ? `size ${component.size}` : null;
+  return [color, size].filter(Boolean).join(", ");
+}
+
+function describeCartComponent(component: CartSelectionLine["components"][number], label = cartComponentRoles[component.componentRole]) {
+  const details = cartComponentDetails(component);
+  if (!details) return label;
+  return label + (details.startsWith("size ") ? ", " : " ") + details;
+}
+
+function isCartBundle(line: CartSelectionLine): boolean {
+  return line.offerKind === "SET" || line.offerKind === "COMBO_3";
+}
+
 /** Render only committed choices; retain the code when there is no bound display name. */
-export function formatCartLineSelection(line: CartV1["lines"][number], product?: NonNullable<RealtimeSalesCycleInput["productNames"]>[number]): string {
-  const label = product && normalizeCatalogToken(product.productId) === line.parentProductId && product.title.trim()
-    ? `(mẫu “${product.title}”)` : line.parentProductId;
-  const roles = { TOP: "áo", SKIRT: "chân váy", PANTS: "quần", DRESS: "váy", JACKET: "áo khoác", ACCESSORY: "phụ kiện", OTHER: "sản phẩm" };
-  const color = (value: string | null) => value && value !== "__NO_COLOR__" ? ` màu ${value.toLocaleLowerCase("vi-VN")}` : "";
-  const component = (c: typeof line.components[number]) => (c.quantity > 1 ? `${c.quantity} ` : "") + roles[c.componentRole] +
-    color(c.color) + (c.size ? `, size ${c.size}` : "");
-  if (line.offerKind === "SET" || line.offerKind === "COMBO_3") {
-    return `${line.quantity} ${line.offerKind === "SET" ? "bộ" : "combo"} ${label} (${line.components.map(component).join("; ")})`;
+export function formatCartLineSelection(line: CartSelectionLine, product?: CartProductName): string {
+  const title = boundCartTitle(line, product);
+  const label = title ? `(mẫu “${title}”)` : line.parentProductId;
+  if (isCartBundle(line)) {
+    const components = line.components.map(component =>
+      (component.quantity > 1 ? `${component.quantity} ` : "") + describeCartComponent(component));
+    return `${line.quantity} ${line.offerKind === "SET" ? "bộ" : "combo"} ${label} (${components.join("; ")})`;
   }
-  const c = line.components[0]!, role = roles[c.componentRole];
-  return `${line.quantity} ${role} ${label}${color(c.color)}${c.size ? `, size ${c.size}` : ""}`;
+  const component = line.components[0]!;
+  const role = cartComponentRoles[component.componentRole];
+  return `${line.quantity} ${describeCartComponent(component, `${role} ${label}`)}`;
+}
+
+export function formatCheckoutPreviewLine(line: CartSelectionLine, product?: CartProductName): string {
+  const title = boundCartTitle(line, product)?.trim() ?? line.parentProductId;
+  const price = money(line.lineTotalVnd ?? 0);
+  if (isCartBundle(line)) {
+    const components = line.components.map(component =>
+      (component.quantity > 1 ? `${component.quantity} ` : "") +
+      [cartComponentRoles[component.componentRole], cartComponentDetails(component)].filter(Boolean).join(" "));
+    const last = components.pop()!;
+    const selection = components.length ? `${components.join(", ")} và ${last}` : last;
+    return `${title} ×${line.quantity}: ${price}\n${selection[0]!.toLocaleUpperCase("vi-VN")}${selection.slice(1)}`;
+  }
+  const component = line.components[0]!;
+  const role = cartComponentRoles[component.componentRole];
+  const label = `${role[0]!.toLocaleUpperCase("vi-VN")}${role.slice(1)} của mẫu ${title}`;
+  const details = cartComponentDetails(component);
+  return `${label} ×${line.quantity}: ${price}` +
+    (details ? `\n${details[0]!.toLocaleUpperCase("vi-VN")}${details.slice(1)}` : "");
 }
 
 function cartSummary(cart: CartV1, includeSelections = false, productNames: RealtimeSalesCycleInput["productNames"] = []): string {
   const hasFreeShipping = cart.adjustments.some(({ kind }) => kind === "FREE_SHIPPING");
   const lines = cart.lines.map((line) => {
+    if (includeSelections) return formatCheckoutPreviewLine(line, productNames.find(p => normalizeCatalogToken(p.productId) === line.parentProductId));
     const sizes = [...new Set(line.components.map(({ size }) => size).filter(Boolean))].join("/");
-    const label = includeSelections ? formatCartLineSelection(line, productNames.find(p => normalizeCatalogToken(p.productId) === line.parentProductId)) : `${line.parentProductId}${sizes ? ` size ${sizes}` : ""} ×${line.quantity}`;
+    const label = `${line.parentProductId}${sizes ? ` size ${sizes}` : ""} ×${line.quantity}`;
     return `${label}: ${money(line.lineTotalVnd ?? 0)}`;
   });
   return [
