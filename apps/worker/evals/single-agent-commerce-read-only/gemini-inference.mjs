@@ -11,6 +11,7 @@ import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHi
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
 import {presentVerifiedOfferTerms} from './owner-offer-terms.mjs';
 import {presentSalesContext} from './owner-sales-context.mjs';
+import {projectOwnerReplyEvidence} from './owner-reply-evidence.mjs';
 import {compactOwnerProducts,compactCurrentFacts,compactSelectionResult,sharedSingleItemReads} from './owner-product-tables.mjs';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
@@ -388,32 +389,22 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  }
  if(request.toolWorkAccounting!==undefined)requireThat(request.toolWorkAccounting==='PRIMITIVE_WORK_V2','OWNER_EXECUTION_BOUND');
  if(declarations.some(d=>d.name==='quote_product'))requireThat(request.toolWorkAccounting==='PRIMITIVE_WORK_V2','QUOTE_ACCOUNTING_REQUIRED');
- // At the existing final generation, start a text-only request with the completed
- // tool trace as data. Do not continue an opaque native tool plan with no call budget.
- // AUTO continuations and the original captured transcript remain byte-for-byte intact.
- let replyContents=contents;
- if(request.toolsAllowed===false&&!contents.some(m=>m.parts.some(p=>p.codexOutput))){
-  const start=contents.findIndex(m=>m.parts.some(p=>p.functionCall||p.functionResponse));
-  if(start>=0){
-   const completedToolTurns=contents.slice(start).map(m=>({role:m.role,parts:m.parts
-    .filter(p=>!p.thought&&(p.text!==undefined||p.functionCall||p.functionResponse))
-    .map(p=>Object.fromEntries(['text','functionCall','functionResponse'].filter(k=>Object.hasOwn(p,k)).map(k=>[k,p[k]])))}));
-   replyContents=[...contents.slice(0,start),{role:'user',parts:[{text:JSON.stringify({completedToolTurns})}]}];
-  }
- }
- const body={systemInstruction:{parts:[{text:request.instructions}]},
+ // Fold only the native trace used by the existing final-only route.
+ const foldReplyContents=messages=>{
+  if(request.toolsAllowed!==false||messages.some(m=>m.parts.some(p=>p.codexOutput)))return messages;
+  const start=messages.findIndex(m=>m.parts.some(p=>p.functionCall||p.functionResponse));
+  if(start<0)return messages;
+  const completedToolTurns=messages.slice(start).map(m=>({role:m.role,parts:m.parts
+   .filter(p=>!p.thought&&(p.text!==undefined||p.functionCall||p.functionResponse))
+   .map(p=>Object.fromEntries(['text','functionCall','functionResponse'].filter(k=>Object.hasOwn(p,k)).map(k=>[k,p[k]])))}));
+  return [...messages.slice(0,start),{role:'user',parts:[{text:JSON.stringify({completedToolTurns})}]}];
+ };
+ let body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({turnTime:publicTurnTime(request.turnTime),trusted:ownerView,
-    ...(request.historyMetadata?.publicCartEvents.length?{untrusted:{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(request.historyMetadata)}}:{})})}]},...replyContents],
+    ...(request.historyMetadata?.publicCartEvents.length?{untrusted:{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(request.historyMetadata)}}:{})})}]},...foldReplyContents(contents)],
   tools:callable.length?[{functionDeclarations:callable}]:[],
   toolConfig:{functionCallingConfig:{mode:callable.length?(request.validateNativeToolCalls===true?'VALIDATED':'AUTO'):'NONE'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
- const signatureBytes=ownerSignatureBytes(body),requestBytes=bytes(body)-signatureBytes;
- const toolResponseBytes=body.contents.slice(1).reduce((n,m)=>n+m.parts.reduce((k,p)=>k+(p.functionResponse?bytes(p.functionResponse):0),0),0);
- const budget={textFrameBytes:requestBytes,systemBytes:bytes(body.systemInstruction),toolSchemaBytes:bytes(body.tools),
-  trustedFrameBytes:bytes(body.contents[0]),dialogueBytes:bytes(body.contents.slice(1)),toolResponseBytes,signatureBytes,
-  textLimitBytes:OWNER_REQUEST_MAX_BYTES,signatureLimitBytes:OWNER_SIGNATURE_MAX_BYTES};
- onBudget(budget);
- if(requestBytes>OWNER_REQUEST_MAX_BYTES||signatureBytes>OWNER_SIGNATURE_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes});
  const render=value=>{
   if(request.ownerContextPresentation===undefined)return value;
   requireThat(['VI_DATA_BLOCKS_V1','VI_DATA_BLOCKS_COMPACT_V2'].includes(request.ownerContextPresentation),'OWNER_PRESENTATION');
@@ -425,8 +416,6 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   const withinBound=ownerTextBytes(presented)<=OWNER_REQUEST_MAX_BYTES&&bytes(presented)<=OWNER_IMAGE_BOUNDS.maxRequestBytes;
   return withinBound?presented:compact;
  };
- budget.presentedTextFrameBytes=ownerTextBytes(render(body));onBudget(budget);
- if(budget.presentedTextFrameBytes>OWNER_REQUEST_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes:budget.presentedTextFrameBytes});
  const images=request.catalogImages??[];
  requireThat(Array.isArray(images)&&images.length<=OWNER_IMAGE_BOUNDS.count,'OWNER_IMAGE_BINDING');
  const imageParts=[];
@@ -442,12 +431,31 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   imageParts.push({text:JSON.stringify({catalogImage:{subjectRef:image.subjectRef,assetRef:image.assetRef,sha256:image.sha256}})},
    {inlineData:{mimeType:image.mimeType,data:image.data}});
  }
- if(imageParts.length){body.contents.splice(1,0,{role:'user',parts:imageParts});body.generationConfig.mediaResolution='MEDIA_RESOLUTION_MEDIUM';}
- if(bytes(body)>OWNER_IMAGE_BOUNDS.maxRequestBytes)throw new Error('OWNER_REQUEST_BOUND');
- const baseline=render(body);
- // With images the whole multimodal frame is bounded; a text frame is bounded without its signatures.
  const wireBound=imageParts.length?OWNER_IMAGE_BOUNDS.maxRequestBytes:OWNER_REQUEST_MAX_BYTES;
  const framed=value=>imageParts.length?bytes(value):ownerTextBytes(value);
+ const withImages=value=>imageParts.length?
+  {...value,contents:[value.contents[0],{role:'user',parts:imageParts},...value.contents.slice(1)],
+   generationConfig:{...value.generationConfig,mediaResolution:'MEDIA_RESOLUTION_MEDIUM'}}:value;
+ const evidenceContents=compactV2?projectOwnerReplyEvidence(contents,c):contents;
+ if(evidenceContents!==contents){
+  const candidate={...body,contents:[body.contents[0],...foldReplyContents(evidenceContents)]};
+  if(ownerTextBytes(candidate)<=OWNER_REQUEST_MAX_BYTES&&ownerTextBytes(render(candidate))<=OWNER_REQUEST_MAX_BYTES){
+   const imageCandidate=withImages(candidate);
+   if(bytes(imageCandidate)<=OWNER_IMAGE_BOUNDS.maxRequestBytes&&framed(render(imageCandidate))<=wireBound)body=candidate;
+  }
+ }
+ const signatureBytes=ownerSignatureBytes(body),requestBytes=bytes(body)-signatureBytes;
+ const toolResponseBytes=body.contents.slice(1).reduce((n,m)=>n+m.parts.reduce((k,p)=>k+(p.functionResponse?bytes(p.functionResponse):0),0),0);
+ const budget={textFrameBytes:requestBytes,systemBytes:bytes(body.systemInstruction),toolSchemaBytes:bytes(body.tools),
+  trustedFrameBytes:bytes(body.contents[0]),dialogueBytes:bytes(body.contents.slice(1)),toolResponseBytes,signatureBytes,
+  textLimitBytes:OWNER_REQUEST_MAX_BYTES,signatureLimitBytes:OWNER_SIGNATURE_MAX_BYTES};
+ onBudget(budget);
+ if(requestBytes>OWNER_REQUEST_MAX_BYTES||signatureBytes>OWNER_SIGNATURE_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes});
+ budget.presentedTextFrameBytes=ownerTextBytes(render(body));onBudget(budget);
+ if(budget.presentedTextFrameBytes>OWNER_REQUEST_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes:budget.presentedTextFrameBytes});
+ body=withImages(body);
+ if(bytes(body)>OWNER_IMAGE_BOUNDS.maxRequestBytes)throw new Error('OWNER_REQUEST_BOUND');
+ const baseline=render(body);
  onBudget({...budget,basePresentedFrameBytes:framed(baseline),inlineImageBytes:images.reduce((n,image)=>n+Buffer.from(image.data,'base64').length,0),frameLimitBytes:wireBound});
  if(framed(baseline)>wireBound)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes:framed(baseline)});
  const hints=projectMediaCapabilities(request.mediaCapabilities,c,request.mediaCapabilitiesAt??Date.now(),onHint);

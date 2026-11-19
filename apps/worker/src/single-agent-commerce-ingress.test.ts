@@ -1215,15 +1215,26 @@ it.each(["ad", "explicit", "missing-ad"])("composes ingress with the real scoped
 });
 
 
-it.each(["unchanged","revision","media"])("explicit quote uses the real group egress before committing: %s",async mode=>{
+it.each(["unchanged","ads-total","revision","media"])("explicit quote uses the real group egress before committing: %s",async mode=>{
  const {EXPLICIT_QUOTE_TASK}=await import("./single-agent-commerce-quote.js");
  const f=fixture(),p=f.products[0]!.product;f.message.text="SM613 bao nhiêu em?";
+ if(mode==="ads-total")Object.assign(f.message,{adsContext:{source:"ADS",adTitle:p.productId,postId:null,adId:null,ref:null}});
  p.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
  let n=0;f.verifier.mockImplementation(async()=>{if(mode==="revision")f.changeRevision();if(mode==="media")p.images=[];return {result:{verdict:"PASS",violations:[]}};});
- const call={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"]}};
- const result=await f.run(async()=>++n===1?{kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}}:{kind:"FINAL",text:"Áo 499.000đ chị nhé."},undefined,EXPLICIT_QUOTE_TASK);
+ const call={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],...(mode==="ads-total"?{quantity:1}:{})}};
+ const draft=mode==="ads-total"?"Áo 499.000đ, cả ship 524.000đ chị nhé.":"Áo 499.000đ chị nhé.";
+ const result=await f.run(async r=>{
+  if(++n===1)return {kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}};
+  if(mode==="ads-total"){
+   expect(JSON.parse(r.context.policyLiterals.find(l=>l.ref==="conversation-entry")!.text)).toEqual({firstContact:true,fromAd:true});
+   expect(r.contents.at(-1)!.parts[0]!.functionResponse?.response).toMatchObject({
+    status:"OK",data:{preCartQuote:{subjectRef:"SM613",offerType:"DIRECT",quantity:1,grandTotalVnd:524000}}
+   });
+  }
+  return {kind:"FINAL",text:draft};
+ },undefined,EXPLICIT_QUOTE_TASK);
  const messages=f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]);
- if(mode==="unchanged"){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text:"Áo 499.000đ chị nhé."},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);}
+ if(mode==="unchanged"||mode==="ads-total"){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text:draft},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);}
  else{expect(result.terminal.disposition).toBe("NO_SEND");expect(messages).toEqual([]);}
  expect(f.verifier).toHaveBeenCalledOnce();
 });
