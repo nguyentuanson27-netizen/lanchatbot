@@ -48,6 +48,12 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
  assert(!traceAdd||prior,'SMOKE_TRACE_REQUIRES_ORIGINAL_RUN');
  const selected=prior?['FIT_CHECKOUT']:ids;
  const trace=[];
+ const replayIndex=process.argv.indexOf('--preprod-smoke-replay-add');
+ const replay=replayIndex<0?null:JSON.parse(readFileSync(process.argv[replayIndex+1],'utf8'));
+ if(replay){
+  assert(traceAdd&&replay.testDatabaseDropped&&replay.sendEnabled===false);
+  assert.deepEqual(replay.smoke.trace.map(x=>[x.index,x.output.kind]),[[1,'TOOLS'],[1,'FINAL']]);
+ }
  const checkCase=(id,label,fn)=>selected.includes(id)?check(PREPROD_SMOKE_PREFIX+label,fn):undefined;
  const ledger=[],evidence={};
  report.smoke={source,client,expectedCases:selected,...(traceAdd?{trace}:{}),priorSmokeSource:prior?.sourceSha??null,maximumGenerations:20,generationRetry:0,
@@ -101,7 +107,15 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
       effect:data?.effect??null,effectCommitted:data?.effectCommitted??null,operationId:data?.operationId??null,
       cartLines:data?.cartItems??null,cartQuote:data?.cartQuote??null}];
     }),contextCart:r.context.state.cartQuote??null,receipts:r.context.effectReceipts.map(x=>({effect:x.effect,status:x.status})),
-    outboundTools:body.tools.flatMap(x=>x.functionDeclarations.map(t=>t.name))};
+    outboundTools:body.tools.flatMap(x=>x.functionDeclarations.map(t=>t.name)),
+    scopes:r.context.protectedClaims.map(c=>({type:c.type,scope:c.scope})),
+    subjects:r.context.boundSubjects.filter(s=>['PRODUCT','VARIANT'].includes(s.kind))
+     .map(s=>({kind:s.kind,ref:s.ref,productId:s.productId??null,variantId:s.variantId??null,hasVariantId:Object.hasOwn(s,'variantId')}))};
+   if(replay){
+    const output=replay.smoke.trace[trace.length].output;
+    entry.output=output;trace.push(entry);save();
+    return output.kind==='TOOLS'?{...output,content:{role:'model',parts:output.calls.map(functionCall=>({functionCall}))}}:output;
+   }
    trace.push(entry);save();
    return call('OWNER',async()=>{
     const result=await sender(body,hash);
@@ -109,7 +123,7 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
      result.output?.kind==='FINAL'?{kind:'FINAL',text:result.output.text}:null;
     save();return result;
    });
-  },verifier:r=>call('VERIFIER',()=>verify(r))};
+  },verifier:r=>{assert(!replay,'DIAGNOSTIC_REPLAY_MUST_STOP_BEFORE_VERIFIER');return call('VERIFIER',()=>verify(r));}};
  }
  const outbox=j=>pool.query('SELECT response_group_id,sequence_no,status FROM meta_outbox WHERE conversation_id=$1 ORDER BY created_at,sequence_no',[j.bound.conversationId]).then(r=>r.rows);
  const events=j=>pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId]).then(r=>r.rows[0].n);
