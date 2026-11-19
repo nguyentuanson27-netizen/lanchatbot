@@ -37,8 +37,17 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
  const sender=createCapturedOwnerSender({projectId:config.vertex.projectId,model:manifest.models.conversation},
   {assertBody:wire=>assertReplayWire(wire,ids)});
  const verify=createCommerceVerifier(manifest);
+ const retryIndex=process.argv.indexOf('--preprod-smoke-fit-only');
+ const prior=retryIndex<0?null:JSON.parse(readFileSync(process.argv[retryIndex+1],'utf8'));
+ if(prior){
+  assert.equal(prior.testDatabaseDropped,true);
+  assert.equal(prior.sendEnabled,false);
+  assert.deepEqual(prior.cases.map(c=>[c.status,c.error??null]),[['PASS',null],['FAIL','FIT_ENGINE_DID_NOT_PROVE_M'],['PASS',null]]);
+ }
+ const selected=prior?['FIT_CHECKOUT']:ids;
+ const checkCase=(id,label,fn)=>selected.includes(id)?check(PREPROD_SMOKE_PREFIX+label,fn):undefined;
  const ledger=[],evidence={};
- report.smoke={source,client,expectedCases:ids,maximumGenerations:20,generationRetry:0,
+ report.smoke={source,client,expectedCases:selected,priorSmokeSource:prior?.sourceSha??null,maximumGenerations:20,generationRetry:0,
   configuredRoles:{owner:manifest.models.conversation,verifier:manifest.models.verifier},
   scope:'REAL_ISOLATED_POSTGRES_SYNTHETIC_CATALOG_STUB_DELIVERY_REAL_OWNER_VERIFIER',liveSend:false,evidence,ledger};
  save();
@@ -101,7 +110,7 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   evidence[id].push(entry);save();
   return {r,payloads,terminal,entry};
  };
- await check(PREPROD_SMOKE_PREFIX+'1 ADS quote and scoped product photo',async()=>{
+ await checkCase('ADS','1 ADS quote and scoped product photo',async()=>{
   const j=await statefulFixture({media:true});
   const text='Áo sơ mi SM613 giá bao nhiêu em?';
   const a=await attempt(j,'ADS',text,{messages:[{text,attachments:[],adsContext:{source:'ADS',adTitle:'SM613',postId:null,adId:null,ref:null}}]});
@@ -117,11 +126,11 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   assert(rows.every(r=>r.status==='SENT_ACCEPTED'),'ADS_GROUP_NOT_CAPTURED');
   assert.equal((await j.state()).cart,null);
  });
- await check(PREPROD_SMOKE_PREFIX+'2 engine fit through cart and checkout with duplicate webhook',async()=>{
+ await checkCase('FIT_CHECKOUT','2 engine fit through cart and checkout with duplicate webhook',async()=>{
   const j=await statefulFixture({componentFit:true,media:true});
   const fit=await attempt(j,'FIT_CHECKOUT','Chị cao 1m60, nặng 55kg. Bình thường chị hay mặc L, em xem giúp áo SM613 mặc size nào nhé.');
   assert.equal(fit.terminal.disposition,'SEND_ELIGIBLE');
-  const recommended=fit.entry.toolResults.filter(x=>x.status==='RECOMMENDED').flatMap(x=>x.recommendedSizes);
+  const recommended=fit.entry.toolResults.filter(x=>x.status==='RECOMMENDED').flatMap(x=>x.recommendedSizes.map(choice=>choice.size));
   assert(recommended.length>0&&recommended.every(x=>x==='M'),'FIT_ENGINE_DID_NOT_PROVE_M');
   const fitText=oneText(fit.payloads).join(' ');
   assert(/\bM\b/u.test(fitText),'FIT_REPLY_OUTSIDE_ENGINE');
@@ -161,7 +170,7 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   assert.equal((await fixtureState(j)).state.conversationOwner,'HUMAN');
   assert.equal(await events(j),1);
  });
- await check(PREPROD_SMOKE_PREFIX+'3 missing chart causes silent handoff',async()=>{
+ await checkCase('MISSING_SOURCE','3 missing chart causes silent handoff',async()=>{
   const j=await statefulFixture({media:true});
   const a=await attempt(j,'MISSING_SOURCE','Chị cao 1m60, nặng 55kg. Chọn size áo SM613 giúp chị nhé.');
   assert.equal(a.terminal.disposition,'HANDOFF');
@@ -174,7 +183,7 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   assert.equal((await fixtureState(j)).state.conversationOwner,'HUMAN');
  });
  await ensureTestOnly();
- assert.equal(report.cases.length,3);
+ assert.equal(report.cases.length,selected.length);
  assert(ledger.every(r=>Number.isInteger(r.providerRequests)),'SMOKE_PROVIDER_ACCOUNTING_UNKNOWN');
  report.providerGenerations=ledger.reduce((n,r)=>n+r.providerRequests,0);
  report.smoke.liveMetaRequests=0;
