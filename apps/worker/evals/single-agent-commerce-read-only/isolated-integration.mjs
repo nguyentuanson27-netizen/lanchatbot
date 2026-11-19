@@ -15,6 +15,7 @@ import {MetaDeliveryAdapter} from '@lana/meta-delivery';
 import {MetaOutboxDispatcher,SinglePageMetaTokenRegistry} from '../../dist/meta-outbox-dispatcher.js';
 import {runPersistedCommerceIngress,commerceHistory,bindCommerceFacts} from '../../dist/single-agent-commerce-ingress.js';
 import {createCommerceMediaPreSendGate} from '../../dist/single-agent-commerce-media-delivery.js';
+import {createCommercePreprodDeliveryGate} from '../../dist/single-agent-commerce-preprod-delivery.js';
 import {createCommerceHandoffPreSendGate} from '../../dist/single-agent-commerce-handoff-delivery.js';
 import {createCommerceHandoffSourceReader} from '../../dist/single-agent-commerce-handoff-sources.js';
 import {commerceSizeSource} from '../../dist/single-agent-commerce-product-groups.js';
@@ -560,7 +561,7 @@ try{
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
  if(j2j1Input){const {createCampaignPorts}=await import('../single-agent-commerce-qualification/j2-j1-campaign.mjs');
   providerPorts=await createCampaignPorts({root,input:j2j1Input,world:initialWorld,out:resolve(out),readPorts:providerPorts});}
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false,componentFit=false,physicalChoices=false,canonicalOfferIds=false,sharedMedia=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false,componentFit=false,physicalChoices=false,canonicalOfferIds=false,sharedMedia=false,preprodDeliveryGate=false}={}){
   assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
@@ -637,16 +638,22 @@ try{
   });
   const readReplySource=async(source,b)=>{assert.equal(b.pageId,bound.pageId);assert.equal(b.conversationId,bound.conversationId);assert.equal(b.customerHash,bound.customerHash);return scopedSourceReader(source,b);};
   const capture=[],capturePayloads=[],gateCalls=[],deliveryObservations=[];
+  const deliveryBase={authorize:async claim=>{if(claim.conversationId===bound.conversationId)gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}};
+  const allowedHostSuffixes=['content.pancake.vn','lanadesign.vn','fbcdn.net','fbsbx.com'];
+  const readDeliveryProduct=async id=>{if(read.catalog.resolveProductCode)assert(await read.catalog.resolveProductCode(id));return (await read.catalog.readProduct(id,false)).product;};
+  const deliveryPolicy=async()=>{const r=await policy();assert(r.bundle);return r.bundle;};
+  const makeGate=()=>preprodDeliveryGate?createCommercePreprodDeliveryGate({
+   pageId,base:deliveryBase,clock:()=>new Date(),store:runtime,inbox,policyStore,policyChannel:'PUBLISHED',
+   catalog:{findByExactCode:readDeliveryProduct},allowedHostSuffixes,
+  }):handoffGate(createCommerceMediaPreSendGate({
+   base:deliveryBase,clock:()=>new Date(),allowedHostSuffixes,
+   readAuthority:async b=>{const row=await runtime.loadOrCreate(b.pageId,b.customerHash,'APP',()=>{throw Error('DELIVERY_CONVERSATION_REQUIRED');});
+    assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
+   policy:deliveryPolicy,readProduct:readDeliveryProduct,
+  }),deliveryPolicy,()=>receiptAvailable,readReplySource,r=>deliveryObservations.push(r));
   const makeDispatcher=()=>new MetaOutboxDispatcher(runtime,new MetaDeliveryAdapter({request:async r=>{
    const b=JSON.parse(r.body);if(b.recipient.id==='synthetic-recipient-'+customerHash){capture.push(b.message.text??'[CODE_IMAGE]');capturePayloads.push(b.message);}return {status:200,headers:{},body:{recipient_id:b.recipient.id,message_id:'captured-'+randomUUID()}};}},{sendEnabled:true}),
-   new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),handoffGate(createCommerceMediaPreSendGate({
-    base:{authorize:async claim=>{if(claim.conversationId===bound.conversationId)gateCalls.push(claim.responseGroupId);return {status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()};}},
-    clock:()=>new Date(),allowedHostSuffixes:['content.pancake.vn','lanadesign.vn','fbcdn.net','fbsbx.com'],
-    readAuthority:async b=>{const row=await runtime.loadOrCreate(b.pageId,b.customerHash,'APP',()=>{throw Error('DELIVERY_CONVERSATION_REQUIRED');});
-     assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
-    policy:async()=>{const r=await policy();assert(r.bundle);return r.bundle;},
-    readProduct:async id=>{if(read.catalog.resolveProductCode)assert(await read.catalog.resolveProductCode(id));return (await read.catalog.readProduct(id,false)).product;},
-   }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;},()=>receiptAvailable,readReplySource,r=>deliveryObservations.push(r)),{workerId:'c3-b-capture'},undefined,historyStore);
+   new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),makeGate(),{workerId:'c3-b-capture'},undefined,historyStore);
   let dispatcher=makeDispatcher();
   const drain=async()=>{for(let i=0;i<20&&await attemptQueue.dispatch(()=>dispatcher.processOne());i++);};
   // Synthetic customer turns must follow earlier accepted delivery on the same clock.
@@ -1058,6 +1065,17 @@ try{
   const rows=(await pool.query('SELECT response_group_id,sequence_no FROM meta_outbox WHERE conversation_id=$1 ORDER BY sequence_no',[j.bound.conversationId])).rows;
   assert.equal(rows.length,2);assert.equal(new Set(rows.map(r=>r.response_group_id)).size,1);assert.deepEqual(rows.map(r=>r.sequence_no),[0,1]);
   await j.drain();assert.deepEqual(j.capture,[text,'[CODE_IMAGE]']);assert.equal(new Set(j.gateCalls).size,1);
+ });
+ for(const revoke of [false,true])await check('PREPROD delivery '+(revoke?'revoked photo blocks entire group after restart':'current photo and text reach capture after restart'),async()=>{
+  const j=await statefulFixture({media:true,preprodDeliveryGate:true}),text='Áo 499.000đ chị nhé.';
+  const r=await j.turn('Mẫu này bao nhiêu em?',[say(text)],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.enqueued,2);
+  if(revoke)j.changeMediaSource();
+  j.restartDelivery();await j.drain();
+  assert.deepEqual(j.capture,revoke?[]:[text,'[CODE_IMAGE]']);
+  const rows=(await pool.query('SELECT status FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows;
+  assert.equal(rows.length,2);
+  assert(rows.every(row=>row.status===(revoke?'MANUAL_REVIEW':'SENT_ACCEPTED')));
  });
  await check('C opening missing photo silently hands off with no Outbox',async()=>{
   const j=await statefulFixture(),r=await j.turn('Mẫu này bao nhiêu em?',[say('Áo 499.000đ chị nhé.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});

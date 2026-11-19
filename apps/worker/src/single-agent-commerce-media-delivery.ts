@@ -57,12 +57,12 @@ export function createCommerceMediaPreSendGate(input: {
         b.recipientHash !== createHash("sha256").update(claim.recipientId).digest("hex") || b.messageHashes[0] !== commerceHash(claim.message)) return blocked();
       const authority = await input.readAuthority(b);
       const policy = await input.policy(b);
-      const validAt = (at: Date) => commerceDeliveryPolicyHash(policy, b.pageId, b.shopId, at) === b.policyHash &&
+      const validAt = (bundle: RuntimePolicyBundle, at: Date) => commerceDeliveryPolicyHash(bundle, b.pageId, b.shopId, at) === b.policyHash &&
         b.images.every(image => Date.parse(image.observedAt) <= at.getTime() &&
           (image.expiresAt===null||Date.parse(image.expiresAt)>at.getTime()));
       if (authority.stateVersion !== b.revision || authority.generation !== b.generation || !authority.appSendEnabled || authority.killSwitch ||
         authority.routingOwner !== "APP" || commerceHash(authority.state) !== b.stateHash ||
-        !validAt(input.clock())) return blocked();
+        !validAt(policy, input.clock())) return blocked();
       const products = new Map(await Promise.all([...new Set(b.images.map(a => a.productId))].map(async id => [id, await input.readProduct(id)] as const)));
       for (const expected of b.images) {
         const product = products.get(expected.productId), asset = product?.images.find(a => a.url === expected.url);
@@ -75,9 +75,12 @@ export function createCommerceMediaPreSendGate(input: {
       }
       // Detect authority changing while catalog/policy reads were in flight.
       const final = await input.readAuthority(b);
-      if (commerceHash(final) !== commerceHash(authority) || !validAt(input.clock())) return blocked();
+      if (commerceHash(final) !== commerceHash(authority) || !validAt(policy, input.clock())) return blocked();
       const result = await input.base.authorize(claim);
-      if (result.status === "ALLOWED" && !validAt(input.clock())) return blocked();
+      if (result.status === "ALLOWED") {
+        const [latestAuthority, activePolicy] = await Promise.all([input.readAuthority(b), input.policy(b)]);
+        if (commerceHash(latestAuthority) !== commerceHash(authority) || !validAt(activePolicy, input.clock())) return blocked();
+      }
       return result;
     } catch { return blocked(); }
   } };

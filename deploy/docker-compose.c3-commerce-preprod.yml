@@ -1,0 +1,11 @@
+services:
+  delivery-worker:
+    environment:
+      C3_COMMERCE_PREPROD_DELIVERY_ENABLED: "true"
+      RUNTIME_POLICY_CHANNEL: "${RUNTIME_POLICY_CHANNEL:-PUBLISHED}"
+      QDRANT_BASE_URL: "${QDRANT_BASE_URL:?Set the same Qdrant endpoint as the realtime worker}"
+      QDRANT_COLLECTION: "${QDRANT_COLLECTION:?Set the same catalog collection as the realtime worker}"
+      QDRANT_API_KEY_FILE: /run/secrets/qdrant_api_key
+      PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS: lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com
+    secrets:
+      - qdrant_api_key

@@ -20,14 +20,17 @@ interface QdrantPoint {
   readonly payload?: unknown;
 }
 
-export interface QdrantStableCatalogSearchOptions {
+export interface QdrantStableCatalogReaderOptions {
   readonly baseUrl: string;
   readonly apiKey: string;
   readonly collection: string;
-  readonly embedding: MultimodalEmbeddingPort;
-  readonly expectedDimension?: number;
   readonly timeoutMs?: number;
   readonly fetchImpl?: typeof fetch;
+}
+
+export interface QdrantStableCatalogSearchOptions extends QdrantStableCatalogReaderOptions {
+  readonly embedding: MultimodalEmbeddingPort;
+  readonly expectedDimension?: number;
 }
 
 export class QdrantSearchError extends Error {
@@ -205,16 +208,14 @@ function scoredDocuments(points: readonly QdrantPoint[], limit: number): ScoredS
     .slice(0, limit);
 }
 
-export class QdrantStableCatalogSearchAdapter implements StableCatalogSearchPort {
+export class QdrantStableCatalogReader implements Pick<StableCatalogSearchPort, "findByExactCode"> {
   private readonly baseUrl: string;
   private readonly apiKey: string;
-  private readonly collection: string;
-  private readonly embedding: MultimodalEmbeddingPort;
-  private readonly expectedDimension: number;
+  protected readonly collection: string;
   private readonly timeoutMs: number;
   private readonly fetchImpl: typeof fetch;
 
-  constructor(options: QdrantStableCatalogSearchOptions) {
+  constructor(options: QdrantStableCatalogReaderOptions) {
     const base = new URL(options.baseUrl);
     if (base.protocol !== "https:") throw new Error("QDRANT_HTTPS_REQUIRED");
     if (!options.apiKey.trim()) throw new Error("QDRANT_API_KEY_REQUIRED");
@@ -222,13 +223,11 @@ export class QdrantStableCatalogSearchAdapter implements StableCatalogSearchPort
     this.baseUrl = base.toString().replace(/\/$/u, "");
     this.apiKey = options.apiKey.trim();
     this.collection = options.collection;
-    this.embedding = options.embedding;
-    this.expectedDimension = options.expectedDimension ?? 1_408;
     this.timeoutMs = options.timeoutMs ?? 15_000;
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
-  private async request(path: string, body: unknown): Promise<Record<string, unknown>> {
+  protected async request(path: string, body: unknown): Promise<Record<string, unknown>> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
@@ -257,7 +256,7 @@ export class QdrantStableCatalogSearchAdapter implements StableCatalogSearchPort
     }
   }
 
-  private async filteredScroll(filter: unknown): Promise<QdrantPoint[]> {
+  protected async filteredScroll(filter: unknown): Promise<QdrantPoint[]> {
     const body = await this.request(
       `/collections/${encodeURIComponent(this.collection)}/points/scroll`,
       { filter, limit: 256, with_payload: true, with_vector: false },
@@ -283,6 +282,17 @@ export class QdrantStableCatalogSearchAdapter implements StableCatalogSearchPort
       if (match) return match;
     }
     return null;
+  }
+}
+
+export class QdrantStableCatalogSearchAdapter extends QdrantStableCatalogReader implements StableCatalogSearchPort {
+  private readonly embedding: MultimodalEmbeddingPort;
+  private readonly expectedDimension: number;
+
+  constructor(options: QdrantStableCatalogSearchOptions) {
+    super(options);
+    this.embedding = options.embedding;
+    this.expectedDimension = options.expectedDimension ?? 1_408;
   }
 
   async findByAlias(normalizedAlias: string): Promise<readonly StableProductDocument[]> {
