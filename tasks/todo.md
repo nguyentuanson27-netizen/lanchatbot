@@ -7,7 +7,9 @@
 - [x] Ca 2 chạy lại sau sửa scope fit và chỉ dẫn giọng. Công nhận M, ghi giỏ một lần, preview 529.000đ và tới PURCHASE_CONFIRMED. Bỏ câu kể thêm giỏ trong mẫu chạy. Giọng câu ACK và câu tư vấn size còn hạn chế. [Kết quả](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/CASE_2_FIX.md).
 - [x] Đổi verifier sang Gemini 3.5 Flash Lite High. Smoke tắt gửi trên cấu hình mới đạt 2/3. Checkout bàn giao im lặng sau khi ghi đúng món vì verdict FAIL.
 - [x] Owner yêu cầu bật trang test. Nối guard ảnh và bàn giao vào entrypoint worker gửi tin. Hai ca PostgreSQL cô lập sau restart đạt, gồm nhóm hợp lệ và ảnh bị thu hồi. [Bằng chứng](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/ACTIVATION_READINESS.md).
-- [ ] Bật candidate trên trang test. Còn nối worker nhận tin, kiểm luồng checkout và chuẩn bị release từ source main.
+- [x] Nối worker nhận tin, model Gemini theo manifest, lease và kiểm quyền trước ghi state. Ba ca PostgreSQL cô lập tại `241a74f3` đạt, gồm điều kiện tag rõ, bị chặn trước model và bị chặn sau verifier. Giữ ca checkout hồi trước FAIL trong evidence.
+- [x] Chuẩn bị [PR release #393](https://github.com/nguyentuanson27-netizen/lanchatbot/pull/393) từ main. Source release `1db25fc8` đạt 2.937 worker test, 75 test ở các file database tập trung và build worker. Hạ tầng test page hiện còn thiếu bốn loại sales events trong ràng buộc PostgreSQL. Migration 0041 đã được kiểm trên bảng tạm.
+- [ ] Bật candidate trên trang test sau khi được duyệt áp migration 0041 trên database dùng chung. Kiểm lại release/rollback từng service và readback sau khi bật.
 
 ## Current — Phase C owner reply evidence, 2026-11-19
 
