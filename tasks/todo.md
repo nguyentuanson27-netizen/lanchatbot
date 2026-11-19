@@ -5,7 +5,9 @@
 - [x] Chạy đúng ba ca khác nhau trên adapter thật với gửi Meta/Pancake tắt. ADS và thiếu bảng size PASS. Ca giao dịch dùng đúng M, giỏ và webhook trùng đạt kiểm, nhưng handoff ngay sau khi ghi giỏ nên checkout chưa đạt. Chạy lại riêng ca 2 sau lỗi harness, tổng 12 lượt model. [Kết quả](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/REPORT.md).
 - [x] Tái hiện ca 2. Claim SIZE_FIT theo sản phẩm/phần áo bị so với biến thể mới của giỏ ở hard precheck. Giỏ có receipt, precheck STALE trước verifier rồi silent handoff. [Bằng chứng và hướng sửa](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/CASE_2_ROOT_CAUSE.md).
 - [x] Ca 2 chạy lại sau sửa scope fit và chỉ dẫn giọng. Công nhận M, ghi giỏ một lần, preview 529.000đ và tới PURCHASE_CONFIRMED. Bỏ câu kể thêm giỏ trong mẫu chạy. Giọng câu ACK và câu tư vấn size còn hạn chế. [Kết quả](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/CASE_2_FIX.md).
-- [ ] Candidate chưa bật trên trang test. ADS và thiếu chart có PASS từ lượt trước, chưa chạy lại trên source ca 2.
+- [x] Đổi verifier sang Gemini 3.5 Flash Lite High. Smoke tắt gửi trên cấu hình mới đạt 2/3. Checkout bàn giao im lặng sau khi ghi đúng món vì verdict FAIL.
+- [x] Owner yêu cầu bật trang test. Nối guard ảnh và bàn giao vào entrypoint worker gửi tin. Hai ca PostgreSQL cô lập sau restart đạt, gồm nhóm hợp lệ và ảnh bị thu hồi. [Bằng chứng](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/ACTIVATION_READINESS.md).
+- [ ] Bật candidate trên trang test. Còn nối worker nhận tin, kiểm luồng checkout và chuẩn bị release từ source main.
 
 ## Current — Phase C owner reply evidence, 2026-11-19
 
