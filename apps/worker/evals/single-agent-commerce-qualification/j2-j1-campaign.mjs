@@ -51,7 +51,7 @@ export async function runJ1Baseline({input,out,ports,seedJ1,fixture,snapshot,now
 }
 
 export async function createCampaignPorts({root,input,world,out,readPorts}){
- assert(['PREPARE','RUN','RESUME','BASELINE_NATIVE'].includes(input.mode),'CAMPAIGN_MODE');
+ assert(['PREPARE','RUN','RESUME','BASELINE_NATIVE','J4_RECHECK'].includes(input.mode),'CAMPAIGN_MODE');
  assert.equal(digest(world),input.worldHash,'CAMPAIGN_WORLD_CHANGED');
  const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json')));
  const config=read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json'));
@@ -72,11 +72,11 @@ export async function createCampaignPorts({root,input,world,out,readPorts}){
  const sender=createJ1Sender({projectId:world.config.vertex.projectId,model:m.models.conversation});
  const verify=createCommerceVerifier(m,undefined,(id,value)=>audit('VERIFIER_CHECKPOINT',{id,value}));
  const claim=role=>{
-  source();assert(['RUN','RESUME','BASELINE_NATIVE'].includes(input.mode)&&!stopped,'CAMPAIGN_GENERATION_DISABLED');
+  source();assert(['RUN','RESUME','BASELINE_NATIVE','J4_RECHECK'].includes(input.mode)&&!stopped,'CAMPAIGN_GENERATION_DISABLED');
   assert(generations.length<30,'CAMPAIGN_TOTAL_CAP');
   const same=generations.filter(g=>g.phase===phase&&g.turn===turn&&g.arm===arm&&g.role===role);
   assert(same.length<(phase==='J1_PRIMARY'?(role==='OWNER'?1:0):(role==='OWNER'?3:1)),'CAMPAIGN_TURN_CAP');
-  assert(generations.filter(g=>g.phase===phase).length<(phase==='J2'?12:phase==='J1_PRIMARY'?10:8),'CAMPAIGN_PHASE_CAP');
+  assert(generations.filter(g=>g.phase===phase).length<(phase==='J4_RECHECK'?20:phase==='J2'?12:phase==='J1_PRIMARY'?10:8),'CAMPAIGN_PHASE_CAP');
   assert(Date.now()+90000+input.safetyMarginMs<Date.parse(minimumProofExpiresAt),'CAMPAIGN_SOURCE_HEADROOM');
   const row=ledger.claim({phase,turn,arm,role,...(phase==='J1_PRIMARY'?{slotId:turn}:{})});audit('GENERATION_CLAIM',row);return row;
  };
@@ -124,6 +124,10 @@ export async function createCampaignPorts({root,input,world,out,readPorts}){
 }
 
 export async function executeCampaign({root,input,inputFile,world,out,ports,sessionFactory,snapshot,runPrimary=runJ1Primary}){
+ if(input.mode==='J4_RECHECK'){
+  const {runJ4PreparationRecheck}=await import('./j4-preparation-recheck.mjs');
+  return runJ4PreparationRecheck({input,out,ports,sessionFactory,snapshot});
+ }
  ports.source();assert.equal(input.scriptHash,campaignScriptHash,'CAMPAIGN_SCRIPT_CHANGED');
  const native=calls=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}});
  const fixture=async codes=>{ports.preparation();const j=await sessionFactory({live:true,initialProductCodes:codes??['SV2447']});return j;};

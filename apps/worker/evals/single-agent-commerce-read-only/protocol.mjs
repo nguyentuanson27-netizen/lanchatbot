@@ -6,6 +6,7 @@ import {OWNER_REQUEST_MAX_BYTES,publicTurnTime,publicCommunicationHistoryMetadat
 import {terminalFallback} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {createGeminiVerifierModel,GEMINI_VERIFIER_MODEL} from './gemini-verifier.mjs';
 const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
+export const VERIFIER_REQUEST_MAX_BYTES=70000;
 export const sha256=value=>createHash('sha256').update(value).digest('hex');
 // Eval-only explicit B1 selection. Stateful callers keep the shared full prompt.
 export function readB1OwnerPrompt(registrationPath){
@@ -61,7 +62,7 @@ export function validateProtocol(m){
   m.handoffReply.customerMessagePolicy==='SILENT_HANDOFF'&&Array.isArray(m.handoffReply.approvedHoldingHashes)&&
   m.handoffReply.approvedHoldingHashes.length===0,'HANDOFF_REPLY_CONTRACT');
  check(m.ownerFinalRequest==='TEXT_WITH_COMPLETED_TOOL_DATA'&&m.toolResultAccounting==='BATCH_EXCLUDING_EXACT_CURRENT_PRODUCT_DUPLICATES','OWNER_EXECUTION_CONTRACT');
- check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===65536,'REQUEST_BOUNDS');
+ check(m.requestBounds?.ownerWireBytes===OWNER_REQUEST_MAX_BYTES&&m.requestBounds.verifierWireBytes===VERIFIER_REQUEST_MAX_BYTES,'REQUEST_BOUNDS');
  check(m.models.conversation.provider==='VERTEX_AI'&&['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(m.models.conversation.model)&&m.models.conversation.effort==='high'&&
   m.models.verifier.effort==='high'&&m.models.verifier.generationConfig.retry===0&&
   // Owner decision 2026-11-10: the verifier runs on the owner's Vertex route. The earlier Codex route stays readable for retained evidence.
@@ -109,7 +110,7 @@ export function buildVerifierRequest(m,r){
       ...(r.historyMetadata?.publicCartEvents.length?{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(r.historyMetadata)}:{})}})}]}],
   tools:[],tool_choice:'none',parallel_tool_calls:false,store:false,stream:true,
   text:{format:{type:'json_schema',name:'semantic_egress_verdict',strict:true,schema:m.verdictSchema}}};
- check(bytes(request)<=65536,'VERIFIER_INPUT_BOUND');return request;
+ check(bytes(request)<=VERIFIER_REQUEST_MAX_BYTES,'VERIFIER_INPUT_BOUND');return request;
 }
 export const geminiVerifier=m=>m.models?.verifier?.provider===GEMINI_VERIFIER_MODEL.provider;
 // The registered verifier identity selects its transport; a caller may still inject one for a test or a controlled comparison.

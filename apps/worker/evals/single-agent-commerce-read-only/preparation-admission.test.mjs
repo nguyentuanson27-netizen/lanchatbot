@@ -30,5 +30,5 @@ test('exact selected tuple proof reaches both owner and verifier native requests
  const finalDraft='Chị xem lựa chọn này nhé.',verifierBody=buildVerifierRequest(manifest,{instructions:verifier,finalDraft,trusted:context,
   latest:'Áo này giá bao nhiêu em?',history:[],binding:makeBinding('opaque',finalDraft,context)});
  assert(JSON.stringify(ownerBody).includes(e.contentHash));assert(JSON.stringify(verifierBody).includes(e.contentHash));
- assert(Buffer.byteLength(JSON.stringify(ownerBody))<=70000);assert(Buffer.byteLength(JSON.stringify(verifierBody))<=65536);
+ assert(Buffer.byteLength(JSON.stringify(ownerBody))<=manifest.requestBounds.ownerWireBytes);assert(Buffer.byteLength(JSON.stringify(verifierBody))<=manifest.requestBounds.verifierWireBytes);
 });

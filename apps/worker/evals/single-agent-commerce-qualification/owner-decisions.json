@@ -284,5 +284,15 @@
         "meaning": "THE_VERIFIER_BLOCKS_ONLY_A_USUAL_SIZE_STATED_AS_FITTING_BETTER_SUITED_OR_RECOMMENDED; TYING_IT_TO_COMFORT_IS_STEERED_BY_THE_OWNER_PROMPT_AND_DOES_NOT_STOP_A_REPLY"
       }
     }
+  },
+  "verifierWireBoundDecision": {
+    "approvedAt": "2026-11-19",
+    "evidenceRef": "OWNER_REQUEST_VERIFIER_70000_AND_FIVE_BLOCKED_J4_TURNS",
+    "ownerAnswer": "tăng verifier lên 70000 byte đồng bộ rồi chạy lại 5 lượt J4 bị chặn",
+    "previousBytes": 65536,
+    "currentBytes": 70000,
+    "scope": "VERIFIER_REQUEST_WIRE_ONLY",
+    "modelEffortPromptSchemaUnchanged": true,
+    "rerunScope": "five final J4 turns with explicitly scripted accepted-prefix setup; not five new whole journeys"
   }
 }

@@ -5,7 +5,8 @@
 - [x] Review độc lập APPROVE CODE đúng `cdbbaa99`, không finding cần sửa; reviewer tự chạy 359 test và hai dạng owner wire PASS. [Kết luận](../docs/specs/evidence/c3-current-cart-choice-repair-20261119/INDEPENDENT_REVIEW.md).
 - [x] Chạy đủ 10 hội thoại/30 lượt trên `48a27a1b`: 25 SEND/5 silent HANDOFF, 72 native +10 judge, không retry; 9 điểm/1 judge provider error giữ mẫu số. Hai áo đúng giỏ/tổng cả năm; J4 lượt cuối preparation fail trước model cả năm. [Đủ lịch sử và review](../docs/specs/evidence/c3-current-cart-choice-native-20261119/REPORT.md).
 - [x] Chẩn đoán component reconstruction năm J4 bằng serializers thật: verifier reserved wire overflow 5/5; đổi riêng prompt cũ qua, thu read scope về AO + pending/prompt mới qua. [Root cause và phương án sửa code/context](../docs/specs/evidence/c3-current-cart-choice-native-20261119/ROOT_CAUSE.md), provider0. Chưa exact native store replay.
-- [ ] Triển khai staged preparation theo target đã giữ, joint admission và diagnostic reason; kiểm hồi quy trước model. Giọng/RECORD còn hạn chế, Phase C STOP; không tự fix/rerun/deploy/live send.
+- [x] Theo lựa chọn owner, tăng verifier wire 70.000 đồng bộ; RED 2→GREEN, 142 Node/worker compile/lint PASS. Giữ prompt/gates, thêm targeted five-turn harness với scripted prefix rõ nguồn.
+- [ ] Chạy đúng năm lượt J4 cuối trên source mới đã seal; chưa triển khai staged preparation rộng. Giọng/RECORD còn hạn chế, Phase C STOP; không deploy/live send.
 
 ## Previous — báo giá hỗ trợ trước giỏ, 2026-11-18
 
