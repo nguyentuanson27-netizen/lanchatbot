@@ -3,12 +3,18 @@ import {randomUUID,createHash} from 'node:crypto';
 import {spawn,spawnSync,execFileSync} from 'node:child_process';
 import {mkdtempSync,writeFileSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {isAbsolute,join} from 'node:path';
 
 // Candidate-only Codex transport. CLI supplies login; it never owns the wire
 // body or a second upstream request. No credential is stored/logged here.
-export function codexBinary() {
-  return join(process.env.APPDATA ?? '', 'npm/node_modules/@openai/codex/node_modules/@openai/codex-win32-x64/vendor/x86_64-pc-windows-msvc/bin/codex.exe');
+export function codexBinary(env=process.env,platform=process.platform) {
+  const configured=env.C3_CODEX_BINARY?.trim();
+  if(configured){
+    if(!isAbsolute(configured))throw new Error('CODEX_CLIENT_BINARY_PATH');
+    return configured;
+  }
+  if(platform!=='win32')throw new Error('CODEX_CLIENT_BINARY_REQUIRED');
+  return join(env.APPDATA ?? '', 'npm/node_modules/@openai/codex/node_modules/@openai/codex-win32-x64/vendor/x86_64-pc-windows-msvc/bin/codex.exe');
 }
 export function inspectCodex() {
   const binary=codexBinary();
