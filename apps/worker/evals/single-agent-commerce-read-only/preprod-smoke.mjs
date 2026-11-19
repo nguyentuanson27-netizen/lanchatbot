@@ -144,7 +144,8 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
    readCoverage:r.result.readCoverage??null,openingMediaWork:r.result.openingMediaWork??null,
    timings:r.result.generations.map(g=>({role:g.role,status:g.status})),actions:r.diagnostics};
   // Private checkout text is verified in memory and never written into smoke evidence.
-  if(index===0)entry.publicOutput=oneText(payloads);
+  if(index===0||id==='FIT_CHECKOUT'&&index===1)entry.publicOutput=oneText(payloads);
+  if(id==='FIT_CHECKOUT'&&r.result.recovery)entry.originalReason=r.result.recovery.originalReason;
   evidence[id].push(entry);save();
   return {r,payloads,terminal,entry};
  };

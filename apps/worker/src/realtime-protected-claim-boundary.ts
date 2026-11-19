@@ -78,9 +78,11 @@ function claimReason(
     const expectedScopes = input.expectedProductScopes?.filter(({ productId }) =>
       productId === productScope.productId
     );
-    // Catalog media is parent-scoped; it does not assert a selected variant's color/stock/price.
-    const parentMedia = claim.type === "PRODUCT_MEDIA" && productScope.variantId === null;
-    if (!parentMedia && expectedScopes?.length && !expectedScopes.some(s => productScope.variantId === s.variantId)) {
+    // Parent-scoped media and explicitly bound fit evidence have their own
+    // scopes. Cart variants still govern variant-level price and inventory.
+    const parentScoped = productScope.variantId === null &&
+      (claim.type === "PRODUCT_MEDIA" || (claim.type === "SIZE_FIT" && input.expectedFitTargets !== undefined));
+    if (!parentScoped && expectedScopes?.length && !expectedScopes.some(s => productScope.variantId === s.variantId)) {
       return `PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH:${claim.claimId}`;
     }
     return null;
