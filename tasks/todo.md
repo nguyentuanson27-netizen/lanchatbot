@@ -1,3 +1,9 @@
+## Current — giọng tư vấn và preview checkout, 2026-11-19
+
+- [x] Triển khai phạm vi đã duyệt ở `089dde39`: prompt chỉ đổi mục Giọng chat, checkout preview tách giá dòng và lựa chọn. Kiểm 785 worker và 141 Node, build/typecheck/lint/dataset qua.
+- [x] Đủ 8 cặp A/B, 16 owner + 8 judge. **STOP**: giọng 6/6, thắng ròng −1 và S04 bỏ trạng thái đặt trước ở hai nhánh. Preview deterministic PASS. [Kết quả và câu trả lời](../docs/specs/evidence/c3-chat-priority-screen-20261119/REPORT.md).
+- [ ] Native 4 ca/9 lượt đang dừng ở gate replay. P07 và qualification Phase C vẫn mở.
+
 ## Current — ưu đãi hiện hành và lựa chọn mua, 2026-11-19
 
 - [x] Sửa theo review: current cart benefit khác claim thao tác mới; pending reuse chỉ cùng source event, giữ provenance/expiry và không tạo receipt; quote cấp màu theo query nguồn, chưa xác nhận ý định mua/tồn đúng quantity-size. Thay chỉ dẫn owner hiện có và prompt hashes.

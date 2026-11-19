@@ -1,0 +1,387 @@
+{
+  "source": "089dde39c6e5f363a645839de00985f8b5e5adb3",
+  "status": "STOP",
+  "voice": 6,
+  "net": -1,
+  "controls": false,
+  "facts": false,
+  "rows": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "complete": true,
+      "baseline": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Trả lời đúng nhu cầu hỏi tổng: bộ 3 món giá 989.000đ, tổng gồm phí giao hàng là 1.019.000đ; thông báo đúng size S, M, L đang có sẵn. Cách nói tự nhiên, rõ phạm vi giá, không tự nhận đã chốt đơn hay thực hiện thao tác."
+      },
+      "candidate": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Nêu đúng giá bộ 3 món 989.000đ, phí vận chuyển 30.000đ và tổng 1.019.000đ, cùng các size S, M, L có sẵn. Diễn đạt tự nhiên, tách phí rõ ràng; mức độ hữu ích tương đương câu A và không có khẳng định vượt nguồn."
+      },
+      "beat": 0
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "complete": true,
+      "baseline": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Tiếp nối đúng mẫu áo màu be khách thích, báo đúng giá áo lẻ 499.000đ và nêu rõ màu be là hàng đặt trước, không nhầm với trạng thái còn hàng của màu khác. Lời mời tư vấn size hoặc món phối cùng tự nhiên, không tự xác nhận đặt hàng hay hẹn ngày giao khi chưa có căn cứ."
+      },
+      "candidate": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Báo đúng giá áo lẻ 499.000đ và giữ rõ điều kiện màu be là hàng đặt trước. Cách xưng hô lịch sự, câu hỏi hỗ trợ chọn size hoặc phối đồ phù hợp để tiếp tục tư vấn. Không đưa ra cam kết về size, thời gian giao hoặc thao tác mua hàng chưa được xác nhận; mức hữu ích tương đương câu A."
+      },
+      "beat": 0
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "turnIndex": 0,
+      "complete": true,
+      "baseline": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Chọn cụ thể SQ675, mô tả đúng màu be, áo suông tay lửng phối ren và quần ống rộng; giúp chị hình dung bộ đồ nhã nhặn để đi ăn gia đình. Lời tư vấn tự nhiên, có câu hỏi để khách phản hồi. Không tự khẳng định giá, tồn kho hay size khi chưa có dữ liệu."
+      },
+      "candidate": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Cũng chọn rõ SQ675 và giải thích phù hợp với buổi ăn gia đình. Các chi tiết áo tay lửng phối ren, quần ống rộng cạp chun đều có căn cứ; thông tin cạp chun làm rõ sự thoải mái. Giọng điệu lịch sự, dễ hiểu, không xác nhận vượt nguồn. Mức hữu ích tương đương câu A."
+      },
+      "beat": 0
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "turnIndex": 0,
+      "complete": true,
+      "baseline": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Ưu tiên Diệp An với lý do phù hợp đi lễ, báo đúng giá 699.000đ và trạng thái đặt trước. Hữu ích hơn nhờ bổ sung Odette giá 799.000đ, có sẵn size S, làm phương án nếu khách cần gấp; mô tả chất liệu cũng đúng nguồn. Cách tư vấn giúp khách cân nhắc cả phong cách lẫn khả năng mua ngay, dù câu hỏi cuối có thể hướng vào thời điểm cần mặc thay vì hỏi lại khách thích mẫu nào."
+      },
+      "candidate": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Chọn cụ thể Diệp An và giải thích phù hợp đi lễ bằng các đặc điểm có căn cứ: hai lớp kín đáo, dáng suông, họa tiết thêu. Báo đúng giá 699.000đ, nói rõ hàng đặt trước và hỏi nhu cầu gấp, không hứa thời gian giao. Đáp ứng yêu cầu chọn một mẫu, nhưng chưa đưa ngay phương án có sẵn để khách cân nhắc."
+      },
+      "beat": -1
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "complete": true,
+      "baseline": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Trả lời tự nhiên, ghi nhận cân nặng đã sửa thành 51kg và xác nhận size M cho riêng áo Thạch Thảo, đúng kết quả fit từ số đo mới. Đáp ứng nhu cầu kiểm tra lại size, không suy rộng sang chân váy."
+      },
+      "candidate": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Ghi nhận cân nặng 51kg cùng số đo ngực, eo mới và giữ tư vấn size M cho áo, đúng dữ kiện đã xác minh. Giọng tư vấn thân thiện, rõ ràng; việc nhắc thêm số đo eo không tạo khác biệt đáng kể về mức độ hữu ích so với câu A."
+      },
+      "beat": 0
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "complete": true,
+      "baseline": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Báo đúng tổng 499k và giải thích phí ship 30k được miễn, đúng phạm vi một áo size M gửi Cần Thơ. Cách nói tự nhiên, hỏi tiếp màu còn thiếu để tiến tới đặt hàng, không khẳng định đã thực hiện thao tác. Không có khác biệt đáng kể về tính hữu ích so với câu A."
+      },
+      "candidate": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Trả lời đúng tổng 499.000đ cho một áo Thạch Thảo size M gửi Cần Thơ, nêu rõ phí vận chuyển 30k được hỗ trợ. Hỏi màu để tiếp tục mua hàng là phù hợp; tình trạng trắng có sẵn, be đặt trước đã được giải thích trong hội thoại. Câu đề nghị lên đơn không phải xác nhận đã tạo đơn."
+      },
+      "beat": 0
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "turnIndex": 0,
+      "complete": true,
+      "baseline": {
+        "voicePass": true,
+        "factsComplete": false,
+        "materialFailure": true,
+        "reason": "Cách nói lịch sự, dễ hiểu và hai màu đều có căn cứ. Tuy nhiên, cũng bỏ sót điều kiện màu be là hàng đặt trước, trong khi màu trắng có sẵn; thiếu sót này ảnh hưởng trực tiếp đến lựa chọn mua. Không có khác biệt đáng kể về mức hữu ích so với câu A."
+      },
+      "candidate": {
+        "voicePass": true,
+        "factsComplete": false,
+        "materialFailure": true,
+        "reason": "Trả lời tự nhiên, nêu đúng hai màu trắng và be, nhưng thiếu tình trạng hàng quan trọng: trắng có sẵn, be phải đặt trước. Khách vì vậy chưa phân biệt được màu nào mua có sẵn và màu nào cần chờ."
+      },
+      "beat": 0
+    },
+    {
+      "caseId": "c-context-opening",
+      "turnIndex": 0,
+      "complete": true,
+      "baseline": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Báo đúng giá cả bộ 989.000đ và áo lẻ 779.000đ, kèm các size S, M, L đã xác nhận còn hàng cho cả hai lựa chọn. Giọng tư vấn tự nhiên, trả lời thẳng câu hỏi và có câu hỏi tiếp giúp khách chọn phương án mua."
+      },
+      "candidate": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialFailure": false,
+        "reason": "Phân tách rõ hai lựa chọn với giá chính xác, thông tin có sẵn size S, M, L đúng nguồn. Cách trình bày dễ đọc, lịch sự và không thêm thông tin chưa xác minh; tuy nhiên dừng ở báo giá, ít hỗ trợ bước chọn mua tiếp theo hơn A."
+      },
+      "beat": -1
+    }
+  ],
+  "registrationHash": "8679de04a972ba665e56483bf91f24298f2ba54aa867a76e32975a1d6e83aa8b",
+  "ownerHash": "2422b86552df11e465bb87f58684f3424a72a8fc2e28e342d5bc52e57536e38a",
+  "judgeHash": "2425530fa58ca2a4424ef9de5f7f9f3cebae9231769f65890611c8645e85bcdd",
+  "ownerRequests": 16,
+  "judgeRequests": 8,
+  "baselineSource": "992e360f677bb3c391986ef201339b087e38606a",
+  "ownerPromptHashes": [
+    "7f87a56de66eb9e313a7c29642e0f7233645c33d9417a057d8e343070d15bdd5",
+    "cf0cce4b71052f1d4ccd01eeae357ae285dcd3b04f6e718f673ca902ffb61bd3"
+  ],
+  "judge": {
+    "model": "gpt-6.1-sol",
+    "version": "gpt-6.1-sol",
+    "effort": "high",
+    "cliVersion": "0.159.2",
+    "rubricHash": "7032ed351e1030db4e3f37287fff5ebcd0300967a1f58b19971f86de6dc0c06e",
+    "schemaHash": "664ce5df0c3e05879e6c95e81650cceed76df4b8370f6ca44a6a717edfbf9149",
+    "retry": 0
+  },
+  "registeredPairs": 8,
+  "ownerCompleted": 16,
+  "judgeCompleted": 8,
+  "providerErrors": 0,
+  "timeouts": 0,
+  "retry": 0,
+  "nativeRequests": 0,
+  "ownerOAuthRequests": 1,
+  "ownerTokens": {
+    "input": 210770,
+    "output": 10579
+  },
+  "judgeTokens": {
+    "input": 41604,
+    "output": 2820
+  },
+  "parentheses": {
+    "targets": [
+      4,
+      4
+    ],
+    "all": [
+      5,
+      4
+    ]
+  },
+  "ownerAttempts": [
+    {
+      "index": 0,
+      "arm": 0,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "5b0e72ee8a50a64df2a2625ad47c3d1458451a4d2860561c8121d5208148bc96"
+    },
+    {
+      "index": 0,
+      "arm": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "df01238b14396a17fc834aed902984e4b9cdd1dc77b221b6ec9cbc126dd2cb7b"
+    },
+    {
+      "index": 1,
+      "arm": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "cafa33af23771d6c11f6489fd81b62129fd88296de7d25a27370620d146c1590"
+    },
+    {
+      "index": 1,
+      "arm": 0,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "fa30483d17efe0cb6c5d6beb1414e6366d92dacf8bc76e6b3c9fc337889e2296"
+    },
+    {
+      "index": 2,
+      "arm": 0,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "17924a70393d5bf7048bce0c4e0bcf1fa07ddbf137066a0993b4207309bf0c22"
+    },
+    {
+      "index": 2,
+      "arm": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "1fbe8ad98fb9547fd33378a7de7fb9c3d9fc61e509d0b73c5ddc700adb23bde8"
+    },
+    {
+      "index": 3,
+      "arm": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "11ea98d4c5ef4f11e15bad535ec0dff3ec6483ab29dcfa562d500e38ffdf452b"
+    },
+    {
+      "index": 3,
+      "arm": 0,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "c85a0eee0a1728a58c2b1a0fc6c9b46df292e62fd4337620b9563b753f51e879"
+    },
+    {
+      "index": 4,
+      "arm": 0,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "39a43d86196b61c5299b2177bba01677b42430210e891844072834451819c23f"
+    },
+    {
+      "index": 4,
+      "arm": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "e6eb6cacf4a7b8917613f99bc7c2414cfcd628192698ef87c1a90b08ced8ce6e"
+    },
+    {
+      "index": 5,
+      "arm": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "87a3111c1af2bcf634de772078ff32d9b1d15e76bd5b99ea81ac1241a64234f7"
+    },
+    {
+      "index": 5,
+      "arm": 0,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "8b91f281609625b35f503b127408678321478c8fdf92db72eef72a0f74dc1d0f"
+    },
+    {
+      "index": 6,
+      "arm": 0,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "e641c627657405f9bbbb6cfd9586c3a67819488198dbc23028785b3cd88c8588"
+    },
+    {
+      "index": 6,
+      "arm": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "9a1ab0dc96174b76b66fd4795e685486cb12064fc569067cada5ef17219f0f6b"
+    },
+    {
+      "index": 7,
+      "arm": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "ee41f4abad8f70bea1945fa47d95586b1cfd954784606a7c4208c1a7f35d5f35"
+    },
+    {
+      "index": 7,
+      "arm": 0,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "requestHash": "5618a528f851b6d84a33782ca1f3a563fe2d6a6e6ccf771c1d7f6f1522f7d5bf"
+    }
+  ],
+  "judgeAttempts": [
+    {
+      "index": 0,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "requestHash": "b5a1e0c2f61d0328ef3781f81f226964ae107c94bc70b3481b31f3c480f26310"
+    },
+    {
+      "index": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "requestHash": "144672294de50ed4a46b932669440123aa740a7b69dd718653f159e0688986ed"
+    },
+    {
+      "index": 2,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "requestHash": "adffdc25f857d115d8b47659df45d09078c18c9dc40100c2a80127ff89c91212"
+    },
+    {
+      "index": 3,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "requestHash": "b6c5462da79ff08342e47d0ef327dde00ee88c929155d7a1701dc86692e80fa7"
+    },
+    {
+      "index": 4,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "requestHash": "4f915c24f6b930978af7b143f5b09a2945424714d64d7cad8e29818bdda60696"
+    },
+    {
+      "index": 5,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "requestHash": "4a6acace6dd5974bdd84cd75900d3b86284591f69805ef6a40019f81e1ed7348"
+    },
+    {
+      "index": 6,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "requestHash": "0c9168cc547ff07f0385518ef5fee6a52a6b9b9dd2464d6a6a4818b6447ab5e9"
+    },
+    {
+      "index": 7,
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "requestHash": "70a8318738915469d4ad235f36fdd14b4570675b4594637e590e51717d51edc5"
+    }
+  ]
+}
