@@ -58,7 +58,7 @@ function presentTotal(data,call,trusted,at){
  if(duplicatePriceCard(data,q,trusted))delete other.openingQuote;
  const {grandTotalVnd,shippingFeeVnd,deliveryRegion,...evidence}=q;
  return {preCartQuote:{grandTotalVnd,currency:'VND',
-  shippingBasis:deliveryRegion===null?'POLICY_WITHOUT_CONFIRMED_REGION':'POLICY_FOR_QUOTED_REGION',
+  shippingBasis:'DEFAULT_SHOP_POLICY',
   shippingFeeVnd,deliveryRegion,...evidence},...other};
 }
 

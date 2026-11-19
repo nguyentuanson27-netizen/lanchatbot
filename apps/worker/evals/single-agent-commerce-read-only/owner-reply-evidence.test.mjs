@@ -41,7 +41,7 @@ test('places the proved total first and removes only the exact duplicate opening
  const candidate=projectOwnerReplyEvidence(f.messages,f.context,now),p=dataOf(candidate);
  assert.equal(Object.keys(p)[0],'preCartQuote');
  assert.deepEqual(Object.keys(p.preCartQuote).slice(0,4),['grandTotalVnd','currency','shippingBasis','shippingFeeVnd']);
- assert.equal(p.preCartQuote.shippingBasis,'POLICY_WITHOUT_CONFIRMED_REGION');
+ assert.equal(p.preCartQuote.shippingBasis,'DEFAULT_SHOP_POLICY');
  assert.equal(p.preCartQuote.grandTotalVnd,1019000);
  assert.equal(p.preCartQuote.benefitAuthorization.status,'NOT_GRANTED');
  assert.equal(p.openingQuote,undefined);
@@ -134,7 +134,7 @@ test('matches a supported quote after the owner projection moves the support blo
  f.data.preCartQuote={...f.q};delete f.data.preCartQuote.supportEvaluation;
  const result=dataOf(projectOwnerReplyEvidence(f.messages,f.context,now));
  assert.equal(result.preCartQuote.grandTotalVnd,989000);
- assert.equal(result.preCartQuote.shippingBasis,'POLICY_FOR_QUOTED_REGION');
+ assert.equal(result.preCartQuote.shippingBasis,'DEFAULT_SHOP_POLICY');
  assert.equal(result.preCartQuote.benefitAuthorization.status,'NOT_GRANTED');
  assert.equal(result.preCartQuote.supportEvaluation,undefined);
  assert.deepEqual(result.supportEvaluation,supportEvaluation);

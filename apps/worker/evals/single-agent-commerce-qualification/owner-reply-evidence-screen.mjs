@@ -69,7 +69,8 @@ function copyProjection(body,trusted,at,changes){
     verifiedColorAvailability:previous.verifiedColorAvailability},
    {...previous,preCartQuote:previous.preCartQuote,openingQuote:previous.openingQuote,verifiedColorAvailability:previous.verifiedColorAvailability});
    changes.push({tool:part.functionResponse.name,firstField:Object.keys(next)[0],openingCardRemoved:!!previous.openingQuote&&!next.openingQuote,
-    amount:next.preCartQuote?.grandTotalVnd??null,availability:next.verifiedColorAvailability??null});
+    amount:next.preCartQuote?.grandTotalVnd??null,shippingBasis:next.preCartQuote?.shippingBasis??null,
+    availability:next.verifiedColorAvailability??null});
   }
   return next;
  }
@@ -106,6 +107,7 @@ const pairs=cases.map(([group,caseId,turn,phase,kind,amount])=>{
  if(kind==='TOTAL'){
   assert.equal(changes[0].firstField,'preCartQuote');
   assert.equal(changes[0].amount,amount);
+  assert.equal(changes[0].shippingBasis,'DEFAULT_SHOP_POLICY');
   assert.equal(changes[0].openingCardRemoved,caseId.endsWith('p06'));
  }
  if(kind==='COLOUR'){
