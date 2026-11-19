@@ -1161,6 +1161,46 @@ it.each(["ad","organic","returning","private-history"])("provides opening contex
  expect(entry).toEqual({firstContact:mode==="ad"||mode==="organic",fromAd:mode==="ad"});
 });
 
+async function openingOwnerData(request:OwnerRequest,tool:string){
+ const evalRoot=new URL("../evals/single-agent-commerce-read-only/",import.meta.url);
+ const [{buildGeminiCommerceRequest},{readCompactSections},{expandCurrentFacts}]=await Promise.all([
+  import(new URL("gemini-inference.mjs",evalRoot).href),
+  import(new URL("owner-data-presentation.mjs",evalRoot).href),
+  import(new URL("owner-product-tables.mjs",evalRoot).href)
+ ]);
+ vi.useFakeTimers({toFake:["Date"]});
+ vi.setSystemTime(commerceNow);
+ const wire=(()=>{
+  try{return buildGeminiCommerceRequest({...request,ownerContextPresentation:"VI_DATA_BLOCKS_COMPACT_V2"});}
+  finally{vi.useRealTimers();}
+ })();
+ const sections=Object.fromEntries(readCompactSections(wire.contents[0]).map((s:{label:string;value:unknown})=>[s.label,s.value]));
+ type Attributes={materials:string[];silhouettes:string[]};
+ type Data={subjectRef:string;label:string;attributes?:Attributes;sellingOptions:unknown[];
+  openingQuote?:{subjectRef:string;offerType:string;text:string};preCartQuote?:{grandTotalVnd:number}};
+ type Offer={facts:{type:string;value:{amountVnd:number}}[];sizeAvailability:{confirmedInStockSizes:string[]}};
+ type Part={functionResponse?:{name:string;response:{status:string;data:Data}};text?:string};
+ type Message={parts:Part[]};
+ const nativeParts=(wire.contents as Message[]).slice(1).flatMap(m=>m.parts);
+ const packedNative=nativeParts.flatMap(p=>{
+  if(!p.text?.startsWith('{"completedToolTurns":'))return [];
+  return (JSON.parse(p.text).completedToolTurns as Message[]).flatMap(m=>m.parts);
+ });
+ const packedFinal=((sections["Lịch sử công cụ đã hoàn tất"]??[]) as {completedToolTurns:Message[]}[])
+  .flatMap(trace=>trace.completedToolTurns.flatMap(m=>m.parts));
+ const response=[...nativeParts,...packedNative,...packedFinal].find(p=>p.functionResponse?.name===tool)?.functionResponse?.response;
+ expect(response?.status).toBe("OK");
+ const data=response!.data;
+ expect(data).toMatchObject({subjectRef:"SM613",label:"Sơ mi SM613"});
+ const product=(sections["Sản phẩm"] as {subjectRef:string;attributes?:Attributes}[]).find(p=>p.subjectRef===data.subjectRef);
+ const attributes=data.attributes??product?.attributes;
+ expect(attributes).toMatchObject({materials:["cotton"],silhouettes:["suông"]});
+ const options=data.sellingOptions.map(o=>expandCurrentFacts(o,sections["Giá, tồn và kết quả đã xác minh"]) as Offer);
+ expect(options[0]).toMatchObject({offerType:"DIRECT",sizeAvailability:{productId:"SM613",offerType:"DIRECT",confirmedInStockSizes:["M"]},
+  facts:expect.arrayContaining([{type:"PRICE",scope:{kind:"PRODUCT",productId:"SM613",variantId:"offer:SM613:DIRECT"},value:{amountVnd:499000,currency:"VND"}}])});
+ return {data,options,attributes:attributes!};
+}
+
 it("passes the opening card and chosen images through the existing verifier and egress group",async()=>{
  const f=fixture(),p=f.products[0]!.product;f.message.text="Bộ này bao nhiêu em?";
  Object.assign(f.message,{adsContext:{source:"ADS",adTitle:p.productId,postId:null,adId:null,ref:null}});
@@ -1169,11 +1209,13 @@ it("passes the opening card and chosen images through the existing verifier and 
  const calls=[{name:"read_product",args:{subjectRef:p.productId}},{name:"select_product_media",args:{subjectRef:p.productId,intent:"GENERIC"}}];
  const result=await f.run(async r=>{
  if(++n===1)return {kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}};
- const reply=r.contents.at(-1)!.parts[0] as {functionResponse:{response:{data:{openingQuote:{text:string}}}}};
- draft=reply.functionResponse.response.data.openingQuote.text;
+ const {data}=await openingOwnerData(r,"read_product");
+ expect(data.openingQuote).toMatchObject({subjectRef:"SM613",offerType:"DIRECT"});
+ draft=data.openingQuote!.text;
  return {kind:"FINAL",text:draft};
  });
- expect(draft).toContain("499.000đ");expect(result.terminal.text).toBe(draft);
+ expect(draft).toBe("Sơ mi SM613 hiện có giá 499.000đ.\nChất liệu: cotton\nForm dáng: suông\nSize: M");
+ expect(result.terminal.text).toBe(draft);
  expect(f.verifier).toHaveBeenCalledTimes(1);
  expect(f.commit.mock.calls.at(-1)![1].metaPlan!.messages).toEqual([{kind:"TEXT",text:draft},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
 });
@@ -1230,20 +1272,36 @@ it.each(["unchanged","ads-total","ads-two-offers","revision","media"])("explicit
  }
  const offerTypes=mode==="ads-two-offers"?["DIRECT","AO"]:["DIRECT"];
  const call={name:"quote_product",args:{subjectRef:"SM613",offerTypes,...(mode==="ads-total"?{quantity:1}:{})}};
- const draft=mode==="ads-two-offers"?"Mẫu này 499.000đ, áo lẻ 399.000đ chị nhé.":mode==="ads-total"?"Áo 499.000đ, cả ship 524.000đ chị nhé.":"Áo 499.000đ chị nhé.";
+ let draft="Áo 499.000đ chị nhé.";
  const result=await f.run(async r=>{
   if(++n===1)return {kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}};
   if(fromAd){
    expect(JSON.parse(r.context.policyLiterals.find(l=>l.ref==="conversation-entry")!.text)).toEqual({firstContact:true,fromAd:true});
-   const part=r.contents.at(-1)!.parts[0] as {functionResponse:{response:unknown}};
-   expect(part.functionResponse.response).toMatchObject({status:"OK",data:mode==="ads-total"
-    ?{preCartQuote:{subjectRef:"SM613",offerType:"DIRECT",quantity:1,grandTotalVnd:524000}}
-    :{sellingOptions:[{offerType:"DIRECT"},{offerType:"AO"}]}});
+   const {data,options,attributes}=await openingOwnerData(r,"quote_product");
+   const money=(amount:number)=>amount.toLocaleString("vi-VN")+"đ";
+   const price=options[0]!.facts.find(f=>f.type==="PRICE")!.value.amountVnd;
+   const opening=`${data.label} giá ${money(price)}. Vải ${attributes.materials[0]}, dáng ${attributes.silhouettes[0]}, còn size ${options[0]!.sizeAvailability.confirmedInStockSizes.join(", ")}.`;
+   if(mode==="ads-total"){
+    expect(data.preCartQuote).toMatchObject({subjectRef:"SM613",offerType:"DIRECT",quantity:1,grandTotalVnd:524000,shippingBasis:"DEFAULT_SHOP_POLICY"});
+    draft=`${opening} Cả ship là ${money(data.preCartQuote!.grandTotalVnd)} chị nhé.`;
+   }else{
+    expect(options).toHaveLength(2);
+    expect(options[1]).toMatchObject({offerType:"AO",facts:expect.arrayContaining([{type:"PRICE",
+     scope:{kind:"PRODUCT",productId:"SM613",variantId:"offer:SM613:AO"},value:{amountVnd:399000,currency:"VND"}}])});
+    const componentPrice=options[1]!.facts.find(f=>f.type==="PRICE")!.value.amountVnd;
+    draft=`${opening} Áo lẻ giá ${money(componentPrice)} chị nhé.`;
+   }
   }
   return {kind:"FINAL",text:draft};
  },undefined,EXPLICIT_QUOTE_TASK);
  const messages=f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]);
- if(mode==="unchanged"||fromAd){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text:draft},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);}
+ if(mode==="unchanged"||fromAd){
+  expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");
+  const opening="Sơ mi SM613 giá 499.000đ. Vải cotton, dáng suông, còn size M.";
+  const expected=mode==="ads-total"?opening+" Cả ship là 524.000đ chị nhé."
+   :mode==="ads-two-offers"?opening+" Áo lẻ giá 399.000đ chị nhé.":"Áo 499.000đ chị nhé.";
+  expect(messages).toEqual([{kind:"TEXT",text:expected},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
+ }
  else{expect(result.terminal.disposition).toBe("NO_SEND");expect(messages).toEqual([]);}
  expect(f.verifier).toHaveBeenCalledOnce();
 });
