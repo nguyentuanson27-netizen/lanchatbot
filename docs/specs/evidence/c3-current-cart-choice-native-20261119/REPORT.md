@@ -1,5 +1,7 @@
 # J4 ×5 và hai áo ×5 sau sửa cartQuote / lựa chọn mua
 
+**Chẩn đoán bổ sung sau run:** đã tái hiện verifier reserved-wire overflow khi ghép pending selection, cùng context dùng prompt cũ qua; đọc AO có mục tiêu cũng qua với prompt mới. [Root cause, đối chứng năm input và hướng sửa code/context](ROOT_CAUSE.md). Phần “chưa có mã exception” bên dưới mô tả bằng chứng tại thời điểm tổng kết run, không bị sửa ngược.
+
 Ngày 19/11/2026. Source thực thi sạch **`48a27a1b39e8976face273a57983f91c8ad74cc2`**, gồm code `cdbbaa99` đã được review độc lập APPROVE. Đã chạy đủ **10 hội thoại / 30 lượt**: **25 SEND_ELIGIBLE, 5 HANDOFF im lặng, 0 NO_SEND, 0 câu fallback do code dựng**. Không gửi khách thật, không sửa runtime/prompt giữa run.
 
 **STOP.** J4 chưa hoàn thành cả năm lần vì lượt hỏi tổng bị chặn trong preparation trước khi gọi owner/verifier. Nhóm hai áo tạo đúng giỏ và tổng trong cả năm, nhưng bước hỏi màu và giọng chưa ổn định. Không lấy kết quả hai ca development làm qualification toàn Phase C.
