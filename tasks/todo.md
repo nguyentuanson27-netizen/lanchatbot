@@ -1,4 +1,9 @@
-## Current — giọng tư vấn và preview checkout, 2026-11-19
+## Current — rollback giọng tư vấn và review nguyên nhân, 2026-11-19
+
+- [x] Hoàn tác `089dde39`. `apps/` và `packages/` khớp `8810904e`. Giữ kế hoạch và kết quả hai lần sửa.
+- [x] Đối chiếu wire của P06, S04, S15, J2 và J4. Root cause và giới hạn phép đo nằm trong [review hai lần sửa](../docs/specs/c3-phase-c-chat-priority-postmortem-20261119.md). Phase C STOP, 0 lượt gọi model mới.
+
+## Previous — giọng tư vấn và preview checkout, 2026-11-19 (đã hoàn tác)
 
 - [x] Triển khai phạm vi đã duyệt ở `089dde39`: prompt chỉ đổi mục Giọng chat, checkout preview tách giá dòng và lựa chọn. Kiểm 785 worker và 141 Node, build/typecheck/lint/dataset qua.
 - [x] Đủ 8 cặp A/B, 16 owner + 8 judge. **STOP**: giọng 6/6, thắng ròng −1 và S04 bỏ trạng thái đặt trước ở hai nhánh. Preview deterministic PASS. [Kết quả và câu trả lời](../docs/specs/evidence/c3-chat-priority-screen-20261119/REPORT.md).

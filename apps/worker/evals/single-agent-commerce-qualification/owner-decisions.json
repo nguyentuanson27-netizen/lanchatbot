@@ -285,20 +285,6 @@
       }
     }
   },
-  "chatPriorityDiagnostic": {
-    "approvedAt": "2026-11-19",
-    "evidenceRef": "OWNER_IMPLEMENT_APPROVED_CHAT_PRIORITY_PLAN_V2",
-    "plan": "docs/specs/c3-phase-c-chat-priority-plan-20261119.md",
-    "planSha256": "a1ad29b29c1964ab53d229af80d4cab766d97bb306e8510b1bcd208cb124ded5",
-    "baselineSourceSha": "992e360f677bb3c391986ef201339b087e38606a",
-    "baselineOwnerPromptHash": "7f87a56de66eb9e313a7c29642e0f7233645c33d9417a057d8e343070d15bdd5",
-    "candidateOwnerPromptHash": "cf0cce4b71052f1d4ccd01eeae357ae285dcd3b04f6e718f673ca902ffb61bd3",
-    "replayPairs": 8,
-    "maximumReplayGenerations": 24,
-    "nativeCases": 4,
-    "nativeTurns": 9,
-    "maximumNativeGenerations": 36
-  },
   "verifierWireBoundDecision": {
     "approvedAt": "2026-11-19",
     "evidenceRef": "OWNER_REQUEST_VERIFIER_70000_AND_FIVE_BLOCKED_J4_TURNS",

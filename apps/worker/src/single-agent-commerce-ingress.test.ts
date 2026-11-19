@@ -1015,10 +1015,7 @@ describe("persisted ingress source and final revision", () => {
     expect(f.history.recordInboundCustomerMessage.mock.calls.every(([input])=>(input as {text:unknown}).text===null)).toBe(true);
     const meta = f.commit.mock.calls.at(-1)![1].metaPlan!;
     const text = meta.messages.map(m => m.kind === "TEXT" ? m.text : "").join("\n");
-    const [productLine, selectionLine] = text.split("\n");
-    expect(productLine).toContain(named ? "Áo của mẫu Set váy thử nghiệm ×1: " : "Áo của mẫu SM613 ×1: ");
-    expect(selectionLine).toBe("Màu navy, size M");
-    expect(text).not.toContain("(mẫu “");
+    expect(text).toContain(named ? "1 áo (mẫu “Set váy thử nghiệm”) màu navy, size M" : "1 áo SM613 màu navy, size M");
     expect(text).toContain(named ? "Set váy thử nghiệm: hàng đặt trước" : "SM613: hàng đặt trước");
     expect(text).toContain("Tổng: 524.000đ"); expect(text).toContain("8-14 ngày");
     expect(meta.effectReadiness!.outcome).toBe("READY");

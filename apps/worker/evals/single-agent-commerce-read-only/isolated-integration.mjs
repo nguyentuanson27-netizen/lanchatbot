@@ -46,8 +46,6 @@ const phaseCArg=name=>{const i=process.argv.indexOf(name);return i<0?null:proces
 assertDiagnosticFlags(process.argv);
 const phaseCDiagnostic=phaseCArg('--phase-c-diagnostic-registration');
 const phaseCSlotFile=phaseCArg('--phase-c-slot-ids');
-const priorityReplayDir=phaseCArg('--phase-c-chat-priority-replay');
-assert(!priorityReplayDir||phaseCDiagnostic&&!phaseCSlotFile,'CHAT_PRIORITY_NATIVE_FLAGS');
 assert(!phaseCSlotFile||phaseCDiagnostic,'C_RESUME_DIAGNOSTIC_ONLY');
 const phaseCSlotIds=phaseCSlotFile?JSON.parse(readFileSync(phaseCSlotFile,'utf8')):undefined;
 const phaseC=phaseCArg('--phase-c-registration')??phaseCDiagnostic;
@@ -67,7 +65,7 @@ const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=j2j1In
 assert(checkPrefixIndex<0||(!providerRun&&!providerPreflight&&typeof checkPrefix==='string'&&checkPrefix.length>0&&checkPrefix.length<=128),'DETERMINISTIC_CHECK_PREFIX_ONLY');
 const contextProof=phaseCArg('--sales-context-campaign')?{campaignPath:phaseCArg('--sales-context-campaign'),seal:phaseCArg('--sales-context-seal'),
  kind:phaseCArg('--sales-context-job'),scorePath:phaseCArg('--sales-context-score')}:undefined;
-const providerFreeze=phaseCDiagnostic?diagnosticPreflight(root,phaseC,phaseCArg('--phase-c-world'),contextProof,priorityReplayDir):phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
+const providerFreeze=phaseCDiagnostic?diagnosticPreflight(root,phaseC,phaseCArg('--phase-c-world'),contextProof):phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
 if(providerPreflight){console.log(JSON.stringify({status:'PREFLIGHT_PASS',...providerFreeze.registration,providerGenerations:0}));process.exit(0);}
 if(phaseC){
  if(!phaseCDiagnostic)phaseCTools.requirePassingSafety(providerFreeze.sealed,phaseCArg('--phase-c-safety'));
