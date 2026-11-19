@@ -4,7 +4,7 @@ import {assertOpeningProductMediaRule,type OpeningProductMediaRule} from "./sing
 import { canonicalCartVariantScopeV2 } from "@lana/contracts";
 import { cartSelectionsHaveIndependentStockV2 } from "./realtime-sales-catalog.js";
 import { createHash, randomUUID } from "node:crypto";
-import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, CommercePublicCartSummaryV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
+import { InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, CommercePublicCartSummaryV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import {projectCommerceHistoryMetadata} from "./single-agent-commerce-public-history.js";
 import { buildProtectedClaimsFromCartSelectionsV1, buildProtectedCartPolicyClaimsV1, canonicalCartPolicyLinesV2, evaluateDeterministicEffectReadinessV1, normalizeCatalogToken, normalizeProductCode } from "@lana/business-tools";
 import { createConversationState, type ConversationState } from "@lana/conversation-engine";
@@ -14,6 +14,7 @@ import type { InboundEnvelopeV1 } from "@lana/meta-webhook";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
 import { hasResidualPii } from "@lana/dataset-review";
 import { createCommerceTools } from "./single-agent-commerce.js";
+import { newCustomerProfile } from "./realtime-identity.js";
 import { createRealtimeCustomerStatePort } from "./single-agent-commerce-state.js";
 import { createPersistedCommerceExecutor } from "./single-agent-commerce-session.js";
 import { createPersistedCommerceHandoffPort } from "./single-agent-commerce-persistence.js";
@@ -244,11 +245,9 @@ export async function runPersistedCommerceIngress(input: {
   const initialProducts = [...new Map([...(ads.length && !hinted.length ? [] : [...focused,...(input.read.initialProducts ?? [])])]
     .map(p => [p.productId,p])).values()].slice(0,MAX_RUNTIME_PRODUCTS);
   const scopedRead = {...input.read,initialProducts,state:()=>({...scope,currentProductId,factSnapshotVersion:""})};
-  const rawProfilePort = createRealtimeCustomerStatePort(input.store, scope, () => {
-    const at = input.clock().toISOString();
-    return { profile: CustomerProfileV1Schema.parse({ schemaVersion: 1, profileId: randomUUID(), customerKey: { namespace: "meta", algorithm: "HMAC_SHA256", digest: scope.customerHash },
-      revision: 1, measurements: [], fitPreference: null, preferences: { colors: [], styles: [], materials: [] }, sizeHistory: [], createdAt: at, updatedAt: at }), fieldEvidence: {} };
-  }, input.clock, { read: readAuthority, inboxBatchGuard: guard });
+  const rawProfilePort = createRealtimeCustomerStatePort(input.store, scope,
+    () => ({ profile: newCustomerProfile(scope.pageId, scope.customerHash, input.clock()), fieldEvidence: {} }),
+    input.clock, { read: readAuthority, inboxBatchGuard: guard });
   const profilePort = { read: rawProfilePort.read, compareAndSwap: (...args: Parameters<typeof rawProfilePort.compareAndSwap>) =>
     observeWrite(() => rawProfilePort.compareAndSwap(...args)) };
   const profile = await profilePort.read();

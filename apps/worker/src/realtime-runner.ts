@@ -1,5 +1,6 @@
 import type { CommercePreprodIngress } from "./single-agent-commerce-preprod-ingress.js";
 import { createHash } from "node:crypto";
+import { deterministicUuid, newCustomerProfile } from "./realtime-identity.js";
 import {
   buildCanonicalDecisionEvidenceV1,
   buildProtectedClaimsFromVerifiedFactSetV1,
@@ -274,17 +275,6 @@ function activeCustomerUrlPolicy(
 
 const CUSTOMER_URL_SAFE_FALLBACK_REPLY =
   "Em kh\u00f4ng th\u1ec3 m\u1edf li\u00ean k\u1ebft n\u00e0y an to\u00e0n. Ch\u1ecb g\u1eedi m\u00e3 s\u1ea3n ph\u1ea9m ho\u1eb7c \u1ea3nh \u0111\u1ec3 em ki\u1ec3m tra nh\u00e9.";
-
-function deterministicUuid(input: string): string {
-  const hash = createHash("sha256").update(input).digest("hex");
-  return [
-    hash.slice(0, 8),
-    hash.slice(8, 12),
-    `5${hash.slice(13, 16)}`,
-    `8${hash.slice(17, 20)}`,
-    hash.slice(20, 32),
-  ].join("-");
-}
 
 const canonicalJson = canonicalJsonV1;
 
@@ -1152,37 +1142,6 @@ export function continuationProductId(
 type CustomerProfileEvidenceMap = Readonly<
   Record<string, CustomerProfileFieldEvidence>
 >;
-
-function profileDigest(customerHash: string): string {
-  const normalized = customerHash.trim().toLocaleLowerCase("en-US");
-  return /^[a-f0-9]{64}$/u.test(normalized)
-    ? normalized
-    : createHash("sha256").update(customerHash).digest("hex");
-}
-
-function newCustomerProfile(
-  pageId: string,
-  customerHash: string,
-  now: Date,
-): CustomerProfileV1 {
-  const timestamp = now.toISOString();
-  return {
-    schemaVersion: 1,
-    profileId: deterministicUuid(`lana:customer-profile:v1:${pageId}:${customerHash}`),
-    customerKey: {
-      namespace: `META_PAGE:${pageId}`.slice(0, 64),
-      algorithm: "HMAC_SHA256",
-      digest: profileDigest(customerHash),
-    },
-    revision: 1,
-    measurements: [],
-    fitPreference: null,
-    preferences: { colors: [], styles: [], materials: [] },
-    sizeHistory: [],
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  };
-}
 
 function customerProfileSummary(profile: CustomerProfileV1 | null): {
   readonly profileRevision: number | null;

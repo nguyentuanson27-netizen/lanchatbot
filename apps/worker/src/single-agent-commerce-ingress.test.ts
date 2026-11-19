@@ -1,4 +1,4 @@
-import {CommerceMediaDeliveryBindingV1Schema} from '@lana/contracts';
+import {CommerceMediaDeliveryBindingV1Schema, CustomerProfileV1Schema} from '@lana/contracts';
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { existsSync,readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -13,11 +13,12 @@ import type { OwnerGeneration, OwnerRequest } from "./single-agent-commerce-read
 import type { CartSelectionResult } from "./realtime-sales-catalog.js";
 import {cartSelectionFromSnapshot} from './realtime-sales-catalog.js';
 
-function fixture(productIds = ["SM613"]) {
-  const scope = commerceScope(), products = productIds.map(id => fixtureProduct(id));
+function fixture(productIds = ["SM613"], customerHash = commerceScope().customerHash) {
+  const scope = { ...commerceScope(), customerHash }, products = productIds.map(id => fixtureProduct(id));
   let generation = 1, revision = 1, profile = fixtureProfile(), tagId: string | null = null, fixtureNow=commerceNow;
   let conversation = createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow });
   let cycle = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
+  let expireProfile = false;
   let checkCommit = async (_prepared: RealtimeCommitInput<unknown>) => {};
   let beforeTransaction = async () => {};
   const profileWrite = vi.fn(async (_page: string, _customer: string, expected: number, next: ReturnType<typeof fixtureProfile>) => {
@@ -33,7 +34,13 @@ function fixture(productIds = ["SM613"]) {
   });
   const store = { loadOrCreate: async () => ({ conversationId: scope.conversationId, stateVersion: revision, state: { ...conversation, revision } }),
     loadOrCreateSalesCycle: async () => ({ state: cycle, stateRevision: cycle.revision }),
-    loadOrCreateCustomerProfile: async () => ({ ...profile, pageId: scope.pageId, customerHash: scope.customerHash, revision: profile.profile.revision }),
+    loadOrCreateCustomerProfile: async (_page: string, _key: string, create: () => ReturnType<typeof fixtureProfile>) => {
+      if (expireProfile) {
+        profile = create();
+        expireProfile = false;
+      }
+      return { ...profile, pageId: scope.pageId, customerHash: scope.customerHash, revision: profile.profile.revision };
+    },
     readCommittedSalesCycleEvent: async (_page:string,_conversation:string,commandId:string) =>
       commit.mock.calls.flatMap(c=>c[1].salesCyclePlan?.events??[]).find(e=>e.commandId===commandId)??null,
     compareAndSwapCustomerProfile: profileWrite, commitWithinTransaction: commit };
@@ -65,7 +72,7 @@ function fixture(productIds = ["SM613"]) {
     ...(evaluationTurn?{evaluationTurn}:{}),
     ...(openingMediaRule?{openingMediaRule}:{}),
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
-  return {setClock:(at:Date)=>{fixtureNow=at;}, run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
+  return {expireProfile: () => { expireProfile = true; }, setClock:(at:Date)=>{fixtureNow=at;}, run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
     newGeneration: () => { batch.generation = generation; },
     checkCommit: (check: typeof checkCommit) => { checkCommit = check; },
@@ -77,8 +84,21 @@ function fixture(productIds = ["SM613"]) {
 
 afterEach(() => vi.restoreAllMocks());
 
+it("recreates an expired profile with the persisted Meta gateway key", async () => {
+  const customerHash = "meta:v1:" + "a".repeat(64);
+  const f = fixture(["SM613"], customerHash);
+  f.expireProfile();
+
+  const result = await f.run();
+
+  expect(CustomerProfileV1Schema.parse(f.profile().profile).revision).toBe(1);
+  expect(result).toMatchObject({ enqueued: 1, terminal: { disposition: "SEND_ELIGIBLE" } });
+  expect(f.commit.mock.calls.at(-1)![1].customerHash).toBe(customerHash);
+});
+
 it("sends one shared attachment while binding both parent sources",async()=>{
- const f=fixture(['SM613','OTHER1']);
+ const customerHash = "meta:v1:" + "b".repeat(64);
+ const f=fixture(['SM613','OTHER1'], customerHash);
  for(const p of f.products)p.product.images=[{url:'https://content.pancake.vn/shared.jpg',role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString(),partsVisible:['AO']}];
  const calls=f.products.map((p,i)=>({name:'select_product_media',args:{subjectRef:p.product.productId,intent:'GENERIC',deliveryMode:i?'APPEND':'REPLACE'}}));let n=0;
  const result=await f.run(async()=>++n===1?{kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}}:{kind:'FINAL',text:'Chị xem ảnh nhé.'});
@@ -86,6 +106,7 @@ it("sends one shared attachment while binding both parent sources",async()=>{
  const meta=f.commit.mock.calls.at(-1)![1].metaPlan!;
  expect(meta.messages.filter(m=>m.kind==='IMAGE')).toHaveLength(1);
  const binding=CommerceMediaDeliveryBindingV1Schema.parse(meta.mediaBinding);
+ expect(binding.customerHash).toBe(customerHash);
  expect(binding.images.map(i=>i.productId).sort()).toEqual(['OTHER1','SM613']);
  expect(binding.messageHashes).toHaveLength(2);
 });

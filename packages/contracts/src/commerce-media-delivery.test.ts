@@ -7,6 +7,10 @@ it("rejects model-shaped labels, unbounded groups and missing source identity", 
   const binding = { kind: "C3_MEDIA_GROUP_V1", pageId: "page", shopId: "shop", conversationId: "conversation", customerHash: h,
     recipientHash: h, responseGroupId: "group", generation: 1, revision: 2, stateHash: h, policyHash: h, messageHashes: [h, h], images: [image] };
   expect(CommerceMediaDeliveryBindingV1Schema.safeParse(binding).success).toBe(true);
+  const customerHash = "meta:v1:" + "b".repeat(64);
+  expect(CommerceMediaDeliveryBindingV1Schema.parse({ ...binding, customerHash }).customerHash).toBe(customerHash);
+  expect(CommerceMediaDeliveryBindingV1Schema.safeParse({ ...binding, recipientHash: customerHash }).success).toBe(false);
+  expect(CommerceMediaDeliveryBindingV1Schema.safeParse({ ...binding, customerHash: customerHash + "0" }).success).toBe(false);
   for (const invalid of [{ ...binding, caseId: "evaluator" }, { ...binding, messageHashes: Array(7).fill(h) },
     { ...binding, images: [{ ...image, sourceVersion: "" }] }, { ...binding, customerHash: "customer-name" }])
     expect(CommerceMediaDeliveryBindingV1Schema.safeParse(invalid).success).toBe(false);
